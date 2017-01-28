@@ -1,22 +1,30 @@
-#TODO: inprogress
-
+# @author vito.dinovi@gmail.com
+# @date 1/27/17
+# NOTE: only tested on once machine
 
 # Setup script for configuring your virtual enviornment 
 # Run this script from the project root
 
-# -----Install python3.4.3------
-# Either build from source - https://www.python.org/downloads/release/python-343/
-#    Note: On OSX its a bit tricky with the openssl -> talk to @vdinovi for help
-# Or install pyenv (python version manager) - https://github.com/yyuu/pyenv
-#    and run python install 3.4.3 -> will exist in somewhere in your ~/.pyenv dir
-
-# set PY_DIR to the installation location of 3.4.3
-PY_DIR=''
+# -----Install python3.4.5------ message @vdinovi for help with your installation
+# Find your openssl install location -> find /usr/local -name "openssl" -> install if you dont have it
+# Replace this with your install location
+OPENSSL_ROOT="/usr/local/opt/openssl"
+if [[ -z $(python3 --version | grep '3.4.5') ]]
+then
+    curl https://www.python.org/ftp/python/3.4.5/Python-3.4.5.tgz | tar xz && cd Python-3.4.5
+    ./configure CPPFLAGS="-I$OPENSSL_ROOT/include" LDFLAGS="-L$OPENSSL_ROOT/lib"
+    make
+    # enable 'make test' if you want to validate your build 
+    #make test 
+    sudo -H make install
+    cd .. && sudo rm -r Python-3.4.5
+fi
 
 # -----Install virtualenv------
-pip install -U pip setuptools #check
-pip install virtualenv
+sudo -H python3 -m pip install --upgrade pip
+python3 -m pip install virtualenv
 
 # -----Setup virtual env-------
+PY_DIR=$(which python3.4)
 virtualenv -p $PY_DIR ./css-env
 
