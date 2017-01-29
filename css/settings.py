@@ -25,7 +25,9 @@ SECRET_KEY = '8jkcrsq9li@vh^&=dt@an!+o(t)q(h6qoje5c^p^f%=12^jg^9'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+        'inviso-css.herokuapp.com'
+]
 
 
 # Application definition
