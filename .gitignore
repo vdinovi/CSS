@@ -4,3 +4,4 @@ staticfiles
 .env
 .*.swp
 db.sqlite3
+.cssenv
