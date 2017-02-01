@@ -82,6 +82,17 @@ WSGI_APPLICATION = 'css.wsgi.application'
 # https://docs.djangoproject.com/en/1.10/ref/settings/#databases
 
 DATABASES = {
+    'aws': {
+        'ENGINE': 'django.db.backends.mysql',
+        'OPTIONS': {
+            'sql_mode': 'STRICT_TRANS_TABLES'
+        },
+        'NAME': 'cssdb',
+        'USER': 'cssdb',
+        'PASSWORD': 'cssdb',
+        'HOST': 'css-db.chfwru12q1ji.us-west-1.rds.amazonaws.com',
+        'PORT': '3306',
+    },
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
