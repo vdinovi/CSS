@@ -25,10 +25,10 @@ urlpatterns = [
     # BASE_URL/Home* addresses
     url('^$', views.IndexView),
     url(r'^home', include([
+        url('^$', views.HomeView),
+        url(r'^/$', views.HomeView),
         url(r'/invite$', views.InviteForm),
         url(r'/invite/$', views.InviteForm),
-        url('$', views.HomeView),
-        url(r'/$', views.HomeView),
     ])),
     url(r'^admin/', admin.site.urls)
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
