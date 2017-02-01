@@ -36,4 +36,8 @@ TODO: Write history
 Inviso is comprised of 6 student enrolled in the same CPE309 section at Cal Poly San Luis Obispo under the direction of Tim Kearns.
 
 Team Lead - Vittorio Dinovi - vito.dinovi@gmail.com
-<TODO: add people>
+Technical Lead - Sigal Shaul - sshaul@calpoly.edu
+Technical Lead - Makenna Johnstone - makennajohnstone@gmail.com
+Document Specialist - Andrew Lam - werdna.mal222@gmail.com
+Quality Assurance - Jason Sawatsky - jasonmsawatzky@gmail.com
+Secretary/Librarian - Paula Ledgerwood - paledger@gmail.com
