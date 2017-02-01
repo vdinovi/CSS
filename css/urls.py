@@ -23,12 +23,10 @@ from . import views
 
 urlpatterns = [
     # BASE_URL/Home* addresses
-    url('^$', views.IndexView),
+    url('^$', views.IndexView, name='index'),
     url(r'^home', include([
-        url('^$', views.HomeView),
-        url(r'^/$', views.HomeView),
-        url(r'/invite$', views.InviteView),
-        url(r'/invite/$', views.InviteView),
+        url('^$', views.HomeView, name='home'),
+        url(r'invite/$', views.InviteView, name='invite'),
     ])),
     url(r'^admin/', admin.site.urls)
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
