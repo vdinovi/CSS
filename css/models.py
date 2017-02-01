@@ -43,3 +43,10 @@ class Section(models.Model):
     conflict_reason = CharField(max_length = 8) # faculty or room
     fault = CharField(max_length = 1) # y or n
     fault_reason = CharField(max_length = 8) # faculty or room
+
+class Schedule(models.Model):
+    academic_term = models.CharField(max_length=16, unique=True) # eg. "Fall 2016"
+    state = models.CharField(max_length=16) # eg. active or finalized 
+
+class SectionType(models.Model):
+    section_type = models.CharField(max_length=32) # eg. lecture or lab
