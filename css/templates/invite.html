@@ -1,0 +1,29 @@
+<html>
+<head>
+    {% load static %}
+    <link rel="stylesheet" href="{% static "css/invite.css" %}">
+</head>
+<body>
+    <div id="invite-form" class="invite-form">
+        <form action="/invite/" method="POST">
+            <div id="name-div" class="invite-form-field">
+                <label>Name: </label>
+                <input name="name" type="text" class="invite-form-field"/>
+            </div>
+            <div id="email-div" class="invite-form-field">
+                <label>Email: </label>
+                <input name="Email" type="text" class="invite-form-field"/>
+            </div>
+            <div class="dropdown" class="invite-form-field" align="center">
+                <select class="dropdown-select">
+                    <option value="0">Scheduler</option>
+                    <option value="1">Faculty</option>
+                </select>
+            </div>
+            <div class="dropdown" class="invite-form-field" align="center">
+                <input style="margin:10px;" type="submit"/>
+            </div>
+        </form>
+    </div>
+</body>
+</html>
