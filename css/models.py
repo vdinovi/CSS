@@ -27,3 +27,10 @@ class FacultyDetails(models.Model):
     user_id = models.ForeignKey(User, on_delete=models.CASCADE, unique=True)
     target_workload = models.IntegerField() # in hours
     changed_preferences = models.CharField(max_length=1) # 'y' or 'n' 
+
+class Schedule(models.Model):
+    academic_term = models.CharField(max_length=16, unique=True) # eg. "Fall 2016"
+    state = models.CharField(max_length=16) # eg. active or finalized 
+
+class SectionType(models.Model):
+    section_type = models.CharField(max_length=32) # eg. lecture or lab
