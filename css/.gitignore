@@ -1,0 +1,7 @@
+venv
+*.pyc
+.env
+.*.swp
+db.sqlite3
+.cssenv
+css/staticfiles
