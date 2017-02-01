@@ -5,7 +5,11 @@
 </head>
 <body>
     <div id="invite-form" class="invite-form">
-        <form action="/invite/" method="POST">
+        <form method="POST" class="post-form">{% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="save btn btn-default">submit</button>
+        </form>
+        <!--<form action="/invite/" method="POST">
             <div id="name-div" class="invite-form-field">
                 <label>Name: </label>
                 <input name="name" type="text" class="invite-form-field"/>
@@ -23,7 +27,7 @@
             <div class="dropdown" class="invite-form-field" align="center">
                 <input style="margin:10px;" type="submit"/>
             </div>
-        </form>
+        </form> -->
         <a href="/home/">Return</a>
     </div>
 </body>
