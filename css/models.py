@@ -1,6 +1,6 @@
 from django.db import models
 
-class Users(models.Model):
+class User(models.Model):
    username = models.CharField(max_length=32)
    userType = models.CharField(max_length=16)   # e.g. scheduler, faculty
    email = models.CharField(max_length=32)
@@ -11,7 +11,7 @@ class Users(models.Model):
 
 class Rooms(models.Model):
    name = models.CharField(max_length=32)
-   description = models.CharField(max-length=256, null=True)
+   description = models.CharField(max_length=256, null=True)
    capacity = models.IntegerField(default=0)
    notes = models.CharField(max_length=1024, null=True)
    equipment = models.CharField(max_length=1024, null=True)
@@ -24,7 +24,7 @@ class Course(models.Model):
 class FacultyDetails(models.Model):
     # The user_id uses the User ID as a primary key.
     # Whenever this User is deleted, this entry in the table will also be deleted
-    user_id = models.ForeignKey(User, on_delete=models.CASCADE, unique=True)
+    user_id = models.OneToOneField(User, on_delete=models.CASCADE, unique=True)
     target_workload = models.IntegerField() # in hours
     changed_preferences = models.CharField(max_length=1) # 'y' or 'n' 
 
