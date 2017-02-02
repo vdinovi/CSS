@@ -24,7 +24,7 @@ from . import views
 urlpatterns = [
     # BASE_URL/Home* addresses
     url('^$', views.IndexView, name='index'),
-    url(r'^home', include([
+    url(r'^home/', include([
         url('^$', views.HomeView, name='home'),
         url(r'invite/$', views.InviteView, name='invite'),
     ])),

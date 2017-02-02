@@ -46,7 +46,7 @@ def InviteView(request):
             print('invalid invite form')
             res = HttpResponse
             res.status_code = 400
-            res.reason_phrase = 'Invalid entries: ' + invForm.errors.as_data()
+            res.reason_phrase = 'Invalid entries: ' #+ [for err in invForm.errors.as_data()]
     elif request.method == "GET":
         inv = InviteForm() 
         return render(request, 'invite.html', {'form': inv})
