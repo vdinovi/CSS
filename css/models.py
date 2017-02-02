@@ -24,7 +24,7 @@ class Course(models.Model):
 class FacultyDetails(models.Model):
     # The user_id uses the User ID as a primary key.
     # Whenever this User is deleted, this entry in the table will also be deleted
-    user_id = models.ForeignKey(User, on_delete=models.CASCADE, unique=True)
+    user_id = models.OneToOneField(User, on_delete=models.CASCADE, unique=True)
     target_workload = models.IntegerField() # in hours
     changed_preferences = models.CharField(max_length=1) # 'y' or 'n' 
 
@@ -33,13 +33,13 @@ class Schedule(models.Model):
     state = models.CharField(max_length=16) # eg. active or finalized 
 
 class Section(models.Model):
-    schedule_id = models.ForeignKey(Schedule, on_delete=models.CASCADE, unique=True)
-    course_id = models.ForeignKey(Course, on_delete=models.CASCADE, unique=True)
+    schedule_id = models.OneToOneField(Schedule, on_delete=models.CASCADE, unique=True)
+    course_id = models.OneToOneField(Course, on_delete=models.CASCADE, unique=True)
     start_time = models.TimeField()
     end_time = models.TimeField()
     days = models.CharField(max_length = 8)    # MWF or TR
-    faculty = models.ForeignKey(User, null = True, on_delete = models.SET_NULL, default = models.SET_NULL)
-    room = models.ForeignKey(Room, null = True, on_delete = models.SET_NULL, default = models.SET_NULL)
+    faculty = models.OneToOneField(User, null = True, on_delete = models.SET_NULL, default = models.SET_NULL)
+    room = models.OneToOneField(Room, null = True, on_delete = models.SET_NULL, default = models.SET_NULL)
     section_capacity = models.IntegerField(default = 0)
     students_enrolled = models.IntegerField(default = 0)
     students_waitlisted = models.IntegerField(default = 0)

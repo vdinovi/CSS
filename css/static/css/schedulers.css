@@ -1,0 +1,15 @@
+.schedulers-table {
+    display: table;
+    table-layout: fixed;
+}
+
+.schedulers-view {
+    width: 500px;
+    height: 300px;
+    background-color: #42f4dc;
+}
+
+.button-box {
+    width: 50px;
+    border: 1px solid grey;
+}

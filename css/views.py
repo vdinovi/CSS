@@ -23,6 +23,14 @@ def IndexView(request):
 def HomeView(request):
     return render(request, 'home.html')
 
+#  Schedulers View
+# @descr Displays all of the schedulers currecntly registered in the database.
+#        Also includes a + and - button that link to the invite form and delete form
+# @TODO Populate list from users in database. Redesign UI with bootstrap.
+# @update 2/2/17
+def SchedulersView(request):
+    return render(request, 'schedulers.html')
+
 
 #  Invite View 
 # @descr Form view enables schedulers to send invites to new users  
