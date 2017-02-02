@@ -41,7 +41,7 @@ def InviteView(request):
             invData = invForm.clean()
             print(invData)
             res.status_code = 200
-            res.content = 'Success'
+            res.content = 'Success. <br><br><a href="../../home">Return</a>'
         else:
             print('invalid invite form')
             res = HttpResponse
