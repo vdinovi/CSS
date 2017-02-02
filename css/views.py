@@ -3,9 +3,9 @@ from django.shortcuts import render
 from django.views.generic import TemplateView
 from django.http import HttpResponse
 
-# --------------
-# --  Views   --
-# --------------
+# ---------------------------
+# --  Method-Based Views   --
+# ---------------------------
 #  Index View
 # @descr This is the splash page that all unauthorized users will get when visitng our base url.
 # @TODO  Figure out what to put on this page (so far: FAQ, Feedback, UserManual links)
@@ -41,16 +41,21 @@ def InviteView(request):
             invData = invForm.clean()
             print(invData)
             res.status_code = 200
-            res.content = 'Success'
+            res.content = 'Success. <br><br><a href="../../home">Return</a>'
         else:
             print('invalid invite form')
             res = HttpResponse
             res.status_code = 400
-            res.reason_phrase = 'Invalid invite form: ' + invForm.errors.as_data()
+            res.reason_phrase = 'Invalid entries: ' #+ [for err in invForm.errors.as_data()]
     elif request.method == "GET":
         inv = InviteForm() 
         return render(request, 'invite.html', {'form': inv})
     else:
         res.status_code = 400
     return res
+
+# ---------------------------
+# --   Class-Based Views   --
+# ---------------------------
+# @NOTE:Use method-based views for now. They are simpler.
 
