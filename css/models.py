@@ -49,4 +49,4 @@ class Section(models.Model):
     fault_reason = models.CharField(max_length = 8) # faculty or room
 
 class SectionType(models.Model):
-    section_type = models.CharField(max_length=32) # eg. lecture or lab
+    section_type = models.CharField(max_length=32, primary_key=True) # eg. lecture or lab
