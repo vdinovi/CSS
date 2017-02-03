@@ -39,6 +39,14 @@ def RoomsView(request):
 def SchedulersView(request):
     return render(request, 'schedulers.html')
 
+#  Faculty View
+# @descr Display all of the faculty currently registered in the database.
+#        Also includes a + and - button that link to theinvite form and delete form
+# @TODO populat lite from users in database. Redesign UI with bootstrap
+# @update 2/2/17
+def FacultyView(request):
+    return render(request, 'faculty.html')
+
 
 #  Invite View 
 # @descr Form view enables schedulers to send invites to new users  
