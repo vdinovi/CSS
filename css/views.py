@@ -13,7 +13,6 @@ from django.http import HttpResponse
 def IndexView(request):
     return render(request, 'index.html')
 
-
 #  Home View
 # @descr The view that logged in users will see and will contain their control panel.
 #        Will have a different control panel based on the authenticated user.
