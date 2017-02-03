@@ -26,6 +26,7 @@ urlpatterns = [
     url('^$', views.IndexView, name='index'),
     url(r'^home/', include([
         url('^$', views.HomeView, name='home'),
+        url('^rooms/$', views.RoomsView, name='rooms'),
         url('^schedulers/$', views.SchedulersView, name='schedulers'),
         url(r'invite/$', views.InviteView, name='invite'),
     ])),

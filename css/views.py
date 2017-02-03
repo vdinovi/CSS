@@ -23,6 +23,14 @@ def IndexView(request):
 def HomeView(request):
     return render(request, 'home.html')
 
+#  Rooms View
+# @descr 
+# @TODO 
+# @update 2/2/17
+def RoomsView(request):
+    return render(request, 'rooms.html')
+
+
 #  Schedulers View
 # @descr Displays all of the schedulers currecntly registered in the database.
 #        Also includes a + and - button that link to the invite form and delete form
