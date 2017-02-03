@@ -29,7 +29,6 @@ urlpatterns = [
         url('^schedulers/$', views.SchedulersView, name='schedulers'),
         url('^faculty/$', views.FacultyView, name='faculty'),
         url('^rooms/$', views.RoomsView, name='rooms'),
-        url(r'invite/$', views.InviteView, name='invite'),
     ])),
     url(r'^admin/', admin.site.urls)
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

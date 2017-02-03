@@ -44,36 +44,19 @@ def SchedulersView(request):
 #        Also includes a + and - button that link to theinvite form and delete form
 # @TODO populat lite from users in database. Redesign UI with bootstrap
 # @update 2/2/17
+from .models import User
+from .forms import InviteForm, DeleteForm
 def FacultyView(request):
-    return render(request, 'faculty.html')
-
-
-#  Invite View 
-# @descr Form view enables schedulers to send invites to new users  
-#        Form fields are: 'name', 'email', 'UserType'
-# @TODO  Should create a URL pointing to the registration page that will be emailed to the user.
-#        The URL name, email, and usertype embedded in the query string
-#        Think about mechanism to prevent faculty from modifying their UserType to scheduler
-#        (perhaps send a secret key to faculty only - not the best idea, but it shouldn't matter too much)
-# @update 1/31/17
-from .forms import InviteForm 
-def InviteView(request):
     res = HttpResponse()
+    #@TODO should process add faculty and delete faculty form submissions
     if request.method == "POST":
-        invForm = InviteForm(request.POST)
-        if (invForm.is_valid()):
-            invData = invForm.clean()
-            print(invData)
-            res.status_code = 200
-            res.content = 'Success. <br><br><a href="../../home">Return</a>'
-        else:
-            print('invalid invite form')
-            res = HttpResponse
-            res.status_code = 400
-            res.reason_phrase = 'Invalid entries: ' #+ [for err in invForm.errors.as_data()]
+        res.status_code = 400
     elif request.method == "GET":
-        inv = InviteForm() 
-        return render(request, 'invite.html', {'form': inv})
+        return render(request, 'faculty.html', {
+            'user_list': User.objects.filter(), #TODO should filter by those with usertype 'faculty'
+            'add_faculty_form': InviteForm(),
+            'delete_faculty_form': DeleteForm()
+            });
     else:
         res.status_code = 400
     return res
