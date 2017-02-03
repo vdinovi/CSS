@@ -33,8 +33,8 @@ class Schedule(models.Model):
     state = models.CharField(max_length=16) # eg. active or finalized 
 
 class Section(models.Model):
-    schedule_id = models.ForeignKey(Schedule, on_delete=models.CASCADE, unique=True)
-    course_id = models.ForeignKey(Course, on_delete=models.CASCADE, unique=True)
+    schedule_id = models.OneToOneField(Schedule, on_delete=models.CASCADE, unique=True)
+    course_id = models.OneToOneField(Course, on_delete=models.CASCADE, unique=True)
     start_time = models.TimeField()
     end_time = models.TimeField()
     days = models.CharField(max_length = 8)    # MWF or TR
