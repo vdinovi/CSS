@@ -1,0 +1,14 @@
+.table > thead > tr > td.top,
+.table > tbody > tr > td.top,
+.table > tfoot > tr > td.top,
+.table > thead > tr > th.top,
+.table > tbody > tr > th.top,
+.table > tfoot > tr > th.top,
+.table > thead > tr.top > td,
+.table > tbody > tr.top > td,
+.table > tfoot > tr.top > td,
+.table > thead > tr.top > th,
+.table > tbody > tr.top > th,
+.table > tfoot > tr.top > th {
+  background-color: #85adad;
+}

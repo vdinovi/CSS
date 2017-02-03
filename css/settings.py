@@ -25,6 +25,9 @@ SECRET_KEY = '8jkcrsq9li@vh^&=dt@an!+o(t)q(h6qoje5c^p^f%=12^jg^9'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
+# Resolves appends a forward slash to any requested url not ending in a forward slash
+APPEND_SLASH = True
+
 ALLOWED_HOSTS = [
         'inviso-css.herokuapp.com',
         'localhost'
@@ -43,6 +46,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'css',
 ]
 
 MIDDLEWARE = [
@@ -82,7 +86,7 @@ WSGI_APPLICATION = 'css.wsgi.application'
 # https://docs.djangoproject.com/en/1.10/ref/settings/#databases
 
 DATABASES = {
-    'aws': {
+    'default': {
         'ENGINE': 'django.db.backends.mysql',
         'OPTIONS': {
             'sql_mode': 'STRICT_TRANS_TABLES'
@@ -93,10 +97,10 @@ DATABASES = {
         'HOST': 'css-db.chfwru12q1ji.us-west-1.rds.amazonaws.com',
         'PORT': '3306',
     },
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-    }
+    #'default': {
+    #    'ENGINE': 'django.db.backends.sqlite3',
+    #    'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+    #}
 }
 
 

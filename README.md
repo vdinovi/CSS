@@ -16,19 +16,34 @@ The softwares goal is to improve the schedule planning process by providing a fl
 * Has an appealing and convenient user interface
 
 
-## Usage
-TODO: Write usage instructions
+## Running a local instance
 
-## Contributing
+1. Install python2.7.13
+2. Get pip (may be auto installed in step 1): curl -X GET https://bootstrap.pypa.io/get-pip.py > get-pip.py && python get-pip.py
+3. Clone this repo
+4. set up virtualenv with python2.7.13
+5. activate virtualenv
+6. Install project packages : pip install -r requirements.txt
+7. Run: python manage.py runserver
 
+## Contribute
+
+# For working on solo features (for small, independent stories)
 1. Fork it!
 2. Create your feature branch: `git checkout -b my-new-feature`
 3. Commit your changes: `git commit -am 'Add some feature'`
 4. Push to the branch: `git push origin my-new-feature`
 5. Submit a pull request :D
 
-## History
+# For working on shared features:
 
+1. Create a feature branch 
+2. Tell other collaborators
+3. Work on your branch ...
+4. Merge changes into master
+5. Delete you branch
+
+## History
 TODO: Write history
 
 ## Inviso
@@ -36,4 +51,8 @@ TODO: Write history
 Inviso is comprised of 6 student enrolled in the same CPE309 section at Cal Poly San Luis Obispo under the direction of Tim Kearns.
 
 Team Lead - Vittorio Dinovi - vito.dinovi@gmail.com
-<TODO: add people>
+Technical Lead - Sigal Shaul - sshaul@calpoly.edu
+Technical Lead - Makenna Johnstone - makennajohnstone@gmail.com
+Document Specialist - Andrew Lam - werdna.mal222@gmail.com
+Quality Assurance - Jason Sawatsky - jasonmsawatzky@gmail.com
+Secretary/Librarian - Paula Ledgerwood - paledger@gmail.com
