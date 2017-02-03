@@ -45,7 +45,7 @@ def SchedulersView(request):
 # @TODO populat lite from users in database. Redesign UI with bootstrap
 # @update 2/2/17
 from .models import User
-from .forms import InviteForm, DeleteForm
+from .forms import InviteUserForm, DeleteUserForm
 def FacultyView(request):
     res = HttpResponse()
     #@TODO should process add faculty and delete faculty form submissions
@@ -54,8 +54,8 @@ def FacultyView(request):
     elif request.method == "GET":
         return render(request, 'faculty.html', {
             'user_list': User.objects.filter(), #TODO should filter by those with usertype 'faculty'
-            'add_faculty_form': InviteForm(),
-            'delete_faculty_form': DeleteForm()
+            'add_faculty_form': InviteUserForm(),
+            'delete_faculty_form': DeleteUserForm()
             });
     else:
         res.status_code = 400
