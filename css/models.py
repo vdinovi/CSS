@@ -38,8 +38,8 @@ class Section(models.Model):
     start_time = models.TimeField()
     end_time = models.TimeField()
     days = models.CharField(max_length = 8)    # MWF or TR
-    faculty = models.ForeignKey(User, null = True, on_delete = models.SET_NULL, default = models.SET_NULL)
-    room = models.ForeignKey(Room, null = True, on_delete = models.SET_NULL, default = models.SET_NULL)
+    faculty = models.OneToOneField(User, null = True, on_delete = models.SET_NULL, default = models.SET_NULL)
+    room = models.OneToOneField(Room, null = True, on_delete = models.SET_NULL, default = models.SET_NULL)
     section_capacity = models.IntegerField(default = 0)
     students_enrolled = models.IntegerField(default = 0)
     students_waitlisted = models.IntegerField(default = 0)
