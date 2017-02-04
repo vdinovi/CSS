@@ -32,16 +32,15 @@ def RoomsView(request):
 #  Schedulers View
 # @descr Displays all of the schedulers currecntly registered in the database.
 #        Also includes a + and - button that link to the invite form and delete form
-# @TODO Populate list from users in database. Redesign UI with bootstrap.
 # @update 2/4/17
 def SchedulersView(request):
     res = HttpResponse()
     if request.method == "GET":
+        #TODO should filter by those with usertype 'scheduler'
         return render(request, 'schedulers.html', {
-            #TODO should filter by those with usertype 'scheduler'
-            'scheduler_list': User.objects.filter(), 
-            'invite_user_form': InviteUserForm(),
-            'delete_user_form': DeleteUserForm()
+                'scheduler_list': User.objects.filter(), 
+                'invite_user_form': InviteUserForm(),
+                'delete_user_form': DeleteUserForm()
             });
     elif request.method == "POST" and 'invite-form' in request.POST:
         form = InviteUserForm(request.POST)
@@ -64,18 +63,17 @@ def SchedulersView(request):
 #  Faculty View
 # @descr Display all of the faculty currently registered in the database.
 #        Also includes a + and - button that link to theinvite form and delete form
-# @TODO populat lite from users in database. Redesign UI with bootstrap
 # @update 2/2/17
 from .models import User
 from .forms import InviteUserForm, DeleteUserForm
 def FacultyView(request):
     res = HttpResponse()
     if request.method == "GET":
-        return render(request, 'schedulers.html', {
-            #TODO should filter by those with usertype 'scheduler'
-            'scheduler_list': User.objects.filter(), 
-            'invite_user_form': InviteUserForm(),
-            'delete_user_form': DeleteUserForm()
+        #TODO should filter by those with usertype 'faculty'
+        return render(request, 'faculty.html', {
+                'faculty_list': User.objects.filter(), 
+                'invite_user_form': InviteUserForm(),
+                'delete_user_form': DeleteUserForm()
             });
     elif request.method == "POST" and 'invite-form' in request.POST:
         form = InviteUserForm(request.POST)

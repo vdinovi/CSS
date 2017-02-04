@@ -6,8 +6,6 @@ class InviteUserForm(forms.Form):
     name = forms.CharField()
     email = forms.EmailField()
 
-    # TODO: send a link to the registration page with 
-    #   the provided name, email, and 'faculty' as the usertype
     def send_invite(self, usertype):
         send_mail('Invite to register for CSS',
                    self.cleaned_data['name'] + ', you have been invited to register for CSS',
@@ -19,4 +17,7 @@ class InviteUserForm(forms.Form):
 class DeleteUserForm(forms.Form):
     id = forms.IntegerField()
 
+    # TODO: Delete user
+    def delete_user(self):
+        pass
 
