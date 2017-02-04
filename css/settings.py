@@ -145,3 +145,10 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = [
         os.path.join(PROJECT_ROOT, 'static')
 ]
+
+# EMAIL
+EMAIL_HOST='smtp.gmail.com'
+EMAIL_PORT=587
+EMAIL_HOST_USER='invisocss309'
+EMAIL_HOST_PASSWORD='invisocss'
+EMAIL_USE_TLS=True

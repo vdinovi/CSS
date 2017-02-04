@@ -68,7 +68,7 @@
                 <th>Name</th>
             </thead>
             <tbody>
-              {% for user in user_list %}
+              {% for user in faculty_list %}
               <tr>
                 <th>{{ user.id }}</th>
                 <th>{{ user.email }}</th>
@@ -83,10 +83,8 @@
       </div>
     </div>
 
-
     <div id="add-faculty" class="modal fade" role="dialog">
       <div class="modal-dialog">
-
         <!-- Modal content-->
         <div class="modal-content">
           <div class="modal-header">
@@ -94,16 +92,15 @@
             <h4 class="modal-title">Add Faculty</h4>
           </div>
           <div class="modal-body">
-            <form method="POST">{% csrf_token %}
+            <form method="POST" action="?" novalidate>{% csrf_token %}
               <p>Invite a Faculty Member</p>
-              {{ add_faculty_form.as_p }}
-              <button type="submit" class="save btn btn-default">submit</button>
+              {{ invite_user_form.as_p }}
+              <button type="submit" name="invite-form" class="save btn btn-default">submit</button>
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
           </div>
         </div>
-
       </div>
     </div>
     <div id="delete-faculty" class="modal fade" role="dialog">
@@ -115,19 +112,17 @@
             <h4 class="modal-title">Delete Faculty</h4>
           </div>
           <div class="modal-body">
-            <form method="POST">{% csrf_token %}
+            <form method="POST" action="?">{% csrf_token %}
               <p>Delete a Faculty Member</p>
-              {{ delete_faculty_form.as_p }}
-              <button type="submit" class="save btn btn-default">submit</button>
+              {{ delete_user_form.as_p }}
+              <button type="submit" name="delete-form" class="save btn btn-default">submit</button>
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
           </div>
         </div>
-
       </div>
     </div>
-
 
     <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>

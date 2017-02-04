@@ -13,7 +13,6 @@ from django.http import HttpResponse
 def IndexView(request):
     return render(request, 'index.html')
 
-
 #  Home View
 # @descr The view that logged in users will see and will contain their control panel.
 #        Will have a different control panel based on the authenticated user.
@@ -30,14 +29,37 @@ def HomeView(request):
 def RoomsView(request):
     return render(request, 'rooms.html')
 
-
 #  Schedulers View
 # @descr Displays all of the schedulers currecntly registered in the database.
 #        Also includes a + and - button that link to the invite form and delete form
 # @TODO Populate list from users in database. Redesign UI with bootstrap.
-# @update 2/2/17
+# @update 2/4/17
 def SchedulersView(request):
-    return render(request, 'schedulers.html')
+    res = HttpResponse()
+    if request.method == "GET":
+        return render(request, 'schedulers.html', {
+            #TODO should filter by those with usertype 'scheduler'
+            'scheduler_list': User.objects.filter(), 
+            'invite_user_form': InviteUserForm(),
+            'delete_user_form': DeleteUserForm()
+            });
+    elif request.method == "POST" and 'invite-form' in request.POST:
+        form = InviteUserForm(request.POST)
+        if form.is_valid():
+            form.send_invite('scheduler')
+            res.status_code = 200
+        else:
+            res.status_code = 400
+    elif request.method == "POST" and 'delete-form' in request.POST:
+        form = DeleteUserForm(request.POST)
+        if form.is_valid():
+            print('NYI')
+            res.status_code = 200
+        else:
+            res.status_code = 400
+    else:
+        res.status_code = 400
+    return res
 
 #  Faculty View
 # @descr Display all of the faculty currently registered in the database.
@@ -48,18 +70,31 @@ from .models import User
 from .forms import InviteUserForm, DeleteUserForm
 def FacultyView(request):
     res = HttpResponse()
-    #@TODO should process add faculty and delete faculty form submissions
-    if request.method == "POST":
-        res.status_code = 400
-    elif request.method == "GET":
-        return render(request, 'faculty.html', {
-            'user_list': User.objects.filter(), #TODO should filter by those with usertype 'faculty'
-            'add_faculty_form': InviteUserForm(),
-            'delete_faculty_form': DeleteUserForm()
+    if request.method == "GET":
+        return render(request, 'schedulers.html', {
+            #TODO should filter by those with usertype 'scheduler'
+            'scheduler_list': User.objects.filter(), 
+            'invite_user_form': InviteUserForm(),
+            'delete_user_form': DeleteUserForm()
             });
+    elif request.method == "POST" and 'invite-form' in request.POST:
+        form = InviteUserForm(request.POST)
+        if form.is_valid():
+            form.send_invite('faculty')
+            res.status_code = 200
+        else:
+            res.status_code = 400
+    elif request.method == "POST" and 'delete-form' in request.POST:
+        form = DeleteUserForm(request.POST)
+        if form.is_valid():
+            print('NYI')
+            res.status_code = 200
+        else:
+            res.status_code = 400
     else:
         res.status_code = 400
     return res
+
 
 # ---------------------------
 # --   Class-Based Views   --

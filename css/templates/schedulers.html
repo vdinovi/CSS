@@ -66,13 +66,58 @@
                 <th>Name</th>
             </thead>
             <tbody>
+              {% for user in scheduler_list %}
               <tr>
-                <td>1</td>
-                <td>kearns@gmail.com</td>
-                <td>Timothy Kearns</td>
+                <td>{{ user.id }}</td>
+                <td>{{ user.email }}</td>
+                <td>{{ user.first_name }} {{ user.last_name }}</td>
               </tr>
+              {% endfor %}
             </tbody>
           </table>
+          <button type="button" class="btn btn-info btn-xs" data-toggle="modal" data-target="#add-scheduler">+</button>
+          <button type="button" class="btn btn-info btn-xs" data-toggle="modal" data-target="#delete-scheduler">-</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="add-scheduler" class="modal fade" role="dialog">
+      <div class="modal-dialog">
+        <!-- Modal content-->
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+            <h4 class="modal-title">Add Scheduler</h4>
+          </div>
+          <div class="modal-body">
+            <form method="POST" action='?' novalidate>{% csrf_token %}
+              <p>Invite a Scheduler</p>
+              {{ invite_user_form.as_p }}
+              <button type="submit" name='invite-form' class="save btn btn-default">submit</button>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id="delete-scheduler" class="modal fade" role="dialog">
+      <div class="modal-dialog">
+        <!-- Modal content-->
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+            <h4 class="modal-title">Delete Scheduler</h4>
+          </div>
+          <div class="modal-body">
+            <form method="POST" action='?'>{% csrf_token %}
+              <p>Delete a Scheduler</p>
+              {{ delete_user_form.as_p }}
+              <button type="submit" name='delete-form' class="save btn btn-default">submit</button>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+          </div>
         </div>
       </div>
     </div>
