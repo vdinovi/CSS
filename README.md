@@ -1,9 +1,10 @@
-## status
+## CS<sup>2</sup>
 Master: [![Build Status](https://travis-ci.com/vdinovi/CSS.svg?token=Dszp13uKbE4rTQ1QWTX4&branch=master)](https://travis-ci.com/vdinovi/CSS) 
 Prod: [![Build Status](https://travis-ci.com/vdinovi/CSS.svg?token=Dszp13uKbE4rTQ1QWTX4&branch=prod)](https://travis-ci.com/vdinovi/CSS)
-# CS<sup>2</sup> - Class Scheduling System CS<sup>2</sup> (or just CSS) is a class scheduling software developed by Inviso for University Software.  This is part of CPE309 - Software Developement taught be Dr. Tim Kearns at Cal Poly San Luis Obispo.
 
 ## Overview
+
+The Class Scheduling System entitled CS<sup>2</sup> (or just CSS) is scheduling software developed by Inviso for University Software.  This is part of CPE309 - Software Developement taught be Dr. Tim Kearns at Cal Poly San Luis Obispo.
 
 The softwares goal is to improve the schedule planning process by providing a flexible interface for creating and managing schedules. The software is required to exhibit improved performance over any existing system and will contain at minimum the following features:
 
