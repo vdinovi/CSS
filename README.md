@@ -1,3 +1,4 @@
+[![Build Status](https://travis-ci.com/vdinovi/CSS.svg?token=Dszp13uKbE4rTQ1QWTX4&branch=master)](https://travis-ci.com/vdinovi/CSS)
 # CS<sup>2</sup> - Class Scheduling System
 
 CS<sup>2</sup> (or just CSS) is a class scheduling software developed by Inviso for University Software.

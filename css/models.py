@@ -49,4 +49,12 @@ class Section(models.Model):
     fault_reason = models.CharField(max_length = 8) # faculty or room
 
 class SectionType(models.Model):
-    section_type = models.CharField(max_length=32) # eg. lecture or lab
+    section_type = models.CharField(max_length=32, primary_key=True) # eg. lecture or lab
+
+class FacultyWorkInfo(models.Model):
+    class Meta:
+        unique_together = (("course_id", "section_type"),)
+    course_id = models.ForeignKey(Course, on_delete = models.CASCADE)
+    section_type = models.ForeignKey(SectionType, on_delete = models.CASCADE)
+    work_units = models.IntegerField(default = 0)
+    work_hours = models.IntegerField(default = 0)

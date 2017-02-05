@@ -13,7 +13,6 @@ from django.http import HttpResponse
 def IndexView(request):
     return render(request, 'index.html')
 
-
 #  Home View
 # @descr The view that logged in users will see and will contain their control panel.
 #        Will have a different control panel based on the authenticated user.
@@ -30,45 +29,70 @@ def HomeView(request):
 def RoomsView(request):
     return render(request, 'rooms.html')
 
-
 #  Schedulers View
 # @descr Displays all of the schedulers currecntly registered in the database.
 #        Also includes a + and - button that link to the invite form and delete form
-# @TODO Populate list from users in database. Redesign UI with bootstrap.
-# @update 2/2/17
+# @update 2/4/17
 def SchedulersView(request):
-    return render(request, 'schedulers.html')
-
-
-#  Invite View 
-# @descr Form view enables schedulers to send invites to new users  
-#        Form fields are: 'name', 'email', 'UserType'
-# @TODO  Should create a URL pointing to the registration page that will be emailed to the user.
-#        The URL name, email, and usertype embedded in the query string
-#        Think about mechanism to prevent faculty from modifying their UserType to scheduler
-#        (perhaps send a secret key to faculty only - not the best idea, but it shouldn't matter too much)
-# @update 1/31/17
-from .forms import InviteForm 
-def InviteView(request):
     res = HttpResponse()
-    if request.method == "POST":
-        invForm = InviteForm(request.POST)
-        if (invForm.is_valid()):
-            invData = invForm.clean()
-            print(invData)
+    if request.method == "GET":
+        #TODO should filter by those with usertype 'scheduler'
+        return render(request, 'schedulers.html', {
+                'scheduler_list': User.objects.filter(), 
+                'invite_user_form': InviteUserForm(),
+                'delete_user_form': DeleteUserForm()
+            });
+    elif request.method == "POST" and 'invite-form' in request.POST:
+        form = InviteUserForm(request.POST)
+        if form.is_valid():
+            form.send_invite('scheduler')
             res.status_code = 200
-            res.content = 'Success. <br><br><a href="../../home">Return</a>'
         else:
-            print('invalid invite form')
-            res = HttpResponse
             res.status_code = 400
-            res.reason_phrase = 'Invalid entries: ' #+ [for err in invForm.errors.as_data()]
-    elif request.method == "GET":
-        inv = InviteForm() 
-        return render(request, 'invite.html', {'form': inv})
+    elif request.method == "POST" and 'delete-form' in request.POST:
+        form = DeleteUserForm(request.POST)
+        if form.is_valid():
+            print('NYI')
+            res.status_code = 200
+        else:
+            res.status_code = 400
     else:
         res.status_code = 400
     return res
+
+#  Faculty View
+# @descr Display all of the faculty currently registered in the database.
+#        Also includes a + and - button that link to theinvite form and delete form
+# @update 2/2/17
+from .models import User
+from .forms import InviteUserForm, DeleteUserForm
+def FacultyView(request):
+    res = HttpResponse()
+    if request.method == "GET":
+        #TODO should filter by those with usertype 'faculty'
+        return render(request, 'faculty.html', {
+                'faculty_list': User.objects.filter(), 
+                'invite_user_form': InviteUserForm(),
+                'delete_user_form': DeleteUserForm()
+            });
+    elif request.method == "POST" and 'invite-form' in request.POST:
+        form = InviteUserForm(request.POST)
+        if form.is_valid():
+            form.send_invite('faculty')
+            res.status_code = 200
+        else:
+            res.status_code = 400
+    elif request.method == "POST" and 'delete-form' in request.POST:
+        form = DeleteUserForm(request.POST)
+        if form.is_valid():
+            print('NYI')
+            res.status_code = 200
+        else:
+            res.status_code = 400
+    else:
+        res.status_code = 400
+    return res
+
 
 # ---------------------------
 # --   Class-Based Views   --
