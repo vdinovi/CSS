@@ -1,2 +1,2 @@
 test:
-	echo "NYI"
+	@echo "NYI"
