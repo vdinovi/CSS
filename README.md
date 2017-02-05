@@ -1,10 +1,9 @@
-[![Build Status](https://travis-ci.com/vdinovi/CSS.svg?token=Dszp13uKbE4rTQ1QWTX4&branch=master)](https://travis-ci.com/vdinovi/CSS)
-# CS<sup>2</sup> - Class Scheduling System
+## status
+Master: [![Build Status](https://travis-ci.com/vdinovi/CSS.svg?token=Dszp13uKbE4rTQ1QWTX4&branch=master)](https://travis-ci.com/vdinovi/CSS) 
+Prod: [![Build Status](https://travis-ci.com/vdinovi/CSS.svg?token=Dszp13uKbE4rTQ1QWTX4&branch=prod)](https://travis-ci.com/vdinovi/CSS)
+# CS<sup>2</sup> - Class Scheduling System CS<sup>2</sup> (or just CSS) is a class scheduling software developed by Inviso for University Software.  This is part of CPE309 - Software Developement taught be Dr. Tim Kearns at Cal Poly San Luis Obispo.
 
-CS<sup>2</sup> (or just CSS) is a class scheduling software developed by Inviso for University Software.
-This is part of CPE309 - Software Developement taught be Dr. Tim Kearns at Cal Poly San Luis Obispo.
-
-# Overview
+## Overview
 
 The softwares goal is to improve the schedule planning process by providing a flexible interface for creating and managing schedules. The software is required to exhibit improved performance over any existing system and will contain at minimum the following features:
 
@@ -50,10 +49,10 @@ TODO: Write history
 ## Inviso
 
 Inviso is comprised of 6 student enrolled in the same CPE309 section at Cal Poly San Luis Obispo under the direction of Tim Kearns.
-
-Team Lead - Vittorio Dinovi - vito.dinovi@gmail.com
-Technical Lead - Sigal Shaul - sshaul@calpoly.edu
-Technical Lead - Makenna Johnstone - makennajohnstone@gmail.com
-Document Specialist - Andrew Lam - werdna.mal222@gmail.com
-Quality Assurance - Jason Sawatsky - jasonmsawatzky@gmail.com
-Secretary/Librarian - Paula Ledgerwood - paledger@gmail.com
+Members:
+* Team Lead - Vittorio Dinovi - vito.dinovi@gmail.com
+* Technical Lead - Sigal Shaul - sshaul@calpoly.edu
+* Technical Lead - Makenna Johnstone - makennajohnstone@gmail.com
+* Document Specialist - Andrew Lam - werdna.mal222@gmail.com
+* Quality Assurance - Jason Sawatsky - jasonmsawatzky@gmail.com
+* Secretary/Librarian - Paula Ledgerwood - paledger@gmail.com
