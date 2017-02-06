@@ -100,6 +100,21 @@ def FacultyView(request):
         res.status_code = 400
     return res
 
+#  FAQ View
+# @descr FAQ view that shows all current FAQ items 
+# @TODO Create FAQ model and use to populate view 
+# @Note These FAQ objects could be done without the database
+# @update 2/6/17
+def FAQView(request):
+    res = HttpResponse()
+    if request.method == "GET":
+        return render(request, 'faq.html', {
+                'faq_list': []
+            });
+    else:
+       res.status_code = 400; 
+    return res
+
 
 # ---------------------------
 # --   Class-Based Views   --
