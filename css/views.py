@@ -1,5 +1,5 @@
 from django.template import Context, Template
-from django.shortcuts import render
+from django.shortcuts import render, render_to_response
 from django.views.generic import TemplateView
 from django.http import HttpResponse
 
@@ -21,6 +21,10 @@ def IndexView(request):
 # @update 1/31/17
 def HomeView(request):
     return render(request, 'home.html')
+
+def SchedulingView(request):
+    #@TODO NYI
+    return render_to_response('nyi.html')
 
 #  Rooms View
 # @descr 
