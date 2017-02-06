@@ -12,3 +12,7 @@
 .table > tfoot > tr.top > th {
   background-color: #85adad;
 }
+
+body {
+    background-color: #D0D0D0;
+}
