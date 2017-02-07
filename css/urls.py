@@ -32,6 +32,8 @@ urlpatterns = [
         url('^courses/$', views.CoursesView, name='courses'),
     ])),
     url(r'^scheduling/$', views.SchedulingView, name='scheduling'), 
+    url(r'^resources/$', views.SchedulingView, name='resources'), 
+    url(r'^department/$', views.SchedulingView, name='department'), 
     url(r'^faq/$', views.FAQView, name='faq'),
     url(r'^admin/', admin.site.urls)
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
