@@ -1,5 +1,5 @@
 from django.template import Context, Template
-from django.shortcuts import render
+from django.shortcuts import render, render_to_response
 from django.views.generic import TemplateView
 from django.http import HttpResponse
 
@@ -22,12 +22,23 @@ def IndexView(request):
 def HomeView(request):
     return render(request, 'home.html')
 
+def SchedulingView(request):
+    #@TODO NYI
+    return render_to_response('nyi.html')
+
 #  Rooms View
 # @descr 
 # @TODO 
 # @update 2/2/17
 def RoomsView(request):
     return render(request, 'rooms.html')
+
+#  Courses View
+# @descr 
+# @TODO 
+# @update 2/5/17
+def CoursesView(request):
+    return render(request, 'courses.html')
 
 #  Schedulers View
 # @descr Displays all of the schedulers currecntly registered in the database.
@@ -91,6 +102,21 @@ def FacultyView(request):
             res.status_code = 400
     else:
         res.status_code = 400
+    return res
+
+#  FAQ View
+# @descr FAQ view that shows all current FAQ items 
+# @TODO Create FAQ model and use to populate view 
+# @Note These FAQ objects could be done without the database
+# @update 2/6/17
+def FAQView(request):
+    res = HttpResponse()
+    if request.method == "GET":
+        return render(request, 'faq.html', {
+                'faq_list': []
+            });
+    else:
+       res.status_code = 400; 
     return res
 
 
