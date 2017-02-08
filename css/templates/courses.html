@@ -20,30 +20,73 @@
     <div class="container">
       <div class="row">
         <div class="col-sm-4 col-sm-offset-4">
-          <h1 align="center" style="padding-bottom: 20px">Courses</h1>
+          <h1 align="center" style="padding-bottom: 20px">Department Faculty</h1>
         </div>
       </div>
       <div class="row">
         <div class="col-lg-10 col-lg-offset-1">
           <table class = "table table-striped table-hover table-bordered" style="background-color: #fff">
             <thead>
-                <tr class="top">
-                  <th>Name</th>
-                  <th>Description</th>
-                  <th>Equipment Requirements</th>
-                  
+              <tr class="top">
+                <th>Name</th>
+                <th>Description</th>
+                <th>Equipment Requirements</th>
             </thead>
             <tbody>
+              {% for course in course_list %}
               <tr>
-                 <td>CPE 471</td>
-                 <td>Introduction to Computer Graphics</td>
-                 <td>Lab machines, OpenGL,Graphics Libraries</td>
+                <th>{{ course.course_name }}</th>
+                <th>{{ couse.description }}</th>
+                <th>{{ course.equipment_req}}</th>
               </tr>
-           </tbody>
+              {% endfor %}
+            </tbody>
           </table>
+          <button type="button" class="btn btn-info btn-xs" data-toggle="modal" data-target="#add-course">+</button>
+          <!-- <button type="button" class="btn btn-info btn-xs" data-toggle="modal" data-target="#delete-course">-</button> -->
         </div>
       </div>
     </div>
+
+    <div id="add-course" class="modal fade" role="dialog">
+      <div class="modal-dialog">
+        <!-- Modal content-->
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+            <h4 class="modal-title">Add Course</h4>
+          </div>
+          <div class="modal-body">
+            <form method="POST" action="?" novalidate>{% csrf_token %}
+              <p>Add Course</p>
+              {{ add_course_form.as_p }}
+              <button type="submit" name="add-course" class="save btn btn-default">submit</button>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- <div id="delete-faculty" class="modal fade" role="dialog">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+            <h4 class="modal-title">Delete Faculty</h4>
+          </div>
+          <div class="modal-body">
+            <form method="POST" action="?">{% csrf_token %}
+              <p>Delete a Faculty Member</p>
+              {{ delete_user_form.as_p }}
+              <button type="submit" name="delete-form" class="save btn btn-default">submit</button>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+          </div>
+        </div>
+      </div>
+    </div> -->
 
     <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>

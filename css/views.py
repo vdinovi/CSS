@@ -33,7 +33,21 @@ def RoomsView(request):
 # @descr 
 # @TODO 
 # @update 2/5/17
+from .models import Course
+from .forms import AddCourseForm
 def CoursesView(request):
+    res = HttpResponse()
+    if request.method == "GET":
+        #TODO should filter by those with usertype 'scheduler'
+        return render(request, 'courses.html', {
+                'course_list': Course.objects.filter(),
+                'add_course_form':AddCourseForm()
+            });
+    elif request.method == "POST":
+        form = AddCourseForm(request.POST); 
+        if form.is_valid():
+            form.addCourse();
+            res.status_code = 200
     return render(request, 'courses.html')
 
 #  Schedulers View
