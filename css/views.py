@@ -4,6 +4,7 @@ from django.views.generic import TemplateView
 from django.http import HttpResponse
 from .models import CUser
 from .forms import * 
+import MySQLdb
 
 
 # ---------------------------
@@ -20,17 +21,18 @@ def RegistrationView(request):
         if form.is_valid():
             try:
                 user = form.save()
+                res.status_code = 200
             # db error
-            except MySQLdb.IntegryError as e:
+            except MySQLdb.IntegrityError as e:
                 if not e[0] == 1062:
                     res.status_code = 500
-                    raise
+                    res.reason_phrase = "db error:" + e[0]
                 else:
                     res.status_code = 400
                     res.reason_phrase = "Duplicate entry"
-            res.status_code = 200
         else:
             res.status_code = 400
+            res.reason_phrase = "Invalid form entry"
     else:
         res.status_code = 400
     return res

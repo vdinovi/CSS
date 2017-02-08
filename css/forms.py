@@ -17,7 +17,7 @@ class InviteUserForm(forms.Form):
 # Registration Form
 class RegisterUserForm(forms.Form):
     email = forms.EmailField()
-    user_type = forms.ChoiceField(label='Usertype', choices=[('scheduler', 'faculty')])
+    user_type = forms.ChoiceField(label='Usertype', choices=[('faculty', 'faculty'), ('scheduler', 'scheduler')])
     password1 = forms.CharField(label='Password', widget=forms.PasswordInput)
     password2 = forms.CharField(label='Confirm Password', widget=forms.PasswordInput)
 

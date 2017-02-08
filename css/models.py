@@ -7,9 +7,10 @@ from django.conf import settings
 
 class CUserManager(models.Manager):
     def create_cuser(self, email, password, user_type):
-        cuser = self.create(user=User.objects.create_user(username=email, email=email,
+        user = self.create(user=User.objects.create_user(username=email, email=email,
                                                           password=password),
                             user_type=user_type)
+        return user
 class CUser(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, null=True)
     user_type = models.CharField(max_length=16)
