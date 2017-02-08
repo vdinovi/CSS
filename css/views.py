@@ -57,6 +57,9 @@ def SchedulingView(request):
     #@TODO NYI
     return render_to_response('nyi.html')
 
+def LoginView(request):
+    return render(request, 'login.html')
+
 #  Rooms View
 # @descr 
 # @TODO 
