@@ -1,0 +1,13 @@
+.custom-nav-bar {
+    min-height: 95px;
+}
+
+.custom-nav-bar-header li a {
+    line-height: 65px;
+    margin-right: 10%;
+}
+
+.logout-button {
+    line-height: 65px;
+    margin-left: 20px;
+}

@@ -9,18 +9,18 @@
 
     <!-- Bootstrap -->
     {% load static %}
-   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
     <link href="{% static "css/custom.css" %}" rel="stylesheet">
+    <link href="{% static "css/navbar.css" %}" rel="stylesheet">
 
-    <div class="well">
-    </div>
   </head>
   <body>
+    {% include "navbar.html" %}
 
     <div class="container">
       <div class="row">
-        <div class="col-sm-4 col-sm-offset-4">
-          <h1 align="center" style="padding-bottom: 20px">Department Faculty</h1>
+        <div class="col-sm-12">
+          <h1 align="center" style="padding-bottom: 20px">Courses</h1>
         </div>
       </div>
       <div class="row">
@@ -31,6 +31,7 @@
                 <th>Name</th>
                 <th>Description</th>
                 <th>Equipment Requirements</th>
+
             </thead>
             <tbody>
               {% for course in course_list %}
@@ -40,6 +41,13 @@
                 <th>{{ course.equipment_req}}</th>
               </tr>
               {% endfor %}
+
+              	<tr>
+                <td>CPE 471</td>
+                <td>Introduction to Computer Graphics</td>
+                <td>Lab machines, OpenGL,Graphics Libraries</td>
+              </tr>
+
             </tbody>
           </table>
           <button type="button" class="btn btn-info btn-xs" data-toggle="modal" data-target="#add-course">+</button>
