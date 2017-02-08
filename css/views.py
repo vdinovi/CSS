@@ -1,11 +1,42 @@
 from django.template import Context, Template
-from django.shortcuts import render
+from django.shortcuts import render, render_to_response
 from django.views.generic import TemplateView
 from django.http import HttpResponse
+from .models import CUser
+from .forms import * 
+import MySQLdb
+
 
 # ---------------------------
 # --  Method-Based Views   --
 # ---------------------------
+def RegistrationView(request):
+    res = HttpResponse()
+    if request.method == "GET":
+        return render(request, 'registration.html', {
+                          'registration_form': RegisterUserForm()
+                      })
+    elif request.method == "POST":
+        form = RegisterUserForm(request.POST)
+        if form.is_valid():
+            try:
+                user = form.save()
+                res.status_code = 200
+            # db error
+            except MySQLdb.IntegrityError as e:
+                if not e[0] == 1062:
+                    res.status_code = 500
+                    res.reason_phrase = "db error:" + e[0]
+                else:
+                    res.status_code = 400
+                    res.reason_phrase = "Duplicate entry"
+        else:
+            res.status_code = 400
+            res.reason_phrase = "Invalid form entry"
+    else:
+        res.status_code = 400
+    return res
+
 #  Index View
 # @descr This is the splash page that all unauthorized users will get when visitng our base url.
 # @TODO  Figure out what to put on this page (so far: FAQ, Feedback, UserManual links)
@@ -21,6 +52,10 @@ def IndexView(request):
 # @update 1/31/17
 def HomeView(request):
     return render(request, 'home.html')
+
+def SchedulingView(request):
+    #@TODO NYI
+    return render_to_response('nyi.html')
 
 #  Rooms View
 # @descr 
@@ -57,9 +92,8 @@ def CoursesView(request):
 def SchedulersView(request):
     res = HttpResponse()
     if request.method == "GET":
-        #TODO should filter by those with usertype 'scheduler'
         return render(request, 'schedulers.html', {
-                'scheduler_list': User.objects.filter(), 
+                'scheduler_list': CUser.objects.filter(user_type='scheduler'), 
                 'invite_user_form': InviteUserForm(),
                 'delete_user_form': DeleteUserForm()
             });
@@ -85,14 +119,11 @@ def SchedulersView(request):
 # @descr Display all of the faculty currently registered in the database.
 #        Also includes a + and - button that link to theinvite form and delete form
 # @update 2/2/17
-from .models import User
-from .forms import InviteUserForm, DeleteUserForm
 def FacultyView(request):
     res = HttpResponse()
     if request.method == "GET":
-        #TODO should filter by those with usertype 'faculty'
         return render(request, 'faculty.html', {
-                'faculty_list': User.objects.filter(), 
+                'faculty_list': CUser.objects.filter(user_type='faculty'), 
                 'invite_user_form': InviteUserForm(),
                 'delete_user_form': DeleteUserForm()
             });
@@ -112,6 +143,21 @@ def FacultyView(request):
             res.status_code = 400
     else:
         res.status_code = 400
+    return res
+
+#  FAQ View
+# @descr FAQ view that shows all current FAQ items 
+# @TODO Create FAQ model and use to populate view 
+# @Note These FAQ objects could be done without the database
+# @update 2/6/17
+def FAQView(request):
+    res = HttpResponse()
+    if request.method == "GET":
+        return render(request, 'faq.html', {
+                'faq_list': []
+            });
+    else:
+       res.status_code = 400; 
     return res
 
 
