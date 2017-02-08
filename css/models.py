@@ -4,19 +4,18 @@ from django.contrib.auth.models import Group
 from django.conf import settings
 
 # ---------- User Models ----------
-
 class CUserManager(models.Manager):
     def create_cuser(self, email, password, user_type):
         user = self.create(user=User.objects.create_user(username=email, email=email,
-                                                          password=password),
+                                                         password=password),
                             user_type=user_type)
         return user
+
 class CUser(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, null=True)
     user_type = models.CharField(max_length=16)
 
     objects = CUserManager()
-
  
 class FacultyDetails(models.Model):
     # The user_id uses the User ID as a primary key.
@@ -24,7 +23,6 @@ class FacultyDetails(models.Model):
     user = models.OneToOneField(CUser, on_delete=models.CASCADE, blank=False)
     target_workload = models.IntegerField() # in hours
     changed_preferences = models.CharField(max_length=1) # 'y' or 'n' 
-
 
 # ---------- Resource Models ----------
 # Room represents department rooms
