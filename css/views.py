@@ -2,7 +2,7 @@ from django.template import Context, Template
 from django.shortcuts import render, render_to_response
 from django.views.generic import TemplateView
 from django.http import HttpResponse
-from .models import User
+from .models import CUser
 from .forms import * 
 
 
@@ -17,9 +17,20 @@ def RegistrationView(request):
                       })
     elif request.method == "POST":
         form = RegisterUserForm(request.POST)
-        user = form.save(commit = False)
-        print(user)
-        res.status_code = 200
+        if form.is_valid():
+            try:
+                user = form.save()
+            # db error
+            except MySQLdb.IntegryError as e:
+                if not e[0] == 1062:
+                    res.status_code = 500
+                    raise
+                else:
+                    res.status_code = 400
+                    res.reason_phrase = "Duplicate entry"
+            res.status_code = 200
+        else:
+            res.status_code = 400
     else:
         res.status_code = 400
     return res
@@ -65,9 +76,8 @@ def CoursesView(request):
 def SchedulersView(request):
     res = HttpResponse()
     if request.method == "GET":
-        #TODO should filter by those with usertype 'scheduler'
         return render(request, 'schedulers.html', {
-                'scheduler_list': User.objects.filter(), 
+                'scheduler_list': CUser.objects.filter(user_type='scheduler'), 
                 'invite_user_form': InviteUserForm(),
                 'delete_user_form': DeleteUserForm()
             });
@@ -96,9 +106,8 @@ def SchedulersView(request):
 def FacultyView(request):
     res = HttpResponse()
     if request.method == "GET":
-        #TODO should filter by those with usertype 'faculty'
         return render(request, 'faculty.html', {
-                'faculty_list': User.objects.filter(), 
+                'faculty_list': CUser.objects.filter(user_type='faculty'), 
                 'invite_user_form': InviteUserForm(),
                 'delete_user_form': DeleteUserForm()
             });

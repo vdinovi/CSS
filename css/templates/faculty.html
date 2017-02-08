@@ -44,9 +44,8 @@
             <tbody>
               {% for user in faculty_list %}
               <tr>
-                <th>{{ user.id }}</th>
-                <th>{{ user.email }}</th>
-                <th>{{ user.first_name }} {{ user.last_name }}</th>
+                <th>{{ user.user.id }}</th>
+                <th>{{ user.user.email }}</th>
               </tr>
               {% endfor %}
             </tbody>
