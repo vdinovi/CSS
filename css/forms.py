@@ -1,20 +1,26 @@
 from django import forms
-from .models import Room
+from django.core.mail import send_mail
 
 #  Invite Form
-class InviteForm(forms.Form):
+class InviteUserForm(forms.Form):
     name = forms.CharField()
     email = forms.EmailField()
 
-    # TODO: send a link to the registration page with
-    #   the provided name, email, and 'faculty' as the usertype
-    def send_invite(self):
+    def send_invite(self, usertype):
+        send_mail('Invite to register for CSS',
+                   self.cleaned_data['name'] + ', you have been invited to register for CSS',
+                   'registration@inviso-css',
+                   [self.cleaned_data['email']])
+
+
+# Delete Form
+class DeleteUserForm(forms.Form):
+    id = forms.IntegerField()
+
+    # TODO: Delete user
+    def delete_user(self):
         pass
 
-
-#  Delete Form
-class DeleteForm(forms.Form):
-    id = forms.IntegerField()
 
 class AddRoomForm(forms.Form):
     name = forms.CharField()

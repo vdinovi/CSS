@@ -1,13 +1,6 @@
 from django.db import models
-
-class User(models.Model):
-   username = models.CharField(max_length=32)
-   user_type = models.CharField(max_length=16)   # e.g. scheduler, faculty
-   email = models.CharField(max_length=32)
-   password = models.CharField(max_length=128)
-   salt = models.CharField(max_length=128)
-   first_name = models.CharField(max_length=16)
-   last_name = models.CharField(max_length=16)
+from django.contrib.auth.models import User
+from django.contrib.auth.models import Group
 
 class Room(models.Model):
    name = models.CharField(max_length=32)
@@ -24,7 +17,7 @@ class Course(models.Model):
 class FacultyDetails(models.Model):
     # The user_id uses the User ID as a primary key.
     # Whenever this User is deleted, this entry in the table will also be deleted
-    user_id = models.OneToOneField(User, on_delete=models.CASCADE, unique=True)
+    user_id = models.OneToOneField(User, on_delete=models.CASCADE)
     target_workload = models.IntegerField() # in hours
     changed_preferences = models.CharField(max_length=1) # 'y' or 'n' 
 
@@ -49,4 +42,12 @@ class Section(models.Model):
     fault_reason = models.CharField(max_length = 8) # faculty or room
 
 class SectionType(models.Model):
-    section_type = models.CharField(max_length=32) # eg. lecture or lab
+    section_type = models.CharField(max_length=32, primary_key=True) # eg. lecture or lab
+
+class FacultyWorkInfo(models.Model):
+    class Meta:
+        unique_together = (("course_id", "section_type"),)
+    course_id = models.ForeignKey(Course, on_delete = models.CASCADE)
+    section_type = models.ForeignKey(SectionType, on_delete = models.CASCADE)
+    work_units = models.IntegerField(default = 0)
+    work_hours = models.IntegerField(default = 0)
