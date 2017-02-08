@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.contrib.auth.models import Group
 
+
 class Room(models.Model):
    name = models.CharField(max_length=32)
    description = models.CharField(max_length=256, null=True)
@@ -44,7 +45,7 @@ class Section(models.Model):
 class SectionType(models.Model):
     section_type = models.CharField(max_length=32, primary_key=True) # eg. lecture or lab
 
-class FacultyWorkInfo(models.Model):
+class FacultyWorkInfo(models.Model): 
     class Meta:
         unique_together = (("course_id", "section_type"),)
     course_id = models.ForeignKey(Course, on_delete = models.CASCADE)
