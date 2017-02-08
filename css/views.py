@@ -2,10 +2,28 @@ from django.template import Context, Template
 from django.shortcuts import render, render_to_response
 from django.views.generic import TemplateView
 from django.http import HttpResponse
+from .models import User
+from .forms import * 
+
 
 # ---------------------------
 # --  Method-Based Views   --
 # ---------------------------
+def RegistrationView(request):
+    res = HttpResponse()
+    if request.method == "GET":
+        return render(request, 'registration.html', {
+                          'registration_form': RegisterUserForm()
+                      })
+    elif request.method == "POST":
+        form = RegisterUserForm(request.POST)
+        user = form.save(commit = False)
+        print(user)
+        res.status_code = 200
+    else:
+        res.status_code = 400
+    return res
+
 #  Index View
 # @descr This is the splash page that all unauthorized users will get when visitng our base url.
 # @TODO  Figure out what to put on this page (so far: FAQ, Feedback, UserManual links)
@@ -75,8 +93,6 @@ def SchedulersView(request):
 # @descr Display all of the faculty currently registered in the database.
 #        Also includes a + and - button that link to theinvite form and delete form
 # @update 2/2/17
-from .models import User
-from .forms import InviteUserForm, DeleteUserForm
 def FacultyView(request):
     res = HttpResponse()
     if request.method == "GET":
