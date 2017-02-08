@@ -84,7 +84,53 @@
               </tr>
             </tbody>
           </table>
+          <button type="button" class="btn btn-info btn-xs" data-toggle="modal" data-target="#add-room">+</button>
+          <button type="button" class="btn btn-info btn-xs" data-toggle="modal" data-target="#delete-room">-</button>
         </div>
+      </div>
+    </div>
+
+    <div id="add-room" class="modal fade" role="dialog">
+      <div class="modal-dialog">
+
+        <!-- Modal content-->
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+            <h4 class="modal-title">Add Room</h4>
+          </div>
+          <div class="modal-body">
+            <form method="POST">{% csrf_token %}
+              <p>Add a room</p>
+              {{ add_room_form.as_p }}
+              <button type="submit" class="save btn btn-default">submit</button>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+    <div id="delete-room" class="modal fade" role="dialog">
+      <div class="modal-dialog">
+        <!-- Modal content-->
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+            <h4 class="modal-title">Delete Room</h4>
+          </div>
+          <div class="modal-body">
+            <form method="POST">{% csrf_token %}
+              <p>Delete a Room</p>
+              {{ delete_room_form.as_p }}
+              <button type="submit" class="save btn btn-default">submit</button>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+          </div>
+        </div>
+
       </div>
     </div>
 
