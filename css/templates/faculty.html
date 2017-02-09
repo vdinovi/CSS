@@ -39,14 +39,12 @@
               <tr class="top">
                 <th>ID</th>
                 <th>Email</th>
-                <th>Name</th>
             </thead>
             <tbody>
-              {% for user in faculty_list %}
+              {% for cuser in faculty_list %}
               <tr>
-                <th>{{ user.id }}</th>
-                <th>{{ user.email }}</th>
-                <th>{{ user.first_name }} {{ user.last_name }}</th>
+                <th>{{ cuser.user.id }}</th>
+                <th>{{ cuser.user.email }}</th>
               </tr>
               {% endfor %}
             </tbody>

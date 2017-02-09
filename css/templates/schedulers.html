@@ -37,14 +37,12 @@
               <tr class="top">
                 <th>ID</th>
                 <th>Email</th>
-                <th>Name</th>
             </thead>
             <tbody>
-              {% for user in scheduler_list %}
+              {% for cuser in scheduler_list %}
               <tr>
-                <td>{{ user.id }}</td>
-                <td>{{ user.email }}</td>
-                <td>{{ user.first_name }} {{ user.last_name }}</td>
+                <td>{{ cuser.user.id }}</td>
+                <td>{{ cuser.user.email }}</td>
               </tr>
               {% endfor %}
             </tbody>

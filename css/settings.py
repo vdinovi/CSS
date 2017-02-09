@@ -96,6 +96,9 @@ DATABASES = {
         'PASSWORD': 'cssdb',
         'HOST': 'css-db.chfwru12q1ji.us-west-1.rds.amazonaws.com',
         'PORT': '3306',
+        'TEST': {
+            'NAME': 'cssdb',
+        },
     },
     #'default': {
     #    'ENGINE': 'django.db.backends.sqlite3',
