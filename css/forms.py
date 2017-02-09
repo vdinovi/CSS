@@ -1,7 +1,6 @@
 from django import forms
 from django.core.mail import send_mail
-from css.models import CUser
-import re
+from css.models import CUser, Room
 
 #  Invite Form
 class InviteUserForm(forms.Form):
@@ -23,8 +22,8 @@ class RegisterUserForm(forms.Form):
 
     def save(self):
         user = CUser.objects.create_cuser(email=self.cleaned_data['email'],
-                                         password=self.cleaned_data['password2'], 
-                                         user_type=self.cleaned_data['user_type'])
+                                          password=self.cleaned_data['password2'],
+                                          user_type=self.cleaned_data['user_type'])
         user.save()
         return user
 
@@ -40,10 +39,19 @@ class DeleteUserForm(forms.Form):
 
 class AddRoomForm(forms.Form):
     name = forms.CharField()
-    description = forms.EmailField()
+    description = forms.CharField()
     capacity = forms.IntegerField()
     notes = forms.CharField()
     equipment = forms.CharField()
 
-class DeleteRoomForm
+    def save(self):
+        room = Room.objects.create(name=self.cleaned_data['name'],
+                                   description=self.cleaned_data['description'],
+                                   capacity=self.cleaned_data['capacity'],
+                                   notes=self.cleaned_data['notes'],
+                                   equipment=self.cleaned_data['equipment'])
+        room.save()
+        return room
+
+class DeleteRoomForm(forms.Form):
     id = forms.IntegerField()
