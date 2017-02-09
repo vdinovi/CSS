@@ -39,6 +39,15 @@ class Course(models.Model):
     equipment_req = models.CharField(max_length=2048, null=True)
     description = models.CharField(max_length=2048, null=True)
 
+    def get_name(self):
+    	return self.course_name
+
+    def get_equipment_req(self):
+    	return self.equipment_req
+
+    def get_description(self):
+    	return self.description
+
 # SectionType contains all the defined section types the department allows
 class SectionType(models.Model):
     section_type = models.CharField(max_length=32, primary_key=True) # eg. lecture or lab
