@@ -80,3 +80,33 @@ class CourseTestCase(TestCase):
         self.assertEqual(course2.get_description(), None)
         self.assertEqual(course3.get_description(), None)
         self.assertEqual(course4.get_description(), "kearns")
+
+class SectionTypeTestCase(TestCase):
+    def setUp(self):
+        SectionType.objects.create(section_type="Lecture")
+        SectionType.objects.create(section_type="Lab")
+
+    def test_create_section_type(self):
+        section = SectionType.objects.get(section_type="Lecture")
+        self.assertEqual(section.section_type, "Lecture")
+
+class ScheduleTestCase(TestCase):
+    def setUp(self):
+        Schedule.objects.create(academic_term="Fall 2017", state="active")
+        Schedule.objects.create(academic_term="Winter 2017")
+
+    def test_finalize_schedule(self):
+        schedule = Schedule.objects.get(academic_term="Fall 2017")
+        schedule.finalize_schedule()
+        self.assertEqual(schedule.state, "finalized")
+
+    def test_default_active_schedule(self):
+        schedule = Schedule.objects.get(academic_term="Winter 2017")
+        self.assertEqual(schedule.state, "active")
+
+    def test_return_to_active_schedule(self):
+        schedule = Schedule.objects.get(academic_term="Winter 2017")
+        schedule.finalize_schedule()
+        self.assertEqual(schedule.state, "finalized")
+        schedule.return_to_active()
+        self.assertEqual(schedule.state, "active")

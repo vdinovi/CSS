@@ -52,6 +52,7 @@ class Course(models.Model):
 class SectionType(models.Model):
     section_type = models.CharField(max_length=32, primary_key=True) # eg. lecture or lab
 
+
 # WorkInfo contains the user defined information for specific Course-SectionType pairs
 # Each pair has an associated work units and work hours defined by the department
 class WorkInfo(models.Model): 
@@ -66,7 +67,13 @@ class WorkInfo(models.Model):
 # Schedule is a container for scheduled sections and correponds to exactly 1 academic term
 class Schedule(models.Model):
     academic_term = models.CharField(max_length=16, unique=True) # eg. "Fall 2016"
-    state = models.CharField(max_length=16) # eg. active or finalized 
+    state = models.CharField(max_length=16, default="active") # eg. active or finalized 
+
+    def finalize_schedule(self):
+    	self.state = "finalized"
+
+    def return_to_active(self):
+    	self.state = "active"
 
 # Section is our systems primary scheduled object
 # Each section represents a department section that is planned for a particular schedule
