@@ -97,7 +97,7 @@ DATABASES = {
         'HOST': 'css-db.chfwru12q1ji.us-west-1.rds.amazonaws.com',
         'PORT': '3306',
         'TEST': {
-            'NAME': 'cssdb',
+            'NAME': 'testdb',
         },
     },
     #'default': {

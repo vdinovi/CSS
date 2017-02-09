@@ -1,15 +1,49 @@
 from django.db import models
-from django.contrib.auth.models import User, AbstractBaseUser, BaseUserManager
+from django.contrib.auth.models import User
 from django.contrib.auth.models import Group
 from django.conf import settings
+import MySQLdb
+import re
 
 # ---------- User Models ----------
 class CUserManager(models.Manager):
+    # Verify email is valid
+    def is_valid_email(self, email): 
+        # @TODO fix regex
+        #if re.match(r'\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b', email) is None:
+        #    raise ValueError("Attempted CUser creation"+ 
+        #                     "with invalid email address")
+        return email
+
+    # @TODO Come up with password patten and validate it here
+    def is_valid_password(self, password):
+        # @TODO should compare password hash
+        #if password is '':
+        #    raise ValueError("Attempted CUser creation with invalid password")
+        return password
+
+    # Verify user_type is either 'scheduler' or 'faculty'
+    def is_valid_user_type(self, user_type):
+        if user_type != 'scheduler' and user_type != 'faculty':
+            raise ValueError("Attempted CUser creation with invalid user_type")
+        return user_type
+
     def create_cuser(self, email, password, user_type):
-        user = self.create(user=User.objects.create_user(username=email, email=email,
-                                                         password=password),
-                            user_type=user_type)
+        try:
+            user = self.create(user=User.objects.create_user(
+                                   username=self.is_valid_email(email), 
+                                   email=self.is_valid_email(email),
+                                   password=self.is_valid_password(password)),
+                               user_type=self.is_valid_user_type(user_type))
+        except MySQLdb.IntegrityError as e:
+            raise
         return user
+
+    def get_faculty(self):
+        return self.filter(user_type='faculty')
+
+    def get_scheduler(self):
+        return self.filter(user_type='faculty')
 
 class CUser(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, null=True)
