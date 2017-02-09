@@ -25,5 +25,25 @@ class RoomTestCase(TestCase):
 
     def test_room_names(self): 
         # test that 
-        graphics = Room.Objects.get(name="14-255")
+        graphics = Room.objects.get(name="14-255")
 
+
+class CourseTestCase(TestCase):
+    def setUp(self):
+        Course.objects.create(course_name="CPE 101",
+                              equipment_req="table",
+                              description="cool course")
+
+    def test_course_name(self):
+        course = Course.objects.get(course_name="CPE 101")
+        self.assertEqual(course.get_name(), "CPE 101")
+
+    def test_equipment_req(self):
+        """ Equipment requirements are correctly retrieved. """
+        course = Course.objects.get(course_name="CPE 101")
+        self.assertEqual(course.get_equipment_req(), "table")
+
+    def test_description(self):
+        """ Course description is correctly retrieved. """
+        course = Course.objects.get(course_name="CPE 101")
+        self.assertEqual(course.get_description(), "cool course")    
