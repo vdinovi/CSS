@@ -17,6 +17,7 @@ class CUserManager(models.Manager):
         return email
 
     # @TODO Come up with password patten and validate it here
+    # -- Min 8 chars, 1 upper, 1 lower, 1 number, max 32
     def is_valid_password(self, password):
         if password is '':
             raise ValueError("Attempted CUser creation with invalid password")
