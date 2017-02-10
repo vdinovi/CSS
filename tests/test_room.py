@@ -52,6 +52,7 @@ class RoomTestCase(TestCase):
         self.assertEqual(graphics.get_capacity(), 35)
         self.assertEqual(chem.get_capacity(), 25)
         self.assertEqual(eng.get_capacity(), 20)
+        
 
     def test_room_set_capacity(self):
         """ Test that capacity is retrieved properly """
@@ -67,6 +68,17 @@ class RoomTestCase(TestCase):
         graphics = Room.objects.get(name="14-255")
         chem = Room.objects.get(name="180-101")
         eng = Room.objects.get(name="4-111")
+        self.assertEqual(graphics.get_description(), "Graphics lab")
+        self.assertEqual(chem.get_description(), "Chemistry lab")
+        self.assertEqual(eng.get_description(), "Engineering IV")
+
+    def test_room_set_description(self):
+        """ Test that description is set properly """
+        graphics = Room.objects.get(name="14-255")
+        chem = Room.objects.get(name="180-101")
+        eng = Room.objects.get(name="4-111")
+        graphics.description = "Security lab"
+        chem.
         self.assertEqual(graphics.get_description(), "Graphics lab")
         self.assertEqual(chem.get_description(), "Chemistry lab")
         self.assertEqual(eng.get_description(), "Engineering IV")
