@@ -5,6 +5,7 @@ from django.conf import settings
 import MySQLdb
 import re
 from django.db import IntegrityError
+from django.core.exceptions import ValidationError
 
 # ---------- User Models ----------
 class CUserManager(models.Manager):
@@ -73,29 +74,23 @@ class Course(models.Model):
     equipment_req = models.CharField(max_length=2048, null=True)
     description = models.CharField(max_length=2048, null=True)
 
-    def get_name(self):
-    	return self.course_name
-
-    def get_equipment_req(self):
-    	return self.equipment_req
-
-    def get_description(self):
-    	return self.description
-
 # SectionType contains all the defined section types the department allows
-class SectionType(models.Model):
-    section_type = models.CharField(max_length=32, primary_key=True) # eg. lecture or lab
+def validate_section_type(name):
+    if name.length > 32:
+        raise ValidationError("Section Type name exceeds 32 characters.")
 
+class SectionType(models.Model):
+    section_type = models.CharField(max_length=32, validators=[validate_section_type]) # eg. lecture or lab
 
 # WorkInfo contains the user defined information for specific Course-SectionType pairs
 # Each pair has an associated work units and work hours defined by the department
 class WorkInfo(models.Model): 
     class Meta:
         unique_together = (("course", "section_type"),)
-    course = models.ForeignKey(Course, on_delete = models.CASCADE)
-    section_type = models.ForeignKey(SectionType, on_delete = models.CASCADE)
-    work_units = models.IntegerField(default = 0)
-    work_hours = models.IntegerField(default = 0)
+    course = models.ForeignKey(Course, on_delete=models.CASCADE)
+    section_type = models.ForeignKey(SectionType, on_delete=models.CASCADE)
+    work_units = models.IntegerField(default=0)
+    work_hours = models.IntegerField(default=0)
 
 # ---------- Scheduling Models ----------
 # Schedule is a container for scheduled sections and correponds to exactly 1 academic term
@@ -118,7 +113,7 @@ class Section(models.Model):
     end_time = models.TimeField()
     days = models.CharField(max_length = 8)    # MWF or TR
     faculty = models.ForeignKey(CUser, null = True, on_delete = models.SET_NULL, default = models.SET_NULL)
-    room = models.OneToOneField(Room, null = True, on_delete = models.SET_NULL, default = models.SET_NULL)
+    room = models.ForeignKey(Room, null = True, on_delete = models.SET_NULL, default = models.SET_NULL)
     section_capacity = models.IntegerField(default = 0)
     students_enrolled = models.IntegerField(default = 0)
     students_waitlisted = models.IntegerField(default = 0)
