@@ -18,7 +18,7 @@ class FacultyTestCase(TestCase):
         self.assertEqual(faculty.user.email, 'email@email.com')
         self.assertTrue(faculty.user.check_password('password'))
         self.assertEqual(faculty.user_type, 'faculty')
-        faculty.delete()
+        #faculty.delete()
 
     # @TODO fix email validation first
     #def test_empty_email(self):

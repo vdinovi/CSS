@@ -75,15 +75,30 @@ class Course(models.Model):
     equipment_req = models.CharField(max_length=2048, null=True)
     description = models.CharField(max_length=2048, null=True)
 
+    @classmethod
+    def create(cls, course_name, equipment_req, description):
+        # try:
+        #     course = cls(course_name=course_name, 
+        #                  equipment_req=equipment_req, 
+        #                  description=description)
+        # except Error as e:
+        #     raise ValidationError("Invalid data for course creation.")
+        # return course
+
+        course = cls(course_name=course_name, 
+                         equipment_req=equipment_req, 
+                         description=description)
+        return course
 
 class SectionType(models.Model):
-    section_type = models.CharField(max_length=32)#, validators=[validate_section_type]) # eg. lecture or lab
-    
-    # SectionType contains all the defined section types the department allows
-    #def validate_section_type(name):
-    #    if name.length > 32:
-    #        raise ValidationError("Section Type name exceeds 32 characters.")
-    #    return True
+    section_type = models.CharField(max_length=32) # eg. lecture or lab
+
+    @classmethod
+    def create(cls, section_type_name):
+        if len(section_type_name) > 32:
+            raise ValidationError("Section Type name exceeds 32 characters.")
+        else:
+            return cls(section_type = section_type_name)
 
 
 # WorkInfo contains the user defined information for specific Course-SectionType pairs
@@ -107,6 +122,13 @@ class Schedule(models.Model):
 
     def return_to_active(self):
     	self.state = "active"
+
+    @classmethod
+    def create(cls, academic_term, state):
+        if state != "finalized" and state != "active":
+            raise ValidationError("Invalid schedule state.")
+        else:
+            return cls(academic_term, state)
 
 # Section is our systems primary scheduled object
 # Each section represents a department section that is planned for a particular schedule
