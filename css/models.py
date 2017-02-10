@@ -75,13 +75,16 @@ class Course(models.Model):
     equipment_req = models.CharField(max_length=2048, null=True)
     description = models.CharField(max_length=2048, null=True)
 
-# SectionType contains all the defined section types the department allows
-def validate_section_type(name):
-    if name.length > 32:
-        raise ValidationError("Section Type name exceeds 32 characters.")
 
 class SectionType(models.Model):
-    section_type = models.CharField(max_length=32, validators=[validate_section_type]) # eg. lecture or lab
+    section_type = models.CharField(max_length=32)#, validators=[validate_section_type]) # eg. lecture or lab
+    
+    # SectionType contains all the defined section types the department allows
+    #def validate_section_type(name):
+    #    if name.length > 32:
+    #        raise ValidationError("Section Type name exceeds 32 characters.")
+    #    return True
+
 
 # WorkInfo contains the user defined information for specific Course-SectionType pairs
 # Each pair has an associated work units and work hours defined by the department
