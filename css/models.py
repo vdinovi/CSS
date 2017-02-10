@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.models import Group
+<<<<<<< HEAD
 
 class User(AbstractUser):
     pass
@@ -11,21 +12,38 @@ class Room(models.Model):
     capacity = models.IntegerField(default=0)
     notes = models.CharField(max_length=1024, null=True)
     equipment = models.CharField(max_length=1024, null=True)
+=======
+from django.conf import settings
+import MySQLdb
+import re
+from django.db import IntegrityError
 
-    def get_name(): 
-        return self.name
+# ---------- User Models ----------
+class CUserManager(models.Manager):
+    # Verify email is valid
+    def is_valid_email(self, email): 
+        #@ TODO FIX REGEX
+        #if re.match(r'[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}', email) is None:
+        #    raise ValueError("Attempted CUser creation"+ 
+        #                     "with invalid email address")
+        return email
 
-    def get_description():
-        return self.description
-        
-    def get_capacity():
-        return self.capacity
+    # @TODO Come up with password patten and validate it here
+    def is_valid_password(self, password):
+        if password is '':
+            raise ValueError("Attempted CUser creation with invalid password")
+        return password
 
-    def get_notes():
-        return self.notes
-
-    def get_equipment():
-        return self.equipment 
+    def create_cuser(self, email, password, user_type):
+        try:
+            user = self.create(user=User.objects.create_user(
+                                   username=self.is_valid_email(email), 
+                                   email=self.is_valid_email(email),
+                                   password=self.is_valid_password(password)),
+                               user_type=self.is_valid_user_type(user_type))
+        except IntegrityError as e:
+            raise ValueError("Trying to add duplicate faculty")
+        return user
 
 class Course(models.Model):
     course_name = models.CharField(max_length=16)
