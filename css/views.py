@@ -1,4 +1,5 @@
 from django.template import Context, Template
+from django.contrib.auth import authenticate, login
 from django.shortcuts import render, render_to_response
 from django.views.generic import TemplateView
 from django.http import HttpResponse
@@ -57,6 +58,14 @@ def SchedulingView(request):
     #@TODO NYI
     return render_to_response('nyi.html')
 
+from .forms import LoginForm
+def LoginView(request):
+	if request.method == "GET":
+		return render(request, 'login.html', {'login_form':LoginForm()});
+	elif request.method == "POST":
+		form = LoginForm(request.POST)
+	return render(request, 'home.html');
+
 #  Rooms View
 # @descr
 # @TODO
@@ -87,8 +96,6 @@ def RoomsView(request):
     else:
         res.status_code = 400
     return res
-
-
 
 #  Courses View
 # @descr
