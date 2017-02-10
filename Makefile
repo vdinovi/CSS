@@ -1,2 +1,2 @@
 test:
-	@echo "NYI"
+	python manage.py test tests

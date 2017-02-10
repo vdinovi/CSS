@@ -4,22 +4,22 @@ from django.contrib.auth.models import Group
 from django.conf import settings
 import MySQLdb
 import re
+from django.db import IntegrityError
 
 # ---------- User Models ----------
 class CUserManager(models.Manager):
     # Verify email is valid
     def is_valid_email(self, email): 
-        # @TODO fix regex
-        #if re.match(r'\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b', email) is None:
+        #@ TODO FIX REGEX
+        #if re.match(r'[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}', email) is None:
         #    raise ValueError("Attempted CUser creation"+ 
         #                     "with invalid email address")
         return email
 
     # @TODO Come up with password patten and validate it here
     def is_valid_password(self, password):
-        # @TODO should compare password hash
-        #if password is '':
-        #    raise ValueError("Attempted CUser creation with invalid password")
+        if password is '':
+            raise ValueError("Attempted CUser creation with invalid password")
         return password
 
     # Verify user_type is either 'scheduler' or 'faculty'
@@ -35,8 +35,8 @@ class CUserManager(models.Manager):
                                    email=self.is_valid_email(email),
                                    password=self.is_valid_password(password)),
                                user_type=self.is_valid_user_type(user_type))
-        except MySQLdb.IntegrityError as e:
-            raise
+        except IntegrityError as e:
+            raise ValueError("Trying to add duplicate faculty")
         return user
 
     def get_faculty(self):
