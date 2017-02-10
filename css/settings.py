@@ -97,20 +97,9 @@ DATABASES = {
         'PASSWORD': 'cssdb',
         'HOST': 'css-db.chfwru12q1ji.us-west-1.rds.amazonaws.com',
         'PORT': '3306',
-    },
-    'test': {
-        'ENGINE': 'django.db.backends.mysql',
-        'OPTIONS': {
-            'sql_mode': 'STRICT_TRANS_TABLES'
-        },
-        'NAME': 'cssdb',
-        'USER': 'cssdb',
-        'PASSWORD': 'cssdb',
-        'HOST': 'css-db.chfwru12q1ji.us-west-1.rds.amazonaws.com',
-        'PORT': '3306',
         'TEST': {
-            'MIRROR': 'default',
-        },
+            'NAME': 'testdb',
+        }
     },
 }
 
