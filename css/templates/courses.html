@@ -22,11 +22,11 @@
 
         <div class="col-sm-4 col-sm-offset-4">
           <h1 align="center" style="padding-bottom: 20px">Department Faculty</h1>
+         </div>
 
         <div class="col-sm-12">
           <h1 align="center" style="padding-bottom: 20px">Courses</h1>
-
-        </div>
+         </div>
       </div>
       <div class="row">
         <div class="col-lg-10 col-lg-offset-1">
@@ -41,13 +41,13 @@
             <tbody>
               {% for course in course_list %}
               <tr>
-
                 <th>{{ course.course_name }}</th>
                 <th>{{ couse.description }}</th>
                 <th>{{ course.equipment_req}}</th>
               </tr>
               {% endfor %}
-
+              	
+              <tr>
                 <td>CPE 471</td>
                 <td>Introduction to Computer Graphics</td>
                 <td>Lab machines, OpenGL,Graphics Libraries</td>
