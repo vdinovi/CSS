@@ -1,15 +1,49 @@
 from django.db import models
-from django.contrib.auth.models import User, AbstractBaseUser, BaseUserManager
+from django.contrib.auth.models import User
 from django.contrib.auth.models import Group
 from django.conf import settings
+import MySQLdb
+import re
+from django.db import IntegrityError
 
 # ---------- User Models ----------
 class CUserManager(models.Manager):
+    # Verify email is valid
+    def is_valid_email(self, email): 
+        #@ TODO FIX REGEX
+        #if re.match(r'[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}', email) is None:
+        #    raise ValueError("Attempted CUser creation"+ 
+        #                     "with invalid email address")
+        return email
+
+    # @TODO Come up with password patten and validate it here
+    def is_valid_password(self, password):
+        if password is '':
+            raise ValueError("Attempted CUser creation with invalid password")
+        return password
+
+    # Verify user_type is either 'scheduler' or 'faculty'
+    def is_valid_user_type(self, user_type):
+        if user_type != 'scheduler' and user_type != 'faculty':
+            raise ValueError("Attempted CUser creation with invalid user_type")
+        return user_type
+
     def create_cuser(self, email, password, user_type):
-        user = self.create(user=User.objects.create_user(username=email, email=email,
-                                                         password=password),
-                            user_type=user_type)
+        try:
+            user = self.create(user=User.objects.create_user(
+                                   username=self.is_valid_email(email), 
+                                   email=self.is_valid_email(email),
+                                   password=self.is_valid_password(password)),
+                               user_type=self.is_valid_user_type(user_type))
+        except IntegrityError as e:
+            raise ValueError("Trying to add duplicate faculty")
         return user
+
+    def get_faculty(self):
+        return self.filter(user_type='faculty')
+
+    def get_scheduler(self):
+        return self.filter(user_type='faculty')
 
 class CUser(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, null=True)
@@ -39,9 +73,19 @@ class Course(models.Model):
     equipment_req = models.CharField(max_length=2048, null=True)
     description = models.CharField(max_length=2048, null=True)
 
+    def get_name(self):
+    	return self.course_name
+
+    def get_equipment_req(self):
+    	return self.equipment_req
+
+    def get_description(self):
+    	return self.description
+
 # SectionType contains all the defined section types the department allows
 class SectionType(models.Model):
     section_type = models.CharField(max_length=32, primary_key=True) # eg. lecture or lab
+
 
 # WorkInfo contains the user defined information for specific Course-SectionType pairs
 # Each pair has an associated work units and work hours defined by the department
@@ -57,7 +101,13 @@ class WorkInfo(models.Model):
 # Schedule is a container for scheduled sections and correponds to exactly 1 academic term
 class Schedule(models.Model):
     academic_term = models.CharField(max_length=16, unique=True) # eg. "Fall 2016"
-    state = models.CharField(max_length=16) # eg. active or finalized 
+    state = models.CharField(max_length=16, default="active") # eg. active or finalized 
+
+    def finalize_schedule(self):
+    	self.state = "finalized"
+
+    def return_to_active(self):
+    	self.state = "active"
 
 # Section is our systems primary scheduled object
 # Each section represents a department section that is planned for a particular schedule
