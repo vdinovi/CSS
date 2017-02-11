@@ -17,10 +17,14 @@ class CUserManager(models.Manager):
                              "with invalid email address")
         return email
 
-    # @TODO Come up with password patten and validate it here
-    # -- Min 8 chars, 1 upper, 1 lower, 1 number, max 32
+    # -- 8-32 chars, 1 alphabetical char, 1 digit, 1 special char[$@!%*#?&]
+    # @TODO Combine independent regex checks
     def validate_password(self, password):
-        if password is '':
+        matches = []
+        matches.append(re.match(r'[A-Za-z]+', password))
+        matches.append(re.match(r'[0-9]+', password))
+        matches.append(re.match(r'[#?!@$%^&*-]+', password))
+        if len(password) < 8 or len(password) > 32 or matches is None:
             raise ValidationError("Attempted CUser creation with invalid password")
         return password
 
