@@ -1,6 +1,6 @@
 from django.test import TestCase
 from css.models import *
-import MySQLdb
+
 
 class FacultyTestCase(TestCase):
     # Utility Functions 
@@ -18,25 +18,23 @@ class FacultyTestCase(TestCase):
         self.assertEqual(faculty.user.email, 'email@email.com')
         self.assertTrue(faculty.user.check_password('password'))
         self.assertEqual(faculty.user_type, 'faculty')
-        #faculty.delete()
+        faculty.delete()
 
-    # @TODO fix email validation first
-    #def test_empty_email(self):
-    #    self.assertRaises(ValueError, self.create_faculty, email='')
+    def test_empty_email(self):
+        self.assertRaises(ValidationError, self.create_faculty, email='')
 
-    # @TODO fix email validation first
-    #def test_invalid_email(self):     
-    #    self.assertRaises(ValueError, self.create_faculty, email='email')
+    def test_invalid_email(self):     
+        self.assertRaises(ValidationError, self.create_faculty, email='email')
 
     def test_empty_password(self):     
-        self.assertRaises(ValueError, self.create_faculty, password='')
+        self.assertRaises(ValidationError, self.create_faculty, password='')
 
     # @TODO once password validation is defined, test it here
     #def test_invalid_password(self):
     #    pass
 
     def test_invalid_user_type(self):
-        self.assertRaises(ValueError, self.create_faculty, user_type='aaa')
+        self.assertRaises(ValidationError, self.create_faculty, user_type='aaa')
 
     def test_filter_faculty_1(self):
         faculty1 = self.create_faculty(email='faculty1@email.com',
@@ -60,9 +58,7 @@ class FacultyTestCase(TestCase):
 
 
     def test_duplicate_faculty(self):
-        faculty1 = self.create_faculty(email='faculty@email.com')
-        #self.assertRaises(MySQLdb.IntegrityError, 
-        #                 self.create_faculty, email='faculty@email.com')
+        faculty1 = self.create_faculty()
+        self.assertRaises(IntegrityError, self.create_faculty)
         #self.assertEqual(cm.exception.error_code, 1062) #duplicate entry code
-        self.assertRaises(ValueError, self.create_faculty, email='faculty@email.com')
 

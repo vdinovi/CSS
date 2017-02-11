@@ -10,35 +10,35 @@ from django.core.exceptions import ValidationError
 # ---------- User Models ----------
 class CUserManager(models.Manager):
     # Verify email is valid
-    def is_valid_email(self, email): 
-        #@ TODO FIX REGEX
-        #if re.match(r'[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}', email) is None:
-        #    raise ValueError("Attempted CUser creation"+ 
-        #                     "with invalid email address")
+    def validate_email(self, email): 
+        if re.match(r'^[A-Za-z0-9\._%+\-]+@[A-Za-z0-9\.\-]+\.[A-Za-z]{2,}$',
+                    email) is None:
+            raise ValidationError("Attempted CUser creation"+ 
+                             "with invalid email address")
         return email
 
     # @TODO Come up with password patten and validate it here
     # -- Min 8 chars, 1 upper, 1 lower, 1 number, max 32
-    def is_valid_password(self, password):
+    def validate_password(self, password):
         if password is '':
-            raise ValueError("Attempted CUser creation with invalid password")
+            raise ValidationError("Attempted CUser creation with invalid password")
         return password
 
     # Verify user_type is either 'scheduler' or 'faculty'
-    def is_valid_user_type(self, user_type):
+    def validate_user_type(self, user_type):
         if user_type != 'scheduler' and user_type != 'faculty':
-            raise ValueError("Attempted CUser creation with invalid user_type")
+            raise ValidationError("Attempted CUser creation with invalid user_type")
         return user_type
 
     def create_cuser(self, email, password, user_type):
         try:
             user = self.create(user=User.objects.create_user(
-                                   username=self.is_valid_email(email), 
-                                   email=self.is_valid_email(email),
-                                   password=self.is_valid_password(password)),
-                               user_type=self.is_valid_user_type(user_type))
+                                   username=self.validate_email(email), 
+                                   email=self.validate_email(email),
+                                   password=self.validate_password(password)),
+                               user_type=self.validate_user_type(user_type))
         except IntegrityError as e:
-            raise ValueError("Trying to add duplicate faculty")
+            raise e#ValidationError("Trying to add duplicate faculty")
         return user
 
     def get_faculty(self):
