@@ -12,8 +12,11 @@ class FacultyTestCase(TestCase):
                        user_type='faculty'):
         return CUser.objects.create_cuser(email, password, user_type)
 
-    def get_faculty(self):
-        return CUser.objects.get_faculty()
+    def get_faculty(self, email=None):
+        if email is None:
+            return CUser.objects.get_faculty()
+        else:
+            return CUser.objects.get_faculty(email=email)
 
     def verify_faculty(self, faculty, email, password):
         self.assertTrue(isinstance(faculty, CUser))
@@ -96,4 +99,11 @@ class FacultyTestCase(TestCase):
     def test_duplicate_faculty(self):
         faculty1 = self.create_faculty()
         self.assertRaises(IntegrityError, self.create_faculty)
+
+    # Delete
+    def test_delete_faculty(self):
+        faculty = self.create_faculty(email='email@email.com')
+        self.assertTrue(self.get_faculty(email='email@email.com'))
+        faculty.delete()
+        self.assertTrue(not self.get_faculty(email='email@email.com'))
 

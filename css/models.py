@@ -8,16 +8,20 @@ from django.db import IntegrityError
 from django.core.exceptions import ValidationError
 
 # ---------- User Models ----------
+
+# CUserManager defines functions for creating and managing CUser objects
 class CUserManager(models.Manager):
     # Verify email is valid
     def validate_email(self, email): 
         if re.match(r'^[A-Za-z0-9\._%+\-]+@[A-Za-z0-9\.\-]+\.[A-Za-z]{2,}$',
                     email) is None:
             raise ValidationError("Attempted CUser creation"+ 
-                             "with invalid email address")
+                                  "with invalid email address")
         return email
 
-    # -- 8-32 chars, 1 alphabetical char, 1 digit, 1 special char[$@!%*#?&]
+    # Password must:
+    #   be 8-32 chars, have 1 alphabetical char, 1 digit,
+    #   and 1 special char[$@!%*#?&]
     # @TODO Combine independent regex checks
     def validate_password(self, password):
         matches = []
@@ -35,27 +39,40 @@ class CUserManager(models.Manager):
         return user_type
 
     def create_cuser(self, email, password, user_type):
-        try:
-            user = self.create(user=User.objects.create_user(
-                                   username=self.validate_email(email), 
-                                   email=self.validate_email(email),
-                                   password=self.validate_password(password)),
-                               user_type=self.validate_user_type(user_type))
-        except IntegrityError as e:
-            raise e#ValidationError("Trying to add duplicate faculty")
+        user = self.create(user=User.objects.create_user(
+                               username=self.validate_email(email), 
+                               email=self.validate_email(email),
+                               password=self.validate_password(password)),
+                           user_type=self.validate_user_type(user_type))
         return user
 
-    def get_faculty(self):
-        return self.filter(user_type='faculty')
+    def get_faculty(self, email=None):
+        # Get all faculty
+        if email is None:
+            return self.filter(user_type='faculty')
+        # Faculty with specified email
+        else:
+            return self.filter(user_type='faculty', user__username=email)
 
-    def get_scheduler(self):
-        return self.filter(user_type='faculty')
+
+    def get_scheduler(self, email=None):
+        # Get all schedulers
+        if email is None:
+            return self.filter(user_type='scheduler')
+        # Scheduler with specified email
+        else:
+            return self.filter(user_type='scheduler', user__username=email)
 
 class CUser(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, null=True)
     user_type = models.CharField(max_length=16)
 
     objects = CUserManager()
+
+    def delete(self):
+        self.user.delete()
+        super(CUser, self).delete()
+
  
 class FacultyDetails(models.Model):
     # The user_id uses the User ID as a primary key.
