@@ -1,4 +1,5 @@
 from django.template import Context, Template
+from django.contrib.auth import authenticate, login
 from django.shortcuts import render, render_to_response
 from django.views.generic import TemplateView
 from django.http import HttpResponse
@@ -57,6 +58,14 @@ def SchedulingView(request):
     #@TODO NYI
     return render_to_response('nyi.html')
 
+from .forms import LoginForm
+def LoginView(request):
+	if request.method == "GET":
+		return render(request, 'login.html', {'login_form':LoginForm()});
+	elif request.method == "POST":
+		form = LoginForm(request.POST)
+	return render(request, 'home.html');
+
 #  Rooms View
 # @descr
 # @TODO
@@ -87,8 +96,6 @@ def RoomsView(request):
     else:
         res.status_code = 400
     return res
-
-
 
 #  Courses View
 # @descr
@@ -133,6 +140,14 @@ def SchedulersView(request):
     elif request.method == "POST" and 'delete-form' in request.POST:
         form = DeleteUserForm(request.POST)
         if form.is_valid():
+            scheduler = CUser.objects.filter(user__id=form.cleaned_data['id'])
+            if scheduler is False:
+                res.status_code = 404
+                res.reason_phrase = "User with that ID does not exist"
+            else:
+                scheduler.delete()
+                res.status_code = 200
+
             print('NYI')
             res.status_code = 200
         else:
@@ -163,8 +178,13 @@ def FacultyView(request):
     elif request.method == "POST" and 'delete-form' in request.POST:
         form = DeleteUserForm(request.POST)
         if form.is_valid():
-            print('NYI')
-            res.status_code = 200
+            faculty = CUser.objects.filter(user__id=form.cleaned_data['id'])
+            if faculty is False:
+                res.status_code = 404
+                res.reason_phrase = "User with that ID does not exist"
+            else:
+                faculty.delete()
+                res.status_code = 200
         else:
             res.status_code = 400
     else:

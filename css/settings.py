@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'css',
+    'django.contrib.sites',
 ]
 
 MIDDLEWARE = [
@@ -96,16 +97,8 @@ DATABASES = {
         'PASSWORD': 'cssdb',
         'HOST': 'css-db.chfwru12q1ji.us-west-1.rds.amazonaws.com',
         'PORT': '3306',
-        'TEST': {
-            'NAME': 'cssdb',
-        },
     },
-    #'default': {
-    #    'ENGINE': 'django.db.backends.sqlite3',
-    #    'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-    #}
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/1.10/ref/settings/#auth-password-validators
