@@ -58,13 +58,21 @@ def SchedulingView(request):
     #@TODO NYI
     return render_to_response('nyi.html')
 
+def LandingView(request):
+    return render(request,'landing.html')
+
 from .forms import LoginForm
 def LoginView(request):
+	res = HttpResponse()
 	if request.method == "GET":
 		return render(request, 'login.html', {'login_form':LoginForm()});
 	elif request.method == "POST":
 		form = LoginForm(request.POST)
-	return render(request, 'home.html');
+		res.status_code = 200
+	else:
+		res.status_code = 400
+	return res
+
 
 #  Rooms View
 # @descr
