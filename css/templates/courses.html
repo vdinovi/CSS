@@ -18,11 +18,6 @@
 
     <div class="container">
       <div class="row">
-
-        <div class="col-sm-4 col-sm-offset-4">
-          <h1 align="center" style="padding-bottom: 20px">Department Faculty</h1>
-         </div>
-
         <div class="col-sm-12">
           <h1 align="center" style="padding-bottom: 20px">Courses</h1>
          </div>
@@ -70,9 +65,8 @@
           </div>
           <div class="modal-body">
             <form method="POST" action="?" novalidate>{% csrf_token %}
-              <p>Add Course</p>
               {{ add_course_form.as_p }}
-              <button type="submit" name="add-course" class="save btn btn-default">submit</button>
+              <button type="submit" name="add-course" class="save btn btn-default">Submit</button>
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
