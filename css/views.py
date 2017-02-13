@@ -2,7 +2,7 @@ from django.template import Context, Template
 from django.contrib.auth import authenticate, login
 from django.shortcuts import render, render_to_response
 from django.views.generic import TemplateView
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseRedirect
 from .models import *
 from .forms import *
 import MySQLdb
@@ -23,6 +23,10 @@ def RegistrationView(request):
             try:
                 user = form.save()
                 res.status_code = 200
+            except ValidationError as e: 
+                res.status_code = 200
+                res.reason_phrase = "Invalid password entry"
+                return HttpResponseRedirect("/home")
             # db error
             except MySQLdb.IntegrityError as e:
                 if not e[0] == 1062:

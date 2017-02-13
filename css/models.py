@@ -153,11 +153,11 @@ class WorkInfo(models.Model):
 class Availability(models.Model):
     class Meta: 
         unique_together = (("faculty_id", "days_of_week", "start_time"),)
-    faculty_id = models.OneToOneField(Faculty, on_delete=models.CASCADE) #
+    faculty_id = models.OneToOneField(WorkInfo, on_delete=models.CASCADE) #
     days_of_week = models.CharField(max_length=16) # MWF or TR
     start_time = models.TimeField()
     end_time = models.TimeField()
-    level = CharField(16) # unavailable, preferred, unavailable
+    level = models.CharField(max_length=16) # unavailable, preferred, unavailable
 
     
 
