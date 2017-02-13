@@ -1,6 +1,5 @@
 from django.test import TestCase
 from css.models import *
-from 
 
 class RoomTestCase(TestCase): 
     def setUp(self):
@@ -21,6 +20,7 @@ class RoomTestCase(TestCase):
                             capacity=20,
                             equipment="whiteboard, large tables")
 
+
     def test_room_get_name(self): 
         """ Test that names are retrieved properly """
         graphics = Room.objects.get(name="14-255")
@@ -38,8 +38,7 @@ class RoomTestCase(TestCase):
         self.assertEqual(graphics.get_name(), "14-256")
 
     def test_room_name_too_long():
-        self.assertRaises(DataError, Rooms.object.create(name="ThisNameIsTooLongForOurRoomNameAttribute"))
-        
+        self.assertRaises(ValidationError, Room.create("ThisNameIsTooLongForOurRoomNameAttribute", None, None, None, None))
 
     def test_room_get_capacity(self):
         """ Test that capacity is retrieved properly """
@@ -58,6 +57,9 @@ class RoomTestCase(TestCase):
         self.assertEqual(graphics.get_capacity(), 35)
         self.assertEqual(chem.get_capacity(), 25)
         self.assertEqual(eng.get_capacity(), 20)
+        
+    def test_room_capacity_too_long():
+        self.assertRaises(ValidationError, Room.create(None, None, None, None, None))
 
     def test_room_get_description(self):
         """ Test that description is retrieved properly """
@@ -73,6 +75,9 @@ class RoomTestCase(TestCase):
         graphics = Room.objects.get(name="14-255")
         graphics.description = "Security lab"
         self.assertEqual(graphics.get_description(), "Security lab")
+
+    def test_room_description_too_long():
+        self.assertRaises(ValidationError, Room.create("ThisIsOurName", None, "DescriptionIsWayTooLongDescriptionIsWayTooLongDescriptionIsWayTooLongDescriptionIsWayTooLongDescriptionIsWayTooLongDescriptionIsWayTooLongDescriptionIsWayTooLongDescriptionIsWayTooLongDescriptionIsWayTooLongDescriptionIsWayTooLongDescriptionIsWayTooLongDescriptionIsWayTooLong", None, None))
 
     def test_room_get_notes(self):
         """ Test that notes are retrieved properly """
@@ -90,6 +95,9 @@ class RoomTestCase(TestCase):
         eng.save()
         self.assertEqual(eng.get_notes(), "This class is honors")
 
+    def test_room_notes_too_long():
+        self.assertRaises(ValidationError, Room.create("ThisIsOurName2", None, None, "DescriptionIsWayTooLongDescriptionIsWayTooLongDescriptionIsWayTooLongDescriptionIsWayTooLongDescriptionIsWayTooLongDescriptionIsWayTooLongDescriptionIsWayTooLongDescriptionIsWayTooLongDescriptionIsWayTooLongDescriptionIsWayTooLongDescriptionIsWayTooLongDescriptionIsWayTooLongDescriptionIsWayTooLongDescriptionIsWayTooLongDescriptionIsWayTooLongDescriptionIsWayTooLongDescriptionIsWayTooLongDescriptionIsWayTooLongDescriptionIsWayTooLongDescriptionIsWayTooLongDescriptionIsWayTooLongDescriptionIsWayTooLongDescriptionIsWayTooLongDescriptionIsWayTooLongDescriptionIsWayTooLongDescriptionIsWayTooLongDescriptionIsWayTooLongDescriptionIsWayTooLongDescriptionIsWayTooLongDescriptionIsWayTooLongDescriptionIsWayTooLongDescriptionIsWayTooLongDescriptionIsWayTooLongDescriptionIsWayTooLongDescriptionIsWayTooLongDescriptionIsWayTooLongDescriptionIsWayTooLongDescriptionIsWayTooLongDescriptionIsWayTooLongDescriptionIsWayTooLongDescriptionIsWayTooLongDescriptionIsWayTooLongDescriptionIsWayTooLongDescriptionIsWayTooLongDescriptionIsWayTooLongDescriptionIsWayTooLongDescriptionIsWayTooLongDescriptionIsWayTooLongDescriptionIsWayTooLongDescriptionIsWayTooLongDescriptionIsWayTooLongDescriptionIsWayTooLongDescriptionIsWayTooLongDescriptionIsWayTooLongDescriptionIsWayTooLongDescriptionIsWayTooLongDescriptionIsWayTooLongDescriptionIsWayTooLongDescriptionIsWayTooLongDescriptionIsWayTooLong", None))
+
     def test_room_get_equipment(self):
         """ Test that equipment retrieved properly """
         graphics = Room.objects.get(name="14-255")
@@ -98,5 +106,8 @@ class RoomTestCase(TestCase):
         self.assertEqual(graphics.get_equipment(), "whiteboard, computers, projector")
         self.assertEqual(chem.get_equipment(), None)
         self.assertEqual(eng.get_equipment(), "whiteboard, large tables")
+
+    def test_room_equipment_too_long():
+        self.assertRaises(ValidationError, Room.create(None, None, None, None, "DescriptionIsWayTooLongDescriptionIsWayTooLongDescriptionIsWayTooLongDescriptionIsWayTooLongDescriptionIsWayTooLongDescriptionIsWayTooLongDescriptionIsWayTooLongDescriptionIsWayTooLongDescriptionIsWayTooLongDescriptionIsWayTooLongDescriptionIsWayTooLongDescriptionIsWayTooLongDescriptionIsWayTooLongDescriptionIsWayTooLongDescriptionIsWayTooLongDescriptionIsWayTooLongDescriptionIsWayTooLongDescriptionIsWayTooLongDescriptionIsWayTooLongDescriptionIsWayTooLongDescriptionIsWayTooLongDescriptionIsWayTooLongDescriptionIsWayTooLongDescriptionIsWayTooLongDescriptionIsWayTooLongDescriptionIsWayTooLongDescriptionIsWayTooLongDescriptionIsWayTooLongDescriptionIsWayTooLongDescriptionIsWayTooLongDescriptionIsWayTooLongDescriptionIsWayTooLongDescriptionIsWayTooLongDescriptionIsWayTooLongDescriptionIsWayTooLongDescriptionIsWayTooLongDescriptionIsWayTooLongDescriptionIsWayTooLongDescriptionIsWayTooLongDescriptionIsWayTooLongDescriptionIsWayTooLongDescriptionIsWayTooLongDescriptionIsWayTooLongDescriptionIsWayTooLongDescriptionIsWayTooLongDescriptionIsWayTooLongDescriptionIsWayTooLongDescriptionIsWayTooLongDescriptionIsWayTooLongDescriptionIsWayTooLongDescriptionIsWayTooLongDescriptionIsWayTooLongDescriptionIsWayTooLongDescriptionIsWayTooLongDescriptionIsWayTooLongDescriptionIsWayTooLongDescriptionIsWayTooLongDescriptionIsWayTooLongDescriptionIsWayTooLongDescriptionIsWayTooLong"))
 
 
