@@ -97,18 +97,13 @@ class Course(models.Model):
     description = models.CharField(max_length=2048, null=True)
 
     @classmethod
-    def create(cls, course_name, equipment_req, description):
-        # try:
-        #     course = cls(course_name=course_name, 
-        #                  equipment_req=equipment_req, 
-        #                  description=description)
-        # except Error as e:
-        #     raise ValidationError("Invalid data for course creation.")
-        # return course
-
-        course = cls(course_name=course_name, 
-                         equipment_req=equipment_req, 
-                         description=description)
+    def create(cls, course, equipment, desc):
+        try:
+            course = cls(course_name = course, 
+                         equipment = equipment, 
+                         description = desc)
+        except:
+            raise ValidationError("Invalid data for course creation.")
         return course
 
 class SectionType(models.Model):
