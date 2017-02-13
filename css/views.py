@@ -23,6 +23,10 @@ def RegistrationView(request):
             try:
                 user = form.save()
                 res.status_code = 200
+            except ValidationError as e: 
+                res.status_code = 200
+                res.reason_phrase = "Invalid password entry"
+                return HttpResponseRedirect("/home")
             # db error
             except MySQLdb.IntegrityError as e:
                 if not e[0] == 1062:
