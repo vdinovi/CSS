@@ -1,8 +1,8 @@
 from django.template import Context, Template
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate, login, logout
 from django.shortcuts import render, render_to_response
 from django.views.generic import TemplateView
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseRedirect
 from .models import *
 from .forms import *
 import MySQLdb
@@ -62,17 +62,31 @@ def LandingView(request):
     return render(request,'landing.html')
 
 from .forms import LoginForm
+from django.contrib.auth import authenticate
+
 def LoginView(request):
 	res = HttpResponse()
 	if request.method == "GET":
 		return render(request, 'login.html', {'login_form':LoginForm()});
 	elif request.method == "POST":
 		form = LoginForm(request.POST)
-		res.status_code = 200
+		if form.is_valid():
+			email = request.POST['email']
+			password = request.POST['password']
+			user = authenticate(username=email, password=password)
+			if user is not None:
+				login(request,user)
+    			return HttpResponseRedirect('/home')
+			#else:
+			#	return HttpResponseRedirect('login')
 	else:
 		res.status_code = 400
 	return res
 
+
+def LogoutView(request):
+	logout(request)
+	return HttpResponseRedirect('/landing')
 
 #  Rooms View
 # @descr
