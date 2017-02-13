@@ -8,49 +8,71 @@ from django.db import IntegrityError
 from django.core.exceptions import ValidationError
 
 # ---------- User Models ----------
+
+# CUserManager defines functions for creating and managing CUser objects
 class CUserManager(models.Manager):
     # Verify email is valid
-    def is_valid_email(self, email): 
-        #@ TODO FIX REGEX
-        #if re.match(r'[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}', email) is None:
-        #    raise ValueError("Attempted CUser creation"+ 
-        #                     "with invalid email address")
+    def validate_email(self, email): 
+        if re.match(r'^[A-Za-z0-9\._%+\-]+@[A-Za-z0-9\.\-]+\.[A-Za-z]{2,}$',
+                    email) is None:
+            raise ValidationError("Attempted CUser creation"+ 
+                                  "with invalid email address")
         return email
 
-    # @TODO Come up with password patten and validate it here
-    def is_valid_password(self, password):
-        if password is '':
-            raise ValueError("Attempted CUser creation with invalid password")
+    # Password must:
+    #   be 8-32 chars, have 1 alphabetical char, 1 digit,
+    #   and 1 special char[$@!%*#?&]
+    # @TODO Combine independent regex checks
+    def validate_password(self, password):
+        matches = []
+        matches.append(re.match(r'[A-Za-z]+', password))
+        matches.append(re.match(r'[0-9]+', password))
+        matches.append(re.match(r'[#?!@$%^&*-]+', password))
+        if len(password) < 8 or len(password) > 32 or matches is None:
+            raise ValidationError("Attempted CUser creation with invalid password")
         return password
 
     # Verify user_type is either 'scheduler' or 'faculty'
-    def is_valid_user_type(self, user_type):
+    def validate_user_type(self, user_type):
         if user_type != 'scheduler' and user_type != 'faculty':
-            raise ValueError("Attempted CUser creation with invalid user_type")
+            raise ValidationError("Attempted CUser creation with invalid user_type")
         return user_type
 
     def create_cuser(self, email, password, user_type):
-        try:
-            user = self.create(user=User.objects.create_user(
-                                   username=self.is_valid_email(email), 
-                                   email=self.is_valid_email(email),
-                                   password=self.is_valid_password(password)),
-                               user_type=self.is_valid_user_type(user_type))
-        except IntegrityError as e:
-            raise ValueError("Trying to add duplicate faculty")
+        user = self.create(user=User.objects.create_user(
+                               username=self.validate_email(email), 
+                               email=self.validate_email(email),
+                               password=self.validate_password(password)),
+                           user_type=self.validate_user_type(user_type))
         return user
 
-    def get_faculty(self):
-        return self.filter(user_type='faculty')
+    def get_faculty(self, email=None):
+        # Get all faculty
+        if email is None:
+            return self.filter(user_type='faculty')
+        # Faculty with specified email
+        else:
+            return self.filter(user_type='faculty', user__username=email)
 
-    def get_scheduler(self):
-        return self.filter(user_type='faculty')
+
+    def get_scheduler(self, email=None):
+        # Get all schedulers
+        if email is None:
+            return self.filter(user_type='scheduler')
+        # Scheduler with specified email
+        else:
+            return self.filter(user_type='scheduler', user__username=email)
 
 class CUser(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, null=True)
     user_type = models.CharField(max_length=16)
 
     objects = CUserManager()
+
+    def delete(self):
+        self.user.delete()
+        super(CUser, self).delete()
+
  
 class FacultyDetails(models.Model):
     # The user_id uses the User ID as a primary key.
@@ -74,13 +96,31 @@ class Course(models.Model):
     equipment_req = models.CharField(max_length=2048, null=True)
     description = models.CharField(max_length=2048, null=True)
 
-# SectionType contains all the defined section types the department allows
-def validate_section_type(name):
-    if name.length > 32:
-        raise ValidationError("Section Type name exceeds 32 characters.")
+    @classmethod
+    def create(cls, course_name, equipment_req, description):
+        # try:
+        #     course = cls(course_name=course_name, 
+        #                  equipment_req=equipment_req, 
+        #                  description=description)
+        # except Error as e:
+        #     raise ValidationError("Invalid data for course creation.")
+        # return course
+
+        course = cls(course_name=course_name, 
+                         equipment_req=equipment_req, 
+                         description=description)
+        return course
 
 class SectionType(models.Model):
-    section_type = models.CharField(max_length=32, validators=[validate_section_type]) # eg. lecture or lab
+    section_type = models.CharField(max_length=32) # eg. lecture or lab
+
+    @classmethod
+    def create(cls, section_type_name):
+        if len(section_type_name) > 32:
+            raise ValidationError("Section Type name exceeds 32 characters.")
+        else:
+            return cls(section_type = section_type_name)
+
 
 # WorkInfo contains the user defined information for specific Course-SectionType pairs
 # Each pair has an associated work units and work hours defined by the department
@@ -103,6 +143,13 @@ class Schedule(models.Model):
 
     def return_to_active(self):
     	self.state = "active"
+
+    @classmethod
+    def create(cls, academic_term, state):
+        if state != "finalized" and state != "active":
+            raise ValidationError("Invalid schedule state.")
+        else:
+            return cls(academic_term, state)
 
 # Section is our systems primary scheduled object
 # Each section represents a department section that is planned for a particular schedule

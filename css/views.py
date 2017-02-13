@@ -148,6 +148,14 @@ def SchedulersView(request):
     elif request.method == "POST" and 'delete-form' in request.POST:
         form = DeleteUserForm(request.POST)
         if form.is_valid():
+            scheduler = CUser.objects.filter(user__id=form.cleaned_data['id'])
+            if scheduler is False:
+                res.status_code = 404
+                res.reason_phrase = "User with that ID does not exist"
+            else:
+                scheduler.delete()
+                res.status_code = 200
+
             print('NYI')
             res.status_code = 200
         else:
@@ -178,8 +186,13 @@ def FacultyView(request):
     elif request.method == "POST" and 'delete-form' in request.POST:
         form = DeleteUserForm(request.POST)
         if form.is_valid():
-            print('NYI')
-            res.status_code = 200
+            faculty = CUser.objects.filter(user__id=form.cleaned_data['id'])
+            if faculty is False:
+                res.status_code = 404
+                res.reason_phrase = "User with that ID does not exist"
+            else:
+                faculty.delete()
+                res.status_code = 200
         else:
             res.status_code = 400
     else:

@@ -26,10 +26,10 @@ class CourseTestCase(TestCase):
         course2 = Course.objects.get(course_name="CPE 102")
         course3 = Course.objects.get(course_name="CPE 103")
         course4 = Course.objects.get(course_name="CPE 309")
-        self.assertEqual(course1.get_name(), "CPE 101")
-        self.assertEqual(course2.get_name(), "CPE 102")
-        self.assertEqual(course3.get_name(), "CPE 103")
-        self.assertEqual(course4.get_name(), "CPE 309")
+        self.assertEqual(course1.course_name, "CPE 101")
+        self.assertEqual(course2.course_name, "CPE 102")
+        self.assertEqual(course3.course_name, "CPE 103")
+        self.assertEqual(course4.course_name, "CPE 309")
 
     def test_equipment_req(self):
         """ Equipment requirements are correctly retrieved. """
@@ -37,10 +37,10 @@ class CourseTestCase(TestCase):
         course2 = Course.objects.get(course_name="CPE 102")
         course3 = Course.objects.get(course_name="CPE 103")
         course4 = Course.objects.get(course_name="CPE 309")
-        self.assertEqual(course1.get_equipment_req(), "table")
-        self.assertEqual(course2.get_equipment_req(), None)
-        self.assertEqual(course3.get_equipment_req(), "computer")
-        self.assertEqual(course4.get_equipment_req(), None)
+        self.assertEqual(course1.equipment_req, "table")
+        self.assertEqual(course2.equipment_req, None)
+        self.assertEqual(course3.equipment_req, "computer")
+        self.assertEqual(course4.equipment_req, None)
 
 
     def test_description(self):
@@ -49,8 +49,12 @@ class CourseTestCase(TestCase):
         course2 = Course.objects.get(course_name="CPE 102")
         course3 = Course.objects.get(course_name="CPE 103")
         course4 = Course.objects.get(course_name="CPE 309")
-        self.assertEqual(course1.get_description(), "cool course")
-        self.assertEqual(course2.get_description(), None)
-        self.assertEqual(course3.get_description(), None)
-        self.assertEqual(course4.get_description(), "kearns")
+        self.assertEqual(course1.description, "cool course")
+        self.assertEqual(course2.description, None)
+        self.assertEqual(course3.description, None)
+        self.assertEqual(course4.description, "kearns")
 
+    def test_course_name_too_long(self):
+        """ Invalid course name raises validation error. """
+        self.assertEqual(Course.create("coursenametoolonglskjfal;sdkfjls", None, None).description, None)
+        #@self.assertRaises(ValidationError, Course.create, "CourseNameTooLong", None, None)

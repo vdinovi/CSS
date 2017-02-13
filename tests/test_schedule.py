@@ -21,3 +21,6 @@ class ScheduleTestCase(TestCase):
         self.assertEqual(schedule.state, "finalized")
         schedule.return_to_active()
         self.assertEqual(schedule.state, "active")
+
+    def test_invalid_state(self):
+        self.assertRaises(ValidationError, Schedule.create, "Winter 2019", "invalid")
