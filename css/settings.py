@@ -35,10 +35,11 @@ ALLOWED_HOSTS = [
 
 # Heroku project root
 PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
+LOGIN_URL = '/home.html'
+LOGIN_REDIRECT_URL = os.path.dirname(os.path.abspath(__file__))
 
 
 # Application definition
-
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',

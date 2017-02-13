@@ -41,7 +41,6 @@ class DeleteUserForm(forms.Form):
     def delete_user(self):
         pass
 
-
 class AddRoomForm(forms.Form):
     name = forms.CharField()
     description = forms.CharField()
@@ -69,6 +68,6 @@ class AddCourseForm(forms.Form):
 
    def addCourse(self):
       course = Course(course_name = self.cleaned_date['course_name'],
-                  descripton = self.cleaned_date['descripton'],
+                  descripton = self.cleaned_date['description'],
                   equipment_req = self.cleaned_data['equipment_req'])
       course.save(); 
