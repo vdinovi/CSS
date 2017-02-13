@@ -90,6 +90,25 @@ class Room(models.Model):
    notes = models.CharField(max_length=1024, null=True)
    equipment = models.CharField(max_length=1024, null=True)
 
+   @classmethod
+   def create(cls, name, description, cap, notes, equip):
+      if name.length > 32:
+         raise ValidationError("Room name is longer than 32 characters")
+      elif description and description.length > 256:
+         raise ValidationError("Room description is longer than 256 characters")
+      elif notes and notes.length > 1024:
+         raise ValidationError("Room notes is longer than 1024 characters")
+      elif equip and quip.length > 256:
+         raise ValidationError("Room equipment is longer than 1024 characters")
+      else:
+         room = cls(name=name, 
+                     description=description, 
+                     capacity=cap, notes=notes, 
+                     equipment=equip)
+         return room
+
+
+
 # Course represents a department course offering
 class Course(models.Model):
     course_name = models.CharField(max_length=16)
@@ -132,6 +151,31 @@ class WorkInfo(models.Model):
     work_units = models.IntegerField(default=0)
     work_hours = models.IntegerField(default=0)
 
+class Availability(models.Model):
+    class Meta: 
+        unique_together = (("faculty_id", "days_of_week", "start_time"),)
+    faculty_id = models.OneToOneField(FacultyDetails, on_delete=models.CASCADE) #
+    days_of_week = models.CharField(max_length=16) # MWF or TR
+    start_time = models.TimeField()
+    end_time = models.TimeField()
+    level = models.CharField(max_length=16) # unavailable, preferred, unavailable
+
+    @classmethod
+    def create(cls, faculty_id, days, start, end, level):
+      num_results = FacultyDetails.objects.filter(user=faculty_id).count()
+      if num_results == 0:
+         raise ValidationError("User does not exist")
+      elif (days is None) or (days.length > 16) or (days == "MWF") or (days == "TR"):
+         raise ValidationError("Invalid days of week input")
+      elif (start is None):
+         raise ValidationError("Need to input start time")  
+      elif (end is None):
+         raise ValidationError("Need to input end time")  
+      elif (level is None):
+         raise ValidationError("Need to input level of availability: preferred, available, or unavailable")  
+      else:
+         return cls(faculty_id=faculty_id, days_of_week=days, start_time=start, end_time=end, level=level)
+
 # ---------- Scheduling Models ----------
 # Schedule is a container for scheduled sections and correponds to exactly 1 academic term
 class Schedule(models.Model):
@@ -168,4 +212,3 @@ class Section(models.Model):
     conflict_reason = models.CharField(max_length = 8) # faculty or room
     fault = models.CharField(max_length = 1) # y or n
     fault_reason = models.CharField(max_length = 8) # faculty or room
-
