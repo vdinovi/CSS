@@ -2,6 +2,11 @@ from django import forms
 from django.core.mail import send_mail
 from css.models import CUser, Room
 
+#Login Form
+class LoginForm(forms.Form):
+	email = forms.EmailField()
+	password = forms.CharField(label='Password', widget=forms.PasswordInput)
+
 #  Invite Form
 class InviteUserForm(forms.Form):
     name = forms.CharField()
@@ -59,11 +64,11 @@ class DeleteRoomForm(forms.Form):
 # Course Form
 class AddCourseForm(forms.Form):
    course_name = forms.CharField()
-   descripton = forms.CharField(); 
-   equipment_req = forms.CharField(); 
+   descripton = forms.CharField()
+   equipment_req = forms.CharField() 
 
    def addCourse(self):
       course = Course(course_name = self.cleaned_date['course_name'],
                   descripton = self.cleaned_date['descripton'],
-                  equipment_req = self.cleaned_data['equipment_req']); 
+                  equipment_req = self.cleaned_data['equipment_req'])
       course.save(); 

@@ -1,0 +1,24 @@
+footer {
+    background:#fdd;
+	color:#fff; 
+	margin-top:450px;
+	padding-top:30px;
+	position:relative;
+}
+div.row {
+    background: #dfd;
+}
+ul {
+    background: #ddf;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    text-align: center;
+}
+
+li {
+    display: inline-block;
+    background: #fff;
+    margin: 0.5em;
+    padding: 0.5em;
+}
