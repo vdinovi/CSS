@@ -3,6 +3,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.shortcuts import render, render_to_response
 from django.views.generic import TemplateView
 from django.http import HttpResponse, HttpResponseRedirect
+from django.db import IntegrityError
 from .models import *
 from .forms import *
 import MySQLdb
@@ -23,18 +24,20 @@ def RegistrationView(request):
             try:
                 user = form.save()
                 res.status_code = 200
+                return HttpResponseRedirect("/home")
             except ValidationError as e: 
                 res.status_code = 200
                 res.reason_phrase = "Invalid password entry"
-                return HttpResponseRedirect("/home")
+                return HttpResponseRedirect("/register")
             # db error
-            except MySQLdb.IntegrityError as e:
+            except IntegrityError as e:
                 if not e[0] == 1062:
                     res.status_code = 500
                     res.reason_phrase = "db error:" + e[0]
                 else:
                     res.status_code = 400
                     res.reason_phrase = "Duplicate entry"
+                    return HttpResponseRedirect("/login")
         else:
             res.status_code = 400
             res.reason_phrase = "Invalid form entry"
