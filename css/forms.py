@@ -20,6 +20,8 @@ class InviteUserForm(forms.Form):
 
 # Registration Form
 class RegisterUserForm(forms.Form):
+    first_name = forms.CharField()
+    last_name = forms.CharField()
     email = forms.EmailField()
     user_type = forms.ChoiceField(label='Usertype', choices=[('faculty', 'faculty'), ('scheduler', 'scheduler')])
     password1 = forms.CharField(label='Password', widget=forms.PasswordInput)
@@ -29,6 +31,8 @@ class RegisterUserForm(forms.Form):
         user = CUser.objects.create_cuser(email=self.cleaned_data['email'],
                                           password=self.cleaned_data['password2'],
                                           user_type=self.cleaned_data['user_type'])
+        user.save()
+        user.set_name(self.cleaned_data['first_name'], self.cleaned_data['last_name'])
         user.save()
         return user
 

@@ -38,6 +38,18 @@ class CUserManager(models.Manager):
             raise ValidationError("Attempted CUser creation with invalid user_type")
         return user_type
 
+    # Verify the first name is not too long
+    def validate_first_name(self, first_name):
+        if first_name and len(first_name) > 30:
+            raise ValidationError("Attempted CUser creation with a first_name longer than 30 characters")
+        return first_name
+
+    # Verify the last name is not too long
+    def validate_last_name(self, last_name):
+        if last_name and len(last_name) > 30:
+            raise ValidationError("Attempted CUser creation with a last_name longer than 30 characters")
+        return last_name
+
     def create_cuser(self, email, password, user_type):
         user = self.create(user=User.objects.create_user(
                                username=self.validate_email(email), 
@@ -69,6 +81,13 @@ class CUser(models.Model):
 
     objects = CUserManager()
 
+    def set_name(self, first, last):
+        if first:
+            self.user.first_name = first
+        if last:
+            self.user.last_name = last
+        self.user.save()
+
     def delete(self):
         self.user.delete()
         super(CUser, self).delete()
@@ -92,13 +111,15 @@ class Room(models.Model):
 
    @classmethod
    def create(cls, name, description, cap, notes, equip):
-      if name.length > 32:
+      if name is None:
+         raise ValidationError("Room name is required")
+      elif len(name) > 32:
          raise ValidationError("Room name is longer than 32 characters")
-      elif description and description.length > 256:
+      elif description and len(description) > 256:
          raise ValidationError("Room description is longer than 256 characters")
-      elif notes and notes.length > 1024:
+      elif notes and len(notes) > 1024:
          raise ValidationError("Room notes is longer than 1024 characters")
-      elif equip and quip.length > 256:
+      elif equip and len(equip) > 256:
          raise ValidationError("Room equipment is longer than 1024 characters")
       else:
          room = cls(name=name, 
@@ -148,28 +169,29 @@ class WorkInfo(models.Model):
 
 class Availability(models.Model):
     class Meta: 
-        unique_together = (("faculty_id", "days_of_week", "start_time"),)
-    faculty_id = models.OneToOneField(FacultyDetails, on_delete=models.CASCADE) #
+        unique_together = (("faculty_member", "days_of_week", "start_time"),)
+    faculty_member = models.OneToOneField(CUser, on_delete=models.CASCADE, null=True) 
     days_of_week = models.CharField(max_length=16) # MWF or TR
     start_time = models.TimeField()
     end_time = models.TimeField()
-    level = models.CharField(max_length=16) # unavailable, preferred, unavailable
+    level = models.CharField(max_length=16) # available, preferred, unavailable
 
     @classmethod
-    def create(cls, faculty_id, days, start, end, level):
-      num_results = FacultyDetails.objects.filter(user=faculty_id).count()
-      if num_results == 0:
+    def create(cls, email, days, start, end, level):
+      cuser_manager = CUserManager()
+      faculty = CUser.objects.get_faculty(email=email)
+      if faculty is None:
          raise ValidationError("User does not exist")
-      elif (days is None) or (days.length > 16) or (days == "MWF") or (days == "TR"):
+      elif days is None or len(days) > 16 or (days != "MWF" and days != "TR"):
          raise ValidationError("Invalid days of week input")
       elif (start is None):
          raise ValidationError("Need to input start time")  
       elif (end is None):
          raise ValidationError("Need to input end time")  
-      elif (level is None):
+      elif (level is None) or (level != "available" and level != "preferred" and level != "unavailable"):
          raise ValidationError("Need to input level of availability: preferred, available, or unavailable")  
       else:
-         return cls(faculty_id=faculty_id, days_of_week=days, start_time=start, end_time=end, level=level)
+         return cls(faculty_member=faculty.get(), days_of_week=days, start_time=start, end_time=end, level=level)
 
 # ---------- Scheduling Models ----------
 # Schedule is a container for scheduled sections and correponds to exactly 1 academic term

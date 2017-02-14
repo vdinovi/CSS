@@ -1,4 +1,4 @@
-gfrom django.test import TestCase
+from django.test import TestCase
 from css.models import *
 
 class CourseTestCase(TestCase):
