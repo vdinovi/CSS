@@ -10,13 +10,10 @@ class FacultyTestCase(TestCase):
     # Utility Functions 
     def create_faculty(self, email='email@email.com', password='password#0',
                        user_type='faculty'):
-        return CUser.objects.create_cuser(email, password, user_type)
+        return CUser.create(email, password, user_type)
 
     def get_faculty(self, email=None):
-        if email is None:
-            return CUser.objects.get_faculty()
-        else:
-            return CUser.objects.get_faculty(email=email)
+        return CUser.objects.filter(user__username=email)
 
     def verify_faculty(self, faculty, email, password):
         self.assertTrue(isinstance(faculty, CUser))

@@ -28,10 +28,9 @@ class RegisterUserForm(forms.Form):
     password2 = forms.CharField(label='Confirm Password', widget=forms.PasswordInput)
 
     def save(self):
-        user = CUser.objects.create_cuser(email=self.cleaned_data['email'],
-                                          password=self.cleaned_data['password2'],
-                                          user_type=self.cleaned_data['user_type'])
-        user.save()
+        user = CUser.create(email=self.cleaned_data['email'],
+                            password=self.cleaned_data['password2'],
+                            user_type=self.cleaned_data['user_type'])
         user.set_name(self.cleaned_data['first_name'], self.cleaned_data['last_name'])
         user.save()
         return user
@@ -39,11 +38,11 @@ class RegisterUserForm(forms.Form):
 
 # Delete Form
 class DeleteUserForm(forms.Form):
-    id = forms.IntegerField()
+    email = forms.CharField(label='Confirm email')
 
     # TODO: Delete user
-    def delete_user(self):
-        pass
+    def delete_user(self, email):
+        CUser.objects.get(user__username=self.cleaned_data['email']).delete()
 
 class AddRoomForm(forms.Form):
     name = forms.CharField()

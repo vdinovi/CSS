@@ -9,10 +9,14 @@ from django.core.exceptions import ValidationError
 
 # ---------- User Models ----------
 
-# CUserManager defines functions for creating and managing CUser objects
-class CUserManager(models.Manager):
-    # Verify email is valid
-    def validate_email(self, email): 
+# System user class,
+# Wrapper for django builtin class, contains user + application specific data
+class CUser(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, null=True)
+    user_type = models.CharField(max_length=16)
+    
+    @staticmethod
+    def validate_email(email): 
         if re.match(r'^[A-Za-z0-9\._%+\-]+@[A-Za-z0-9\.\-]+\.[A-Za-z]{2,}$',
                     email) is None:
             raise ValidationError("Attempted CUser creation"+ 
@@ -22,64 +26,44 @@ class CUserManager(models.Manager):
     # Password must:
     #   be 8-32 chars, have 1 alphabetical char, 1 digit,
     #   and 1 special char[$@!%*#?&]
-    # @TODO Combine independent regex checks
-    def validate_password(self, password):
-        matches = []
-        matches.append(re.match(r'[A-Za-z]+', password))
-        matches.append(re.match(r'[0-9]+', password))
-        matches.append(re.match(r'[#?!@$%^&*-]+', password))
-        if len(password) < 8 or len(password) > 32 or matches is None:
+    @staticmethod
+    def validate_password(password):
+        if ( (len(password) < 8)
+           or (len(password) > 32) 
+           or (re.match(r'^(?=.*\d)(?=.*[A-Za-z])(?=.*[-._!@#$%^&*?])[A-Za-z0-9-._!@#$%^&*?]{8,32}$', password) is None)):
             raise ValidationError("Attempted CUser creation with invalid password")
         return password
 
-    # Verify user_type is either 'scheduler' or 'faculty'
-    def validate_user_type(self, user_type):
+    @staticmethod
+    def validate_user_type(user_type):
         if user_type != 'scheduler' and user_type != 'faculty':
             raise ValidationError("Attempted CUser creation with invalid user_type")
         return user_type
 
-    # Verify the first name is not too long
-    def validate_first_name(self, first_name):
+    @staticmethod
+    def validate_first_name(first_name):
         if first_name and len(first_name) > 30:
             raise ValidationError("Attempted CUser creation with a first_name longer than 30 characters")
         return first_name
 
-    # Verify the last name is not too long
-    def validate_last_name(self, last_name):
+    @staticmethod
+    def validate_last_name(last_name):
         if last_name and len(last_name) > 30:
             raise ValidationError("Attempted CUser creation with a last_name longer than 30 characters")
         return last_name
 
-    def create_cuser(self, email, password, user_type):
-        user = self.create(user=User.objects.create_user(
-                               username=self.validate_email(email), 
-                               email=self.validate_email(email),
-                               password=self.validate_password(password)),
-                           user_type=self.validate_user_type(user_type))
+    @classmethod
+    def create(cls, email, password, user_type):
+        user = cls(user=User.objects.create_user(
+                               username=cls.validate_email(email), 
+                               email=cls.validate_email(email),
+                               password=cls.validate_password(password)),
+                    user_type=cls.validate_user_type(user_type))
         return user
-
-    def get_faculty(self, email=None):
-        # Get all faculty
-        if email is None:
-            return self.filter(user_type='faculty')
-        # Faculty with specified email
-        else:
-            return self.filter(user_type='faculty', user__username=email)
-
-
-    def get_scheduler(self, email=None):
-        # Get all schedulers
-        if email is None:
-            return self.filter(user_type='scheduler')
-        # Scheduler with specified email
-        else:
-            return self.filter(user_type='scheduler', user__username=email)
-
-class CUser(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, null=True)
-    user_type = models.CharField(max_length=16)
-
-    objects = CUserManager()
+   
+    @classmethod
+    def get_user(cls, email):
+        return cls.objects.filter(user_username=email)
 
     def set_name(self, first, last):
         if first:
@@ -87,10 +71,6 @@ class CUser(models.Model):
         if last:
             self.user.last_name = last
         self.user.save()
-
-    def delete(self):
-        self.user.delete()
-        super(CUser, self).delete()
 
  
 class FacultyDetails(models.Model):
