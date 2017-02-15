@@ -1,6 +1,7 @@
 from django import forms
 from django.core.mail import send_mail
 from css.models import CUser, Room
+from django.http import HttpResponseRedirect
 
 #Login Form
 class LoginForm(forms.Form):
@@ -52,22 +53,38 @@ class AddRoomForm(forms.Form):
     equipment = forms.CharField()
 
     def save(self):
-        room = Room.objects.create(name=self.cleaned_data['name'],
-                                   description=self.cleaned_data['description'],
-                                   capacity=self.cleaned_data['capacity'],
-                                   notes=self.cleaned_data['notes'],
-                                   equipment=self.cleaned_data['equipment'])
-        room.save()
-        return room
+		print "save"
+		nameString = self.cleaned_data['roomName']
+		print "namestring" + nameString
+		room = Room.objects.filter(name=nameString)
+		if room is None:
+			print "no room"
+			room = Room.objects.create(name=self.cleaned_data['name'], description=self.cleaned_data['description'], capacity=self.cleaned_data['capacity'], notes=self.cleaned_data['notes'], equipment=self.cleaned_data['equipment'])
+		else:
+			print "room found"
+			room.name = self.cleaned_data['name']
+			description = self.cleaned_data['description']
+			capacity = self.cleaned_data['capacity']
+			notes = self.cleaned_data['notes']
+			equipment = self.cleaned_data['equipment']
+
+		room.save()
+		return room
 
 class DeleteRoomForm(forms.Form):
-    id = forms.IntegerField()
+	roomName = forms.CharField(widget=forms.HiddenInput(), initial='defaultRoom')
+	def deleteRoom(self):
+		nameString=self.cleaned_data['roomName']
+		print("name: " + nameString)
+		print("delete1")
+		Room.objects.filter(name=nameString).delete()
+		return HttpResponseRedirect('/')
 
 # Course Form
 class AddCourseForm(forms.Form):
    course_name = forms.CharField()
    descripton = forms.CharField()
-   equipment_req = forms.CharField() 
+   equipment_req = forms.CharField()
 
    def addCourse(self):
       course = Course(course_name = self.cleaned_date['course_name'],
