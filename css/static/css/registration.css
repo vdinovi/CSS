@@ -73,3 +73,22 @@
     display: block;
     margin-top: 10px;
 }
+button.save.btn.register-btn {
+    width:100%;
+    margin-top: 10px;
+}
+button.save.btn.register-btn:hover {
+    background-color:lightblue;
+}
+input, select {
+    float: right;
+}
+label {
+    padding-top: 10px;
+}
+label[for=id_user_type] {
+    display: none;
+}
+select#id_user_type {
+    display: none;
+}
