@@ -3,15 +3,18 @@ from css.models import *
 
 class schedulerTestCase(TestCase):
     # Utility Functions 
-    def create_scheduler(self, email='email@email.com', password='password#0',
+    @staticmethod
+    def create_scheduler(email='email@email.com', password='password#0',
                        user_type='scheduler'):
-        return CUser.objects.create_cuser(email, password, user_type)
+        return CUser.create(email, password, user_type)
 
-    def get_scheduler(self, email=None):
-        if email is None:
-            return CUser.objects.get_scheduler()
-        else:
-            return CUser.objects.get_scheduler(email=email)
+    @staticmethod
+    def get_scheduler(email=None):
+        return CUser.objects.get(user__username=email, user_type='scheduler')
+
+    @staticmethod
+    def get_all_schedulers():
+        return CUser.objects.filter(user_type='scheduler')
 
     def verify_scheduler(self, scheduler, email, password):
         self.assertTrue(isinstance(scheduler, CUser))
@@ -22,7 +25,6 @@ class schedulerTestCase(TestCase):
     # begin tests
     def test_valid_scheduler(self):     
         scheduler = self.create_scheduler()
-        self.assertTrue(scheduler is not None)
         self.verify_scheduler(scheduler, 'email@email.com', 'password#0')
         scheduler.delete()
 
@@ -53,8 +55,8 @@ class schedulerTestCase(TestCase):
         scheduler.delete()
 
     def test_valid_password_2(self):
-        scheduler = self.create_scheduler(password='u*zz+F?T')
-        self.assertTrue(scheduler.user.check_password('u*zz+F?T'))
+        scheduler = self.create_scheduler(password='u*1zz+F?T')
+        self.assertTrue(scheduler.user.check_password('u*1zz+F?T'))
         scheduler.delete()
 
     def test_invalid_password_1(self):     
@@ -76,7 +78,7 @@ class schedulerTestCase(TestCase):
                                   user_type='scheduler')
         scheduler2 = self.create_scheduler(email='scheduler2@email.com',
                                   user_type='faculty')
-        scheduler_list = self.get_scheduler()
+        scheduler_list = self.get_all_schedulers()
         self.assertTrue(scheduler1 in scheduler_list)
         self.assertTrue(scheduler2 not in scheduler_list)
         scheduler1.delete()
@@ -84,10 +86,10 @@ class schedulerTestCase(TestCase):
 
     def test_filter_scheduler_2(self):
         scheduler1 = self.create_scheduler(email='scheduler1@email.com',
-                                           user_type='faculty')
+                                  user_type='faculty')
         scheduler2 = self.create_scheduler(email='scheduler2@email.com',
-                                           user_type='faculty')
-        self.assertTrue(not self.get_scheduler()) 
+                                  user_type='faculty')
+        self.assertTrue(not self.get_all_schedulers()) 
         scheduler1.delete()
         scheduler2.delete()
 
@@ -99,7 +101,7 @@ class schedulerTestCase(TestCase):
     # Delete
     def test_delete_scheduler(self):
         scheduler = self.create_scheduler(email='email@email.com')
-        self.assertTrue(self.get_scheduler(email='email@email.com'))
+        self.assertTrue(scheduler in self.get_all_schedulers())
         scheduler.delete()
-        self.assertTrue(not self.get_scheduler(email='email@email.com'))
+        self.assertTrue(scheduler not in self.get_all_schedulers())
 

@@ -6,13 +6,13 @@ class AvailabilityTestCase(TestCase):
     # Utility Functions 
     def create_faculty(self, email='email@email.com', password='password#0',
                        user_type='faculty'):
-        return CUser.objects.create_cuser(email, password, user_type)
+        return CUser.create(email, password, user_type)
 
     def setUp(self):
         self.create_faculty()
 
     def test_create_faculty(self):
-        self.assertEquals(CUser.objects.get_faculty(email="email@email.com").get().user_type, "faculty")
+        self.assertEquals(CUser.get_faculty(email="email@email.com").user_type, "faculty")
 
     def test_valid_availability1(self):
         availability = Availability.create("email@email.com", "MWF", "10:00", "12:00", "available")

@@ -5,14 +5,14 @@ from django.conf import settings
 import MySQLdb
 import re
 from django.db import IntegrityError
-from django.core.exceptions import ValidationError
+from django.core.exceptions import ValidationError, ObjectDoesNotExist
 
 # ---------- User Models ----------
 
 # System user class,
 # Wrapper for django builtin class, contains user + application specific data
 class CUser(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, null=True)
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
     user_type = models.CharField(max_length=16)
     
     @staticmethod
@@ -30,7 +30,7 @@ class CUser(models.Model):
     def validate_password(password):
         if ( (len(password) < 8)
            or (len(password) > 32) 
-           or (re.match(r'^(?=.*\d)(?=.*[A-Za-z])(?=.*[-._!@#$%^&*?])[A-Za-z0-9-._!@#$%^&*?]{8,32}$', password) is None)):
+           or (re.match(r'^(?=.*\d)(?=.*[A-Za-z])(?=.*[-._!@#$%^&*?+])[A-Za-z0-9-._!@#$%^&*?+]{8,32}$', password) is None)):
             raise ValidationError("Attempted CUser creation with invalid password")
         return password
 
@@ -59,12 +59,29 @@ class CUser(models.Model):
                                email=cls.validate_email(email),
                                password=cls.validate_password(password)),
                     user_type=cls.validate_user_type(user_type))
+        user.save()
         return user
-   
+       
     @classmethod
     def get_user(cls, email):
-        return cls.objects.filter(user_username=email)
+        return cls.objects.get(user__username=email)
 
+    @classmethod
+    def get_faculty(cls, email):
+        return cls.objects.get(user__username=email, user_type='faculty')
+
+    @classmethod
+    def get_all_faculty(cls):
+        return cls.objects.filter(user_type='faculty')
+
+    @classmethod
+    def get_scheduler(cls, email):
+        return cls.objects.get(user__username=email, user_type='scheduler')
+
+    @classmethod
+    def get_all_schedulers(cls):
+        return cls.objects.filter(user_type='scheduler')
+ 
     def set_name(self, first, last):
         if first:
             self.user.first_name = first
@@ -158,20 +175,20 @@ class Availability(models.Model):
 
     @classmethod
     def create(cls, email, days, start, end, level):
-      cuser_manager = CUserManager()
-      faculty = CUser.objects.get_faculty(email=email)
-      if faculty is None:
-         raise ValidationError("User does not exist")
-      elif days is None or len(days) > 16 or (days != "MWF" and days != "TR"):
-         raise ValidationError("Invalid days of week input")
-      elif (start is None):
-         raise ValidationError("Need to input start time")  
-      elif (end is None):
-         raise ValidationError("Need to input end time")  
-      elif (level is None) or (level != "available" and level != "preferred" and level != "unavailable"):
-         raise ValidationError("Need to input level of availability: preferred, available, or unavailable")  
-      else:
-         return cls(faculty_member=faculty.get(), days_of_week=days, start_time=start, end_time=end, level=level)
+        try: 
+            faculty = CUser.get_faculty(email=email)
+        except ObjectDoesNotExist:
+            raise ValidationError("User does not exist")
+        if days is None or len(days) > 16 or (days != "MWF" and days != "TR"):
+            raise ValidationError("Invalid days of week input")
+        elif (start is None):
+            raise ValidationError("Need to input start time")  
+        elif (end is None):
+            raise ValidationError("Need to input end time")  
+        elif (level is None) or (level != "available" and level != "preferred" and level != "unavailable"):
+            raise ValidationError("Need to input level of availability: preferred, available, or unavailable")  
+        else:
+            return cls(faculty_member=faculty, days_of_week=days, start_time=start, end_time=end, level=level)
 
 # ---------- Scheduling Models ----------
 # Schedule is a container for scheduled sections and correponds to exactly 1 academic term

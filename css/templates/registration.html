@@ -54,7 +54,7 @@
             var pass1 = document.getElementById("id_password1").value;
             var pass2 = document.getElementById("id_password2").value;
             if (pass1.length < 8 || pass1.length > 32
-                || !(pass1.match(/^(?=.*\d)(?=.*[A-Za-z])(?=.*[-._!@#$%^&*?])[A-Za-z0-9-._!@#$%^&*?]{8,32}$/))) {
+                || !(pass1.match(/^(?=.*\d)(?=.*[A-Za-z])(?=.*[-._!@#$%^&*?])[A-Za-z0-9-._!@#$%^&*?+]{8,32}$/))) {
                 sweetAlert("Invalid password", "Must contain 1 letter, 1 number, and 1 special character");
                 return false;
             }
