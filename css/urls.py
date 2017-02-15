@@ -38,7 +38,9 @@ urlpatterns = [
     url(r'^faq/$', views.FAQView, name='faq'),
     url(r'^admin/', admin.site.urls),
     url(r'^login/$', views.LoginView, name='login'),
-    url(r'^loginhelp/$', views.LoginView, name='loginhelp')
+    url(r'^loginhelp/$', views.LoginView, name='loginhelp'),
+    url(r'^landing/$', views.LandingView, name='landing'),
+    url(r'^logout/$', views.LogoutView, name='logout')
 
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 

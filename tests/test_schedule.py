@@ -7,17 +7,24 @@ class ScheduleTestCase(TestCase):
         Schedule.objects.create(academic_term="Winter 2017")
 
     def test_finalize_schedule(self):
+        """ Changes an active schedule to finalized. """
         schedule = Schedule.objects.get(academic_term="Fall 2017")
         schedule.finalize_schedule()
         self.assertEqual(schedule.state, "finalized")
 
     def test_default_active_schedule(self):
+        """ Creates a schedule with no state. Checking state defaults to active."""
         schedule = Schedule.objects.get(academic_term="Winter 2017")
         self.assertEqual(schedule.state, "active")
 
     def test_return_to_active_schedule(self):
+        """ Changes an active schedule to finalized and returns it to active. """
         schedule = Schedule.objects.get(academic_term="Winter 2017")
         schedule.finalize_schedule()
         self.assertEqual(schedule.state, "finalized")
         schedule.return_to_active()
         self.assertEqual(schedule.state, "active")
+
+    def test_invalid_state(self):
+        """ Checks that an invalid input for state raises an error. """
+        self.assertRaises(ValidationError, Schedule.create, "Winter 2019", "invalid")

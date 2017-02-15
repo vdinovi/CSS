@@ -21,27 +21,29 @@ class InviteUserForm(forms.Form):
 
 # Registration Form
 class RegisterUserForm(forms.Form):
+    first_name = forms.CharField()
+    last_name = forms.CharField()
     email = forms.EmailField()
     user_type = forms.ChoiceField(label='Usertype', choices=[('faculty', 'faculty'), ('scheduler', 'scheduler')])
     password1 = forms.CharField(label='Password', widget=forms.PasswordInput)
     password2 = forms.CharField(label='Confirm Password', widget=forms.PasswordInput)
 
     def save(self):
-        user = CUser.objects.create_cuser(email=self.cleaned_data['email'],
-                                          password=self.cleaned_data['password2'],
-                                          user_type=self.cleaned_data['user_type'])
+        user = CUser.create(email=self.cleaned_data['email'],
+                            password=self.cleaned_data['password2'],
+                            user_type=self.cleaned_data['user_type'])
+        user.set_name(self.cleaned_data['first_name'], self.cleaned_data['last_name'])
         user.save()
         return user
 
 
 # Delete Form
 class DeleteUserForm(forms.Form):
-    id = forms.IntegerField()
+    email = forms.CharField(label='Confirm email')
 
     # TODO: Delete user
     def delete_user(self):
-        pass
-
+        CUser.get_user(email=self.cleaned_data['email']).delete()
 
 class AddRoomForm(forms.Form):
     name = forms.CharField()
@@ -86,6 +88,6 @@ class AddCourseForm(forms.Form):
 
    def addCourse(self):
       course = Course(course_name = self.cleaned_date['course_name'],
-                  descripton = self.cleaned_date['descripton'],
+                  descripton = self.cleaned_date['description'],
                   equipment_req = self.cleaned_data['equipment_req'])
-      course.save();
+      course.save(); 
