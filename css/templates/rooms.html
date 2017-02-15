@@ -33,9 +33,10 @@
       </div>
       <div class="row">
         <div class="col-lg-10 col-lg-offset-1">
-          <table class = "table table-striped table-hover table-bordered" style="background-color: #fff">
+          <table id="table" class = "table table-striped table-hover table-bordered" style="background-color: #fff">
             <thead>
               <tr class="top">
+                <th>Edit</th>
                 <th>Name</th>
                 <th>Description</th>
                 <th>Capacity</th>
@@ -45,17 +46,21 @@
             <tbody>
               {% for room in room_list %}
               <tr>
-                <th>{{ room.name }}</th>
-                <th>{{ room.description }}</th>
-                <th>{{ room.capacity }}</th>
-                <th>{{ room.notes }}</th>
-                <th>{{ room.equipment }}</th>
+                <td>
+                  <button type="button" class="btn btn-info btn-xs" data-toggle="modal" data-target="#delete-room" onclick="setDeleteID('{{ room.name }}')"><span class="glyphicon glyphicon-minus"></span>&nbsp;</button>
+                  <button type="button" class="btn btn-info btn-xs" data-toggle="modal" data-target="#add-room"><span onclick="updateRoom('{{ room.name }}')" class="glyphicon glyphicon-edit"></span>&nbsp;</button>
+                </td>
+                <td name="roomName">{{ room.name }}</td>
+                <td name="description">{{ room.description }}</td>
+                <td name="capacity">{{ room.capacity }}</td>
+                <td name="notes">{{ room.notes }}</td>
+                <td name="equipment">{{ room.equipment }}</td>
               </tr>
               {% endfor %}
             </tbody>
           </table>
-          <button type="button" class="btn btn-info btn-xs" data-toggle="modal" data-target="#add-room">+</button>
-          <button type="button" class="btn btn-info btn-xs" data-toggle="modal" data-target="#delete-room">-</button>
+          <button type="button" class="btn btn-info btn-xs" data-toggle="modal" data-target="#add-room"><span class="glyphicon glyphicon-plus"></span>&nbsp;
+</button>
         </div>
       </div>
     </div>
@@ -67,19 +72,16 @@
         <div class="modal-content">
           <div class="modal-header">
             <button type="button" class="close" data-dismiss="modal">&times;</button>
-            <h4 class="modal-title">Add Room</h4>
+            <h4 class="modal-title">Add/Edit Room</h4>
           </div>
           <div class="modal-body">
             <form method="POST" action="" novalidate>{% csrf_token %}
               <p>Add a room</p>
               {{ add_room_form.as_p }}
               <button type="submit" name="add-form" class="save btn btn-default">submit</button>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </form>
           </div>
         </div>
-
       </div>
     </div>
     <div id="delete-room" class="modal fade" role="dialog">
@@ -94,16 +96,59 @@
             <form method="POST">{% csrf_token %}
               <p>Delete a Room</p>
               {{ delete_room_form.as_p }}
-              <button type="submit" name="delete-form" class="save btn btn-default">submit</button>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+              <button id="delete-button" type="submit" name="delete-form" class="save btn btn-default">submit</button>
+            </form>
           </div>
         </div>
-
       </div>
     </div>
 
+    <script>
+      function setDeleteID(string){
+        console.log("called setDeleteID");
+        console.log('value' + document.getElementById('id_roomName').value)
+        console.log('name' + document.getElementById('id_roomName').name)
+        document.getElementById('id_roomName').value = string;
+        console.log(string)
+        console.log('value' + document.getElementById('id_roomName').value)
+        console.log('name' + document.getElementById('id_roomName').name)
+/*
+        var xhttp;
+        if (window.XMLHttpRequest) {
+          xhttp = new XMLHttpRequest();
+        }
+        else {
+        // code for IE6, IE5
+          console.log("Error");
+        }
+        xhttp.open(POST, )
+        xhttp.send("Payload");
+*/
+      }
+      function updateRoom(name){
+        var table = document.getElementById("table");
+        console.log("input: " + name)
+        if(table == null)
+          console.log("table null");
+        for (var i = 0, row; row = table.rows[i]; i++) {
+          console.log(i);
+          x = 0;
+          if(row.cells[1].innerHTML == name)
+          {
+            document.getElementById("id_name").value = name;
+            document.getElementById("id_description").value = row.cells[2].innerHTML;
+            document.getElementById("id_capacity").value = row.cells[3].innerHTML;
+            document.getElementById("id_notes").value = row.cells[4].innerHTML;
+            document.getElementById("id_equipment").value = row.cells[5].innerHTML;
+          }
+
+          /*if(row.cells[4].name != null)
+            console.log(row.cells[4].name)
+          if(row.name == name)
+            console.log('Found ' + name);*/
+        }
+      }
+    </script>
 
     <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>

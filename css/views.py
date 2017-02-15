@@ -72,6 +72,7 @@ def LoginView(request):
 # @update 2/2/17
 def RoomsView(request):
     res = HttpResponse()
+
     if request.method == "GET":
         print("if")
         return render(request, 'rooms.html', {
@@ -82,17 +83,27 @@ def RoomsView(request):
     elif request.method == "POST" and 'add-form' in request.POST:
         form = AddRoomForm(request.POST)
         if form.is_valid():
+            print request.POST
             form.save()
             res.status_code = 200
+            return HttpResponseRedirect('/home/rooms')
         else:
             res.status_code = 400
     elif request.method == "POST" and 'delete-form' in request.POST:
+        print("POST delete")
         form = DeleteRoomForm(request.POST)
         if form.is_valid():
             print('NYI')
+            print request.POST
+            form.deleteRoom()
             res.status_code = 200
+            return HttpResponseRedirect('/home/rooms')
         else:
             res.status_code = 400
+    elif request.method == "POST":
+        print("post")
+        print request.POST
+
     else:
         res.status_code = 400
     return res
@@ -112,7 +123,7 @@ def CoursesView(request):
                 'add_course_form':AddCourseForm()
             });
     elif request.method == "POST":
-        form = AddCourseForm(request.POST); 
+        form = AddCourseForm(request.POST);
         if form.is_valid():
             form.addCourse();
             res.status_code = 200
