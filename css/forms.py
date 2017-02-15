@@ -41,8 +41,8 @@ class DeleteUserForm(forms.Form):
     email = forms.CharField(label='Confirm email')
 
     # TODO: Delete user
-    def delete_user(self, email):
-        CUser.objects.get(user__username=self.cleaned_data['email']).delete()
+    def delete_user(self):
+        CUser.get_user(email=self.cleaned_data['email']).delete()
 
 class AddRoomForm(forms.Form):
     name = forms.CharField()

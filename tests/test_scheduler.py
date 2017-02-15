@@ -104,4 +104,5 @@ class schedulerTestCase(TestCase):
         self.assertTrue(scheduler in self.get_all_schedulers())
         scheduler.delete()
         self.assertTrue(scheduler not in self.get_all_schedulers())
+        self.assertRaises(ObjectDoesNotExist, self.get_scheduler, email='email@email.com')
 

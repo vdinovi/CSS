@@ -206,10 +206,12 @@ def FacultyView(request):
             try:
                 form.delete_user()
                 res.status_code = 200
-            except:
-                raise
+            except ObjectDoesNotExist:
+                res.status_code = 404
+                res.reason_phrase = "User not found"
         else:
             res.status_code = 400
+            res.reason_phrase = "Invalid form entry"
     else:
         res.status_code = 400
     return res
