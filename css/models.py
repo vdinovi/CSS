@@ -207,3 +207,17 @@ class Section(models.Model):
     conflict_reason = models.CharField(max_length = 8) # faculty or room
     fault = models.CharField(max_length = 1) # y or n
     fault_reason = models.CharField(max_length = 8) # faculty or room
+
+    @classmethod
+    def create(cls, schedule, course, start_time, end_time, days, faculty, room
+        section_capacity, students_enrolled, students_waitlisted, conflict, conflict_reason,
+        fault, fault_reason):
+        
+
+
+
+
+
+
+
+
