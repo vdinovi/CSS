@@ -8,15 +8,18 @@ from css.models import *
 
 class FacultyTestCase(TestCase):
     # Utility Functions 
-    def create_faculty(self, email='email@email.com', password='password#0',
+    @staticmethod
+    def create_faculty(email='email@email.com', password='password#0',
                        user_type='faculty'):
-        return CUser.objects.create_cuser(email, password, user_type)
+        return CUser.create(email, password, user_type)
 
-    def get_faculty(self, email=None):
-        if email is None:
-            return CUser.objects.get_faculty()
-        else:
-            return CUser.objects.get_faculty(email=email)
+    @staticmethod
+    def get_faculty(email=None):
+        return CUser.get_faculty(email=email)
+
+    @staticmethod
+    def get_all_faculty():
+        return CUser.objects.filter(user_type='faculty')
 
     def verify_faculty(self, faculty, email, password):
         self.assertTrue(isinstance(faculty, CUser))
@@ -57,8 +60,8 @@ class FacultyTestCase(TestCase):
         faculty.delete()
 
     def test_valid_password_2(self):
-        faculty = self.create_faculty(password='u*zz+F?T')
-        self.assertTrue(faculty.user.check_password('u*zz+F?T'))
+        faculty = self.create_faculty(password='u*1zz+F?T')
+        self.assertTrue(faculty.user.check_password('u*1zz+F?T'))
         faculty.delete()
 
     def test_invalid_password_1(self):     
@@ -80,7 +83,7 @@ class FacultyTestCase(TestCase):
                                   user_type='faculty')
         faculty2 = self.create_faculty(email='faculty2@email.com',
                                   user_type='scheduler')
-        faculty_list = self.get_faculty()
+        faculty_list = self.get_all_faculty()
         self.assertTrue(faculty1 in faculty_list)
         self.assertTrue(faculty2 not in faculty_list)
         faculty1.delete()
@@ -91,7 +94,7 @@ class FacultyTestCase(TestCase):
                                   user_type='scheduler')
         faculty2 = self.create_faculty(email='faculty2@email.com',
                                   user_type='scheduler')
-        self.assertTrue(not self.get_faculty()) 
+        self.assertTrue(not self.get_all_faculty()) 
         faculty1.delete()
         faculty2.delete()
 
@@ -103,7 +106,8 @@ class FacultyTestCase(TestCase):
     # Delete
     def test_delete_faculty(self):
         faculty = self.create_faculty(email='email@email.com')
-        self.assertTrue(self.get_faculty(email='email@email.com'))
+        self.assertTrue(faculty in self.get_all_faculty())
         faculty.delete()
-        self.assertTrue(not self.get_faculty(email='email@email.com'))
+        self.assertTrue(faculty not in self.get_all_faculty())
+        self.assertRaises(ObjectDoesNotExist, self.get_faculty, email='email@email.com')
 
