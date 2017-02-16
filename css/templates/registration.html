@@ -13,6 +13,8 @@
     {% load static %}
     <link href="{% static "css/custom.css" %}" rel="stylesheet">
     <link href="{% static "css/registration.css" %}" rel="stylesheet">
+    <link href="{% static "css/sweetalert.css" %}" rel="stylesheet">
+    <script src="{% static "js/sweetalert.min.js" %}"></script>
 
     <link rel='stylesheet prefetch' href='http://fonts.googleapis.com/css?family=Open+Sans:600'>
 
@@ -33,9 +35,12 @@
                 <h1 class="text-center login-title">Register</h1>
                 <div class="account-wall">                
                       <div>
-                        <form method="POST">{% csrf_token %}
+                        <form action="#" method="POST" onSubmit="return validateRegisterForm()" name="register-form" id="regform">{% csrf_token %}
                           {{ registration_form.as_p }}
+
                           <button type="submit" name="register-form" class="save btn register-btn">Submit</button>
+                          <button name="register-form" type="submit" class="save btn register-btn">submit</button>
+
                       </div>           
                 </div>
             </div>
@@ -46,7 +51,23 @@
 
         <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
-        <!-- Include all compiled plugins (below), or include individual files as needed -->
+        <script language="javascript">
+        function validateRegisterForm() {
+            var regform = document.getElementById("regform");
+            var pass1 = document.getElementById("id_password1").value;
+            var pass2 = document.getElementById("id_password2").value;
+            if (pass1.length < 8 || pass1.length > 32
+                || !(pass1.match(/^(?=.*\d)(?=.*[A-Za-z])(?=.*[-._!@#$%^&*?])[A-Za-z0-9-._!@#$%^&*?+]{8,32}$/))) {
+                sweetAlert("Invalid password", "Must contain 1 letter, 1 number, and 1 special character");
+                return false;
+            }
+            if (pass1.localeCompare(pass2)) {
+              sweetAlert("Passwords do not Match", "");
+              return false;
+            }
+            return true;
+        }
+        </script>
   </body>
 </html>
 

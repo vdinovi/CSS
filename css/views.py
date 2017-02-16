@@ -26,9 +26,8 @@ def RegistrationView(request):
                 res.status_code = 200
                 return HttpResponseRedirect("/home")
             except ValidationError as e: 
-                res.status_code = 200
+                res.status_code = 400
                 res.reason_phrase = "Invalid password entry"
-                return HttpResponseRedirect("/register")
             # db error
             except IntegrityError as e:
                 if not e[0] == 1062:
@@ -37,7 +36,6 @@ def RegistrationView(request):
                 else:
                     res.status_code = 400
                     res.reason_phrase = "Duplicate entry"
-                    return HttpResponseRedirect("/login")
         else:
             res.status_code = 400
             res.reason_phrase = "Invalid form entry"
@@ -101,10 +99,10 @@ def LogoutView(request):
 
 #  Rooms View
 # @descr
-# @TODO
 # @update 2/2/17
 def RoomsView(request):
     res = HttpResponse()
+
     if request.method == "GET":
         print("if")
         return render(request, 'rooms.html', {
@@ -115,37 +113,46 @@ def RoomsView(request):
     elif request.method == "POST" and 'add-form' in request.POST:
         form = AddRoomForm(request.POST)
         if form.is_valid():
+            print request.POST
             form.save()
             res.status_code = 200
+            return HttpResponseRedirect('/home/rooms')
         else:
             res.status_code = 400
     elif request.method == "POST" and 'delete-form' in request.POST:
+        print("POST delete")
         form = DeleteRoomForm(request.POST)
         if form.is_valid():
             print('NYI')
+            print request.POST
+            form.deleteRoom()
             res.status_code = 200
+            return HttpResponseRedirect('/home/rooms')
         else:
             res.status_code = 400
+    elif request.method == "POST":
+        print("post")
+        print request.POST
+
     else:
         res.status_code = 400
     return res
 
+
 #  Courses View
 # @descr
-# @TODO
 # @update 2/5/17
 from .models import Course
 from .forms import AddCourseForm
 def CoursesView(request):
     res = HttpResponse()
     if request.method == "GET":
-        #TODO should filter by those with usertype 'scheduler'
         return render(request, 'courses.html', {
                 'course_list': Course.objects.filter(),
                 'add_course_form':AddCourseForm()
             });
     elif request.method == "POST":
-        form = AddCourseForm(request.POST); 
+        form = AddCourseForm(request.POST);
         if form.is_valid():
             form.addCourse();
             res.status_code = 200
@@ -211,15 +218,15 @@ def FacultyView(request):
     elif request.method == "POST" and 'delete-form' in request.POST:
         form = DeleteUserForm(request.POST)
         if form.is_valid():
-            faculty = CUser.objects.filter(user__id=form.cleaned_data['id'])
-            if faculty is False:
-                res.status_code = 404
-                res.reason_phrase = "User with that ID does not exist"
-            else:
-                faculty.delete()
+            try:
+                form.delete_user()
                 res.status_code = 200
+            except ObjectDoesNotExist:
+                res.status_code = 404
+                res.reason_phrase = "User not found"
         else:
             res.status_code = 400
+            res.reason_phrase = "Invalid form entry"
     else:
         res.status_code = 400
     return res

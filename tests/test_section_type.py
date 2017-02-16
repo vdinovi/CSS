@@ -12,3 +12,10 @@ class SectionTypeTestCase(TestCase):
     def test_section_type_too_long(self):
     	""" Creates a section type with a name that is too long, expects an error. """
     	self.assertRaises(ValidationError, SectionType.create, "SectionTypeNameTooManyCharacters1")
+
+    def test_valid_delete_section_type(self):
+        st = SectionType.objects.create(section_type="Lab")
+        self.assertTrue(SectionType.objects.get(section_type="lab"))
+        st.delete()
+        self.assertRaises(ObjectDoesNotExist, SectionType.objects.get, section_type="lab")
+
