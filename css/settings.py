@@ -35,10 +35,11 @@ ALLOWED_HOSTS = [
 
 # Heroku project root
 PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
+LOGIN_URL = '/home.html'
+LOGIN_REDIRECT_URL = os.path.dirname(os.path.abspath(__file__))
 
 
 # Application definition
-
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -98,23 +99,7 @@ DATABASES = {
         'HOST': 'css-db.chfwru12q1ji.us-west-1.rds.amazonaws.com',
         'PORT': '3306',
     },
-    'test': {
-        'ENGINE': 'django.db.backends.mysql',
-        'OPTIONS': {
-            'sql_mode': 'STRICT_TRANS_TABLES'
-        },
-        'NAME': 'cssdb',
-        'USER': 'cssdb',
-        'PASSWORD': 'cssdb',
-        'HOST': 'css-db.chfwru12q1ji.us-west-1.rds.amazonaws.com',
-        'PORT': '3306',
-        'TEST': {
-            'MIRROR': 'default',
-        },
-    },
 }
-
-#
 
 # Password validation
 # https://docs.djangoproject.com/en/1.10/ref/settings/#auth-password-validators

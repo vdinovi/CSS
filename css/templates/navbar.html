@@ -1,22 +1,87 @@
 <!-- nav bar --> 
-<nav class="navbar navbar-default custom-nav-bar" role="navigation"> <!-- navbar-fixed-top -->
-  <div class="navbar-header" style="margin-left:25px;">
-    <!-- displays logo   -->
-    <a class="navbar-brand topnav" href="#"> 
-      {% load static %}
-      <img src="{% static "images/InvisoLogo.png" %}" width="65" height="65">
-    </a>
-    <a href = "#" class = "navbar-link navbar-right logout-button">Logout</a>
-  </div>
+<!-- Bootstrap CSS -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+{% load static %}
+<link rel="stylesheet" href="{% static "css/navbar.css" %}">
 
-  <!-- link to logout page -->
-  <div class="collapse navbar-collapse custom-nav-bar-header">
-    <ul class="nav navbar-nav navbar-right" style="margin-right: 25px;">
-      <li> <a href="/home">HOME</a></li>
-      <li> <a href="/scheduling">SCHEDULING</a></li>
-      <li> <a href="/resources">RESOURCES</a></li>
-      <li> <a href="/department">DEPARTMENT</a></li>
-    </ul>
-  </div>      
+<nav class="navbar navbar-default custom-nav-bar" role="navigation"> <!-- navbar-fixed-top -->
+    <div class="navbar-header" style="margin-left:25px;">
+        <!-- displays logo   -->
+        <a class="navbar-brand topnav" href="#"> 
+            {% load static %}
+            <img src="{% static "images/InvisoLogo.png" %}" width="65" height="65">
+        </a>
+        <a href="/logout" class="navbar-link navbar-right logout-button">Logout</a>
+        <a href="http://{{ request.get_host }}/register" class="navbar-link navbar-right logout-button">Register</a>
+    </div>
+
+    <div class="collapse navbar-collapse custom-nav-bar-header">
+        <ul class="nav navbar-nav navbar-right" style="margin-right: 25px;">
+            <!-- Home -->
+            <div class="dropdown">
+                <button onclick="" class="dropbtn">
+                    <a href="http://{{ request.get_host }}/home" style="color: #777;">HOME</a>
+                </button>
+            </div>
+            <!-- Scheduling -->
+            <div class="dropdown">
+                <button onclick="dropdownSchedulingFunction()" class="dropbtn">SCHEDULING</button>
+                <div id="scheduling-dropdown" class="dropdown-content">
+                </div> 
+            </div>
+            <!-- Resources -->
+            <div class="dropdown">
+                <button onclick="dropdownResourcesFunction()" class="dropbtn">RESOURCES</button>
+                <div id="resources-dropdown" class="dropdown-content">
+                    <a href="http://{{ request.get_host }}/home/faculty">Faculty</a>
+                    <a href="http://{{ request.get_host }}/home/rooms">Rooms</a>
+                    <a href="http://{{ request.get_host }}/home/courses">Courses</a>
+                </div>
+            </div>
+            <!-- Department -->
+            <div class="dropdown">
+                <button onclick="dropdownDepartmentFunction()" class="dropbtn">DEPARTMENT</button>
+                <div id="department-dropdown" class="dropdown-content">
+                    <a href="http://{{ request.get_host }}/home/schedulers">Schedulers</a>
+                </div>
+            </div>
+        </ul>
+    </div>      
+
+    <!-- Bootstrap js -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+    <script language="javascript">
+    /* When the user clicks on the button, 
+    toggle between hiding and showing the dropdown content */
+    function dropdownSchedulingFunction() {
+        document.getElementById("scheduling-dropdown").classList.toggle("show");
+    }
+
+    function dropdownResourcesFunction() {
+        document.getElementById("resources-dropdown").classList.toggle("show");
+    }
+
+    function dropdownDepartmentFunction() {
+        document.getElementById("department-dropdown").classList.toggle("show");
+    }
+
+
+    // Close the dropdown menu if the user clicks outside of it
+    window.onclick = function(event) {
+        if (!event.target.matches('.dropbtn')) {
+
+            var dropdowns = document.getElementsByClassName("dropdown-content");
+            var i;
+            for (i = 0; i < dropdowns.length; i++) {
+                var openDropdown = dropdowns[i];
+                    if (openDropdown.classList.contains('show')) {
+                    openDropdown.classList.remove('show');
+                }
+            }
+        }
+    }
+    </script>
 </nav>
 

@@ -1,8 +1,9 @@
 from django.template import Context, Template
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate, login, logout
 from django.shortcuts import render, render_to_response
 from django.views.generic import TemplateView
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseRedirect
+from django.db import IntegrityError
 from .models import *
 from .forms import *
 import MySQLdb
@@ -23,8 +24,12 @@ def RegistrationView(request):
             try:
                 user = form.save()
                 res.status_code = 200
+                return HttpResponseRedirect("/home")
+            except ValidationError as e: 
+                res.status_code = 400
+                res.reason_phrase = "Invalid password entry"
             # db error
-            except MySQLdb.IntegrityError as e:
+            except IntegrityError as e:
                 if not e[0] == 1062:
                     res.status_code = 500
                     res.reason_phrase = "db error:" + e[0]
@@ -58,17 +63,38 @@ def SchedulingView(request):
     #@TODO NYI
     return render_to_response('nyi.html')
 
+def LandingView(request):
+    return render(request,'landing.html')
+
 from .forms import LoginForm
+from django.contrib.auth import authenticate
+
 def LoginView(request):
+	res = HttpResponse()
 	if request.method == "GET":
 		return render(request, 'login.html', {'login_form':LoginForm()});
 	elif request.method == "POST":
 		form = LoginForm(request.POST)
-	return render(request, 'home.html');
+		if form.is_valid():
+			email = request.POST['email']
+			password = request.POST['password']
+			user = authenticate(username=email, password=password)
+			if user is not None:
+				login(request,user)
+    			return HttpResponseRedirect('/home')
+			#else:
+			#	return HttpResponseRedirect('login')
+	else:
+		res.status_code = 400
+	return res
+
+
+def LogoutView(request):
+	logout(request)
+	return HttpResponseRedirect('/landing')
 
 #  Rooms View
 # @descr
-# @TODO
 # @update 2/2/17
 def RoomsView(request):
     res = HttpResponse()
@@ -118,16 +144,15 @@ def RoomsView(request):
         res.status_code = 400
     return res
 
+
 #  Courses View
 # @descr
-# @TODO
 # @update 2/5/17
 from .models import Course
 from .forms import AddCourseForm
 def CoursesView(request):
     res = HttpResponse()
     if request.method == "GET":
-        #TODO should filter by those with usertype 'scheduler'
         return render(request, 'courses.html', {
                 'course_list': Course.objects.filter(),
                 'add_course_form':AddCourseForm()
@@ -161,6 +186,14 @@ def SchedulersView(request):
     elif request.method == "POST" and 'delete-form' in request.POST:
         form = DeleteUserForm(request.POST)
         if form.is_valid():
+            scheduler = CUser.objects.filter(user__id=form.cleaned_data['id'])
+            if scheduler is False:
+                res.status_code = 404
+                res.reason_phrase = "User with that ID does not exist"
+            else:
+                scheduler.delete()
+                res.status_code = 200
+
             print('NYI')
             res.status_code = 200
         else:
@@ -191,10 +224,15 @@ def FacultyView(request):
     elif request.method == "POST" and 'delete-form' in request.POST:
         form = DeleteUserForm(request.POST)
         if form.is_valid():
-            print('NYI')
-            res.status_code = 200
+            try:
+                form.delete_user()
+                res.status_code = 200
+            except ObjectDoesNotExist:
+                res.status_code = 404
+                res.reason_phrase = "User not found"
         else:
             res.status_code = 400
+            res.reason_phrase = "Invalid form entry"
     else:
         res.status_code = 400
     return res
