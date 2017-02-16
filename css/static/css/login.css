@@ -73,3 +73,20 @@
     display: block;
     margin-top: 10px;
 }
+input, select {
+    float: right;
+}
+label {
+    padding-top: 10px;
+}
+button.save.btn.register-btn {
+    width:100%;
+    margin-top: 10px;
+}
+button.save.btn.register-btn:hover {
+    background-color:lightblue;
+}
+a {
+    color: #31708f;
+    text-decoration: none;
+}
