@@ -9,6 +9,7 @@
 
     <!-- Bootstrap -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
     <!-- Custom -->
     {% load static %}
     <link href="{% static "css/custom.css" %}" rel="stylesheet">
@@ -37,10 +38,7 @@
                       <div>
                         <form action="#" method="POST" onSubmit="return validateRegisterForm()" name="register-form" id="regform">{% csrf_token %}
                           {{ registration_form.as_p }}
-
                           <button type="submit" name="register-form" class="save btn register-btn">Submit</button>
-                          <button name="register-form" type="submit" class="save btn register-btn">submit</button>
-
                       </div>           
                 </div>
             </div>

@@ -17,20 +17,15 @@ class CUser(models.Model):
     
     @staticmethod
     def validate_email(email): 
-        if re.match(r'^[A-Za-z0-9\._%+\-]+@[A-Za-z0-9\.\-]+\.[A-Za-z]{2,}$',
-                    email) is None:
-            raise ValidationError("Attempted CUser creation"+ 
-                                  "with invalid email address")
+        if re.match(r'^[A-Za-z0-9\._%+\-]+@[A-Za-z0-9\.\-]+\.[A-Za-z]{2,}$', email) is None:
+            raise ValidationError("Attempted CUser creation"+"with invalid email address")
         return email
 
     # Password must:
-    #   be 8-32 chars, have 1 alphabetical char, 1 digit,
-    #   and 1 special char[$@!%*#?&]
+    # be 8-32 chars, have: 1 alphachar, 1 digit, 1 specialchar
     @staticmethod
     def validate_password(password):
-        if ( (len(password) < 8)
-           or (len(password) > 32) 
-           or (re.match(r'^(?=.*\d)(?=.*[A-Za-z])(?=.*[-._!@#$%^&*?+])[A-Za-z0-9-._!@#$%^&*?+]{8,32}$', password) is None)):
+        if re.match(r'^(?=.*\d)(?=.*[A-Za-z])(?=.*[-._!@#$%^&*?+])[A-Za-z0-9-._!@#$%^&*?+]{8,32}$', password) is None:
             raise ValidationError("Attempted CUser creation with invalid password")
         return password
 
@@ -53,12 +48,13 @@ class CUser(models.Model):
         return last_name
 
     @classmethod
-    def create(cls, email, password, user_type):
-        user = cls(user=User.objects.create_user(
-                               username=cls.validate_email(email), 
-                               email=cls.validate_email(email),
-                               password=cls.validate_password(password)),
-                    user_type=cls.validate_user_type(user_type))
+    def create(cls, email, password, user_type, first_name, last_name):
+        user = cls(user=User.objects.create_user(username=cls.validate_email(email), 
+                                                 email=cls.validate_email(email),
+                                                 password=cls.validate_password(password),
+                                                 first_name=first_name,
+                                                 last_name=last_name),
+                   user_type=cls.validate_user_type(user_type))
         user.save()
         return user
        
@@ -96,6 +92,14 @@ class FacultyDetails(models.Model):
     user = models.OneToOneField(CUser, on_delete=models.CASCADE, blank=False)
     target_workload = models.IntegerField() # in hours
     changed_preferences = models.CharField(max_length=1) # 'y' or 'n' 
+
+    @classmethod
+    def create(cls, user, target_workload):
+        faculty_details = cls(user=user, target_workload=target_workload,
+                              changed_preferences='y')
+
+    def set_changed_preferences(self, changed):
+        self.changed_preferences = changed
 
 # ---------- Resource Models ----------
 # Room represents department rooms
@@ -153,6 +157,10 @@ class SectionType(models.Model):
         else:
             return cls(section_type = section_type_name)
 
+    @classmethod
+    def get_section_type(cls, section_type_name):
+        cls.objects.get(section_type_name=section_type_name)
+
 
 # WorkInfo contains the user defined information for specific Course-SectionType pairs
 # Each pair has an associated work units and work hours defined by the department
@@ -175,10 +183,7 @@ class Availability(models.Model):
 
     @classmethod
     def create(cls, email, days, start, end, level):
-        try: 
-            faculty = CUser.get_faculty(email=email)
-        except ObjectDoesNotExist:
-            raise ValidationError("User does not exist")
+        faculty = CUser.get_faculty(email=email)
         if days is None or len(days) > 16 or (days != "MWF" and days != "TR"):
             raise ValidationError("Invalid days of week input")
         elif (start is None):
