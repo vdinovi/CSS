@@ -1,5 +1,6 @@
 from django.template import Context, Template
 from django.contrib.auth import authenticate, login, logout
+from django.contrib import messages
 from django.shortcuts import render, render_to_response
 from django.views.generic import TemplateView
 from django.http import HttpResponse, HttpResponseRedirect
@@ -15,6 +16,9 @@ import MySQLdb
 def RegistrationView(request):
     res = HttpResponse()
     if request.method == "GET":
+        storage = messages.get_messages(request)
+        for msg in storage:
+            pass
         return render(request, 'registration.html', {
                           'registration_form': RegisterUserForm()
                       })
@@ -23,11 +27,13 @@ def RegistrationView(request):
         if form.is_valid():
             try:
                 user = form.save()
-                res.status_code = 200
+                #res.status_code = 200
+                #return render(request, 'home.html')
                 return HttpResponseRedirect("/home")
             except ValidationError as e: 
                 res.status_code = 200
                 res.reason_phrase = "Invalid password entry"
+                #return render(request, 'registration.html')
                 return HttpResponseRedirect("/register")
             # db error
             except IntegrityError as e:
@@ -37,7 +43,10 @@ def RegistrationView(request):
                 else:
                     res.status_code = 400
                     res.reason_phrase = "Duplicate entry"
-                    return HttpResponseRedirect("/login")
+                    #return render_to_response(request, 'home.html')
+                    messages.error(request, "A user with that email already exists. Please login if that's you or contact a department scheduler.")
+                    return render(request, 'registration.html', {'registration_form': RegisterUserForm(), 'errors': messages.get_messages(request)})
+                    #return HttpResponseRedirect("/login")
         else:
             res.status_code = 400
             res.reason_phrase = "Invalid form entry"
@@ -84,8 +93,8 @@ def LoginView(request):
 			if user is not None:
 				login(request,user)
     			return HttpResponseRedirect('/home')
-			#else:
-			#	return HttpResponseRedirect('login')
+            #else:
+            #    return render_to_response('/login', {'outcome':'Invalid login'})
 	else:
 		res.status_code = 400
 	return res

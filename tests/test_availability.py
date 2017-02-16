@@ -37,19 +37,15 @@ class AvailabilityTestCase(TestCase):
         self.assertRaises(ValidationError, Availability.create, "email@email.com", "HELLO", None, None, None)
 
     def test_availability_invalid_start_time(self):
-        # TODO: add actual test for invalid start time
         self.assertRaises(ValidationError, Availability.create, "email@email.com", "MWF", None, "12:00", "available")
 
     def test_availability_invalid_end_time(self):
-        # TODO: add actual test for invalid end time
         self.assertRaises(ValidationError, Availability.create, "email@email.com", "TR", "12:00 AM", None, None)
 
     def test_availability_invalid_level1(self):
-        # TODO: add actual test for invalid level
         self.assertRaises(ValidationError, Availability.create, "email@email.com", "MWF", "10:00", "12:00", None)
 
     def test_availability_invalid_level2(self):
-        # TODO: add actual test for invalid level
         self.assertRaises(ValidationError, Availability.create, "email@email.com", "MWF", "10:00", "12:00", "ew")
 
 

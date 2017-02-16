@@ -34,9 +34,18 @@
                 <div class="account-wall">                
                       <div>
                         <form method="POST">{% csrf_token %}
-                          {{ registration_form.as_p }}
+                        {{ registration_form.as_p }}
+                        {% if errors %}
+                            <ul class="messages">
+                                {% for message in errors %}
+                                <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>
+                                    {{ message }}
+                                </li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}      
                           <button type="submit" name="register-form" class="save btn register-btn">submit</button>
-                      </div>           
+                      </div>     
                 </div>
             </div>
         </div>
