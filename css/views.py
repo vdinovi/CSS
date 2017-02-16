@@ -78,10 +78,20 @@ def RoomsView(request):
         return render(request, 'rooms.html', {
                 'room_list': Room.objects.filter(),
                 'add_room_form': AddRoomForm(),
-                'delete_room_form': DeleteRoomForm()
+                'delete_room_form': DeleteRoomForm(),
+                'edit_room_form': EditRoomForm(auto_id='edit_room_%s')
             });
     elif request.method == "POST" and 'add-form' in request.POST:
         form = AddRoomForm(request.POST)
+        if form.is_valid():
+            print request.POST
+            form.save()
+            res.status_code = 200
+            return HttpResponseRedirect('/home/rooms')
+        else:
+            res.status_code = 400
+    elif request.method == "POST" and 'edit-form' in request.POST:
+        form = EditRoomForm(request.POST)
         if form.is_valid():
             print request.POST
             form.save()
