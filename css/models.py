@@ -52,8 +52,8 @@ class CUser(models.Model):
         user = cls(user=User.objects.create_user(username=cls.validate_email(email), 
                                                  email=cls.validate_email(email),
                                                  password=cls.validate_password(password),
-                                                 first_name=first_name,
-                                                 last_name=last_name),
+                                                 first_name=cls.validate_first_name(first_name),
+                                                 last_name=cls.validate_last_name(last_name)),
                    user_type=cls.validate_user_type(user_type))
         user.save()
         return user
@@ -146,6 +146,23 @@ class Course(models.Model):
         except:
             raise ValidationError("Invalid data for course creation.")
         return course
+
+    @classmethod
+    def get_all_courses(cls):
+        return cls.objects.filter()
+
+    @classmethod
+    def get_course(cls, course_name):
+        return cls.objects.get(course_name=course_name)
+
+    def set_equipment_req(self, equip):
+        self.equipment_req = equip
+        self.save()
+
+    def set_description(self, description):
+        self.description = description
+        self.save()
+
 
 class SectionType(models.Model):
     section_type = models.CharField(max_length=32) # eg. lecture or lab
