@@ -1,8 +1,10 @@
 from django.template import Context, Template
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate, login, logout
+from django.contrib import messages
 from django.shortcuts import render, render_to_response
 from django.views.generic import TemplateView
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseRedirect
+from django.db import IntegrityError
 from .models import *
 from .forms import *
 import MySQLdb
@@ -14,6 +16,9 @@ import MySQLdb
 def RegistrationView(request):
     res = HttpResponse()
     if request.method == "GET":
+        storage = messages.get_messages(request)
+        for msg in storage:
+            pass
         return render(request, 'registration.html', {
                           'registration_form': RegisterUserForm()
                       })
@@ -22,15 +27,23 @@ def RegistrationView(request):
         if form.is_valid():
             try:
                 user = form.save()
-                res.status_code = 200
+                #res.status_code = 200
+                #return render(request, 'home.html')
+                return HttpResponseRedirect("/home")
+            except ValidationError as e: 
+                res.status_code = 400
+                res.reason_phrase = "Invalid password entry"
+                return HttpResponseRedirect("/register")
             # db error
-            except MySQLdb.IntegrityError as e:
+            except IntegrityError as e:
                 if not e[0] == 1062:
                     res.status_code = 500
                     res.reason_phrase = "db error:" + e[0]
                 else:
                     res.status_code = 400
                     res.reason_phrase = "Duplicate entry"
+                    messages.error(request, "A user with that email already exists. Please login if that's you or contact a department scheduler.")
+                    return render(request, 'registration.html', {'registration_form': RegisterUserForm(), 'errors': messages.get_messages(request)})
         else:
             res.status_code = 400
             res.reason_phrase = "Invalid form entry"
@@ -58,20 +71,46 @@ def SchedulingView(request):
     #@TODO NYI
     return render_to_response('nyi.html')
 
+def LandingView(request):
+    return render(request,'landing.html')
+
 from .forms import LoginForm
+from django.contrib.auth import authenticate
 def LoginView(request):
-	if request.method == "GET":
-		return render(request, 'login.html', {'login_form':LoginForm()});
-	elif request.method == "POST":
-		form = LoginForm(request.POST)
-	return render(request, 'home.html');
+    res = HttpResponse()
+    if request.method == "GET":
+        return render(request, 'login.html', {'login_form':LoginForm()})
+    elif request.method == "POST":
+        form = LoginForm(request.POST)
+        if form.is_valid():
+            email = form.cleaned_data['email']
+            password = form.cleaned_data['password']
+            print(email)
+            print(password)
+            user = authenticate(username=email, password=password)
+            print(user)
+            if user is not None:
+                login(request,user)
+                return HttpResponseRedirect('/home')
+            else:
+                return render_to_response('login.html', {'login_form':LoginForm()})
+        #else:
+         #   res.status_code = 400
+    else:
+        res.status_code = 400
+    return res
+
+
+def LogoutView(request):
+    logout(request)
+    return HttpResponseRedirect('/landing')
 
 #  Rooms View
 # @descr
-# @TODO
 # @update 2/2/17
 def RoomsView(request):
     res = HttpResponse()
+
     if request.method == "GET":
         print("if")
         return render(request, 'rooms.html', {
@@ -82,37 +121,46 @@ def RoomsView(request):
     elif request.method == "POST" and 'add-form' in request.POST:
         form = AddRoomForm(request.POST)
         if form.is_valid():
+            print request.POST
             form.save()
             res.status_code = 200
+            return HttpResponseRedirect('/home/rooms')
         else:
             res.status_code = 400
     elif request.method == "POST" and 'delete-form' in request.POST:
+        print("POST delete")
         form = DeleteRoomForm(request.POST)
         if form.is_valid():
             print('NYI')
+            print request.POST
+            form.deleteRoom()
             res.status_code = 200
+            return HttpResponseRedirect('/home/rooms')
         else:
             res.status_code = 400
+    elif request.method == "POST":
+        print("post")
+        print request.POST
+
     else:
         res.status_code = 400
     return res
 
+
 #  Courses View
 # @descr
-# @TODO
 # @update 2/5/17
 from .models import Course
 from .forms import AddCourseForm
 def CoursesView(request):
     res = HttpResponse()
     if request.method == "GET":
-        #TODO should filter by those with usertype 'scheduler'
         return render(request, 'courses.html', {
                 'course_list': Course.objects.filter(),
                 'add_course_form':AddCourseForm()
             });
     elif request.method == "POST":
-        form = AddCourseForm(request.POST); 
+        form = AddCourseForm(request.POST);
         if form.is_valid():
             form.addCourse();
             res.status_code = 200
@@ -178,15 +226,15 @@ def FacultyView(request):
     elif request.method == "POST" and 'delete-form' in request.POST:
         form = DeleteUserForm(request.POST)
         if form.is_valid():
-            faculty = CUser.objects.filter(user__id=form.cleaned_data['id'])
-            if faculty is False:
-                res.status_code = 404
-                res.reason_phrase = "User with that ID does not exist"
-            else:
-                faculty.delete()
+            try:
+                form.delete_user()
                 res.status_code = 200
+            except ObjectDoesNotExist:
+                res.status_code = 404
+                res.reason_phrase = "User not found"
         else:
             res.status_code = 400
+            res.reason_phrase = "Invalid form entry"
     else:
         res.status_code = 400
     return res
