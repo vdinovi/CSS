@@ -70,30 +70,34 @@ def LandingView(request):
 
 from .forms import LoginForm
 from django.contrib.auth import authenticate
-
 def LoginView(request):
-	res = HttpResponse()
-	if request.method == "GET":
-		return render(request, 'login.html', {'login_form':LoginForm()});
-	elif request.method == "POST":
-		form = LoginForm(request.POST)
-		if form.is_valid():
-			email = request.POST['email']
-			password = request.POST['password']
-			user = authenticate(username=email, password=password)
-			if user is not None:
-				login(request,user)
-    			return HttpResponseRedirect('/home')
-			#else:
-			#	return HttpResponseRedirect('login')
-	else:
-		res.status_code = 400
-	return res
+    res = HttpResponse()
+    if request.method == "GET":
+        return render(request, 'login.html', {'login_form':LoginForm()})
+    elif request.method == "POST":
+        form = LoginForm(request.POST)
+        if form.is_valid():
+            email = form.cleaned_data['email']
+            password = form.cleaned_data['password']
+            print(email)
+            print(password)
+            user = authenticate(username=email, password=password)
+            print(user)
+            if user is not None:
+                login(request,user)
+                return HttpResponseRedirect('/home')
+            else:
+                return render_to_response('login.html', {'login_form':LoginForm()})
+        #else:
+         #   res.status_code = 400
+    else:
+        res.status_code = 400
+    return res
 
 
 def LogoutView(request):
-	logout(request)
-	return HttpResponseRedirect('/landing')
+    logout(request)
+    return HttpResponseRedirect('/landing')
 
 #  Rooms View
 # @descr
