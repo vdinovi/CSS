@@ -1,5 +1,6 @@
 from django.template import Context, Template
 from django.contrib.auth import authenticate, login, logout
+from django.contrib import messages
 from django.shortcuts import render, render_to_response
 from django.views.generic import TemplateView
 from django.http import HttpResponse, HttpResponseRedirect
@@ -15,6 +16,9 @@ import MySQLdb
 def RegistrationView(request):
     res = HttpResponse()
     if request.method == "GET":
+        storage = messages.get_messages(request)
+        for msg in storage:
+            pass
         return render(request, 'registration.html', {
                           'registration_form': RegisterUserForm()
                       })
@@ -23,11 +27,13 @@ def RegistrationView(request):
         if form.is_valid():
             try:
                 user = form.save()
-                res.status_code = 200
+                #res.status_code = 200
+                #return render(request, 'home.html')
                 return HttpResponseRedirect("/home")
             except ValidationError as e: 
                 res.status_code = 400
                 res.reason_phrase = "Invalid password entry"
+                return HttpResponseRedirect("/register")
             # db error
             except IntegrityError as e:
                 if not e[0] == 1062:
@@ -36,6 +42,8 @@ def RegistrationView(request):
                 else:
                     res.status_code = 400
                     res.reason_phrase = "Duplicate entry"
+                    messages.error(request, "A user with that email already exists. Please login if that's you or contact a department scheduler.")
+                    return render(request, 'registration.html', {'registration_form': RegisterUserForm(), 'errors': messages.get_messages(request)})
         else:
             res.status_code = 400
             res.reason_phrase = "Invalid form entry"
@@ -82,32 +90,34 @@ def SettingsView(request):
 
 from .forms import LoginForm
 from django.contrib.auth import authenticate
-
 def LoginView(request):
     res = HttpResponse()
     if request.method == "GET":
-        return render(request, 'login.html', {'login_form':LoginForm()});
+        return render(request, 'login.html', {'login_form':LoginForm()})
     elif request.method == "POST":
         form = LoginForm(request.POST)
         if form.is_valid():
-            email = request.POST['email']
-            password = request.POST['password']
+            email = form.cleaned_data['email']
+            password = form.cleaned_data['password']
+            print(email)
+            print(password)
             user = authenticate(username=email, password=password)
+            print(user)
             if user is not None:
                 login(request,user)
                 return HttpResponseRedirect('/home')
             else:
-                return HttpResponseRedirect('login.html')
-        else:
-            res.status_code = 400
+                return render_to_response('login.html', {'login_form':LoginForm()})
+        #else:
+         #   res.status_code = 400
     else:
         res.status_code = 400
     return res
 
 
 def LogoutView(request):
-	logout(request)
-	return HttpResponseRedirect('/landing')
+    logout(request)
+    return HttpResponseRedirect('/landing')
 
 #  Rooms View
 # @descr
