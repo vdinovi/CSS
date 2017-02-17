@@ -2,6 +2,7 @@ from django import forms
 from django.core.mail import send_mail
 from css.models import CUser, Room
 from django.http import HttpResponseRedirect
+import re
 
 #Login Form
 class LoginForm(forms.Form):
@@ -10,38 +11,46 @@ class LoginForm(forms.Form):
 
 #  Invite Form
 class InviteUserForm(forms.Form):
-    name = forms.CharField()
     email = forms.EmailField()
+    first_name = forms.CharField()
+    last_name = forms.CharField()
 
     def send_invite(self, usertype):
-        send_mail('Invite to register for CSS',
-                   self.cleaned_data['name'] + ', you have been invited to register for CSS',
-                   'registration@inviso-css',
-                   [self.cleaned_data['email']])
+        name = self.cleaned_data['first_name'] + self.cleaned_data['last_name']
+        print name
+        print self.data['email']
+        #send_mail('Invite to register for CSS',
+        #          name + ', you have been invited to register for CSS',
+        #          'registration@inviso-css',
+        #           [self.cleaned_data['email']])
 
 # Registration Form
 class RegisterUserForm(forms.Form):
     first_name = forms.CharField()
     last_name = forms.CharField()
     email = forms.EmailField()
-    user_type = forms.ChoiceField(label='Usertype', choices=[('faculty', 'faculty'), ('scheduler', 'scheduler')])
+    user_type = forms.ChoiceField(label='Role', choices=[('faculty', 'faculty'), ('scheduler', 'scheduler')])
     password1 = forms.CharField(label='Password', widget=forms.PasswordInput)
     password2 = forms.CharField(label='Confirm Password', widget=forms.PasswordInput)
 
     def save(self):
         user = CUser.create(email=self.cleaned_data['email'],
                             password=self.cleaned_data['password2'],
-                            user_type=self.cleaned_data['user_type'])
-        user.set_name(self.cleaned_data['first_name'], self.cleaned_data['last_name'])
+                            user_type=self.cleaned_data['user_type'],
+                            first_name=self.cleaned_data['first_name'],
+                            last_name=self.cleaned_data['last_name'])
         user.save()
         return user
+
+# Edit User Form
+class EditUserForm(forms.Form):
+    pass
 
 
 # Delete Form
 class DeleteUserForm(forms.Form):
     email = forms.CharField(label='Confirm email')
 
-    # TODO: Delete user
     def delete_user(self):
         CUser.get_user(email=self.cleaned_data['email']).delete()
 

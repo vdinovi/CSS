@@ -5,8 +5,8 @@ from css.models import *
 class AvailabilityTestCase(TestCase): 
     # Utility Functions 
     def create_faculty(self, email='email@email.com', password='password#0',
-                       user_type='faculty'):
-        return CUser.create(email, password, user_type)
+                       user_type='faculty', first_name='blah', last_name='blah'):
+        return CUser.create(email, password, user_type, first_name, last_name)
 
     def setUp(self):
         self.create_faculty()
@@ -31,25 +31,21 @@ class AvailabilityTestCase(TestCase):
         self.assertEquals(availability.level, "unavailable")
         
     def test_availability_invalid_faculty_id(self):
-        self.assertRaises(ValidationError, Availability.create, "email_unique@email.com", None, None, None, None)
+        self.assertRaises(ObjectDoesNotExist, Availability.create, "email_unique@email.com", None, None, None, None)
 
     def test_availability_invalid_days_of_week(self):
         self.assertRaises(ValidationError, Availability.create, "email@email.com", "HELLO", None, None, None)
 
     def test_availability_invalid_start_time(self):
-        # TODO: add actual test for invalid start time
         self.assertRaises(ValidationError, Availability.create, "email@email.com", "MWF", None, "12:00", "available")
 
     def test_availability_invalid_end_time(self):
-        # TODO: add actual test for invalid end time
         self.assertRaises(ValidationError, Availability.create, "email@email.com", "TR", "12:00 AM", None, None)
 
     def test_availability_invalid_level1(self):
-        # TODO: add actual test for invalid level
         self.assertRaises(ValidationError, Availability.create, "email@email.com", "MWF", "10:00", "12:00", None)
 
     def test_availability_invalid_level2(self):
-        # TODO: add actual test for invalid level
         self.assertRaises(ValidationError, Availability.create, "email@email.com", "MWF", "10:00", "12:00", "ew")
 
 
