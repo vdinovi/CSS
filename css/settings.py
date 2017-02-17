@@ -151,7 +151,7 @@ EMAIL_HOST_PASSWORD='invisocss'
 EMAIL_USE_TLS=True
 
 # Department
-from css.util import DepartmentSettings
+from util import DepartmentSettings
 if not os.path.exists('department_settings.json'):
     DepartmentSettings().save_settings()
 DEPARTMENT_SETTINGS = DepartmentSettings.load_settings()
