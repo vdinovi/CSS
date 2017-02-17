@@ -9,7 +9,6 @@ from .models import *
 from .forms import *
 import MySQLdb
 
-
 # ---------------------------
 # --  Method-Based Views   --
 # ---------------------------
@@ -126,7 +125,6 @@ def LogoutView(request):
 # @update 2/2/17
 def RoomsView(request):
     res = HttpResponse()
-
     if request.method == "GET":
         return render(request, 'rooms.html', {
                 'room_list': Room.objects.filter(),
@@ -165,7 +163,6 @@ def RoomsView(request):
     else:
         res.status_code = 400
     return res
-
 
 #  Courses View
 # @descr
