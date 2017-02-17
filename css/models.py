@@ -8,9 +8,7 @@ from django.db import IntegrityError
 from django.core.exceptions import ValidationError, ObjectDoesNotExist
 from util import DepartmentSettings
 
-# ---------- User Models ----------
-
-# System user class,
+# System User class,
 # Wrapper for django builtin class, contains user + application specific data
 class CUser(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
@@ -60,31 +58,25 @@ class CUser(models.Model):
         return user
        
     @classmethod
-    def get_user(cls, email):
+    def get_user(cls, email): # Throws ObjectDoesNotExist
         return cls.objects.get(user__username=email)
 
     @classmethod
-    def get_faculty(cls, email):
+    def get_faculty(cls, email): # Throws ObjectDoesNotExist
         return cls.objects.get(user__username=email, user_type='faculty')
 
     @classmethod
-    def get_all_faculty(cls):
+    def get_all_faculty(cls): 
         return cls.objects.filter(user_type='faculty')
 
     @classmethod
-    def get_scheduler(cls, email):
+    def get_scheduler(cls, email): # Throws ObjectDoesNotExist
         return cls.objects.get(user__username=email, user_type='scheduler')
 
     @classmethod
     def get_all_schedulers(cls):
         return cls.objects.filter(user_type='scheduler')
- 
-    def set_name(self, first, last):
-        if first:
-            self.user.first_name = first
-        if last:
-            self.user.last_name = last
-        self.user.save()
+
 
 class FacultyDetails(models.Model):
     # The user_id uses the User ID as a primary key.
@@ -161,8 +153,20 @@ class Course(models.Model):
         self.description = description
         self.save()
 
+    def get_all_section_types(self):
+        return WorkInfo.filter(course=self)
+
+    def get_section_type(self, section_type_name): # Throws ObjectDoesNotExist, MultipleObjectsReturned
+        section_type = SectionType.get_section_type(section_type_name)
+        WorkInfo.objects.get(course=self, section_type=section_type)
+
+    def add_section_type(self, section_type_name, work_units, work_hours): # Throws ObjectDoesNotExist
+        section_type = SectionType.get_section_type(section_type_name)
+        WorkInfo.create(self, section_type, work_units, work_hours)
+
 
 class SectionType(models.Model):
+    # @TODO should probably be called 'name', SectionType.section_type is confusing
     section_type = models.CharField(max_length=32) # eg. lecture or lab
 
     @classmethod
@@ -187,6 +191,12 @@ class WorkInfo(models.Model):
     work_units = models.IntegerField(default=0)
     work_hours = models.IntegerField(default=0)
 
+    @classmethod
+    def create(cls, course, section_type, work_units, work_hours):
+        return cls(course=course, section_type=section_type,
+                   work_units=work_units, work_hours=work_hours)
+
+
 class Availability(models.Model):
     class Meta: 
         unique_together = (("faculty_member", "days_of_week", "start_time"),)
@@ -210,6 +220,7 @@ class Availability(models.Model):
         else:
             return cls(faculty_member=faculty, days_of_week=days, start_time=start, end_time=end, level=level)
 
+
 # ---------- Scheduling Models ----------
 # Schedule is a container for scheduled sections and correponds to exactly 1 academic term
 class Schedule(models.Model):
@@ -229,6 +240,7 @@ class Schedule(models.Model):
         else:
             return cls(academic_term, state)
 
+
 # Section is our systems primary scheduled object
 # Each section represents a department section that is planned for a particular schedule
 class Section(models.Model):
@@ -247,6 +259,7 @@ class Section(models.Model):
     fault = models.CharField(max_length=1, default='n') # y or n
     fault_reason = models.CharField(max_length=8, null=True, default=None) # faculty or room
 
+    
     @classmethod
     def create(
         cls, schedule, course, start_time, end_time, days, faculty, room,
@@ -281,27 +294,6 @@ class Section(models.Model):
                 section_capacity, students_enrolled, students_waitlisted, conflict,
                 conflict_reason, fault, fault_reason)
 
-    # this function takes in a dictionary object of filters that has been serialized from a JSON object based on what the user has selected
-    # for filtering by time, it will only take in an array of pairs (an array of 2-piece arrays) so that it will at least have a start time and end time.
-    #### there can also be chunks of time, so there are multiple start and end times
-    # for any other filter, we will pass on the keyword and array argument as it is to the filter. 
-    def filter(filters):
-        sections = Section.objects
-        for key, value in filters.iteritems():
-            if key == time:
-                # START
-                # reduce(lambda q, f: q | Q(creator=f), filters, Q())
-                sections = sections.filter(reduce(lambda query, filter: query | (Q(start_time >= filter[0]) & Q(end_time <= filter[1])), value, Q()))
-                # OR 
-                for pair in value:
-                    sections = sections.filter(start_time >= pair[0]).filter(end_time <= pair[1])
-                # END
-            else:
-                sections = sections.filter(key=value)
-
-
-                
-     
 
 
 
