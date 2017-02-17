@@ -18,18 +18,35 @@ class FacultyTestCase(TestCase):
         return CUser.get_faculty(email=email)
 
     @staticmethod
+    def get_faculty_details(faculty):
+        return FacultyDetails.objects.get(faculty=faculty)
+
+    @staticmethod
     def get_all_faculty():
         return CUser.objects.filter(user_type='faculty')
 
+    @staticmethod
+    def verify_faculty_details(self, faculty, work_units, work_hours, changed_prefs):
+        details = self.get_faculty_details(faculty)
+        self.assertTrue(isinstance(details, FacultyDetails))
+        self.assertEqual(details.faculty, faculty)
+        self.assertEqual(details.target_work_units, work_units)
+        self.assertEqual(details.target_work_hours, work_hours)
+        self.assertEqual(details.changed_preferences, changed_prefs)
+
+    @staticmethod
     def verify_faculty(self, faculty, email, password, first_name, last_name):
+        # Verify User
         self.assertTrue(isinstance(faculty, CUser))
         self.assertEqual(faculty.user.email, email)
         self.assertTrue(faculty.user.check_password(password))
         self.assertEqual(faculty.user_type, 'faculty')
         self.assertEqual(faculty.user.first_name, first_name)
         self.assertEqual(faculty.user.last_name, last_name)
+        # Verify Details
+        verify_faculty_details(faculty, 0, 0)
 
-    # begin tests
+    # Begin tests
     def test_valid_faculty(self):     
         faculty = self.create_faculty()
         self.verify_faculty(faculty, 'email@email.com', 'password#0', 'blah', 'blah')
@@ -46,6 +63,7 @@ class FacultyTestCase(TestCase):
         faculty1.delete()
         faculty2.delete()
         self.assertRaises(ObjectDoesNotExist, self.get_faculty, email='email@email.com')
+        self.assertRaises(ObjectDoesNotExist, self.get_faculty_details, faculty=faculty)
 
     # Email
     def test_valid_email_1(self):
@@ -112,12 +130,28 @@ class FacultyTestCase(TestCase):
         faculty1.delete()
         faculty2.delete()
 
+    # FacultyDetails
+    def test_change_faculty_details(self):
+        faculty = self.create_faculty()
+        details = self.get_faculty_details(faculty)
+        self.assertTrue(details is not False)
+        self.assertEqual(details.changed_preferences, 'n')
+        self.assertEqual(details.target_work_hours, 0)
+        self.assertEqual(details.target_work_units, 0)
+        details.change_details(new_work_units=4, new_work_hours=8)
+        self.assertEqual(details.changed_preferences, 'y')
+        self.assertEqual(details.target_work_hours, 8)
+        self.assertEqual(details.target_work_units, 4)
+        faculty.delete()
+        self.assertRaises(ObjectDoesNotExist, self.get_faculty_details, faculty=faculty)
+        self.assertRaises(ObjectDoesNotExist, self.get_faculty, email="email@email.com")
+
+
     # DoesNotExist
-    def test_invalid_get_faculty(self):
+    def test_invalid_faculty(self):
         self.assertRaises(ObjectDoesNotExist, self.get_faculty, email='aaaaaaaaa')
 
-    def test_invalid_get_faculty(self):
-        self.create_faculty()
+    def test_invalid_faculty(self):
         self.assertRaises(ObjectDoesNotExist, self.get_faculty, email='aaaaaaaaa')
 
     # Duplicate
@@ -128,8 +162,12 @@ class FacultyTestCase(TestCase):
     # Delete
     def test_delete_faculty(self):
         faculty = self.create_faculty(email='email@email.com')
+        details = self.get_faculty_details(faculty)
         self.assertTrue(faculty in self.get_all_faculty())
         faculty.delete()
         self.assertTrue(faculty not in self.get_all_faculty())
+        self.assertRaises(ObjectDoesNotExist, self.get_faculty_details, faculty=faculty)
         self.assertRaises(ObjectDoesNotExist, self.get_faculty, email='email@email.com')
+
+
 

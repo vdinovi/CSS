@@ -53,8 +53,8 @@ class CUser(models.Model):
                                                  password=cls.validate_password(password),
                                                  first_name=cls.validate_first_name(first_name),
                                                  last_name=cls.validate_last_name(last_name)),
-                   user_type=cls.validate_user_type(user_type))
-        user.save()
+                   user_type=cls.validate_user_type(user_type)).save()
+        FacultyDetails.create(user, 0, 0).save()
         return user
        
     @classmethod
@@ -81,17 +81,25 @@ class CUser(models.Model):
 class FacultyDetails(models.Model):
     # The user_id uses the User ID as a primary key.
     # Whenever this User is deleted, this entry in the table will also be deleted
-    user = models.OneToOneField(CUser, on_delete=models.CASCADE, blank=False)
-    target_workload = models.IntegerField() # in hours
+    faculty = models.OneToOneField(CUser, on_delete=models.CASCADE, blank=False)
+    target_work_units = models.IntegerField(default=0, null=True) # in units
+    target_work_hours = models.IntegerField(default=0, null=True) # in hours
     changed_preferences = models.CharField(max_length=1) # 'y' or 'n' 
 
     @classmethod
-    def create(cls, user, target_workload):
-        faculty_details = cls(user=user, target_workload=target_workload,
-                              changed_preferences='y')
+    def create(cls, faculty, target_work_units, target_work_hours):
+        return cls(faculty=faculty, target_work_units=target_work_units,
+                   target_work_hours=target_work_hours, changed_preferences='n')
 
-    def set_changed_preferences(self, changed):
-        self.changed_preferences = changed
+    def change_details(self, new_work_units=None, new_work_hours=None):
+        if new_work_units:
+            self.target_work_units = new_work_units
+        if new_work_hours:
+            self.target_work_hours = new_work_hours
+        self.changed_preferences = 'y' 
+
+    # @TODO Function to yes changed_preferences to 'n'? Also consider naming it something
+    #       more indicatedve -> preferences_have_changed? has_changed_preferences? etc.
 
 # ---------- Resource Models ----------
 # Room represents department rooms
@@ -199,8 +207,8 @@ class WorkInfo(models.Model):
 
 class Availability(models.Model):
     class Meta: 
-        unique_together = (("faculty_member", "days_of_week", "start_time"),)
-    faculty_member = models.OneToOneField(CUser, on_delete=models.CASCADE, null=True) 
+        unique_together = (("faculty", "days_of_week", "start_time"),)
+    faculty = models.OneToOneField(CUser, on_delete=models.CASCADE, null=True) 
     days_of_week = models.CharField(max_length=16) # MWF or TR
     start_time = models.TimeField()
     end_time = models.TimeField()
