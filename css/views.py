@@ -30,7 +30,7 @@ def RegistrationView(request):
                 #res.status_code = 200
                 #return render(request, 'home.html')
                 return HttpResponseRedirect("/home")
-            except ValidationError as e: 
+            except ValidationError as e:
                 res.status_code = 400
                 res.reason_phrase = "Invalid password entry"
                 return HttpResponseRedirect("/register")
@@ -128,26 +128,31 @@ def RoomsView(request):
     res = HttpResponse()
 
     if request.method == "GET":
-        print("if")
         return render(request, 'rooms.html', {
                 'room_list': Room.objects.filter(),
                 'add_room_form': AddRoomForm(),
-                'delete_room_form': DeleteRoomForm()
+                'delete_room_form': DeleteRoomForm(),
+                'edit_room_form': EditRoomForm(auto_id='edit_room_%s')
             });
     elif request.method == "POST" and 'add-form' in request.POST:
         form = AddRoomForm(request.POST)
         if form.is_valid():
-            print request.POST
+            form.save()
+            res.status_code = 200
+            return HttpResponseRedirect('/home/rooms')
+        else:
+            res.status_code = 400
+    elif request.method == "POST" and 'edit-form' in request.POST:
+        form = EditRoomForm(request.POST)
+        if form.is_valid():
             form.save()
             res.status_code = 200
             return HttpResponseRedirect('/home/rooms')
         else:
             res.status_code = 400
     elif request.method == "POST" and 'delete-form' in request.POST:
-        print("POST delete")
         form = DeleteRoomForm(request.POST)
         if form.is_valid():
-            print('NYI')
             print request.POST
             form.deleteRoom()
             res.status_code = 200
@@ -155,7 +160,6 @@ def RoomsView(request):
         else:
             res.status_code = 400
     elif request.method == "POST":
-        print("post")
         print request.POST
 
     else:
@@ -234,12 +238,12 @@ def FacultyView(request):
     elif request.method == "POST" and 'invite-form' in request.POST:
         form = InviteUserForm(request.POST)
         if form.is_valid():
-            form.send_invite('faculty')
+            form.send_invite('faculty',request)
             res.status_code = 200
         else:
             print form.errors
             res.status_code = 400
-    elif reqest.method == "POST" and 'edit-form' in request.POST:
+    elif request.method == "POST" and 'edit-form' in request.POST:
         res.status_code = 400
         res.reason_phrase = "NYI"
     elif request.method == "POST" and 'delete-form' in request.POST:

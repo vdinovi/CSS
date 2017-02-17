@@ -6,7 +6,7 @@ import MySQLdb
 import re
 from django.db import IntegrityError
 from django.core.exceptions import ValidationError, ObjectDoesNotExist
-import settings.DepartmentSettings
+from util import DepartmentSettings
 
 # ---------- User Models ----------
 
@@ -243,9 +243,9 @@ class Section(models.Model):
     students_enrolled = models.IntegerField(default=0)
     students_waitlisted = models.IntegerField(default=0)
     conflict = models.CharField(max_length=1, default='n')  # y or n
-    conflict_reason = models.CharField(max_length=8, null=true, default=None) # faculty or room
+    conflict_reason = models.CharField(max_length=8, null=True, default=None) # faculty or room
     fault = models.CharField(max_length=1, default='n') # y or n
-    fault_reason = models.CharField(max_length=8, null=true, default=None) # faculty or room
+    fault_reason = models.CharField(max_length=8, null=True, default=None) # faculty or room
 
     @classmethod
     def create(
