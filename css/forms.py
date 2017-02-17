@@ -17,12 +17,13 @@ class InviteUserForm(forms.Form):
 
     def send_invite(self, usertype):
         name = self.cleaned_data['first_name'] + self.cleaned_data['last_name']
+        email = self.cleaned_data['email']
         print name
-        print self.data['email']
-        #send_mail('Invite to register for CSS',
-        #          name + ', you have been invited to register for CSS',
-        #          'registration@inviso-css',
-        #           [self.cleaned_data['email']])
+        print email
+        send_mail('Invite to register for CSS',
+                 name + ', you have been invited to register for CSS',
+                 'registration@inviso-css',
+                  [self.cleaned_data['email']])
 
 # Registration Form
 class RegisterUserForm(forms.Form):

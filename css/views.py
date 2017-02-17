@@ -79,23 +79,25 @@ from django.contrib.auth import authenticate
 def LoginView(request):
     res = HttpResponse()
     if request.method == "GET":
+        storage = messages.get_messages(request)
+        for msg in storage:
+            pass
         return render(request, 'login.html', {'login_form':LoginForm()})
     elif request.method == "POST":
         form = LoginForm(request.POST)
         if form.is_valid():
             email = form.cleaned_data['email']
             password = form.cleaned_data['password']
-            print(email)
-            print(password)
             user = authenticate(username=email, password=password)
             print(user)
             if user is not None:
                 login(request,user)
                 return HttpResponseRedirect('/home')
             else:
-                return render_to_response('login.html', {'login_form':LoginForm()})
-        #else:
-         #   res.status_code = 400
+                messages.error(request, "Invalid login credentials. Please try again.")
+                return render(request,'login.html', {'login_form':LoginForm(),'errors': messages.get_messages(request)})
+        else:
+            res.status_code = 400
     else:
         res.status_code = 400
     return res
