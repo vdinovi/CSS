@@ -6,3 +6,5 @@ db.sqlite3
 .cssenv
 css/staticfiles
 css/migrations
+css/.DS_Store
+css/templates/.DS_Store
