@@ -30,7 +30,7 @@ def RegistrationView(request):
                 #res.status_code = 200
                 #return render(request, 'home.html')
                 return HttpResponseRedirect("/home")
-            except ValidationError as e: 
+            except ValidationError as e:
                 res.status_code = 400
                 res.reason_phrase = "Invalid password entry"
                 return HttpResponseRedirect("/register")
@@ -74,28 +74,44 @@ def SchedulingView(request):
 def LandingView(request):
     return render(request,'landing.html')
 
+def SettingsView(request):
+    res = HttpResponse()
+    if request.method == "GET":
+        return render(request, 'settings.html', {
+                'section_type_list': SectionType.objects.filter(),
+                # 'department_name': DepartmentSettings.objects.filter()
+            });
+    elif request.method == "POST":
+        form = AddCourseForm(request.POST);
+        if form.is_valid():
+            form.addCourse();
+            res.status_code = 200
+    return render(request, 'settings.html')
+
 from .forms import LoginForm
 from django.contrib.auth import authenticate
 def LoginView(request):
     res = HttpResponse()
     if request.method == "GET":
+        storage = messages.get_messages(request)
+        for msg in storage:
+            pass
         return render(request, 'login.html', {'login_form':LoginForm()})
     elif request.method == "POST":
         form = LoginForm(request.POST)
         if form.is_valid():
             email = form.cleaned_data['email']
             password = form.cleaned_data['password']
-            print(email)
-            print(password)
             user = authenticate(username=email, password=password)
             print(user)
             if user is not None:
                 login(request,user)
                 return HttpResponseRedirect('/home')
             else:
-                return render_to_response('login.html', {'login_form':LoginForm()})
-        #else:
-         #   res.status_code = 400
+                messages.error(request, "Invalid login credentials. Please try again.")
+                return render(request,'login.html', {'login_form':LoginForm(),'errors': messages.get_messages(request)})
+        else:
+            res.status_code = 400
     else:
         res.status_code = 400
     return res
@@ -112,26 +128,31 @@ def RoomsView(request):
     res = HttpResponse()
 
     if request.method == "GET":
-        print("if")
         return render(request, 'rooms.html', {
                 'room_list': Room.objects.filter(),
                 'add_room_form': AddRoomForm(),
-                'delete_room_form': DeleteRoomForm()
+                'delete_room_form': DeleteRoomForm(),
+                'edit_room_form': EditRoomForm(auto_id='edit_room_%s')
             });
     elif request.method == "POST" and 'add-form' in request.POST:
         form = AddRoomForm(request.POST)
         if form.is_valid():
-            print request.POST
+            form.save()
+            res.status_code = 200
+            return HttpResponseRedirect('/home/rooms')
+        else:
+            res.status_code = 400
+    elif request.method == "POST" and 'edit-form' in request.POST:
+        form = EditRoomForm(request.POST)
+        if form.is_valid():
             form.save()
             res.status_code = 200
             return HttpResponseRedirect('/home/rooms')
         else:
             res.status_code = 400
     elif request.method == "POST" and 'delete-form' in request.POST:
-        print("POST delete")
         form = DeleteRoomForm(request.POST)
         if form.is_valid():
-            print('NYI')
             print request.POST
             form.deleteRoom()
             res.status_code = 200
@@ -139,7 +160,6 @@ def RoomsView(request):
         else:
             res.status_code = 400
     elif request.method == "POST":
-        print("post")
         print request.POST
 
     else:
@@ -185,19 +205,18 @@ def SchedulersView(request):
             res.status_code = 200
         else:
             res.status_code = 400
+    elif reqest.method == "POST" and 'edit-form' in request.POST:
+        res.status_code = 400
+        res.reason_phrase = "NYI"
     elif request.method == "POST" and 'delete-form' in request.POST:
         form = DeleteUserForm(request.POST)
         if form.is_valid():
-            scheduler = CUser.objects.filter(user__id=form.cleaned_data['id'])
-            if scheduler is False:
-                res.status_code = 404
-                res.reason_phrase = "User with that ID does not exist"
-            else:
-                scheduler.delete()
+            try:
+                form.delete_user()
                 res.status_code = 200
-
-            print('NYI')
-            res.status_code = 200
+            except ObjectDoesNotExist:
+                res.status_code = 404
+                res.reason_phrase = "User not found"
         else:
             res.status_code = 400
     else:
@@ -219,10 +238,14 @@ def FacultyView(request):
     elif request.method == "POST" and 'invite-form' in request.POST:
         form = InviteUserForm(request.POST)
         if form.is_valid():
-            form.send_invite('faculty')
+            form.send_invite('faculty',request)
             res.status_code = 200
         else:
+            print form.errors
             res.status_code = 400
+    elif request.method == "POST" and 'edit-form' in request.POST:
+        res.status_code = 400
+        res.reason_phrase = "NYI"
     elif request.method == "POST" and 'delete-form' in request.POST:
         form = DeleteUserForm(request.POST)
         if form.is_valid():
@@ -235,7 +258,9 @@ def FacultyView(request):
         else:
             res.status_code = 400
             res.reason_phrase = "Invalid form entry"
+
     else:
+        print "didnt even post"
         res.status_code = 400
     return res
 

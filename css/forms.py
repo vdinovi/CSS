@@ -2,29 +2,44 @@ from django import forms
 from django.core.mail import send_mail
 from css.models import CUser, Room
 from django.http import HttpResponseRedirect
+#from django.contrib.sites.models import Site
 import re
 
-#Login Form
+#  Login Form
 class LoginForm(forms.Form):
-	email = forms.EmailField()
-	password = forms.CharField(label='Password', widget=forms.PasswordInput)
+    email = forms.EmailField()
+    password = forms.CharField(label='Password', widget=forms.PasswordInput)
+
+    #@TODO validate pass?
+    @staticmethod
+    def validate_password(password):
+        pass
 
 #  Invite Form
 class InviteUserForm(forms.Form):
-    email = forms.EmailField()
+    #@TODO Email field not working -> is_valid fails
+    #email = forms.EmailField()
+    email = forms.CharField()
     first_name = forms.CharField()
     last_name = forms.CharField()
 
-    def send_invite(self, usertype):
-        name = self.cleaned_data['first_name'] + self.cleaned_data['last_name']
-        print name
-        print self.data['email']
-        #send_mail('Invite to register for CSS',
-        #          name + ', you have been invited to register for CSS',
-        #          'registration@inviso-css',
-        #           [self.cleaned_data['email']])
+    #@TODO send registraiton link in email
+    def send_invite(self, usertype, request):
+        first_name = self.cleaned_data['first_name']
+        last_name = self.cleaned_data['last_name']
+        name = first_name + ' ' + last_name
+        email = self.cleaned_data['email']
+        #your_domain = Site.objects.get_current().domain
+        link = 'http://localhost:8000/register?'+first_name + '+' + last_name +'&type='+usertype
+        send_mail('Invite to register for CSS',
+                  name + """, you have been invited to register for CSS. 
+                  Please register using the following link: """ + link,
+                  'registration@inviso-css',
+                  [self.cleaned_data['email']])
 
 # Registration Form
+# @TODO on load, pull fields from query string -> show failure if field not able to be loaded:
+#       Fields to pull: email, first_name, last_name, user_type
 class RegisterUserForm(forms.Form):
     first_name = forms.CharField()
     last_name = forms.CharField()
@@ -46,7 +61,6 @@ class RegisterUserForm(forms.Form):
 class EditUserForm(forms.Form):
     pass
 
-
 # Delete Form
 class DeleteUserForm(forms.Form):
     email = forms.CharField(label='Confirm email')
@@ -62,32 +76,36 @@ class AddRoomForm(forms.Form):
     equipment = forms.CharField()
 
     def save(self):
-		print "save"
-		nameString = self.cleaned_data['roomName']
-		print "namestring" + nameString
-		room = Room.objects.filter(name=nameString)
-		if room is None:
-			print "no room"
-			room = Room.objects.create(name=self.cleaned_data['name'], description=self.cleaned_data['description'], capacity=self.cleaned_data['capacity'], notes=self.cleaned_data['notes'], equipment=self.cleaned_data['equipment'])
-		else:
-			print "room found"
-			room.name = self.cleaned_data['name']
-			description = self.cleaned_data['description']
-			capacity = self.cleaned_data['capacity']
-			notes = self.cleaned_data['notes']
-			equipment = self.cleaned_data['equipment']
-
+		nameString = self.cleaned_data['name']
+		resultRooms = Room.objects.filter(name=nameString)
+		room = Room.objects.create(name=self.cleaned_data['name'], description=self.cleaned_data['description'], capacity=self.cleaned_data['capacity'], notes=self.cleaned_data['notes'], equipment=self.cleaned_data['equipment'])
 		room.save()
 		return room
+
+class EditRoomForm(forms.Form):
+	name = forms.CharField(widget=forms.HiddenInput(), initial='defaultRoom')
+	description = forms.CharField()
+	capacity = forms.IntegerField()
+	notes = forms.CharField()
+	equipment = forms.CharField()
+
+	def save(self):
+		nameString = self.cleaned_data['name']
+		resultRooms = Room.objects.filter(name=nameString)
+		room = resultRooms[0]
+		room.name = self.cleaned_data['name']
+		room.description = self.cleaned_data['description']
+		room.capacity = self.cleaned_data['capacity']
+		room.notes = self.cleaned_data['notes']
+		room.equipment = self.cleaned_data['equipment']
+		room.save()
 
 class DeleteRoomForm(forms.Form):
 	roomName = forms.CharField(widget=forms.HiddenInput(), initial='defaultRoom')
 	def deleteRoom(self):
 		nameString=self.cleaned_data['roomName']
-		print("name: " + nameString)
-		print("delete1")
 		Room.objects.filter(name=nameString).delete()
-		return HttpResponseRedirect('/')
+		return
 
 # Course Form
 class AddCourseForm(forms.Form):
