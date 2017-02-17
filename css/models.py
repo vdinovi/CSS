@@ -6,6 +6,7 @@ import MySQLdb
 import re
 from django.db import IntegrityError
 from django.core.exceptions import ValidationError, ObjectDoesNotExist
+import settings.DepartmentSettings
 
 # ---------- User Models ----------
 
@@ -235,16 +236,54 @@ class Section(models.Model):
     course = models.OneToOneField(Course, on_delete=models.CASCADE, unique=True)
     start_time = models.TimeField()
     end_time = models.TimeField()
-    days = models.CharField(max_length = 8)    # MWF or TR
-    faculty = models.ForeignKey(CUser, null = True, on_delete = models.SET_NULL, default = models.SET_NULL)
-    room = models.ForeignKey(Room, null = True, on_delete = models.SET_NULL, default = models.SET_NULL)
-    section_capacity = models.IntegerField(default = 0)
-    students_enrolled = models.IntegerField(default = 0)
-    students_waitlisted = models.IntegerField(default = 0)
-    conflict = models.CharField(max_length = 1)  # y or n
-    conflict_reason = models.CharField(max_length = 8) # faculty or room
-    fault = models.CharField(max_length = 1) # y or n
-    fault_reason = models.CharField(max_length = 8) # faculty or room
+    days = models.CharField(max_length=8)    # MWF or TR
+    faculty = models.ForeignKey(CUser, null=True, on_delete=models.SET_NULL, default=models.SET_NULL)
+    room = models.ForeignKey(Room, null=True, on_delete=models.SET_NULL, default=models.SET_NULL)
+    section_capacity = models.IntegerField(default=0)
+    students_enrolled = models.IntegerField(default=0)
+    students_waitlisted = models.IntegerField(default=0)
+    conflict = models.CharField(max_length=1, default='n')  # y or n
+    conflict_reason = models.CharField(max_length=8, null=true, default=None) # faculty or room
+    fault = models.CharField(max_length=1, default='n') # y or n
+    fault_reason = models.CharField(max_length=8, null=true, default=None) # faculty or room
+
+    
+    @classmethod
+    def create(
+        cls, schedule, course, start_time, end_time, days, faculty, room,
+        section_capacity, students_enrolled, students_waitlisted, conflict, 
+        conflict_reason, fault, fault_reason):
+        schedule = Schedule.objects.get(id=schedule)
+        course = Course.objects.get(id=course)
+        faculty = Faculty.objects.get(id=faculty)
+        room = Room.objects.get(id=room)
+        if start_time < DepartmentSettings.start_time:
+            raise ValidationError("Invalid start time for department.")
+        if end_time > DepartmentSettings.end_time or end_time < start_time:
+            raise ValidationError("Invalid end time for department.")
+        if days != "MWF" and days != "TR":
+            raise ValidationError("Invalid days of the week.")
+        if section_capacity < 0:
+            raise ValidationError("Invalid section capacity.")
+        if students_enrolled < 0:
+            raise ValidationError("Invalid number of enrolled students.")
+        if students_waitlisted < 0:
+            raise ValidationError("Invalid number of students waitlisted.")
+        if conflict != 'y' or conflict != 'n':
+            raise ValidationError("Invalid value for conflict.")
+        if conflict_reason != "faculty" or conflict_reason != "room":
+            raise ValidationError("Invalid conflict reason.")
+        if fault != 'y' or fault != 'n':
+            raise ValidationError("Invalid value for fault.")
+        if fault_reason != "faculty" or fault_reason != "room":
+            raise ValidationError("Invalid fault reason.")
+        return cls(
+                schedule, course, start_time, end_time, days, faculty, room,
+                section_capacity, students_enrolled, students_waitlisted, conflict,
+                conflict_reason, fault, fault_reason)
+
+
+
 
 class FacultyCoursePreferences(models.Model):
     faculty = models.ForeignKey(CUser, on_delete = models.CASCADE)

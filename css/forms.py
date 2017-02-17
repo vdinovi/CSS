@@ -16,6 +16,8 @@ class LoginForm(forms.Form):
 
 #  Invite Form
 class InviteUserForm(forms.Form):
+
+    email = forms.EmailField()
     #@TODO Email field not working -> is_valid fails
     #email = forms.EmailField()
     email = forms.CharField()
@@ -25,6 +27,9 @@ class InviteUserForm(forms.Form):
     #@TODO send registraiton link in email
     def send_invite(self, usertype):
         name = self.cleaned_data['first_name'] + self.cleaned_data['last_name']
+        email = self.cleaned_data['email']
+        print name
+        print email
         send_mail('Invite to register for CSS',
                   name + ', you have been invited to register for CSS',
                   'registration@inviso-css',

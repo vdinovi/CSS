@@ -6,4 +6,9 @@ db.sqlite3
 .cssenv
 css/staticfiles
 css/migrations
+<<<<<<< HEAD
 department_settings.json
+=======
+css/.DS_Store
+css/templates/.DS_Store
+>>>>>>> 083f73379ea65c898fe55b6df131460c77ee5d24
