@@ -4,27 +4,35 @@ from css.models import CUser, Room
 from django.http import HttpResponseRedirect
 import re
 
-#Login Form
+#  Login Form
 class LoginForm(forms.Form):
-	email = forms.EmailField()
-	password = forms.CharField(label='Password', widget=forms.PasswordInput)
+    email = forms.EmailField()
+    password = forms.CharField(label='Password', widget=forms.PasswordInput)
+
+    #@TODO validate pass?
+    @staticmethod
+    def validate_password(password):
+        pass
 
 #  Invite Form
 class InviteUserForm(forms.Form):
-    email = forms.EmailField()
+    #@TODO Email field not working -> is_valid fails
+    #email = forms.EmailField()
+    email = forms.CharField()
     first_name = forms.CharField()
     last_name = forms.CharField()
 
+    #@TODO send registraiton link in email
     def send_invite(self, usertype):
         name = self.cleaned_data['first_name'] + self.cleaned_data['last_name']
-        print name
-        print self.data['email']
-        #send_mail('Invite to register for CSS',
-        #          name + ', you have been invited to register for CSS',
-        #          'registration@inviso-css',
-        #           [self.cleaned_data['email']])
+        send_mail('Invite to register for CSS',
+                  name + ', you have been invited to register for CSS',
+                  'registration@inviso-css',
+                  [self.cleaned_data['email']])
 
 # Registration Form
+# @TODO on load, pull fields from query string -> show failure if field not able to be loaded:
+#       Fields to pull: email, first_name, last_name, user_type
 class RegisterUserForm(forms.Form):
     first_name = forms.CharField()
     last_name = forms.CharField()
