@@ -71,7 +71,7 @@
         <div class="modal-content">
           <div class="modal-header">
             <button type="button" class="close" data-dismiss="modal">&times;</button>
-            <h4 class="modal-title">Add/Edit Room</h4>
+            <h4 class="modal-title">Add Room</h4>
           </div>
           <div class="modal-body">
             <form method="POST" action="" novalidate>{% csrf_token %}
@@ -127,6 +127,7 @@
       }
       function updateRoom(name){
         var table = document.getElementById("table");
+        console.log(name);
         for (var i = 0, row; row = table.rows[i]; i++) {
           if(row.cells[1].innerHTML == name)
           {
