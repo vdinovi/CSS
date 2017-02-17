@@ -287,12 +287,17 @@ class Section(models.Model):
     # for any other filter, we will pass on the keyword and array argument as it is to the filter. 
     def filter(filters):
         sections = Section.objects
-        for k, v in filters.iteritems():
-            if k == time:
-                for pair in v:
+        for key, value in filters.iteritems():
+            if key == time:
+                # START
+                # reduce(lambda q, f: q | Q(creator=f), filters, Q())
+                sections = sections.filter(reduce(lambda query, filter: query | (Q(start_time >= filter[0]) & Q(end_time <= filter[1])), value, Q()))
+                # OR 
+                for pair in value:
                     sections = sections.filter(start_time >= pair[0]).filter(end_time <= pair[1])
+                # END
             else:
-                sections = sections.filter(k=v)
+                sections = sections.filter(key=value)
 
 
                 
