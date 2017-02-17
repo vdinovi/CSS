@@ -74,6 +74,20 @@ def SchedulingView(request):
 def LandingView(request):
     return render(request,'landing.html')
 
+def SettingsView(request):
+    res = HttpResponse()
+    if request.method == "GET":
+        return render(request, 'settings.html', {
+                'section_type_list': SectionType.objects.filter(),
+                # 'department_name': DepartmentSettings.objects.filter()
+            });
+    elif request.method == "POST":
+        form = AddCourseForm(request.POST);
+        if form.is_valid():
+            form.addCourse();
+            res.status_code = 200
+    return render(request, 'settings.html')
+
 from .forms import LoginForm
 from django.contrib.auth import authenticate
 def LoginView(request):
