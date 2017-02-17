@@ -47,7 +47,7 @@
               <tr>
                 <td>
                   <button type="button" class="btn btn-info btn-xs" data-toggle="modal" data-target="#delete-room" onclick="setDeleteID('{{ room.name }}')"><span class="glyphicon glyphicon-minus"></span>&nbsp;</button>
-                  <button type="button" class="btn btn-info btn-xs" data-toggle="modal" data-target="#edit-room"><span onclick="updateRoom('{{ room.name }}')" class="glyphicon glyphicon-edit"></span>&nbsp;</button>
+                  <button type="button" class="btn btn-info btn-xs" data-toggle="modal" data-target="#edit-room" onclick="updateRoom('{{ room.name }}\')"><span class="glyphicon glyphicon-edit"></span>&nbsp;</button>
                 </td>
                 <td name="roomName">{{ room.name }}</td>
                 <td name="description">{{ room.description }}</td>
@@ -124,9 +124,13 @@
     <script>
       function setDeleteID(string){
         document.getElementById('id_roomName').value = string;
+        console.log(string)
+        console.log('value' + document.getElementById('id_roomName').value)
+        console.log('name' + document.getElementById('id_roomName').name)
       }
       function updateRoom(name){
         var table = document.getElementById("table");
+        name.replace("&#39;", "\"");
         console.log(name);
         for (var i = 0, row; row = table.rows[i]; i++) {
           if(row.cells[1].innerHTML == name)

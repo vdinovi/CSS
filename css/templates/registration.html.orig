@@ -30,23 +30,32 @@
   <body>
   {% include "navbar.html" %}
     <!-- REGISTRATION FORM -->
-	<div class="container">
+    <div class="container">
         <div class="row">
             <div class="col-sm-6 col-md-4 col-md-offset-4">
                 <h1 class="text-center login-title">Register</h1>
-                <div class="account-wall">          
-                 	<form method="POST" onSubmit="return validateRegisterForm()" name="register-form" id="regform">{% csrf_token %}
-                    	{{ registration_form.as_p }}
+                <div class="account-wall">                
+                      <div>
+<<<<<<< HEAD
+                        <form action="#" method="POST" onSubmit="return validateRegisterForm()" name="register-form" id="regform">{% csrf_token %}
+                          {{ registration_form.as_p }}
+                          <button type="submit" name="register-form" class="save btn register-btn">Submit</button>
+                      </div>           
+=======
+                        <form method="POST" onSubmit="return validateRegisterForm()" name="register-form" id="regform">{% csrf_token %}
+                        {{ registration_form.as_p }}
                         {% if errors %}
-                        	<ul class="messages">
-                            {% for message in errors %}
-                            	<li{% if message.tags %} class="{{ message.tags }}"{% endif %}>
-                            		{{ message }}
-                            	</li>
-                            {% endfor %}
+                            <ul class="messages">
+                                {% for message in errors %}
+                                <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>
+                                    {{ message }}
+                                </li>
+                                {% endfor %}
                             </ul>
                         {% endif %}      
-                 	<button type="submit" name="register-form" class="save btn register-btn">submit</button>
+                          <button type="submit" name="register-form" class="save btn register-btn">submit</button>
+                      </div>     
+>>>>>>> 7dca59fabde4259adaf88843a455da7047feb166
                 </div>
             </div>
         </div>

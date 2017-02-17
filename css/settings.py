@@ -149,3 +149,13 @@ EMAIL_PORT=587
 EMAIL_HOST_USER='invisocss309'
 EMAIL_HOST_PASSWORD='invisocss'
 EMAIL_USE_TLS=True
+
+# Department
+from util import DepartmentSettings
+if not os.path.exists('department_settings.json'):
+    DepartmentSettings().save_settings()
+DEPARTMENT_SETTINGS = DepartmentSettings.load_settings()
+
+
+
+

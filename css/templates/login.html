@@ -37,9 +37,18 @@
                 <input type="password" class="form-control" placeholder="Password" required> -->
                 
                 <div class="login-authenticate">
-            		<form method="POST" action="?" novalidate>{% csrf_token %}
+            		<form method="POST" >{% csrf_token %}
               		{{ login_form.as_p }}
-              		<button class="btn btn-lg btn-primary btn-block" type="submit"> Sign in</button>
+              		{% if errors %}
+                        	<ul class="messages">
+                            {% for message in errors %}
+                            	<li{% if message.tags %} class="{{ message.tags }}"{% endif %}>
+                            		{{ message }}
+                            	</li>
+                            {% endfor %}
+                            </ul>
+                        {% endif %}      
+              		<button type="submit" name="register-form" class="save btn register-btn">Sign In</button>
               	    </form>
           		</div>
                 <a href="/loginhelp.html" class="pull-right need-help">Need help? </a><span class="clearfix"></span>

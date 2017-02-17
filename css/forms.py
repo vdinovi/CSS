@@ -2,46 +2,68 @@ from django import forms
 from django.core.mail import send_mail
 from css.models import CUser, Room
 from django.http import HttpResponseRedirect
+import re
 
-#Login Form
+#  Login Form
 class LoginForm(forms.Form):
-	email = forms.EmailField()
-	password = forms.CharField(label='Password', widget=forms.PasswordInput)
+    email = forms.EmailField()
+    password = forms.CharField(label='Password', widget=forms.PasswordInput)
+
+    #@TODO validate pass?
+    @staticmethod
+    def validate_password(password):
+        pass
 
 #  Invite Form
 class InviteUserForm(forms.Form):
-    name = forms.CharField()
-    email = forms.EmailField()
 
+    email = forms.EmailField()
+    #@TODO Email field not working -> is_valid fails
+    #email = forms.EmailField()
+    email = forms.CharField()
+    first_name = forms.CharField()
+    last_name = forms.CharField()
+
+    #@TODO send registraiton link in email
     def send_invite(self, usertype):
+        name = self.cleaned_data['first_name'] + self.cleaned_data['last_name']
+        email = self.cleaned_data['email']
+        print name
+        print email
         send_mail('Invite to register for CSS',
-                   self.cleaned_data['name'] + ', you have been invited to register for CSS',
-                   'registration@inviso-css',
-                   [self.cleaned_data['email']])
+                  name + ', you have been invited to register for CSS',
+                  'registration@inviso-css',
+                  [self.cleaned_data['email']])
 
 # Registration Form
+# @TODO on load, pull fields from query string -> show failure if field not able to be loaded:
+#       Fields to pull: email, first_name, last_name, user_type
 class RegisterUserForm(forms.Form):
     first_name = forms.CharField()
     last_name = forms.CharField()
     email = forms.EmailField()
-    user_type = forms.ChoiceField(label='Usertype', choices=[('faculty', 'faculty'), ('scheduler', 'scheduler')])
+    user_type = forms.ChoiceField(label='Role', choices=[('faculty', 'faculty'), ('scheduler', 'scheduler')])
     password1 = forms.CharField(label='Password', widget=forms.PasswordInput)
     password2 = forms.CharField(label='Confirm Password', widget=forms.PasswordInput)
 
     def save(self):
         user = CUser.create(email=self.cleaned_data['email'],
                             password=self.cleaned_data['password2'],
-                            user_type=self.cleaned_data['user_type'])
-        user.set_name(self.cleaned_data['first_name'], self.cleaned_data['last_name'])
+                            user_type=self.cleaned_data['user_type'],
+                            first_name=self.cleaned_data['first_name'],
+                            last_name=self.cleaned_data['last_name'])
         user.save()
         return user
+
+# Edit User Form
+class EditUserForm(forms.Form):
+    pass
 
 
 # Delete Form
 class DeleteUserForm(forms.Form):
     email = forms.CharField(label='Confirm email')
 
-    # TODO: Delete user
     def delete_user(self):
         CUser.get_user(email=self.cleaned_data['email']).delete()
 
