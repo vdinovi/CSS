@@ -247,7 +247,6 @@ class Section(models.Model):
     fault = models.CharField(max_length=1, default='n') # y or n
     fault_reason = models.CharField(max_length=8, null=true, default=None) # faculty or room
 
-    
     @classmethod
     def create(
         cls, schedule, course, start_time, end_time, days, faculty, room,
@@ -282,6 +281,22 @@ class Section(models.Model):
                 section_capacity, students_enrolled, students_waitlisted, conflict,
                 conflict_reason, fault, fault_reason)
 
+    # this function takes in a dictionary object of filters that has been serialized from a JSON object based on what the user has selected
+    # for filtering by time, it will only take in an array of pairs (an array of 2-piece arrays) so that it will at least have a start time and end time.
+    #### there can also be chunks of time, so there are multiple start and end times
+    # for any other filter, we will pass on the keyword and array argument as it is to the filter. 
+    def filter(filters):
+        sections = Section.objects
+        for k, v in filters.iteritems():
+            if k == time:
+                for pair in v:
+                    sections = sections.filter(start_time >= pair[0]).filter(end_time <= pair[1])
+            else:
+                sections = sections.filter(k=v)
+
+
+                
+     
 
 
 
