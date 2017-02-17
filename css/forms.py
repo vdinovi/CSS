@@ -117,3 +117,16 @@ class AddCourseForm(forms.Form):
                   descripton = self.cleaned_date['description'],
                   equipment_req = self.cleaned_data['equipment_req'])
       course.save(); 
+
+# Settings Form
+class SettingsForm(forms.Form):
+    name = forms.CharField(required=True)
+    chair = forms.CharField()
+    start_time = forms.TimeField()
+    end_time = forms.TimeField()
+
+    def save(self):
+        name = self.cleaned_data['name']
+        chair = self.cleaned_data['chair']
+        start_time = self.cleaned_data['start_time']
+        end_time = self.cleaned_data['end_time']

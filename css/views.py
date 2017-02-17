@@ -7,6 +7,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.db import IntegrityError
 from .models import *
 from .forms import *
+from settings import DEPARTMENT_SETTINGS
 import MySQLdb
 
 
@@ -79,7 +80,10 @@ def SettingsView(request):
     if request.method == "GET":
         return render(request, 'settings.html', {
                 'section_type_list': SectionType.objects.filter(),
-                # 'department_name': DepartmentSettings.objects.filter()
+                'department_name': DEPARTMENT_SETTINGS.name,
+                'department_chair': DEPARTMENT_SETTINGS.chair,
+                'department_start_time': DEPARTMENT_SETTINGS.start_time,
+                'department_end_time': DEPARTMENT_SETTINGS.end_time,
             });
     elif request.method == "POST":
         form = AddCourseForm(request.POST);
