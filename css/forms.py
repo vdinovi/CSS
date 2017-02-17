@@ -2,6 +2,7 @@ from django import forms
 from django.core.mail import send_mail
 from css.models import CUser, Room
 from django.http import HttpResponseRedirect
+#from django.contrib.sites.models import Site
 import re
 
 #  Login Form
@@ -16,8 +17,6 @@ class LoginForm(forms.Form):
 
 #  Invite Form
 class InviteUserForm(forms.Form):
-
-    email = forms.EmailField()
     #@TODO Email field not working -> is_valid fails
     #email = forms.EmailField()
     email = forms.CharField()
@@ -25,13 +24,16 @@ class InviteUserForm(forms.Form):
     last_name = forms.CharField()
 
     #@TODO send registraiton link in email
-    def send_invite(self, usertype):
-        name = self.cleaned_data['first_name'] + self.cleaned_data['last_name']
+    def send_invite(self, usertype, request):
+        first_name = self.cleaned_data['first_name']
+        last_name = self.cleaned_data['last_name']
+        name = first_name + ' ' + last_name
         email = self.cleaned_data['email']
-        print name
-        print email
+        #your_domain = Site.objects.get_current().domain
+        link = 'http://localhost:8000/register?'+first_name + '+' + last_name +'&type='+usertype
         send_mail('Invite to register for CSS',
-                  name + ', you have been invited to register for CSS',
+                  name + """, you have been invited to register for CSS. 
+                  Please register using the following link: """ + link,
                   'registration@inviso-css',
                   [self.cleaned_data['email']])
 
@@ -58,7 +60,6 @@ class RegisterUserForm(forms.Form):
 # Edit User Form
 class EditUserForm(forms.Form):
     pass
-
 
 # Delete Form
 class DeleteUserForm(forms.Form):
