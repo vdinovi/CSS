@@ -89,7 +89,6 @@ class CUser(models.Model):
             self.user.last_name = last
         self.user.save()
 
- 
 class FacultyDetails(models.Model):
     # The user_id uses the User ID as a primary key.
     # Whenever this User is deleted, this entry in the table will also be deleted
@@ -124,8 +123,6 @@ class Room(models.Model):
                      capacity=cap, notes=notes, 
                      equipment=equip)
          return room
-
-
 
 # Course represents a department course offering
 class Course(models.Model):
@@ -197,10 +194,10 @@ class Schedule(models.Model):
     state = models.CharField(max_length=16, default="active") # eg. active or finalized 
 
     def finalize_schedule(self):
-    	self.state = "finalized"
+        self.state = "finalized"
 
     def return_to_active(self):
-    	self.state = "active"
+        self.state = "active"
 
     @classmethod
     def create(cls, academic_term, state):
@@ -226,3 +223,31 @@ class Section(models.Model):
     conflict_reason = models.CharField(max_length = 8) # faculty or room
     fault = models.CharField(max_length = 1) # y or n
     fault_reason = models.CharField(max_length = 8) # faculty or room
+
+class FacultyCoursePreferences(models.Model):
+    faculty = models.ForeignKey(CUser, on_delete = models.CASCADE)
+    course = models.ForeignKey(Course, on_delete = models.CASCADE)
+    rank = models.IntegerField(default = 0)
+
+    @classmethod
+    def create(faculty, course, rank):
+        course_pref = cls(
+            faculty=faculty,
+            course=course,
+            rank=rank)
+        course_pref.save()
+        return course_pref
+
+    @classmethod
+    def get_faculty_pref(cls, faculty):
+        entries = cls.objects.filter(faculty='faculty')
+        #join the course ID to the course table
+        course_arr = {}
+        i = 0
+        for entry in entries:
+            course_id = entry.value(course)
+            #course_obj holds the entry in the table in the course table
+            course_obj = Course.objects.get(id=course_id)
+            course_arr[course_obj.rank] = course_obj.course_name
+        course_arr.sort()
+        return course_arr.values()
