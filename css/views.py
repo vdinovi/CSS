@@ -74,6 +74,20 @@ def SchedulingView(request):
 def LandingView(request):
     return render(request,'landing.html')
 
+def SettingsView(request):
+    res = HttpResponse()
+    if request.method == "GET":
+        return render(request, 'settings.html', {
+                'section_type_list': SectionType.objects.filter(),
+                # 'department_name': DepartmentSettings.objects.filter()
+            });
+    elif request.method == "POST":
+        form = AddCourseForm(request.POST);
+        if form.is_valid():
+            form.addCourse();
+            res.status_code = 200
+    return render(request, 'settings.html')
+
 from .forms import LoginForm
 from django.contrib.auth import authenticate
 def LoginView(request):
@@ -187,19 +201,18 @@ def SchedulersView(request):
             res.status_code = 200
         else:
             res.status_code = 400
+    elif reqest.method == "POST" and 'edit-form' in request.POST:
+        res.status_code = 400
+        res.reason_phrase = "NYI"
     elif request.method == "POST" and 'delete-form' in request.POST:
         form = DeleteUserForm(request.POST)
         if form.is_valid():
-            scheduler = CUser.objects.filter(user__id=form.cleaned_data['id'])
-            if scheduler is False:
-                res.status_code = 404
-                res.reason_phrase = "User with that ID does not exist"
-            else:
-                scheduler.delete()
+            try:
+                form.delete_user()
                 res.status_code = 200
-
-            print('NYI')
-            res.status_code = 200
+            except ObjectDoesNotExist:
+                res.status_code = 404
+                res.reason_phrase = "User not found"
         else:
             res.status_code = 400
     else:
@@ -224,7 +237,11 @@ def FacultyView(request):
             form.send_invite('faculty')
             res.status_code = 200
         else:
+            print form.errors
             res.status_code = 400
+    elif reqest.method == "POST" and 'edit-form' in request.POST:
+        res.status_code = 400
+        res.reason_phrase = "NYI"
     elif request.method == "POST" and 'delete-form' in request.POST:
         form = DeleteUserForm(request.POST)
         if form.is_valid():
@@ -237,7 +254,9 @@ def FacultyView(request):
         else:
             res.status_code = 400
             res.reason_phrase = "Invalid form entry"
+
     else:
+        print "didnt even post"
         res.status_code = 400
     return res
 

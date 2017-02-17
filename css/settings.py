@@ -149,3 +149,36 @@ EMAIL_PORT=587
 EMAIL_HOST_USER='invisocss309'
 EMAIL_HOST_PASSWORD='invisocss'
 EMAIL_USE_TLS=True
+
+# Department Settings
+import json
+class DepartmentSettings():
+
+    @classmethod
+    def new_settings(cls):
+        obj = cls()
+        obj.name = None
+        obj.chairs = None
+        obj.start_time = None
+        obj.end_time = None
+
+    def load_from_file(cls):
+        contents = json.loads(open('department_settings.json', 'r').read())
+        obj = cls()
+        obj.name = contents.name
+        obj.chair = contents.chair
+        obj.start_time = contents.start_time
+        obj.end_time = contents.end_time
+"""
+# Write new department settings to file
+def save_department_settings(name=None, chairs=None, start_time=None, end_time=None):
+    f = open('department_settings.json', 'w')
+
+
+
+DEPARTMENT_SETTINGS = load_department_settings()
+"""
+
+
+
+

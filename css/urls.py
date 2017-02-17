@@ -30,6 +30,7 @@ urlpatterns = [
         url('^faculty/$', views.FacultyView, name='faculty'),
         url('^rooms/$', views.RoomsView, name='rooms'),
         url('^courses/$', views.CoursesView, name='courses'),
+        url(r'^settings/$', views.SettingsView, name='settings'),
     ])),
     url(r'^scheduling/$', views.SchedulingView, name='scheduling'), 
     url(r'^resources/$', views.SchedulingView, name='resources'), 

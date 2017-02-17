@@ -71,6 +71,10 @@
               <p>Invite a Faculty Member</p>
               {{ invite_user_form.as_p }}
               <button type="submit" name="invite-form-button" class="save btn btn-default">submit</button>
+
+            <form method="POST" action="#">{% csrf_token %}
+              {{ invite_user_form.as_p }}
+              <button type="submit" name="invite-form" class="save btn btn-default">submit</button>
             </form>
           </div>
           <div class="modal-footer">
@@ -92,6 +96,13 @@
               <p>Edit [insert name here] </p>
               {{ edit_user_form.as_p }}
               <button type="submit" name="edit-form-button" class="save btn btn-default">submit</button>
+
+            <h4 class="modal-title">Edit [insert name here]</h4>
+          </div>
+          <div class="modal-body">
+            <form method="POST" action="?" >{% csrf_token %}
+              {{ edit_user_form.as_p }}
+              <button type="submit" name="edit-form" class="save btn btn-default">submit</button>
             </form>
           </div>
           <div class="modal-footer">
@@ -107,13 +118,18 @@
         <div class="modal-content">
           <div class="modal-header">
             <button type="button" class="close" data-dismiss="modal">&times;</button>
-            <h4 class="modal-title">Delete Faculty</h4>
+            <h4 class="modal-title">Delete [insert name here]</h4>
           </div>
           <div class="modal-body">
+
             <form name='delete-form' method="POST" action="?">{% csrf_token %}
               <p>Delete [insert name here]</p>
               {{ delete_user_form.as_p }}
               <button type="submit" name="delete-form-button" class="save btn btn-default">submit</button>
+
+            <form method="POST" action="?">{% csrf_token %}
+              {{ delete_user_form.as_p }}
+              <button type="submit" name="delete-form" class="save btn btn-default">submit</button>
             </form>
           </div>
           <div class="modal-footer">
