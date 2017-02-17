@@ -66,27 +66,43 @@ def SchedulingView(request):
 def LandingView(request):
     return render(request,'landing.html')
 
+def SettingsView(request):
+    res = HttpResponse()
+    if request.method == "GET":
+        return render(request, 'settings.html', {
+                'section_type_list': SectionType.objects.filter(),
+                # 'department_name': DepartmentSettings.objects.filter()
+            });
+    elif request.method == "POST":
+        form = AddCourseForm(request.POST);
+        if form.is_valid():
+            form.addCourse();
+            res.status_code = 200
+    return render(request, 'settings.html')
+
 from .forms import LoginForm
 from django.contrib.auth import authenticate
 
 def LoginView(request):
-	res = HttpResponse()
-	if request.method == "GET":
-		return render(request, 'login.html', {'login_form':LoginForm()});
-	elif request.method == "POST":
-		form = LoginForm(request.POST)
-		if form.is_valid():
-			email = request.POST['email']
-			password = request.POST['password']
-			user = authenticate(username=email, password=password)
-			if user is not None:
-				login(request,user)
-    			return HttpResponseRedirect('/home')
-			#else:
-			#	return HttpResponseRedirect('login')
-	else:
-		res.status_code = 400
-	return res
+    res = HttpResponse()
+    if request.method == "GET":
+        return render(request, 'login.html', {'login_form':LoginForm()});
+    elif request.method == "POST":
+        form = LoginForm(request.POST)
+        if form.is_valid():
+            email = request.POST['email']
+            password = request.POST['password']
+            user = authenticate(username=email, password=password)
+            if user is not None:
+                login(request,user)
+                return HttpResponseRedirect('/home')
+            else:
+                return HttpResponseRedirect('login.html')
+        else:
+            res.status_code = 400
+    else:
+        res.status_code = 400
+    return res
 
 
 def LogoutView(request):
