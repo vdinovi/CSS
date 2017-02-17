@@ -67,11 +67,6 @@
             <h4 class="modal-title">Add Faculty</h4>
           </div>
           <div class="modal-body">
-            <form name='invite-form' method="POST" action="?" novalidate>{% csrf_token %}
-              <p>Invite a Faculty Member</p>
-              {{ invite_user_form.as_p }}
-              <button type="submit" name="invite-form-button" class="save btn btn-default">submit</button>
-
             <form method="POST" action="#">{% csrf_token %}
               {{ invite_user_form.as_p }}
               <button type="submit" name="invite-form" class="save btn btn-default">submit</button>
