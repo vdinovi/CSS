@@ -234,12 +234,12 @@ def FacultyView(request):
     elif request.method == "POST" and 'invite-form' in request.POST:
         form = InviteUserForm(request.POST)
         if form.is_valid():
-            form.send_invite('faculty')
+            form.send_invite('faculty',request)
             res.status_code = 200
         else:
             print form.errors
             res.status_code = 400
-    elif reqest.method == "POST" and 'edit-form' in request.POST:
+    elif request.method == "POST" and 'edit-form' in request.POST:
         res.status_code = 400
         res.reason_phrase = "NYI"
     elif request.method == "POST" and 'delete-form' in request.POST:
