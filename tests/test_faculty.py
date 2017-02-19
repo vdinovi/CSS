@@ -44,7 +44,7 @@ class FacultyTestCase(TestCase):
         self.assertEqual(faculty.user.first_name, first_name)
         self.assertEqual(faculty.user.last_name, last_name)
         # Verify Details
-        verify_faculty_details(faculty, 0, 0)
+        verify_faculty_details(faculty, 0, 0, 'n')
 
     # Begin tests
     def test_valid_faculty(self):     
