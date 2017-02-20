@@ -14,6 +14,20 @@ td {
 	text-align: center;
 }
 
+.name_chair_fields {
+	height: 40px;
+}
+
+.input_labels {
+	text-align: center;
+	font-size: 15px;
+	font-weight: bold;
+}
+
+input {
+	border-radius: 4px;
+}
+
 .btn {
 	background-color: #85adad;
 	align: center;

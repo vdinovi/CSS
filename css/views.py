@@ -78,6 +78,7 @@ def SettingsView(request):
     res = HttpResponse()
     if request.method == "GET":
         return render(request, 'settings.html', {
+                'settings_form': SettingsForm(),
                 'section_type_list': SectionType.objects.filter(),
                 'department_name': DEPARTMENT_SETTINGS.name,
                 'department_chair': DEPARTMENT_SETTINGS.chair,
@@ -85,11 +86,22 @@ def SettingsView(request):
                 'department_end_time': DEPARTMENT_SETTINGS.end_time,
             });
     elif request.method == "POST":
-        form = AddCourseForm(request.POST);
+        form = SettingsForm(request.POST);
         if form.is_valid():
-            form.addCourse();
+            DEPARTMENT_SETTINGS.name = form.cleaned_data['name']
+            DEPARTMENT_SETTINGS.chair = form.cleaned_data['chair']
+            DEPARTMENT_SETTINGS.start_time = form.cleaned_data['start_time']
+            DEPARTMENT_SETTINGS.end_time = form.cleaned_data['end_time']
+            DEPARTMENT_SETTINGS.save_settings()
             res.status_code = 200
-    return render(request, 'settings.html')
+    return render(request, 'settings.html', {
+                'settings_form': SettingsForm(),
+                'section_type_list': SectionType.objects.filter(),
+                'department_name': DEPARTMENT_SETTINGS.name,
+                'department_chair': DEPARTMENT_SETTINGS.chair,
+                'department_start_time': DEPARTMENT_SETTINGS.start_time,
+                'department_end_time': DEPARTMENT_SETTINGS.end_time,
+            })
 
 from .forms import LoginForm
 from django.contrib.auth import authenticate
