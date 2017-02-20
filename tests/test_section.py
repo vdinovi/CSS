@@ -14,7 +14,7 @@ class SectionTestCase(TestCase):
     # @TODO paula
     def test_section_get_schedule(self): 
         """ Test that schedule is retrieved properly """
-        self.assertEquals(None, None)
+        self.assertEquals(, None)
 
     # @TODO
     def test_section_get_course(self): 
