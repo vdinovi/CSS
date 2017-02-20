@@ -109,7 +109,7 @@ class FacultyDetails(models.Model):
 # ---------- Resource Models ----------
 # Room represents department rooms
 class Room(models.Model):
-   name = models.CharField(max_length=32)
+   name = models.CharField(max_length=32, unique=True)
    description = models.CharField(max_length=256, null=True)
    capacity = models.IntegerField(default=0)
    notes = models.CharField(max_length=1024, null=True)
@@ -136,7 +136,7 @@ class Room(models.Model):
 
 # Course represents a department course offering
 class Course(models.Model):
-    course_name = models.CharField(max_length=16)
+    course_name = models.CharField(max_length=16, unique=True)
     equipment_req = models.CharField(max_length=2048, null=True)
     description = models.CharField(max_length=2048, null=True)
 
@@ -144,7 +144,7 @@ class Course(models.Model):
     def create(cls, course, equipment, desc):
         try:
             course = cls(course_name = course, 
-                         equipment = equipment, 
+                         equipment_req = equipment, 
                          description = desc)
         except:
             raise ValidationError("Invalid data for course creation.")
