@@ -134,6 +134,10 @@ class Room(models.Model):
                      equipment=equip)
          return room
 
+    @classmethod
+    def get_room(cls, room_name):
+        return Room.objects.get(name=room_name)
+
 # Course represents a department course offering
 class Course(models.Model):
     course_name = models.CharField(max_length=16, unique=True)
@@ -253,6 +257,10 @@ class Schedule(models.Model):
         else:
             return cls(academic_term, state)
 
+    @classmethod
+    def get_schedule(cls, term_name):
+        return cls.objects.get(academic_term=term_name)
+
 
 # Section is our systems primary scheduled object
 # Each section represents a department section that is planned for a particular schedule
@@ -272,16 +280,17 @@ class Section(models.Model):
     fault = models.CharField(max_length=1, default='n') # y or n
     fault_reason = models.CharField(max_length=8, null=True, default=None) # faculty or room
 
-    
     @classmethod
     def create(
-        cls, schedule, course, start_time, end_time, days, faculty, room,
+        cls, term_name, course_name, start_time, end_time, days, faculty_email, room_name,
         section_capacity, students_enrolled, students_waitlisted, conflict, 
         conflict_reason, fault, fault_reason):
-        schedule = Schedule.objects.get(id=schedule)
-        course = Course.objects.get(id=course)
-        faculty = Faculty.objects.get(id=faculty)
-        room = Room.objects.get(id=room)
+        # the schedule and course object will actually be passed into the Section as a OneToOneField
+        schedule = Schedule.get_schedule(term_name)
+        course = Course.get_course(course_name)
+        # the faculty and room will be passed in just as the email and room name (IDs for their models) b/c of the ForeignKey type
+        faculty = CUser.get_faculty(faculty_email)
+        room = Room.get_room(room_name)
         if start_time < DepartmentSettings.start_time:
             raise ValidationError("Invalid start time for department.")
         if end_time > DepartmentSettings.end_time or end_time < start_time:
@@ -296,19 +305,35 @@ class Section(models.Model):
             raise ValidationError("Invalid number of students waitlisted.")
         if conflict != 'y' or conflict != 'n':
             raise ValidationError("Invalid value for conflict.")
-        if conflict_reason != "faculty" or conflict_reason != "room":
+        if conflict == 'y' and conflict_reason != "faculty" or conflict_reason != "room":
             raise ValidationError("Invalid conflict reason.")
         if fault != 'y' or fault != 'n':
             raise ValidationError("Invalid value for fault.")
-        if fault_reason != "faculty" or fault_reason != "room":
+        if fault == 'y' and fault_reason != "faculty" or fault_reason != "room":
             raise ValidationError("Invalid fault reason.")
         return cls(
-                schedule, course, start_time, end_time, days, faculty, room,
+                schedule, course, start_time, end_time, days, faculty_email, room_name,
                 section_capacity, students_enrolled, students_waitlisted, conflict,
                 conflict_reason, fault, fault_reason)
 
 
-
+    # this function takes in a dictionary object of filters that has been serialized from a JSON object based on what the user has selected
+    # for filtering by time, it will only take in an array of pairs (an array of 2-piece arrays) so that it will at least have a start time and end time.
+    #### there can also be chunks of time, so there are multiple start and end times
+    # for any other filter, we will pass on the keyword and array argument as it is to the filter. 
+    def filter(filters):
+        sections = Section.objects
+        for key, value in filters.iteritems():
+            if key == time:
+                # START
+                # reduce(lambda q, f: q | Q(creator=f), filters, Q())
+                sections = sections.filter(reduce(lambda query, filter: query | (Q(start_time >= filter[0]) & Q(end_time <= filter[1])), value, Q()))
+                # OR 
+                for pair in value:
+                    sections = sections.filter(start_time >= pair[0]).filter(end_time <= pair[1])
+                # END
+            else:
+                sections = sections.filter(key=value)
 
 class FacultyCoursePreferences(models.Model):
     faculty = models.ForeignKey(CUser, on_delete = models.CASCADE)
