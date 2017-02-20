@@ -5,11 +5,13 @@ from css.models import *
 
 class SectionTestCase(TestCase): 
     def setUp(self):
-        Section.objects.create()
-        Sections.objects.create()
-        Sections.objects.create()
+        schedule = Schedule.create("Spring2017", "active")
+        course = Course.create("CPE101", "computers", "Fundamentals of Computer Science I")
+        faculty = CUser.create("paula@calpoly.edu", "testpass", "faculty", "Paula", "Ledgerwood")
+        room = Room.create("14-156", "Graphics", None, None, None)
+        Section.create("Spring2017", "CPE101", "10:00AM", "12:00PM", "MWF", "paula@calpoly.edu", "14-156", 30, 0, 0, 'n', None, 'n', None)
 
-    # @TODO
+    # @TODO paula
     def test_section_get_schedule(self): 
         """ Test that schedule is retrieved properly """
         self.assertEquals(None, None)
