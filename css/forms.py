@@ -2,6 +2,7 @@ from django import forms
 from django.core.mail import send_mail
 from css.models import CUser, Room, Course
 from django.http import HttpResponseRedirect
+from settings import DEPARTMENT_SETTINGS
 #from django.contrib.sites.models import Site
 import re
 
@@ -125,11 +126,13 @@ class SettingsForm(forms.Form):
     end_time = forms.TimeField()
 
     def save(self):
-        name = self.cleaned_data['name']
-        chair = self.cleaned_data['chair']
-        start_time = self.cleaned_data['start_time']
-        end_time = self.cleaned_data['end_time']
-      return Course
+        DEPARTMENT_SETTINGS.name = form.cleaned_data['name']
+        DEPARTMENT_SETTINGS.chair = form.cleaned_data['chair']
+        DEPARTMENT_SETTINGS.start_time = form.cleaned_data['start_time']
+        DEPARTMENT_SETTINGS.end_time = form.cleaned_data['end_time']
+        DEPARTMENT_SETTINGS.save_settings()
+
+
 
 class DeleteCourseForm(forms.Form):
     course_name = forms.CharField()
