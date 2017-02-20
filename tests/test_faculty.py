@@ -25,7 +25,6 @@ class FacultyTestCase(TestCase):
     def get_all_faculty():
         return CUser.objects.filter(user_type='faculty')
 
-    @staticmethod
     def verify_faculty_details(self, faculty, work_units, work_hours, changed_prefs):
         details = self.get_faculty_details(faculty)
         self.assertTrue(isinstance(details, FacultyDetails))
@@ -34,7 +33,6 @@ class FacultyTestCase(TestCase):
         self.assertEqual(details.target_work_hours, work_hours)
         self.assertEqual(details.changed_preferences, changed_prefs)
 
-    @staticmethod
     def verify_faculty(self, faculty, email, password, first_name, last_name):
         # Verify User
         self.assertTrue(isinstance(faculty, CUser))
@@ -44,7 +42,7 @@ class FacultyTestCase(TestCase):
         self.assertEqual(faculty.user.first_name, first_name)
         self.assertEqual(faculty.user.last_name, last_name)
         # Verify Details
-        verify_faculty_details(faculty, 0, 0, 'n')
+        self.verify_faculty_details(faculty, 0, 0, 'n')
 
     # Begin tests
     def test_valid_faculty(self):     
@@ -63,7 +61,7 @@ class FacultyTestCase(TestCase):
         faculty1.delete()
         faculty2.delete()
         self.assertRaises(ObjectDoesNotExist, self.get_faculty, email='email@email.com')
-        self.assertRaises(ObjectDoesNotExist, self.get_faculty_details, faculty=faculty)
+        self.assertRaises(ObjectDoesNotExist, self.get_faculty_details, faculty=faculty1)
 
     # Email
     def test_valid_email_1(self):

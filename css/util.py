@@ -20,7 +20,7 @@ class DepartmentSettings():
     # Write new department settings to file
     def save_settings(self):
         contents = json.dumps(self.__dict__, indent=4)
-        f = open('department_settings.json', 'w')
-        f.write(contents)
+        with open("department_settings.json", 'w') as dept_settings_file:
+            dept_settings_file.write(contents)
 
 

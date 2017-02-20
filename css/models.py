@@ -48,13 +48,18 @@ class CUser(models.Model):
 
     @classmethod
     def create(cls, email, password, user_type, first_name, last_name):
-        user = cls(user=User.objects.create_user(username=cls.validate_email(email), 
-                                                 email=cls.validate_email(email),
-                                                 password=cls.validate_password(password),
-                                                 first_name=cls.validate_first_name(first_name),
-                                                 last_name=cls.validate_last_name(last_name)),
-                   user_type=cls.validate_user_type(user_type)).save()
-        FacultyDetails.create(user, 0, 0).save()
+        try:
+            user = cls(user=User.objects.create_user(username=cls.validate_email(email), 
+                                                     email=cls.validate_email(email),
+                                                     password=cls.validate_password(password),
+                                                     first_name=cls.validate_first_name(first_name),
+                                                     last_name=cls.validate_last_name(last_name)),
+                       user_type=cls.validate_user_type(user_type))
+            user.save()
+            if user_type == 'faculty':
+                FacultyDetails.create(user, 0, 0).save()
+        except:
+            raise
         return user
        
     @classmethod
@@ -81,7 +86,7 @@ class CUser(models.Model):
 class FacultyDetails(models.Model):
     # The user_id uses the User ID as a primary key.
     # Whenever this User is deleted, this entry in the table will also be deleted
-    faculty = models.OneToOneField(CUser, on_delete=models.CASCADE, blank=False)
+    faculty = models.OneToOneField(CUser, on_delete=models.CASCADE)
     target_work_units = models.IntegerField(default=0, null=True) # in units
     target_work_hours = models.IntegerField(default=0, null=True) # in hours
     changed_preferences = models.CharField(max_length=1) # 'y' or 'n' 
