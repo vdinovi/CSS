@@ -1,5 +1,6 @@
 .scheduling-container {
     margin-top: 10px;
+    overflow-x: scroll;
 }
 
 .filter-frame {
@@ -7,12 +8,20 @@
     background-color: #1ac6ff;
     border: 2px solid black;
     border-radius: 5px;
-    overflow-x: auto;
+    overflow-x: scroll;
+    white-space: nowrap;
+}
+
+.outer-frame {
+    padding:5px;
+    width:290px;
+    min-width:290px;
+    white-space: normal;
 }
 
 .inner-frame {
+    width: 100%;
     min-height: 300px;
-    min-width: 250px;
     margin: 10px;
     background-color: white;
     border: 2px solid black;

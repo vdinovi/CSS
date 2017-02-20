@@ -25,26 +25,19 @@
   <body>
     {% include "navbar.html" %}
     <div id="scheduling-container" class="container scheduling-container">
-      <div class="row-fluid">
-        <div class="col-xs-4">
-          <h1>Filter Type</h1>
-        </div>
-        <div class="col-xs-4">
-          <h1>Item</h1>
-        </div>
-        <div class="col-xs-4">
-          <h1>Section</h1>
-        </div>
+      <div class="row">
+        
       </div>
-      <div class="row-fluid">
+      <div class="row">
         <div id="filter-frame" class="col-xs-12 filter-frame">
-          <div class="col-xs-4" style="padding:5px">
+          <div class="col-xs-4 outer-frame">
+            <h1 style="text-align:center;">Filter Type</h1>
             <div id="filter-type-frame" class="inner-frame">
               <div id="course-filter" class="input-group">
                 <span class="input-group-addon">
-                  <input type="checkbox" aria-label="...">
+                  <input type="checkbox">
                 </span>
-                <p class="form-control" aria-label="...">Course</p>
+                <p class="form-control">Course</p>
               </div>
               <div id="faculty-filter" class="input-group">
                 <span class="input-group-addon">
@@ -67,7 +60,8 @@
             </div>
           </div>
           <!-- @TODO Fill with real entries -->
-          <div class="col-xs-4" style="padding:5px">
+          <div class="col-xs-4 outer-frame">
+            <h1 style="text-align:center;">Item</h1>
             <div id="item-frame" class="inner-frame">
               <ul class="list-group">
                 <li class="list-group-item">CPE101</li>
@@ -77,7 +71,8 @@
             </div>
           </div>
           <!-- @TODO Fill with real entries -->
-          <div class="col-xs-4" style="padding:5px">
+          <div class="col-xs-4 outer-frame">
+            <h1 style="text-align:center;">Section</h1>
             <div id="section-frame" class="inner-frame">
               <ul class="list-group">
                 <li class="list-group-item">01</li>
