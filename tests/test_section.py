@@ -7,7 +7,7 @@ class SectionTestCase(TestCase):
     def setUp(self):
         schedule = Schedule.create("Spring2017", "active")
         course = Course.create("CPE101", "computers", "Fundamentals of Computer Science I")
-        faculty = CUser.create("paula@calpoly.edu", "testpass", "faculty", "Paula", "Ledgerwood")
+        faculty = CUser.create("paula@calpoly.edu", "@1Testpass", "faculty", "Paula", "Ledgerwood")
         room = Room.create("14-156", "Graphics", None, None, None)
         Section.create(
             "Spring2017", "CPE101", "10:00AM", "12:00PM", "MWF", 

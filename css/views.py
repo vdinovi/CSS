@@ -8,12 +8,8 @@ import MySQLdb
 from django.db import IntegrityError
 from .models import *
 from .forms import *
-<<<<<<< HEAD
 from settings import DEPARTMENT_SETTINGS
 import MySQLdb
-=======
-import settings
->>>>>>> b0d5fa062b9be4522c3c83ed96ef4a27e1618b1b
 
 # ---------------------------
 # --  Method-Based Views   --

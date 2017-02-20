@@ -109,31 +109,31 @@ class FacultyDetails(models.Model):
 # ---------- Resource Models ----------
 # Room represents department rooms
 class Room(models.Model):
-   name = models.CharField(max_length=32, unique=True)
-   description = models.CharField(max_length=256, null=True)
-   capacity = models.IntegerField(default=0)
-   notes = models.CharField(max_length=1024, null=True)
-   equipment = models.CharField(max_length=1024, null=True)
-
-   @classmethod
-   def create(cls, name, description, cap, notes, equip):
-      if name is None:
-         raise ValidationError("Room name is required")
-      elif len(name) > 32:
-         raise ValidationError("Room name is longer than 32 characters")
-      elif description and len(description) > 256:
-         raise ValidationError("Room description is longer than 256 characters")
-      elif notes and len(notes) > 1024:
-         raise ValidationError("Room notes is longer than 1024 characters")
-      elif equip and len(equip) > 256:
-         raise ValidationError("Room equipment is longer than 1024 characters")
-      else:
-         room = cls(name=name, 
+    name = models.CharField(max_length=32, unique=True)
+    description = models.CharField(max_length=256, null=True)
+    capacity = models.IntegerField(default=0)
+    notes = models.CharField(max_length=1024, null=True)
+    equipment = models.CharField(max_length=1024, null=True)
+    
+    @classmethod
+    def create(cls, name, description, cap, notes, equip):
+        if name is None:
+            raise ValidationError("Room name is required")        
+        elif len(name) > 32:
+            raise ValidationError("Room name is longer than 32 characters")
+        elif description and len(description) > 256:
+            raise ValidationError("Room description is longer than 256 characters")
+        elif notes and len(notes) > 1024:
+            raise ValidationError("Room notes is longer than 1024 characters")
+        elif equip and len(equip) > 256:
+            raise ValidationError("Room equipment is longer than 1024 characters")
+        else:
+            room = cls(name=name, 
                      description=description, 
                      capacity=cap, notes=notes, 
                      equipment=equip)
-         return room
-
+            return room
+            
     @classmethod
     def get_room(cls, room_name):
         return Room.objects.get(name=room_name)
