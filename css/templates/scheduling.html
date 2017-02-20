@@ -31,8 +31,16 @@
       <!-- @TODO Term Frame -->
       <!-- Term Frame -->
       <div class="row">
-        <div id="term-frame" class="col-xs-4 offset-xs-1 term-frame">
-          <p>Hi</p>
+        <!-- Why is this not offsetting??? -->
+        <div class="row">
+          <div id="active-term-frame" class="col-xs-4 offset-xs-4 term-frame">
+            <p>@TODO Active Term Frame</p>
+          </div>
+        </div>
+        <div class="row">
+          <div id="term-management-frame" class="col-xs-4 offset-xs-4 term-frame">
+            <p>@TODO Term Management Frame</p>
+          </div> 
         </div>
       </div>
       <!-- Filter Frame -->
@@ -45,7 +53,7 @@
                 <!-- COURSE FILTER -->
                 <div id="course-filter" class="input-group" style="border-bottom: 1px solid black;">
                   <span class="input-group-addon">
-                    <input id="course-checkbox" type="checkbox">
+                    <input id="course-checkbox" type="checkbox" onclick="selectFilter(this)">
                   </span>
                   <span class="form-control">
                     <p><b>Course</b></p>
@@ -59,7 +67,7 @@
                 <!-- FACULTY FILTER -->
                 <div id="faculty-filter" class="input-group" style="border-bottom: 1px solid black;">
                   <span class="input-group-addon">
-                    <input id="faculty-checkbox" type="checkbox">
+                    <input id="faculty-checkbox" type="checkbox" onclick="selectFilter(this)">
                   </span>
                   <span class="form-control">
                     <p><b>Faculty</b></p>
@@ -71,7 +79,7 @@
                 <!-- ROOM FILTER -->
                 <div id="room-filter" class="input-group" style="border-bottom: 1px solid black;">
                   <span class="input-group-addon">
-                    <input id="room-checkbox" type="checkbox">
+                    <input id="room-checkbox" type="checkbox" onclick="selectFilter(this)">
                   </span>
                   <span class="form-control">
                     <p><b>Room</b></p>
@@ -83,31 +91,34 @@
                 <!-- TIME FILTER -->
                 <div id="time-filter" class="input-group" style="border-bottom: 1px solid black;">
                   <span class="input-group-addon">
-                    <input id="time-checkbox" type="checkbox">
+                    <input id="time-checkbox" type="checkbox" onclick="selectFilter(this)">
                   </span>
                   <span class="form-control">
                     <p><b>Time</b></p>
                   </span>
                   <span class="list-group">
-                    <li class="filter-selection">- 8:00am</li>
+                    <li class="filter-selection">- MWF 8:00am : 10:00am</li>
                   </span>
+                  <span class="list-group">
+                    <li class="filter-selection">- TH 6:00pm : 8:00pm</li>
+                  </span> 
                 </div>
               </div>
             </form>
           </div>
           <!-- @TODO Fill with real entries -->
           <div class="col-xs-4 outer-frame">
-            <h1 style="text-align:center;">Item</h1>
-            <div id="item-frame" class="inner-frame">
-              <div id="item-cpe101" class="input-group">
+            <h1 style="text-align:center;">Options</h1>
+            <div id="option-frame" class="inner-frame">
+              <div id="option-cpe101" class="input-group">
                 <span class="input-group-addon">
-                  <input id="item-checkbox" type="checkbox">
+                  <input id="option-checkbox" type="checkbox" onclick="selectFilter(this)">
                 </span>
                 <p class="form-control">CPE101</p>
               </div>
-              <div id="item-cpe101" class="input-group">
+              <div id="option-cpe101" class="input-group">
                 <span class="input-group-addon">
-                  <input id="item-checkbox" type="checkbox">
+                  <input id="option-checkbox" type="checkbox">
                 </span>
                 <p class="form-control">CPE102</p>
               </div>
@@ -115,12 +126,27 @@
           </div>
           <!-- @TODO Fill with real entries -->
           <div class="col-xs-4 outer-frame">
-            <h1 style="text-align:center;">Section</h1>
+            <h1 style="text-align:center;">Sections</h1>
             <div id="section-frame" class="inner-frame">
               <ul class="list-group">
-                <li class="list-group-item">01</li>
-                <li class="list-group-item">02</li>
-                <li class="list-group-item">03</li>
+              <div id="section-cpe101-01" class="input-group">
+                <span class="input-group-addon">
+                  <input id="section-checkbox" type="checkbox">
+                </span>
+                <p class="form-control">CPE101-01</p>
+              </div>
+               <div id="section-cpe101-02" class="input-group">
+                <span class="input-group-addon">
+                  <input id="option-checkbox" type="checkbox">
+                </span>
+                <p class="form-control">CPE101-02</p>
+              </div>
+               <div id="section-cpe101-03" class="input-group">
+                <span class="input-group-addon">
+                  <input id="option-checkbox" type="checkbox">
+                </span>
+                <p class="form-control">CPE101-03</p>
+              </div>
               </ul>
             </div> 
           </div>
@@ -128,8 +154,8 @@
       </div>
       <!-- Section Frame -->
       <div class="row">
-        <div class="section-frame">
-          <table class="table table-bordered">
+        <div class="section-detail-frame">
+          <table class="table section-detail-table">
             <thead>
               <th>Name</th>
               <th>Section</th>
