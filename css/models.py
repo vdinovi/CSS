@@ -104,7 +104,7 @@ class FacultyDetails(models.Model):
         self.changed_preferences = 'y' 
 
     # @TODO Function to yes changed_preferences to 'n'? Also consider naming it something
-    #       more indicatedve -> preferences_have_changed? has_changed_preferences? etc.
+    #       more indicative -> preferences_have_changed? has_changed_preferences? etc.
 
 # ---------- Resource Models ----------
 # Room represents department rooms

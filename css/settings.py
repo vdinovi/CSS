@@ -158,4 +158,3 @@ DEPARTMENT_SETTINGS = DepartmentSettings.load_settings()
 
 
 
-

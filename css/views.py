@@ -1,4 +1,4 @@
-from django.template import Context, Template
+from django.template import Context, Template, RequestContext
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from django.shortcuts import render, render_to_response
@@ -102,10 +102,17 @@ def LoginView(request):
             email = form.cleaned_data['email']
             password = form.cleaned_data['password']
             user = authenticate(username=email, password=password)
-            print(user)
+            # Authentication success
             if user is not None:
                 login(request,user)
+                request.session['first_name'] = user.first_name 
+                request.session['last_name'] = user.last_name
+                request.session['email'] = user.username
+                request.session['user_id'] = user.id
+                # 5 min session duration
+                request.session.set_expiry_time(300)
                 return HttpResponseRedirect('/home')
+            # Authentication failed
             else:
                 messages.error(request, "Invalid login credentials. Please try again.")
                 return render(request,'login.html', {'login_form':LoginForm(),'errors': messages.get_messages(request)})
