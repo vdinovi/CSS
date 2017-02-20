@@ -157,4 +157,5 @@ if not os.path.exists('department_settings.json'):
 DEPARTMENT_SETTINGS = DepartmentSettings.load_settings()
 
 
-
+SESSION_ENGINE = "django.contrib.sessions.backends.signed_cookies" # 
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True # force session expiration on browser close 

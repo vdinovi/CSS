@@ -105,12 +105,13 @@ def LoginView(request):
             # Authentication success
             if user is not None:
                 login(request,user)
+                cuser = CUser.objects.get(user=user)
+                request.session['user_id'] = user.id
+                request.session['email'] = user.username
+                request.session['user_type'] = cuser.user_type
                 request.session['first_name'] = user.first_name 
                 request.session['last_name'] = user.last_name
-                request.session['email'] = user.username
-                request.session['user_id'] = user.id
-                # 5 min session duration
-                request.session.set_expiry_time(300)
+                request.session.set_expiry(300) # 5 min session duration
                 return HttpResponseRedirect('/home')
             # Authentication failed
             else:
