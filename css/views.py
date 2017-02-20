@@ -68,8 +68,15 @@ def HomeView(request):
     return render(request, 'home.html')
 
 def SchedulingView(request):
-    #@TODO NYI
-    return render_to_response('nyi.html')
+    res = HttpResponse()
+    if request.method == "GET":
+        return render(request, 'scheduling.html', {
+                     })
+    elif request.method == "POST":
+        res.status_code = 400
+        res.reason_phrase = "NYI"
+    else:
+        res.status_code = 400
 
 def LandingView(request):
     return render(request,'landing.html')
