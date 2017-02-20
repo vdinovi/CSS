@@ -116,9 +116,9 @@ class Room(models.Model):
     equipment = models.CharField(max_length=1024, null=True)
     
     @classmethod
-    def create(cls, name, description, cap, notes, equip):
+    def create(cls, name, description, capacity, notes, equipment):
         if name is None:
-            raise ValidationError("Room name is required")        
+            raise ValidationError("Room name is required")
         elif len(name) > 32:
             raise ValidationError("Room name is longer than 32 characters")
         elif description and len(description) > 256:
@@ -129,27 +129,28 @@ class Room(models.Model):
             raise ValidationError("Room equipment is longer than 1024 characters")
         else:
             room = cls(name=name, 
-                     description=description, 
-                     capacity=cap, notes=notes, 
-                     equipment=equip)
+                       description=description, 
+                       capacity=capacity,
+                       notes=notes, 
+                       equipment=equipment)
             return room
-            
+
     @classmethod
-    def get_room(cls, room_name):
-        return Room.objects.get(name=room_name)
+    def get_room(cls, name):
+        return Room.objects.get(name=name)
 
 # Course represents a department course offering
 class Course(models.Model):
-    course_name = models.CharField(max_length=16, unique=True)
+    name = models.CharField(max_length=16, unique=True)
     equipment_req = models.CharField(max_length=2048, null=True)
     description = models.CharField(max_length=2048, null=True)
 
     @classmethod
-    def create(cls, course, equipment, desc):
+    def create(cls, name, equipment_req, description):
         try:
-            course = cls(course_name = course, 
-                         equipment_req = equipment, 
-                         description = desc)
+            course = cls(name=name, 
+                         equipment_req=equipment_req, 
+                         description=description)
         except:
             raise ValidationError("Invalid data for course creation.")
         return course
@@ -159,11 +160,11 @@ class Course(models.Model):
         return cls.objects.filter()
 
     @classmethod
-    def get_course(cls, course_name):
-        return cls.objects.get(course_name=course_name)
+    def get_course(cls, name):
+        return cls.objects.get(name=name)
 
-    def set_equipment_req(self, equip):
-        self.equipment_req = equip
+    def set_equipment_req(self, equipment_req):
+        self.equipment_req = equipment_req
         self.save()
 
     def set_description(self, description):
@@ -183,19 +184,18 @@ class Course(models.Model):
 
 
 class SectionType(models.Model):
-    # @TODO should probably be called 'name', SectionType.section_type is confusing
-    section_type = models.CharField(max_length=32) # eg. lecture or lab
+    name = models.CharField(max_length=32) # eg. lecture or lab
 
     @classmethod
-    def create(cls, section_type_name):
-        if len(section_type_name) > 32:
+    def create(cls, name):
+        if len(name) > 32:
             raise ValidationError("Section Type name exceeds 32 characters.")
         else:
-            return cls(section_type = section_type_name)
+            return cls(name=name)
 
     @classmethod
-    def get_section_type(cls, section_type_name):
-        cls.objects.get(section_type_name=section_type_name)
+    def get_section_type(cls, name):
+        cls.objects.get(name=name)
 
 
 # WorkInfo contains the user defined information for specific Course-SectionType pairs

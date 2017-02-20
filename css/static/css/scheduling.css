@@ -47,7 +47,7 @@
     border-bottom: 0px;
 }
 
-.section-frame {
+.section-detail-frame {
     margin-top: 10px;
     min-width:300px;
     background-color: #1ac6ff;
@@ -55,6 +55,10 @@
     border-radius: 5px;
     overflow-x: scroll;
     white-space: nowrap;
+}
+
+.section-detail-table {
+    border: 1px solid black;
 }
 
 
