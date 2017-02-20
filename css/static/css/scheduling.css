@@ -1,9 +1,16 @@
 .scheduling-container {
-    margin-top: 10px;
     overflow-x: scroll;
 }
 
+.term-frame {
+    margin-top: 10px;
+    background-color: #1ac6ff;
+    border: 2px solid black;
+    border-radius: 5px;
+}
+
 .filter-frame {
+    margin-top: 10px;
     min-width:300px;
     background-color: #1ac6ff;
     border: 2px solid black;
@@ -20,15 +27,35 @@
 }
 
 .inner-frame {
+    background-color: #cccccc;
     width: 100%;
     min-height: 300px;
     margin: 10px;
-    background-color: white;
     border: 2px solid black;
     border-radius: 5px;
     display:inline-block;
 }
 
-.inner-frame li {
-    text-align:center;
+.filter-selection {
+    background-color: white;
+    position: relative;
+    display: block;
+    padding: 0px;
+    padding-left: 15px;
+    border: 1px solid #cccccc;
+    border-top: 0px;
+    border-bottom: 0px;
 }
+
+.section-frame {
+    margin-top: 10px;
+    min-width:300px;
+    background-color: #1ac6ff;
+    border: 2px solid black;
+    border-radius: 5px;
+    overflow-x: scroll;
+    white-space: nowrap;
+}
+
+
+
