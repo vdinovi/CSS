@@ -324,13 +324,13 @@ class Section(models.Model):
     def filter(filters):
         sections = Section.objects
         for key, value in filters.iteritems():
-            if key == time:
+            if key == 'time':
                 # START
                 # reduce(lambda q, f: q | Q(creator=f), filters, Q())
                 sections = sections.filter(reduce(lambda query, filter: query | (Q(start_time >= filter[0]) & Q(end_time <= filter[1])), value, Q()))
                 # OR 
-                for pair in value:
-                    sections = sections.filter(start_time >= pair[0]).filter(end_time <= pair[1])
+                #for pair in value:
+                #    sections = sections.filter(start_time >= pair[0]).filter(end_time <= pair[1])
                 # END
             else:
                 sections = sections.filter(key=value)
