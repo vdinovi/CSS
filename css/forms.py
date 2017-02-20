@@ -1,6 +1,6 @@
 from django import forms
 from django.core.mail import send_mail
-from css.models import CUser, Room
+from css.models import CUser, Room, Course
 from django.http import HttpResponseRedirect
 #from django.contrib.sites.models import Site
 import re
@@ -105,18 +105,16 @@ class DeleteRoomForm(forms.Form):
 	def deleteRoom(self):
 		nameString=self.cleaned_data['roomName']
 		Room.objects.filter(name=nameString).delete()
-		return
 
-# Course Form
 class AddCourseForm(forms.Form):
    course_name = forms.CharField()
-   descripton = forms.CharField()
+   description = forms.CharField()
    equipment_req = forms.CharField()
 
-   def addCourse(self):
-      course = Course(course_name = self.cleaned_date['course_name'],
-                  descripton = self.cleaned_date['description'],
-                  equipment_req = self.cleaned_data['equipment_req'])
+   def save(self):
+      course = Course(course_name = self.cleaned_data['course_name'],
+                      description = self.cleaned_data['description'],
+                      equipment_req = self.cleaned_data['equipment_req'])
       course.save(); 
 
 # Settings Form
@@ -131,3 +129,16 @@ class SettingsForm(forms.Form):
         chair = self.cleaned_data['chair']
         start_time = self.cleaned_data['start_time']
         end_time = self.cleaned_data['end_time']
+      return Course
+
+class DeleteCourseForm(forms.Form):
+    course_name = forms.CharField()
+
+    def save(self):
+        pass
+
+class EditCourseForm(forms.Form):
+    course_name = forms.CharField()
+
+    def save(self):
+        pass

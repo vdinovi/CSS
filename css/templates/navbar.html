@@ -11,8 +11,15 @@
             {% load static %}
             <img src="{% static "images/InvisoLogo.png" %}" width="65" height="65">
         </a>
-        <a href="/logout" class="navbar-link navbar-right logout-button">Logout</a>
-        <a href="http://{{ request.get_host }}/register" class="navbar-link navbar-right logout-button">Register</a>
+        <div class="pull-left">
+                {% if request.user.is_authenticated %}
+                <p class="navbar-link navbar-right logout-button"><b>{{ request.session.first_name }} {{request.session.last_name }}</b></p>
+                <a href="/logout" class="navbar-link navbar-right logout-button">Logout</a>
+                {% else %}
+                <a href="/login" class="navbar-link navbar-right logout-button">Login</a>
+                {% endif %}
+                <a href="http://{{ request.get_host }}/register" class="navbar-link navbar-right logout-button">Register</a>
+        </div>
     </div>
 
     <div class="collapse navbar-collapse custom-nav-bar-header">
@@ -25,9 +32,9 @@
             </div>
             <!-- Scheduling -->
             <div class="dropdown">
-                <button onclick="dropdownSchedulingFunction()" class="dropbtn">SCHEDULING</button>
-                <div id="scheduling-dropdown" class="dropdown-content">
-                </div> 
+                <button onclick="" class="dropbtn">
+                    <a href="http://{{ request.get_host }}/scheduling" style="color: #777;">SCHEDULING</a>
+                </button>
             </div>
             <!-- Resources -->
             <div class="dropdown">

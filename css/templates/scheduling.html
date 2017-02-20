@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <title>Scheduling</title>
+
+    <!-- Bootstrap -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <!-- Custom -->
+    {% load static %}
+    <link href="{% static "css/table.css" %}" rel="stylesheet">
+    <link href="{% static "css/scheduling.css" %}" rel="stylesheet">
+    <!-- Nice looking checkbox, would like to use to fill box where existing checkboxes are 
+         Has some bugs to work out. Taken from: http://bootsnipp.com/snippets/featured/checkboxradio-css-only -->
+    <link href="{% static "css/checkbox.css" %}" rel="stylesheet"> 
+
+    <!-- #e0e0e0HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+  </head>
+  <body>
+    {% include "navbar.html" %}
+    <div id="scheduling-container" class="container scheduling-container">
+      <!-- @TODO Term Frame -->
+      <!-- Term Frame -->
+      <div class="row">
+        <div id="term-frame" class="col-xs-4 offset-xs-1 term-frame">
+          <p>Hi</p>
+        </div>
+      </div>
+      <!-- Filter Frame -->
+      <div class="row">
+        <div id="filter-frame" class="col-xs-12 filter-frame">
+          <div class="col-xs-4 outer-frame">
+            <form method="POST" action="#">
+              <h1 style="text-align:center;">Filter Type</h1>
+              <div id="filter-type-frame" class="inner-frame">
+                <!-- COURSE FILTER -->
+                <div id="course-filter" class="input-group" style="border-bottom: 1px solid black;">
+                  <span class="input-group-addon">
+                    <input id="course-checkbox" type="checkbox">
+                  </span>
+                  <span class="form-control">
+                    <p><b>Course</b></p>
+                  </span>
+                  <!-- @TODO Fill with real entries -->
+                  <span class="list-group">
+                    <li class="filter-selection">- CPE101</li>
+                    <li class="filter-selection">- CPE102</li>
+                  </span>
+                </div>
+                <!-- FACULTY FILTER -->
+                <div id="faculty-filter" class="input-group" style="border-bottom: 1px solid black;">
+                  <span class="input-group-addon">
+                    <input id="faculty-checkbox" type="checkbox">
+                  </span>
+                  <span class="form-control">
+                    <p><b>Faculty</b></p>
+                  </span>
+                  <span class="list-group">
+                    <li class="filter-selection">- Kearns</li>
+                  </span> 
+                </div>
+                <!-- ROOM FILTER -->
+                <div id="room-filter" class="input-group" style="border-bottom: 1px solid black;">
+                  <span class="input-group-addon">
+                    <input id="room-checkbox" type="checkbox">
+                  </span>
+                  <span class="form-control">
+                    <p><b>Room</b></p>
+                  </span>
+                  <span class="list-group">
+                    <li class="filter-selection">- 14-256</li>
+                  </span>
+                </div>
+                <!-- TIME FILTER -->
+                <div id="time-filter" class="input-group" style="border-bottom: 1px solid black;">
+                  <span class="input-group-addon">
+                    <input id="time-checkbox" type="checkbox">
+                  </span>
+                  <span class="form-control">
+                    <p><b>Time</b></p>
+                  </span>
+                  <span class="list-group">
+                    <li class="filter-selection">- 8:00am</li>
+                  </span>
+                </div>
+              </div>
+            </form>
+          </div>
+          <!-- @TODO Fill with real entries -->
+          <div class="col-xs-4 outer-frame">
+            <h1 style="text-align:center;">Item</h1>
+            <div id="item-frame" class="inner-frame">
+              <div id="item-cpe101" class="input-group">
+                <span class="input-group-addon">
+                  <input id="item-checkbox" type="checkbox">
+                </span>
+                <p class="form-control">CPE101</p>
+              </div>
+              <div id="item-cpe101" class="input-group">
+                <span class="input-group-addon">
+                  <input id="item-checkbox" type="checkbox">
+                </span>
+                <p class="form-control">CPE102</p>
+              </div>
+            </div>
+          </div>
+          <!-- @TODO Fill with real entries -->
+          <div class="col-xs-4 outer-frame">
+            <h1 style="text-align:center;">Section</h1>
+            <div id="section-frame" class="inner-frame">
+              <ul class="list-group">
+                <li class="list-group-item">01</li>
+                <li class="list-group-item">02</li>
+                <li class="list-group-item">03</li>
+              </ul>
+            </div> 
+          </div>
+        </div>
+      </div>
+      <!-- Section Frame -->
+      <div class="row">
+        <div class="section-frame">
+          <table class="table table-bordered">
+            <thead>
+              <th>Name</th>
+              <th>Section</th>
+              <th>Type</th>
+              <th>Days</th>
+              <th>Start Time</th>
+              <th>End Time</th>
+              <th>Faculty</th>
+              <th>Room</th>
+            </thead>
+            <!-- @TODO Fill with real entries -->
+            <tbody>
+              <tr>
+                <td>01</td>
+                <td>CPE309</td>
+                <td>LEC</td>
+                <td>MWF</td>
+                <td>9:00am</td>
+                <td>10:00am</td>
+                <td>Kearns</td>
+                <td>14-229</td>
+              </tr>
+              <tr>
+                <td>01</td>
+                <td>CPE309</td>
+                <td>LAB</td>
+                <td>MWF</td>
+                <td>10:00am</td>
+                <td>11:00am</td>
+                <td>Kearns</td>
+                <td>14-229</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Custom JS -->
+    <script src="{% static "js/scheduling.js" %}"></script>
+    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+  </body>
+</html>

@@ -1,0 +1,61 @@
+.scheduling-container {
+    overflow-x: scroll;
+}
+
+.term-frame {
+    margin-top: 10px;
+    background-color: #1ac6ff;
+    border: 2px solid black;
+    border-radius: 5px;
+}
+
+.filter-frame {
+    margin-top: 10px;
+    min-width:300px;
+    background-color: #1ac6ff;
+    border: 2px solid black;
+    border-radius: 5px;
+    overflow-x: scroll;
+    white-space: nowrap;
+}
+
+.outer-frame {
+    padding:5px;
+    width:290px;
+    min-width:290px;
+    white-space: normal;
+}
+
+.inner-frame {
+    background-color: #cccccc;
+    width: 100%;
+    min-height: 300px;
+    margin: 10px;
+    border: 2px solid black;
+    border-radius: 5px;
+    display:inline-block;
+}
+
+.filter-selection {
+    background-color: white;
+    position: relative;
+    display: block;
+    padding: 0px;
+    padding-left: 15px;
+    border: 1px solid #cccccc;
+    border-top: 0px;
+    border-bottom: 0px;
+}
+
+.section-frame {
+    margin-top: 10px;
+    min-width:300px;
+    background-color: #1ac6ff;
+    border: 2px solid black;
+    border-radius: 5px;
+    overflow-x: scroll;
+    white-space: nowrap;
+}
+
+
+
