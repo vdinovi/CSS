@@ -217,8 +217,8 @@ def CoursesView(request):
     if request.method == "GET":
         return render(request, 'courses.html', {
                 'course_list': Course.objects.filter(),
-                'add_course_form': AddCourseForm(),
-                'edit_course_form': EditCourseForm(),
+                'add_course_form': AddCourseForm(auto_id='add_room_%s'),
+                'edit_course_form': EditCourseForm(auto_id='edit_room_%s'),
                 'delete_course_form': DeleteCourseForm()
             });
     elif request.method == "POST" and 'add-course-form' in request.POST:
@@ -252,12 +252,14 @@ def CoursesView(request):
             res.status_code = 400
             res.reason_phrase = "Invalid form entry"
     elif request.method == "POST" and 'delete-course-form' in request.POST:
-        form = DeleteRoomForm(request.POST)
+        form = DeleteCourseForm(request.POST)
+        print("delete view")
         if form.is_valid():
             form.save()
             res.status_code = 200
             return HttpResponseRedirect('/home/courses')
         else:
+            #form.save()
             res.status_code = 400
             res.reason_phrase = "Invalid form entry"
 

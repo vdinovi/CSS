@@ -34,7 +34,7 @@ class InviteUserForm(forms.Form):
         #your_domain = Site.objects.get_current().domain
         link = 'http://localhost:8000/register?first='+first_name + '&last=' + last_name +'&type='+usertype
         send_mail('Invite to register for CSS',
-                  name + """, you have been invited to register for CSS. 
+                  name + """, you have been invited to register for CSS.
                   Please register using the following link: """ + link,
                   'registration@inviso-css',
                   [self.cleaned_data['email']])
@@ -111,15 +111,18 @@ class DeleteRoomForm(forms.Form):
 		Room.objects.filter(name=nameString).delete()
 
 class AddCourseForm(forms.Form):
-   course_name = forms.CharField()
-   description = forms.CharField()
-   equipment_req = forms.CharField()
+    course_name = forms.CharField()
+    description = forms.CharField()
+    equipment_req = forms.CharField()
 
-   def save(self):
-      course = Course(name = self.cleaned_data['course_name'],
+    def save(self):
+        print "save course"
+        course = Course(name = self.cleaned_data['course_name'],
                       description = self.cleaned_data['description'],
                       equipment_req = self.cleaned_data['equipment_req'])
-      course.save(); 
+        name = self.cleaned_data['course_name']
+        print name
+        course.save();
 
 # Settings Form
 class SettingsForm(forms.Form):
@@ -135,13 +138,12 @@ class SettingsForm(forms.Form):
         DEPARTMENT_SETTINGS.end_time = form.cleaned_data['end_time']
         DEPARTMENT_SETTINGS.save_settings()
 
-
-
 class DeleteCourseForm(forms.Form):
-    course_name = forms.CharField()
+    course_name = forms.CharField(widget=forms.HiddenInput(), initial='defaultRoom')
 
     def save(self):
-        Course.get_course(name=form.cleaned_data['course_name']).delete()
+        print("delete " + self.cleaned_data['course_name'])
+        Course.get_course(name=self.cleaned_data['course_name']).delete()
 
 
 class EditCourseForm(forms.Form):
