@@ -42,13 +42,13 @@ class InviteUserForm(forms.Form):
 # Registration Form
 # @TODO on load, pull fields from query string -> show failure if field not able to be loaded:
 #       Fields to pull: email, first_name, last_name, user_type
-class RegisterUserForm(forms.Form, first ,last,type):
+class RegisterUserForm(forms.Form):
     first_name = forms.CharField()
     last_name = forms.CharField()
     email = forms.EmailField()
-    user_type = forms.CharField(type)
-    forms.fields['user_type'].disabled=True
-    #forms.ChoiceField(label='Role', choices=[('faculty', 'faculty'), ('scheduler', 'scheduler')])
+    #user_type = forms.CharField(type)
+    #forms.fields['user_type'].disabled=True
+    forms.ChoiceField(label='Role', choices=[('faculty', 'faculty'), ('scheduler', 'scheduler')])
     password1 = forms.CharField(label='Password', widget=forms.PasswordInput)
     password2 = forms.CharField(label='Confirm Password', widget=forms.PasswordInput)
 
@@ -60,7 +60,6 @@ class RegisterUserForm(forms.Form, first ,last,type):
                             last_name=self.cleaned_data['last_name'])
         user.save()
         return user
-#f = RegisterUserForm(initial={'first_name': 'Britney'})
 
 # Edit User Form
 class EditUserForm(forms.Form):

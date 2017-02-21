@@ -29,7 +29,7 @@ def RegistrationView(request):
         for msg in storage:
             pass
         return render(request, 'registration.html', {
-                          'registration_form': RegisterUserForm(first_name,last_name,type)
+                          'registration_form': RegisterUserForm()
                       })
     elif request.method == "POST":
         form = RegisterUserForm(request.POST)
