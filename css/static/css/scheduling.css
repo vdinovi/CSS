@@ -5,14 +5,27 @@
 .term-frame {
     margin-top: 10px;
     background-color: #1ac6ff;
-    border: 1px solid black;
     border-radius: 5px;
+}
+
+.term-frame span {
+    
+}
+
+.manage-new-section-btn {
+    margin-top: 10px;
+    width: 100%;
+    height: 100%;
+}
+
+.new-section {
+
 }
 
 .filter-frame {
     margin-top: 10px;
     min-width:300px;
-    background-color: #cccccc;
+    background-color: #1ac6ff;
     border: 1px solid black;
     border-radius: 5px;
     overflow-x: scroll;
