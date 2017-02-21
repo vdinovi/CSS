@@ -38,8 +38,8 @@
               {% for course in course_list %}
               <tr>
                 <td>
-                  <button type="button" class="btn btn-info btn-xs" data-toggle="modal" data-target="#delete-course" onclick="setDeleteID('{{ course.course_name }}')"><span class="glyphicon glyphicon-minus"></span>&nbsp;</button>
-                  <button type="button" class="btn btn-info btn-xs" data-toggle="modal" data-target="#edit-course" onclick="updateRoom('{{ course.course_name }}')"><span class="glyphicon glyphicon-edit"></span>&nbsp;</button>
+                  <button type="button" class="btn btn-info btn-xs" data-toggle="modal" data-target="#delete-course" onclick="setDeleteFormItem('{{ course.course_name }}')"><span class="glyphicon glyphicon-minus"></span>&nbsp;</button>
+                  <button type="button" class="btn btn-info btn-xs" data-toggle="modal" data-target="#edit-course" onclick="setEditFormFields('{{ course.course_name }}')"><span class="glyphicon glyphicon-edit"></span>&nbsp;</button>
                 </td>
                 <td>{{ course.course_name }}</td>
                 <td>{{ couse.description }}</td>
@@ -117,5 +117,8 @@
 
     <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+
+    {% load static %}
+    <script src="{% static "js/resources.js" %}"></script>
   </body>
 </html>

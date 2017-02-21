@@ -137,7 +137,7 @@ def LoginView(request):
                 request.session['user_id'] = user.id
                 request.session['email'] = user.username
                 request.session['user_type'] = cuser.user_type
-                request.session['first_name'] = user.first_name 
+                request.session['first_name'] = user.first_name
                 request.session['last_name'] = user.last_name
                 request.session.set_expiry(300) # 5 min session duration
                 return HttpResponseRedirect('/home')
@@ -226,6 +226,7 @@ def CoursesView(request):
         print form.is_valid()
         if form.is_valid():
             try:
+                print "add form view"
                 form.save();
                 return HttpResponseRedirect("/home/courses")
             except ValidationError as e:
@@ -259,7 +260,7 @@ def CoursesView(request):
         else:
             res.status_code = 400
             res.reason_phrase = "Invalid form entry"
- 
+
     else:
         res.status_code = 400
     return res
