@@ -239,17 +239,24 @@ def CoursesView(request):
             res.status_code = 400
             res.reason_phrase = "Invalid form entry"
     elif request.method == "POST" and 'edit-course-form' in request.POST:
-        form = EditRoomForm(request.POST)
+        form = EditCourseForm(request.POST)
         if form.is_valid():
             form.save()
             res.status_code = 200
-            return HttpResponseRedirect('/home/rooms')
+            return HttpResponseRedirect('/home/courses')
         else:
             res.status_code = 400
-
+            res.reason_phrase = "Invalid form entry"
     elif request.method == "POST" and 'delete-course-form' in request.POST:
-        res.status_code = 400
-        res.reason_phrase = "NYI"
+        form = DeleteRoomForm(request.POST)
+        if form.is_valid():
+            form.save()
+            res.status_code = 200
+            return HttpResponseRedirect('/home/courses')
+        else:
+            res.status_code = 400
+            res.reason_phrase = "Invalid form entry"
+ 
     else:
         res.status_code = 400
     return res
