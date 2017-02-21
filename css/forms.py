@@ -26,7 +26,7 @@ class InviteUserForm(forms.Form):
 
     #@TODO send registraiton link in email
     def send_invite(self, usertype, request):
-    	#credentials = {'name': [first_name, last_name], 'type': usertype}
+        #credentials = {'name': [first_name, last_name], 'type': usertype}
         first_name = self.cleaned_data['first_name']
         last_name = self.cleaned_data['last_name']
         name = first_name + ' ' + last_name
@@ -38,6 +38,7 @@ class InviteUserForm(forms.Form):
                   Please register using the following link: """ + link,
                   'registration@inviso-css',
                   [self.cleaned_data['email']])
+        print("sent email to " + self.cleaned_data['email'])
 
 # Registration Form
 # @TODO on load, pull fields from query string -> show failure if field not able to be loaded:
@@ -48,7 +49,7 @@ class RegisterUserForm(forms.Form):
     email = forms.EmailField()
     #user_type = forms.CharField(type)
     #forms.fields['user_type'].disabled=True
-    forms.ChoiceField(label='Role', choices=[('faculty', 'faculty'), ('scheduler', 'scheduler')])
+    user_type = forms.ChoiceField(label='Role', choices=[('faculty', 'faculty'), ('scheduler', 'scheduler')])
     password1 = forms.CharField(label='Password', widget=forms.PasswordInput)
     password2 = forms.CharField(label='Confirm Password', widget=forms.PasswordInput)
 
@@ -70,6 +71,8 @@ class DeleteUserForm(forms.Form):
     email = forms.CharField(label='Confirm email')
 
     def delete_user(self):
+        email = self.cleaned_data['email']
+        print("emails match")
         CUser.get_user(email=self.cleaned_data['email']).delete()
 
 class AddRoomForm(forms.Form):
@@ -80,35 +83,35 @@ class AddRoomForm(forms.Form):
     equipment = forms.CharField()
 
     def save(self):
-		nameString = self.cleaned_data['name']
-		resultRooms = Room.objects.filter(name=nameString)
-		room = Room.objects.create(name=self.cleaned_data['name'], description=self.cleaned_data['description'], capacity=self.cleaned_data['capacity'], notes=self.cleaned_data['notes'], equipment=self.cleaned_data['equipment'])
-		room.save()
-		return room
+        nameString = self.cleaned_data['name']
+        resultRooms = Room.objects.filter(name=nameString)
+        room = Room.objects.create(name=self.cleaned_data['name'], description=self.cleaned_data['description'], capacity=self.cleaned_data['capacity'], notes=self.cleaned_data['notes'], equipment=self.cleaned_data['equipment'])
+        room.save()
+        return room
 
 class EditRoomForm(forms.Form):
-	name = forms.CharField(widget=forms.HiddenInput(), initial='defaultRoom')
-	description = forms.CharField()
-	capacity = forms.IntegerField()
-	notes = forms.CharField()
-	equipment = forms.CharField()
+    name = forms.CharField(widget=forms.HiddenInput(), initial='defaultRoom')
+    description = forms.CharField()
+    capacity = forms.IntegerField()
+    notes = forms.CharField()
+    equipment = forms.CharField()
 
-	def save(self):
-		nameString = self.cleaned_data['name']
-		resultRooms = Room.objects.filter(name=nameString)
-		room = resultRooms[0]
-		room.name = self.cleaned_data['name']
-		room.description = self.cleaned_data['description']
-		room.capacity = self.cleaned_data['capacity']
-		room.notes = self.cleaned_data['notes']
-		room.equipment = self.cleaned_data['equipment']
-		room.save()
+    def save(self):
+        nameString = self.cleaned_data['name']
+        resultRooms = Room.objects.filter(name=nameString)
+        room = resultRooms[0]
+        room.name = self.cleaned_data['name']
+        room.description = self.cleaned_data['description']
+        room.capacity = self.cleaned_data['capacity']
+        room.notes = self.cleaned_data['notes']
+        room.equipment = self.cleaned_data['equipment']
+        room.save()
 
 class DeleteRoomForm(forms.Form):
-	roomName = forms.CharField(widget=forms.HiddenInput(), initial='defaultRoom')
-	def deleteRoom(self):
-		nameString=self.cleaned_data['roomName']
-		Room.objects.filter(name=nameString).delete()
+    roomName = forms.CharField(widget=forms.HiddenInput(), initial='defaultCourse')
+    def deleteRoom(self):
+        nameString=self.cleaned_data['roomName']
+        Room.objects.filter(name=nameString).delete()
 
 class AddCourseForm(forms.Form):
     course_name = forms.CharField()
@@ -139,19 +142,19 @@ class SettingsForm(forms.Form):
         DEPARTMENT_SETTINGS.save_settings()
 
 class DeleteCourseForm(forms.Form):
-    course_name = forms.CharField(widget=forms.HiddenInput(), initial='defaultRoom')
+    course_name = forms.CharField(widget=forms.HiddenInput(), initial='defaultCourse')
 
     def save(self):
         print("delete " + self.cleaned_data['course_name'])
         Course.get_course(name=self.cleaned_data['course_name']).delete()
-
+        return
 
 class EditCourseForm(forms.Form):
-    course_name = forms.CharField()
+    course_name = forms.CharField(widget=forms.HiddenInput(), initial='defaultCourse')
     equipment_req = forms.CharField()
     description = forms.CharField()
 
     def save(self):
-        course = Course.get_course(name=form.cleaned_data['course_name'])
-        course.set_equipment_req(forms.cleaned_data['equipment_req'])
-        course.set_description(forms.cleaned_data['description'])
+        course = Course.get_course(name=self.cleaned_data['course_name'])
+        course.set_equipment_req(self.cleaned_data['equipment_req'])
+        course.set_description(self.cleaned_data['description'])

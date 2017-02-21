@@ -217,8 +217,8 @@ def CoursesView(request):
     if request.method == "GET":
         return render(request, 'courses.html', {
                 'course_list': Course.objects.filter(),
-                'add_course_form': AddCourseForm(auto_id='add_room_%s'),
-                'edit_course_form': EditCourseForm(auto_id='edit_room_%s'),
+                'add_course_form': AddCourseForm(auto_id='add_course_%s'),
+                'edit_course_form': EditCourseForm(auto_id='edit_course_%s'),
                 'delete_course_form': DeleteCourseForm()
             });
     elif request.method == "POST" and 'add-course-form' in request.POST:
@@ -331,6 +331,7 @@ def FacultyView(request):
         form = DeleteUserForm(request.POST)
         if form.is_valid():
             try:
+                print("delete user view")
                 form.delete_user()
                 res.status_code = 200
             except ObjectDoesNotExist:
