@@ -11,7 +11,7 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
     <!-- Custom -->
     {% load static %}
-    <link href="{% static "css/custom.css" %}" rel="stylesheet">
+    <link href="{% static "css/table.css" %}" rel="stylesheet">
 
     <!-- #e0e0e0HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -26,8 +26,8 @@
 
     <div class="container">
       <div class="row">
-        <div class="col-sm-12">
-          <h1 align="center"  style="line-height:60px; padding-bottom: 20px">Department Rooms</h1>
+        <div class="col-sm-12" style="padding-bottom: 20px">
+          <h1 align="center">Department Rooms</h1>
         </div>
       </div>
       <div class="row">
@@ -35,12 +35,13 @@
           <table id="table" class = "table table-striped table-hover table-bordered" style="background-color: #fff">
             <thead>
               <tr class="top">
-                <th>Edit</th>
-                <th>Name</th>
-                <th>Description</th>
-                <th>Capacity</th>
-                <th>Notes</th>
-                <th>Equipment</th>
+                <td>Edit</td>
+                <td>Name</td>
+                <td>Description</td>
+                <td>Capacity</td>
+                <td>Notes</td>
+                <td>Equipment</td>
+            </tr>
             </thead>
             <tbody>
               {% for room in room_list %}
@@ -74,7 +75,7 @@
             <h4 class="modal-title">Add Room</h4>
           </div>
           <div class="modal-body">
-            <form method="POST" action="" novalidate>{% csrf_token %}
+            <form method="POST" action="" >{% csrf_token %}
               <p>Add a room</p>
               {{ add_room_form.as_p }}
               <button type="submit" name="add-form" class="save btn btn-default">submit</button>
@@ -93,7 +94,7 @@
             <h4 class="modal-title">Edit Room</h4>
           </div>
           <div class="modal-body">
-            <form method="POST" action="" novalidate>{% csrf_token %}
+            <form method="POST" action="" >{% csrf_token %}
               <p>Edit Room</p>
               {{ edit_room_form.as_p }}
               <button type="submit" name="edit-form" class="save btn btn-default">submit</button>

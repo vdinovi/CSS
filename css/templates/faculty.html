@@ -11,7 +11,7 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
     <!-- Custom -->
     {% load static %}
-    <link href="{% static "css/custom.css" %}" rel="stylesheet">
+    <link href="{% static "css/table.css" %}" rel="stylesheet">
 
 
     <!-- #e0e0e0HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
@@ -27,8 +27,8 @@
     
     <div class="container">
       <div class="row">
-        <div class="col-sm-12">
-          <h1 align="center" style="padding-bottom: 20px">Department Faculty</h1>
+        <div class="col-sm-12" style="padding-bottom: 20px">
+          <h1 align="center">Department Faculty</h1>
         </div>
       </div>
       <div class="row">
@@ -36,9 +36,10 @@
           <table class = "table table-striped table-hover table-bordered" style="background-color: #fff">
             <thead>
               <tr class="top">
-                <th/>
-                <th>ID</th>
+                <th></th>
                 <th>Email</th>
+                <th>Name</th>
+              </tr>
             </thead>
             <tbody>
               {% for cuser in faculty_list %}
@@ -47,8 +48,8 @@
                 <button type="button" class="btn btn-info btn-xs" data-toggle="modal" data-target="#delete-faculty" onclick="setDeleteID('{{ faculty.user.email }}')"><span class="glyphicon glyphicon-minus"></span>&nbsp;</button>
                 <button type="button" class="btn btn-info btn-xs" data-toggle="modal" data-target="#edit-faculty"><span onclick="updateRoom('{{ faculty.user.name }}')" class="glyphicon glyphicon-edit"></span>&nbsp;</button>
                 </td>
-                <th>{{ cuser.user.id }}</th>
-                <th>{{ cuser.user.email }}</th>
+                <td>{{ cuser.user.email }}</td>
+                <td>{{ cuser.user.first_name }} {{ cuser.user.last_name }}</td>
               </tr>
               {% endfor %}
             </tbody>
@@ -67,11 +68,6 @@
             <h4 class="modal-title">Add Faculty</h4>
           </div>
           <div class="modal-body">
-            <form name='invite-form' method="POST" action="?" novalidate>{% csrf_token %}
-              <p>Invite a Faculty Member</p>
-              {{ invite_user_form.as_p }}
-              <button type="submit" name="invite-form-button" class="save btn btn-default">submit</button>
-
             <form method="POST" action="#">{% csrf_token %}
               {{ invite_user_form.as_p }}
               <button type="submit" name="invite-form" class="save btn btn-default">submit</button>
