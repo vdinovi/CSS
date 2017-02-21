@@ -25,12 +25,13 @@ class InviteUserForm(forms.Form):
 
     #@TODO send registraiton link in email
     def send_invite(self, usertype, request):
+    	#credentials = {'name': [first_name, last_name], 'type': usertype}
         first_name = self.cleaned_data['first_name']
         last_name = self.cleaned_data['last_name']
         name = first_name + ' ' + last_name
         email = self.cleaned_data['email']
         #your_domain = Site.objects.get_current().domain
-        link = 'http://localhost:8000/register?'+first_name + '+' + last_name +'&type='+usertype
+        link = 'http://localhost:8000/register?first='+first_name + '&last=' + last_name +'&type='+usertype
         send_mail('Invite to register for CSS',
                   name + """, you have been invited to register for CSS. 
                   Please register using the following link: """ + link,
@@ -40,11 +41,13 @@ class InviteUserForm(forms.Form):
 # Registration Form
 # @TODO on load, pull fields from query string -> show failure if field not able to be loaded:
 #       Fields to pull: email, first_name, last_name, user_type
-class RegisterUserForm(forms.Form):
+class RegisterUserForm(forms.Form, first ,last,type):
     first_name = forms.CharField()
     last_name = forms.CharField()
     email = forms.EmailField()
-    user_type = forms.ChoiceField(label='Role', choices=[('faculty', 'faculty'), ('scheduler', 'scheduler')])
+    user_type = forms.CharField(type)
+    forms.fields['user_type'].disabled=True
+    #forms.ChoiceField(label='Role', choices=[('faculty', 'faculty'), ('scheduler', 'scheduler')])
     password1 = forms.CharField(label='Password', widget=forms.PasswordInput)
     password2 = forms.CharField(label='Confirm Password', widget=forms.PasswordInput)
 
@@ -56,6 +59,7 @@ class RegisterUserForm(forms.Form):
                             last_name=self.cleaned_data['last_name'])
         user.save()
         return user
+#f = RegisterUserForm(initial={'first_name': 'Britney'})
 
 # Edit User Form
 class EditUserForm(forms.Form):
