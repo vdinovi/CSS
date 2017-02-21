@@ -16,12 +16,20 @@ import MySQLdb
 # ---------------------------
 def RegistrationView(request):
     res = HttpResponse()
+
+    first_name = request.GET.get('first')
+    last_name = request.GET.get('last')
+    type = request.GET.get('type')
+
+    #pass these credentials to the RegisterUserForm
+    #add arguments to the form
+
     if request.method == "GET":
         storage = messages.get_messages(request)
         for msg in storage:
             pass
         return render(request, 'registration.html', {
-                          'registration_form': RegisterUserForm()
+                          'registration_form': RegisterUserForm(first_name,last_name,type)
                       })
     elif request.method == "POST":
         form = RegisterUserForm(request.POST)

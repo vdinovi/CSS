@@ -316,7 +316,6 @@ class Section(models.Model):
                 section_capacity, students_enrolled, students_waitlisted, conflict,
                 conflict_reason, fault, fault_reason)
 
-
     # this function takes in a dictionary object of filters that has been serialized from a JSON object based on what the user has selected
     # for filtering by time, it will only take in an array of pairs (an array of 2-piece arrays) so that it will at least have a start time and end time.
     #### there can also be chunks of time, so there are multiple start and end times
