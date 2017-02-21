@@ -13,11 +13,13 @@ class schedulerTestCase(TestCase):
         return CUser.get_scheduler(email=email)
 
     @staticmethod
-    def get_all_scheduler():
+    def get_all_schedulers():
         return CUser.objects.filter(user_type='scheduler')
 
-    def verify_scheduler(self, scheduler, email, password, first_name, last_name):
+    def verify_scheduler(self, scheduler, email='email@email.com', password='password#0',
+                         first_name='blah', last_name='blah'):
         self.assertTrue(isinstance(scheduler, CUser))
+        self.assertEqual(scheduler.user.username, email)
         self.assertEqual(scheduler.user.email, email)
         self.assertTrue(scheduler.user.check_password(password))
         self.assertEqual(scheduler.user_type, 'scheduler')
@@ -34,24 +36,27 @@ class schedulerTestCase(TestCase):
     def test_valid_scheduler(self):     
         scheduler1 = self.create_scheduler(email='email1@email.com')
         scheduler2 = self.create_scheduler(email='email2@email.com')
-        self.verify_scheduler(scheduler1, 'email1@email.com', 'password#0', 'blah', 'blah')
-        self.verify_scheduler(scheduler2, 'email2@email.com', 'password#0', 'blah', 'blah')
-        self.assertTrue(scheduler1 in self.get_all_scheduler())
-        self.assertTrue(scheduler2 in self.get_all_scheduler())
+        self.verify_scheduler(scheduler1, email='email1@email.com')
+        self.verify_scheduler(scheduler2, email='email2@email.com')
+        self.assertTrue(scheduler1 in self.get_all_schedulers())
+        self.assertTrue(scheduler2 in self.get_all_schedulers())
         scheduler1.delete()
         scheduler2.delete()
-        self.assertRaises(ObjectDoesNotExist, self.get_scheduler, email='email@email.com')
+        self.assertRaises(ObjectDoesNotExist, self.get_scheduler, email='email@email1.com')
+        self.assertRaises(ObjectDoesNotExist, self.get_scheduler, email='email@email2.com')
 
     # Email
     def test_valid_email_1(self):
         scheduler = self.create_scheduler(email='vito.dinovi@gmail.com')
-        self.assertEqual(scheduler.user.email, 'vito.dinovi@gmail.com')
+        self.verify_scheduler(scheduler, email='vito.dinovi@gmail.com')
         scheduler.delete()
+        self.assertRaises(ObjectDoesNotExist, self.get_scheduler, email='vito.dinovi@gmail.com')
 
     def test_valid_email_2(self):
         scheduler = self.create_scheduler(email='vdinovi@calpoly.edu')
-        self.assertEqual(scheduler.user.email, 'vdinovi@calpoly.edu')
+        self.verify_scheduler(scheduler, email='vdinovi@calpoly.edu')
         scheduler.delete()
+        self.assertRaises(ObjectDoesNotExist, self.get_scheduler, email='vdinovi@calpoly.edu')
 
     def test_invalid_email_1(self):
         self.assertRaises(ValidationError, self.create_scheduler, email='')
@@ -82,6 +87,9 @@ class schedulerTestCase(TestCase):
     def test_invalid_password_3(self):
         self.assertRaises(ValidationError, self.create_scheduler, password='1$aaaaa')
 
+    def test_invalid_password_4(self):
+        self.assertRaises(ValidationError, self.create_scheduler, password='1234567!')
+
     # User type
     def test_invalid_user_type(self):
         self.assertRaises(ValidationError, self.create_scheduler, user_type='aaa')
@@ -91,8 +99,8 @@ class schedulerTestCase(TestCase):
         scheduler1 = self.create_scheduler(email='scheduler1@email.com',
                                   user_type='scheduler')
         scheduler2 = self.create_scheduler(email='scheduler2@email.com',
-                                  user_type='faculty')
-        scheduler_list = self.get_all_scheduler()
+                                           user_type='faculty')
+        scheduler_list = self.get_all_schedulers()
         self.assertTrue(scheduler1 in scheduler_list)
         self.assertTrue(scheduler2 not in scheduler_list)
         scheduler1.delete()
@@ -103,7 +111,7 @@ class schedulerTestCase(TestCase):
                                   user_type='faculty')
         scheduler2 = self.create_scheduler(email='scheduler2@email.com',
                                   user_type='faculty')
-        self.assertTrue(not self.get_all_scheduler()) 
+        self.assertTrue(not self.get_all_schedulers()) 
         scheduler1.delete()
         scheduler2.delete()
 
@@ -123,8 +131,8 @@ class schedulerTestCase(TestCase):
     # Delete
     def test_delete_scheduler(self):
         scheduler = self.create_scheduler(email='email@email.com')
-        self.assertTrue(scheduler in self.get_all_scheduler())
+        self.assertTrue(scheduler in self.get_all_schedulers())
         scheduler.delete()
-        self.assertTrue(scheduler not in self.get_all_scheduler())
+        self.assertTrue(scheduler not in self.get_all_schedulers())
         self.assertRaises(ObjectDoesNotExist, self.get_scheduler, email='email@email.com')
 

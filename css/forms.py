@@ -1,7 +1,8 @@
 from django import forms
 from django.core.mail import send_mail
-from css.models import CUser, Room
+from css.models import CUser, Room, Course
 from django.http import HttpResponseRedirect
+from settings import DEPARTMENT_SETTINGS
 #from django.contrib.sites.models import Site
 import re
 
@@ -109,16 +110,42 @@ class DeleteRoomForm(forms.Form):
 	def deleteRoom(self):
 		nameString=self.cleaned_data['roomName']
 		Room.objects.filter(name=nameString).delete()
-		return
 
-# Course Form
 class AddCourseForm(forms.Form):
    course_name = forms.CharField()
-   descripton = forms.CharField()
+   description = forms.CharField()
    equipment_req = forms.CharField()
 
-   def addCourse(self):
-      course = Course(course_name = self.cleaned_date['course_name'],
-                  descripton = self.cleaned_date['description'],
-                  equipment_req = self.cleaned_data['equipment_req'])
+   def save(self):
+      course = Course(course_name = self.cleaned_data['course_name'],
+                      description = self.cleaned_data['description'],
+                      equipment_req = self.cleaned_data['equipment_req'])
       course.save(); 
+
+# Settings Form
+class SettingsForm(forms.Form):
+    name = forms.CharField(required=True)
+    chair = forms.CharField()
+    start_time = forms.TimeField()
+    end_time = forms.TimeField()
+
+    def save(self):
+        DEPARTMENT_SETTINGS.name = form.cleaned_data['name']
+        DEPARTMENT_SETTINGS.chair = form.cleaned_data['chair']
+        DEPARTMENT_SETTINGS.start_time = form.cleaned_data['start_time']
+        DEPARTMENT_SETTINGS.end_time = form.cleaned_data['end_time']
+        DEPARTMENT_SETTINGS.save_settings()
+
+
+
+class DeleteCourseForm(forms.Form):
+    course_name = forms.CharField()
+
+    def save(self):
+        pass
+
+class EditCourseForm(forms.Form):
+    course_name = forms.CharField()
+
+    def save(self):
+        pass

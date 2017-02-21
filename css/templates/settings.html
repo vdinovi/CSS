@@ -11,7 +11,7 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
     <!-- Custom -->
     {% load static %}
-    <link href="{% static "css/custom.css" %}" rel="stylesheet">
+    <link href="{% static "css/table.css" %}" rel="stylesheet">
     <link href="{% static "css/settings.css" %}" rel="stylesheet">
 
 
@@ -35,51 +35,62 @@
         
         <div class="well-border col-lg-10 col-lg-offset-1">
           <div class="col-lg-10 col-lg-offset-1">
-            <form class="form-horizontal" role="form">
-
+            <form class="form-horizontal" role="form" method="POST">
+              {% csrf_token %}
               <div class="form-group">
-                <label for="department_name" class="col-md-6 control-label">Department Name</label>
-                <div class="col-md-3">
-                    <input type="text" class="form-control" id="inputType" value="hello">
+                <label for=" department_name " class="col-md-6 control-label">Department Name</label>
+                <div class="col-md-3 fieldWrapper">
+                    <input type="text" class="form-control" value={{ department_chair }}>
                 </div>
               </div>
 
               <div class="form-group">
-                <label for="department_chair" class="col-md-6 control-label">Department Chair</label>
+                <label for=" department_chair " class="col-md-6 control-label">Department Chair</label>
                 <div class="col-md-3">
-                    <input type="text" class="form-control" id="inputType" value = "Timothy Kearns">
+                    <input type="text" class="form-control" id="inputType" value={{ department_name }}>
                 </div>
               </div>
 
               <div class="form-group">
-                <label for="dep_hours" class="col-md-6 col-md-offset-3 hours-label">Department Hours</label>
+                <label for="hours" class="col-md-6 col-md-offset-3 hours-label">Department Hours</label>
               </div>
 
               <div class="time-inputs col-md-6 col-md-offset-3">
                 <div class="col-md-5">
-                    <input type="time" class="form-control" id="inputType" value="15:00:00" placeholder="HH:MM:SS">
+                    <input type="time" class="form-control" id="settings_form.start_time" value={{ department_start_time }} placeholder="HH:MM:SS">
                 </div>
                 <div class="col-md-2 dash-text">
                   -
                 </div>
                 <div class="col-md-5">
-                    <input type="time" class="form-control" id="inputType" value="15:00:00" placeholder="HH:MM:SS">
+                    <input type="time" class="form-control" id="settings_form.end_time" value={{ department_end_time }} placeholder="HH:MM:SS">
                 </div>
               </div>
 
-              <div class="section-types">
+              <div class="col-md-12 space">
+              </div>
 
+              <input name="submit-settings" type="submit" class="btn btn-small col-md-2 col-md-offset-5" value="Submit Settings">
+
+              <div class="col-md-12 space">
               </div>
             </form>
-          </div>
-
-          <div class="space col-md-12"> 
-          </div>
-
-          <button type="submit" class="btn btn-small col-md-2 col-md-offset-5">Submit Settings</button>
-
-
-          <div class="space col-md-12"> 
+            <!-- <form method="POST" onSubmit="DEPARTMENT_SETTINGS.save_settings">
+              {% csrf_token %}
+              {% for field in settings_form %}
+                {% if "time" not in field.label %}
+                  <div class="col-md-6 col-md-offset-3 name_chair_fields">
+                    <div class="col-md-6 input_labels"> 
+                      Department {{field.label}}
+                    </div>
+                    <div class="col-md-6 inputs">
+                      {{ field }}
+                    </div>
+                  </div>
+                {% endif%}
+              {% endfor %}
+              <input type="submit" class="btn btn-small col-md-2 col-md-offset-5" value="Submit Settings">
+            </form> -->
           </div>
 
           <div class="panel panel-default col-md-4 col-md-offset-4">
