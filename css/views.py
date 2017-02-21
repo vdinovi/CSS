@@ -16,12 +16,17 @@ import MySQLdb
 # ---------------------------
 def RegistrationView(request):
     res = HttpResponse()
+    #pass these credentials to the RegisterUserForm
+    first_name = request.GET.get('first')
+    last_name = request.GET.get('last')
+    user_type = request.GET.get('type')
+
     if request.method == "GET":
         storage = messages.get_messages(request)
         for msg in storage:
             pass
         return render(request, 'registration.html', {
-                          'registration_form': RegisterUserForm()
+                          'registration_form': RegisterUserForm(first=first_name,last=last_name,type=user_type)
                       })
     elif request.method == "POST":
         form = RegisterUserForm(request.POST)
@@ -234,17 +239,24 @@ def CoursesView(request):
             res.status_code = 400
             res.reason_phrase = "Invalid form entry"
     elif request.method == "POST" and 'edit-course-form' in request.POST:
-        form = EditRoomForm(request.POST)
+        form = EditCourseForm(request.POST)
         if form.is_valid():
             form.save()
             res.status_code = 200
-            return HttpResponseRedirect('/home/rooms')
+            return HttpResponseRedirect('/home/courses')
         else:
             res.status_code = 400
-
+            res.reason_phrase = "Invalid form entry"
     elif request.method == "POST" and 'delete-course-form' in request.POST:
-        res.status_code = 400
-        res.reason_phrase = "NYI"
+        form = DeleteRoomForm(request.POST)
+        if form.is_valid():
+            form.save()
+            res.status_code = 200
+            return HttpResponseRedirect('/home/courses')
+        else:
+            res.status_code = 400
+            res.reason_phrase = "Invalid form entry"
+ 
     else:
         res.status_code = 400
     return res

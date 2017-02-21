@@ -7,6 +7,7 @@ import re
 from django.db import IntegrityError
 from django.core.exceptions import ValidationError, ObjectDoesNotExist
 from util import DepartmentSettings
+from settings import DEPARTMENT_SETTINGS
 
 # System User class,
 # Wrapper for django builtin class, contains user + application specific data
@@ -93,8 +94,10 @@ class FacultyDetails(models.Model):
 
     @classmethod
     def create(cls, faculty, target_work_units, target_work_hours):
-        return cls(faculty=faculty, target_work_units=target_work_units,
-                   target_work_hours=target_work_hours, changed_preferences='n')
+        faculty = cls(faculty=faculty, target_work_units=target_work_units,
+                      target_work_hours=target_work_hours, changed_preferences='n')
+        faculty.save()
+        return faculty
 
     def change_details(self, new_work_units=None, new_work_hours=None):
         if new_work_units:
@@ -125,7 +128,7 @@ class Room(models.Model):
             raise ValidationError("Room description is longer than 256 characters")
         elif notes and len(notes) > 1024:
             raise ValidationError("Room notes is longer than 1024 characters")
-        elif equip and len(equip) > 256:
+        elif equipment and len(equipment) > 256:
             raise ValidationError("Room equipment is longer than 1024 characters")
         else:
             room = cls(name=name, 
@@ -133,6 +136,7 @@ class Room(models.Model):
                        capacity=capacity,
                        notes=notes, 
                        equipment=equipment)
+            room.save()
             return room
 
     @classmethod
@@ -151,6 +155,7 @@ class Course(models.Model):
             course = cls(name=name, 
                          equipment_req=equipment_req, 
                          description=description)
+            course.save()
         except:
             raise ValidationError("Invalid data for course creation.")
         return course
@@ -191,6 +196,8 @@ class SectionType(models.Model):
         if len(name) > 32:
             raise ValidationError("Section Type name exceeds 32 characters.")
         else:
+            section_type = cls(name=name)
+            section_type.save()
             return cls(name=name)
 
     @classmethod
@@ -210,8 +217,10 @@ class WorkInfo(models.Model):
 
     @classmethod
     def create(cls, course, section_type, work_units, work_hours):
-        return cls(course=course, section_type=section_type,
-                   work_units=work_units, work_hours=work_hours)
+        work_info = cls(course=course, section_type=section_type,
+                        work_units=work_units, work_hours=work_hours)
+        work_info.save()
+        return work_info
 
 
 class Availability(models.Model):
@@ -235,8 +244,9 @@ class Availability(models.Model):
         elif (level is None) or (level != "available" and level != "preferred" and level != "unavailable"):
             raise ValidationError("Need to input level of availability: preferred, available, or unavailable")  
         else:
-            return cls(faculty_member=faculty, days_of_week=days, start_time=start, end_time=end, level=level)
-
+            availability = cls(faculty_member=faculty, days_of_week=days, start_time=start, end_time=end, level=level)
+            availability.save()
+            return availability
 
 # ---------- Scheduling Models ----------
 # Schedule is a container for scheduled sections and correponds to exactly 1 academic term
@@ -255,7 +265,9 @@ class Schedule(models.Model):
         if state != "finalized" and state != "active":
             raise ValidationError("Invalid schedule state.")
         else:
-            return cls(academic_term, state)
+            schedule = cls(academic_term=academic_term, state=state)
+            schedule.save()
+            return schedule
 
     @classmethod
     def get_schedule(cls, term_name):
@@ -291,9 +303,9 @@ class Section(models.Model):
         # the faculty and room will be passed in just as the email and room name (IDs for their models) b/c of the ForeignKey type
         faculty = CUser.get_faculty(faculty_email)
         room = Room.get_room(room_name)
-        if start_time < DepartmentSettings.start_time:
+        if start_time < DEPARTMENT_SETTINGS.start_time:
             raise ValidationError("Invalid start time for department.")
-        if end_time > DepartmentSettings.end_time or end_time < start_time:
+        if end_time > DEPARTMENT_SETTINGS.end_time or end_time < start_time:
             raise ValidationError("Invalid end time for department.")
         if days != "MWF" and days != "TR":
             raise ValidationError("Invalid days of the week.")
@@ -311,11 +323,23 @@ class Section(models.Model):
             raise ValidationError("Invalid value for fault.")
         if fault == 'y' and fault_reason != "faculty" or fault_reason != "room":
             raise ValidationError("Invalid fault reason.")
-        return cls(
-                schedule, course, start_time, end_time, days, faculty_email, room_name,
-                section_capacity, students_enrolled, students_waitlisted, conflict,
-                conflict_reason, fault, fault_reason)
-
+        section = cls(
+                  schedule=schedule, 
+                  course=course, 
+                  start_time=start_time, 
+                  end_time=end_time, 
+                  days=days, 
+                  faculty_email=faculty_email, 
+                  room_name=room_name,
+                  section_capacity=section_capacity, 
+                  students_enrolled=students_enrolled, 
+                  students_waitlisted=students_waitlisted, 
+                  conflict=conflict,
+                  conflict_reason=conflict_reason, 
+                  fault=fault, 
+                  fault_reason=fault_reason)
+        section.save()
+        return section
 
     # this function takes in a dictionary object of filters that has been serialized from a JSON object based on what the user has selected
     # for filtering by time, it will only take in an array of pairs (an array of 2-piece arrays) so that it will at least have a start time and end time.
