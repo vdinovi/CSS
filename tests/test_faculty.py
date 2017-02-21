@@ -132,4 +132,3 @@ class FacultyTestCase(TestCase):
         faculty.delete()
         self.assertTrue(faculty not in self.get_all_faculty())
         self.assertRaises(ObjectDoesNotExist, self.get_faculty, email='email@email.com')
-
