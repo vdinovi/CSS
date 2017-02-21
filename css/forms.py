@@ -113,7 +113,7 @@ class AddCourseForm(forms.Form):
    equipment_req = forms.CharField()
 
    def save(self):
-      course = Course(course_name = self.cleaned_data['course_name'],
+      course = Course(name = self.cleaned_data['course_name'],
                       description = self.cleaned_data['description'],
                       equipment_req = self.cleaned_data['equipment_req'])
       course.save(); 
@@ -138,10 +138,15 @@ class DeleteCourseForm(forms.Form):
     course_name = forms.CharField()
 
     def save(self):
-        pass
+        Course.get_course(name=form.cleaned_data['course_name']).delete()
+
 
 class EditCourseForm(forms.Form):
     course_name = forms.CharField()
+    equipment_req = forms.CharField()
+    description = forms.CharField()
 
     def save(self):
-        pass
+        course = Course.get_course(name=form.cleaned_data['course_name'])
+        course.set_equipment_req(forms.cleaned_data['equipment_req'])
+        course.set_description(forms.cleaned_data['description'])
