@@ -168,6 +168,10 @@ class Course(models.Model):
     def get_course(cls, name):
         return cls.objects.get(name=name)
 
+    def set_course_name(self, name):
+        self.name = name
+        self.save()
+
     def set_equipment_req(self, equipment_req):
         self.equipment_req = equipment_req
         self.save()
