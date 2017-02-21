@@ -50,58 +50,85 @@
             <form method="POST" action="#">
               <h2 style="text-align:center;">Filter Type</h2>
               <div id="filter-type-frame" class="inner-frame">
-                <!-- COURSE FILTER -->
-                <div id="course-filter" class="input-group" style="border-bottom: 1px solid black;">
-                  <span class="input-group-addon">
-                    <input id="course-checkbox" type="checkbox" onclick="selectFilter(this)">
-                  </span>
-                  <span class="form-control">
-                    <p><b>Course</b></p>
-                  </span>
-                  <!-- @TODO Fill with real entries -->
-                  <span class="list-group">
-                    <li class="filter-selection">- CPE101</li>
-                    <li class="filter-selection">- CPE102</li>
-                  </span>
+                <div id="filter-type-selection-frame" class="filter-selection-frame">
+                  <!-- COURSE FILTER -->
+                  <div id="course-filter" class="input-group" style="border-bottom: 1px solid black; width:100%">
+                    <span class="form-control">
+                      <p><b>Course</b></p>
+                    </span>
+                    <!-- @TODO Fill with real entries -->
+                    <span class="list-group">
+                      <li class="filter-selection">- CPE101</li>
+                      <li class="filter-selection">- CPE102</li>
+                    </span>
+                  </div>
+                  <!-- FACULTY FILTER -->
+                  <div id="faculty-filter" class="input-group" style="border-bottom: 1px solid black; width:100%">
+                    <span class="form-control">
+                      <p><b>Faculty</b></p>
+                    </span>
+                    <span class="list-group">
+                      <li class="filter-selection">- Kearns</li>
+                    </span> 
+                  </div>
+                  <!-- ROOM FILTER -->
+                  <div id="room-filter" class="input-group" style="border-bottom: 1px solid black; width:100%">
+                    <span class="form-control">
+                      <p><b>Room</b></p>
+                    </span>
+                    <span class="list-group">
+                      <li class="filter-selection">- 14-256</li>
+                    </span>
+                  </div>
+                  <!-- TIME FILTER -->
+                  <div id="time-filter" class="input-group" style="border-bottom: 1px solid black; width:100%">
+                    <span class="form-control">
+                      <p><b>Time</b></p>
+                    </span>
+                    <span class="list-group">
+                      <li class="filter-selection">- MWF 8:00am : 10:00am</li>
+                    </span>
+                    <span class="list-group">
+                      <li class="filter-selection">- TH 6:00pm : 8:00pm</li>
+                    </span> 
+                  </div>
                 </div>
-                <!-- FACULTY FILTER -->
-                <div id="faculty-filter" class="input-group" style="border-bottom: 1px solid black;">
-                  <span class="input-group-addon">
-                    <input id="faculty-checkbox" type="checkbox" onclick="selectFilter(this)">
-                  </span>
-                  <span class="form-control">
-                    <p><b>Faculty</b></p>
-                  </span>
-                  <span class="list-group">
-                    <li class="filter-selection">- Kearns</li>
-                  </span> 
-                </div>
-                <!-- ROOM FILTER -->
-                <div id="room-filter" class="input-group" style="border-bottom: 1px solid black;">
-                  <span class="input-group-addon">
-                    <input id="room-checkbox" type="checkbox" onclick="selectFilter(this)">
-                  </span>
-                  <span class="form-control">
-                    <p><b>Room</b></p>
-                  </span>
-                  <span class="list-group">
-                    <li class="filter-selection">- 14-256</li>
-                  </span>
-                </div>
-                <!-- TIME FILTER -->
-                <div id="time-filter" class="input-group" style="border-bottom: 1px solid black;">
-                  <span class="input-group-addon">
-                    <input id="time-checkbox" type="checkbox" onclick="selectFilter(this)">
-                  </span>
-                  <span class="form-control">
-                    <p><b>Time</b></p>
-                  </span>
-                  <span class="list-group">
-                    <li class="filter-selection">- MWF 8:00am : 10:00am</li>
-                  </span>
-                  <span class="list-group">
-                    <li class="filter-selection">- TH 6:00pm : 8:00pm</li>
-                  </span> 
+                <!-- Filter Logic Frame -->
+                <div id="filter-type-logic" class="filter-logic">
+                  <div class="col-xs-3">
+                    <div class="row" style="text-align:center">
+                      <p>Courses</p>
+                    </div>
+                    <div class="logic-buttons" style="height:85% font-size:12px">
+                      <div class="row">
+                        <div id="add-option" class="input-group">
+                          <span class="input-group-addon">
+                            <input id="section-checkbox" type="checkbox">
+                          </span> 
+                        <!-- <p style="font-size:10px">AND</p> -->
+                          AND
+                        </div>
+                      </div>
+                      <div class="row">
+                        <div id="add-option" class="input-group">
+                          <span class="input-group-addon">
+                            <input id="section-checkbox" type="checkbox">
+                          </span> 
+                        <!-- <p style="font-size:10px">AND</p> -->
+                          OR
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-xs-3">
+                    Faculty
+                  </div>
+                  <div class="col-xs-3">
+                    Room
+                  </div>
+                  <div class="col-xs-3">
+                    Time
+                  </div>
                 </div>
               </div>
             </form>
