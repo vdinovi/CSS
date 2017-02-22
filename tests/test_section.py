@@ -21,7 +21,7 @@ class SectionTestCase(TestCase):
         course3 = Course.create("CPE102", "computers", "Fundamentals of Computer Science I")
         faculty3 = CUser.create("paula3@calpoly.edu", "@3Testpass", "faculty", "Paula", "Ledgerwood")
         room3 = Room.create("14-157", "Graphics", None, None, None)
-        Section.create(schedule3.academic_term, course3.name, "10:00AM", "12:00PM", "MWF", "paula@calpoly.edu", "14-157", 30, 0, 0, 'n', None, 'n', None)
+        Section.create(schedule3.academic_term, course3.name, "11:00AM", "12:00PM", "MWF", "paula@calpoly.edu", "14-157", 30, 0, 0, 'n', None, 'n', None)
 
 
     # @TODO paula
@@ -96,9 +96,112 @@ class SectionTestCase(TestCase):
 
 
         #--------------- Filter Tests ----------------#
-    def test_section_filter_name(self):
-        """ No sections match the name of course we filter by. """
-        name_filter = {'course': 'CPE101'}
-        res_sections = Section.filter(name_filter)
+    def test_section_filter_course_none(self):
+        """ No sections match the name of one course we filter by. """
+        course_filter = {'course': 'CPE103'}
+        res_sections = Section.filter(course_filter)
+        self.assertEquals(len(res_sections), 0)
+
+    def test_section_filter_course_one(self):
+        """ One section matches the name of the one course we filter by. """
+        course_filter = {'course': 'CPE101'}
+        res_sections = Section.filter(course_filter)
         self.assertEquals(len(res_sections), 1)
+
+    def test_section_filter_course_multiple(self):
+        """ Uses multiple courses as filter. Results in 3 sections."""
+        course_filter = {'course': ('CPE101', 'CPE102')}   ## is this how filter would be fo multiple sections?
+        res_sections = Section.filter(course_filter)
+        self.assertEquals(len(res_sections), 3)
+
+    def test_section_filter_faculty_none(self):
+        """ No sections match the name of one faculty we filter by. """
+        faculty_filter = {'faculty': 'kearns'}
+        res_sections = Section.filter(faculty_filter)
+        self.assertEquals(len(res_sections), 0)
+
+    def test_section_filter_faculty_one(self):
+        """ One section matches the name of the one faculty we filter by. """
+        faculty_filter = {'course': 'CPE101'}
+        res_sections = Section.filter(faculty_filter)
+        self.assertEquals(len(res_sections), 1)
+
+    def test_section_filter_faculty_multiple(self):
+        """ Uses multiple faculty as filter. Results in 3 sections."""
+        faculty_filter = {'course': ('CPE101', 'CPE102')}
+        res_sections = Section.filter(faculty_filter)
+        self.assertEquals(len(res_sections), 3)
+
+    def test_section_filter_room_none(self):
+        """ No sections match the name of one faculty we filter by. """
+        room_filter = {'room': '14-001'}
+        res_sections = Section.filter(room_filter)
+        self.assertEquals(len(res_sections), 0)
+
+    def test_section_filter_room_one(self):
+        """ One section matches the name of the one faculty we filter by. """
+        room_filter = {'room': '14-157'}
+        res_sections = Section.filter(room_filter)
+        self.assertEquals(len(res_sections), 1)
+
+    def test_section_filter_room_multiple(self):
+        """ Uses multiple faculty as filter. Results in 3 sections."""
+        room_filter = {'room': ('14-157', '14-156')}
+        res_sections = Section.filter(room_filter)
+        self.assertEquals(len(res_sections), 3)
+
+    def test_section_time_invalid(self):
+        """ 
+            1. Start time is too early for department hours (8:00AM).
+            2. End time is too late for department hours (5:00PM).
+            3. Start time is after End time around noon.
+            4. Start time is after End time.
+        """
+        # Earlier than start time
+        time_filter = {'time': ('6:00AM', '7:00AM')}
+        res_sections = Section.filter(time_filter)
+        self.assertEquals(len(res_sections), 0)
+        # Later than end time
+        time_filter = {'time': ('10:00PM', '11:00PM')}
+        res_sections = Section.filter(time_filter)
+        self.assertEquals(len(res_sections), 0)
+        # Start time later than end time over noon
+        time_filter = {'time': ('1:00PM', '10:00AM')}
+        res_sections = Section.filter(time_filter)
+        self.assertEquals(len(res_sections), 0)
+        # Start time later than end time
+        time_filter = {'time': ('3:00PM', '2:00PM')}
+        res_sections = Section.filter(time_filter)
+        self.assertEquals(len(res_sections), 0)
+
+    def test_section_time_noon_midnight(self):
+        """ Makes sure there are no errors when switching from am to pm. """
+        time_filter = {'time': ('10:00AM', '1:00PM')}
+        res_sections = Section.filter(time_filter)
+        self.assertEquals(len(res_sections), 1)
+
+        time_filter = {'time': ('10:00PM', '1:00AM')}
+        res_sections = Section.filter(time_filter)
+        self.assertEquals(len(res_sections), 0)
+
+    def test_section_time_success(self):
+        """ Successful time filter returns 1 section. """
+        time_filter = {'time': ('1:00PM', '3:00PM')}
+        res_sections = Section.filter(time_filter)
+        self.assertEquals(len(res_sections), 1)
+
+    def test_section_time_multiple(self):
+        """ Successfully filters with 2 time filters. Returns 2 sections. """ 
+        time_filter = {'time': (('9:00AM', '12:00PM'), ('1:00PM', '4:00PM'))}
+        res_sections = Section.filter(time_filter)
+        self.assertEquals(len(res_sections), 2)
+
+    def test_section_time_valid_none(self):
+        """ Successful time filter results in 0 sections. """
+        time_filter = {'time': ('4:00PM', '5:00PM')}
+        res_sections = Section.filter(time_filter)
+        self.assertEquals(len(res_sections), 0)
+
+
+
 

@@ -19,19 +19,16 @@ class LoginForm(forms.Form):
 #  Invite Form
 class InviteUserForm(forms.Form):
     #@TODO Email field not working -> is_valid fails
-    #email = forms.EmailField()
     email = forms.CharField()
     first_name = forms.CharField()
     last_name = forms.CharField()
 
     #@TODO send registraiton link in email
     def send_invite(self, usertype, request):
-        #credentials = {'name': [first_name, last_name], 'type': usertype}
         first_name = self.cleaned_data['first_name']
         last_name = self.cleaned_data['last_name']
         name = first_name + ' ' + last_name
         email = self.cleaned_data['email']
-        #your_domain = Site.objects.get_current().domain
         link = 'http://localhost:8000/register?first='+first_name + '&last=' + last_name +'&type='+usertype
         send_mail('Invite to register for CSS',
                   name + """, you have been invited to register for CSS.
