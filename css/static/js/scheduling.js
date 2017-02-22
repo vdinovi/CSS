@@ -27,6 +27,15 @@ function selectFilter(element) {
     }
 }
 
+// OnClick function for new section frame
+// - Toggles between new section frame and filter frame
+function switchFrame(firstFrame, secondFrame) {
+    first = document.getElementById(firstFrame).style.visibility="hidden"; 
+    second = document.getElementById(secondFrame).style.visibility="visible";
+    // (first, second).toggle()
+}
+
+
 // OnClick function for an option checkbox
 //  - Populates section window with all sections for selected option
 //  - Checks all sections in section window 
@@ -40,5 +49,16 @@ function selectItem(element) {
 function selectSection(element) {
     //@TODO everything :(
     return true;
+}
+
+// OnClick function for a filter logic checkbox
+// -Makes the and/or radio button enabled
+function enableLogic(element) {
+
+}
+
+// OnClick function that adds the logic for this filter
+function addLogic(element) {
+
 }
 
