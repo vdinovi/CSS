@@ -1,11 +1,6 @@
 from django.test import TestCase
 from css.models import *
 
-
-# @TODO Write tests for the following
-# - Delete Faculty (success, failure-nonexistant, ...)
-# 
-
 class FacultyTestCase(TestCase):
     # Utility Functions 
     @staticmethod
