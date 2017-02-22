@@ -57,36 +57,42 @@ class CUser(models.Model):
                                                      last_name=cls.validate_last_name(last_name)),
                        user_type=cls.validate_user_type(user_type))
             user.save()
+            # If user is faculty, create an associated faculty details
+            # Target work hours and units are initially 0
             if user_type == 'faculty':
                 FacultyDetails.create(user, 0, 0).save()
+                # @TODO Also make Faculty Availability
         except:
             raise
         return user
        
+    # Return cuser by email
     @classmethod
     def get_user(cls, email): # Throws ObjectDoesNotExist
         return cls.objects.get(user__username=email)
 
+    # Return faculty cuser by email
     @classmethod
     def get_faculty(cls, email): # Throws ObjectDoesNotExist
         return cls.objects.get(user__username=email, user_type='faculty')
 
+    # Return all faculty cusers
     @classmethod
     def get_all_faculty(cls): 
         return cls.objects.filter(user_type='faculty')
 
+    # Return scheduler cuser by email
     @classmethod
     def get_scheduler(cls, email): # Throws ObjectDoesNotExist
         return cls.objects.get(user__username=email, user_type='scheduler')
 
+    # Return all scheduler cusers
     @classmethod
     def get_all_schedulers(cls):
         return cls.objects.filter(user_type='scheduler')
 
 
 class FacultyDetails(models.Model):
-    # The user_id uses the User ID as a primary key.
-    # Whenever this User is deleted, this entry in the table will also be deleted
     faculty = models.OneToOneField(CUser, on_delete=models.CASCADE)
     target_work_units = models.IntegerField(default=0, null=True) # in units
     target_work_hours = models.IntegerField(default=0, null=True) # in hours
@@ -99,15 +105,17 @@ class FacultyDetails(models.Model):
         faculty.save()
         return faculty
 
+    # Set new target work hours and/or units. If changed, set changed_preferences to new
     def change_details(self, new_work_units=None, new_work_hours=None):
         if new_work_units:
             self.target_work_units = new_work_units
+            if self.target_work_units != new_work_units:
+                self.changed_preferences = 'y' 
         if new_work_hours:
             self.target_work_hours = new_work_hours
-        self.changed_preferences = 'y' 
+            if self.target_work_hours != new_work_hours:
+                self.changed_preferences = 'y' 
 
-    # @TODO Function to yes changed_preferences to 'n'? Also consider naming it something
-    #       more indicative -> preferences_have_changed? has_changed_preferences? etc.
 
 # ---------- Resource Models ----------
 # Room represents department rooms
@@ -139,6 +147,7 @@ class Room(models.Model):
             room.save()
             return room
 
+    # Get room by name
     @classmethod
     def get_room(cls, name):
         return Room.objects.get(name=name)
@@ -160,29 +169,36 @@ class Course(models.Model):
             raise ValidationError("Invalid data for course creation.")
         return course
 
+    # Returns all course objects
     @classmethod
     def get_all_courses(cls):
         return cls.objects.filter()
 
+    # Returns course by name
     @classmethod
     def get_course(cls, name):
         return cls.objects.get(name=name)
 
+    # Set the equipment required for this course
     def set_equipment_req(self, equipment_req):
         self.equipment_req = equipment_req
         self.save()
 
+    # Set the description of this course
     def set_description(self, description):
         self.description = description
         self.save()
 
+    # Get all section types associated with this course
     def get_all_section_types(self):
         return WorkInfo.filter(course=self)
 
+    # Get a specific section type associated with this course
     def get_section_type(self, section_type_name): # Throws ObjectDoesNotExist, MultipleObjectsReturned
         section_type = SectionType.get_section_type(section_type_name)
         WorkInfo.objects.get(course=self, section_type=section_type)
 
+    # Associate a new section type with this course
     def add_section_type(self, section_type_name, work_units, work_hours): # Throws ObjectDoesNotExist
         section_type = SectionType.get_section_type(section_type_name)
         WorkInfo.create(self, section_type, work_units, work_hours)
@@ -200,9 +216,16 @@ class SectionType(models.Model):
             section_type.save()
             return cls(name=name)
 
+    # Get all section types
+    @classmethod
+    def get_all_section_types(cls):
+        return cls.objects.filter()
+
+    # Get section type by name
     @classmethod
     def get_section_type(cls, name):
         cls.objects.get(name=name)
+
 
 
 # WorkInfo contains the user defined information for specific Course-SectionType pairs
