@@ -73,6 +73,9 @@ def IndexView(request):
 def HomeView(request):
     return render(request, 'home.html')
 
+def AvailabilityView(request):
+    return render(request, 'availability.html')
+
 def SchedulingView(request):
     res = HttpResponse()
     if request.method == "GET":
