@@ -40,15 +40,25 @@ class InviteUserForm(forms.Form):
 # Registration Form
 # @TODO on load, pull fields from query string -> show failure if field not able to be loaded:
 #       Fields to pull: email, first_name, last_name, user_type
-class RegisterUserForm(forms.Form):
+lass RegisterUserForm(forms.Form):
     first_name = forms.CharField()
     last_name = forms.CharField()
     email = forms.EmailField()
-    #user_type = forms.CharField(type)
-    #forms.fields['user_type'].disabled=True
+    user_type = forms.CharField()
     user_type = forms.ChoiceField(label='Role', choices=[('faculty', 'faculty'), ('scheduler', 'scheduler')])
     password1 = forms.CharField(label='Password', widget=forms.PasswordInput)
     password2 = forms.CharField(label='Confirm Password', widget=forms.PasswordInput)
+
+    def __init__(self,*args,**kwargs):
+        self.first_name = kwargs.pop('first')
+        self.last_name = kwargs.pop('last')
+        self.user_type = kwargs.pop('type')
+
+        self.declared_fields['first_name'].initial = self.first_name
+        self.declared_fields['last_name'].initial = self.last_name
+        self.declared_fields['user_type'].initial = self.user_type
+        self.declared_fields['user_type'].disabled = True
+        super(RegisterUserForm, self).__init__(*args,**kwargs)
 
     def save(self):
         user = CUser.create(email=self.cleaned_data['email'],
@@ -58,6 +68,7 @@ class RegisterUserForm(forms.Form):
                             last_name=self.cleaned_data['last_name'])
         user.save()
         return user
+
 
 # Edit User Form
 class EditUserForm(forms.Form):
@@ -105,7 +116,12 @@ class EditRoomForm(forms.Form):
         room.save()
 
 class DeleteRoomForm(forms.Form):
+<<<<<<< HEAD
     roomName = forms.CharField(widget=forms.HiddenInput(), initial='defaultCourse')
+=======
+    roomName = forms.CharField(widget=forms.HiddenInput(), initial='defaultRoom')
+
+>>>>>>> 019a49d348e7368bb59f9cb603fc4c4c712b9fe5
     def deleteRoom(self):
         nameString=self.cleaned_data['roomName']
         Room.objects.filter(name=nameString).delete()
