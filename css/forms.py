@@ -19,19 +19,16 @@ class LoginForm(forms.Form):
 #  Invite Form
 class InviteUserForm(forms.Form):
     #@TODO Email field not working -> is_valid fails
-    #email = forms.EmailField()
     email = forms.CharField()
     first_name = forms.CharField()
     last_name = forms.CharField()
 
     #@TODO send registraiton link in email
     def send_invite(self, usertype, request):
-        #credentials = {'name': [first_name, last_name], 'type': usertype}
         first_name = self.cleaned_data['first_name']
         last_name = self.cleaned_data['last_name']
         name = first_name + ' ' + last_name
         email = self.cleaned_data['email']
-        #your_domain = Site.objects.get_current().domain
         link = 'http://localhost:8000/register?first='+first_name + '&last=' + last_name +'&type='+usertype
         send_mail('Invite to register for CSS',
                   name + """, you have been invited to register for CSS.
@@ -41,17 +38,27 @@ class InviteUserForm(forms.Form):
         print("sent email to " + self.cleaned_data['email'])
 
 # Registration Form
-# @TODO on load, pull fields from query string -> show failure if field not able to be loaded:
-#       Fields to pull: email, first_name, last_name, user_type
+# @TODO show failure if field not able to be loaded:
+#       Fields to pull: email
 class RegisterUserForm(forms.Form):
     first_name = forms.CharField()
     last_name = forms.CharField()
     email = forms.EmailField()
-    #user_type = forms.CharField(type)
-    #forms.fields['user_type'].disabled=True
+    user_type = forms.CharField()
     user_type = forms.ChoiceField(label='Role', choices=[('faculty', 'faculty'), ('scheduler', 'scheduler')])
     password1 = forms.CharField(label='Password', widget=forms.PasswordInput)
     password2 = forms.CharField(label='Confirm Password', widget=forms.PasswordInput)
+
+    def __init__(self,*args,**kwargs):
+        self.first_name = kwargs.pop('first')
+        self.last_name = kwargs.pop('last')
+        self.user_type = kwargs.pop('type')
+        
+        self.declared_fields['first_name'].initial = self.first_name
+        self.declared_fields['last_name'].initial = self.last_name
+        self.declared_fields['user_type'].initial = self.user_type
+        self.declared_fields['user_type'].disabled = True
+        super(RegisterUserForm, self).__init__(*args,**kwargs)
 
     def save(self):
         user = CUser.create(email=self.cleaned_data['email'],
@@ -108,7 +115,8 @@ class EditRoomForm(forms.Form):
         room.save()
 
 class DeleteRoomForm(forms.Form):
-    roomName = forms.CharField(widget=forms.HiddenInput(), initial='defaultCourse')
+    roomName = forms.CharField(widget=forms.HiddenInput(), initial='defaultRoom')
+
     def deleteRoom(self):
         nameString=self.cleaned_data['roomName']
         Room.objects.filter(name=nameString).delete()
