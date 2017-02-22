@@ -40,7 +40,7 @@ class InviteUserForm(forms.Form):
 # Registration Form
 # @TODO on load, pull fields from query string -> show failure if field not able to be loaded:
 #       Fields to pull: email, first_name, last_name, user_type
-lass RegisterUserForm(forms.Form):
+class RegisterUserForm(forms.Form):
     first_name = forms.CharField()
     last_name = forms.CharField()
     email = forms.EmailField()
