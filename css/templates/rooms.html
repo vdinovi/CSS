@@ -47,8 +47,8 @@
               {% for room in room_list %}
               <tr>
                 <td>
-                  <button type="button" class="btn btn-info btn-xs" data-toggle="modal" data-target="#delete-room" onclick="setDeleteID('{{ room.name }}')"><span class="glyphicon glyphicon-minus"></span>&nbsp;</button>
-                  <button type="button" class="btn btn-info btn-xs" data-toggle="modal" data-target="#edit-room" onclick="updateRoom('{{ room.name }}')"><span class="glyphicon glyphicon-edit"></span>&nbsp;</button>
+                  <button type="button" class="btn btn-info btn-xs" data-toggle="modal" data-target="#delete-room" onclick="setDeleteFormItem('{{ room.name }}', 'id_roomName')"><span class="glyphicon glyphicon-minus"></span>&nbsp;</button>
+                  <button type="button" class="btn btn-info btn-xs" data-toggle="modal" data-target="#edit-room" onclick="setEditFormFields('{{ room.name }}', 'room')"><span class="glyphicon glyphicon-edit"></span>&nbsp;</button>
                 </td>
                 <td name="roomName">{{ room.name }}</td>
                 <td name="description">{{ room.description }}</td>
@@ -123,11 +123,11 @@
     </div>
 
     <script>
-      function setDeleteID(string){
+      function setDeleteID2(string, target){
         document.getElementById('id_roomName').value = string;
 
       }
-      function updateRoom(name){
+      function updateRoom1(name){
         var table = document.getElementById("table");
         for (var i = 0, row; row = table.rows[i]; i++) {
           if(row.cells[1].innerHTML == name)
@@ -146,5 +146,7 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
     <!-- Include all compiled plugins (below), or include individual files as needed -->
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+    {% load static %}
+    <script src="{% static "js/resources.js" %}"></script>
   </body>
 </html>
