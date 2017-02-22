@@ -214,7 +214,7 @@ class SectionType(models.Model):
         else:
             section_type = cls(name=name)
             section_type.save()
-            return cls(name=name)
+            return section_type
 
     # Get all section types
     @classmethod
