@@ -38,7 +38,7 @@
               {% for course in course_list %}
               <tr>
                 <td>
-                  <button type="button" class="btn btn-info btn-xs" data-toggle="modal" data-target="#delete-course" onclick="setDeleteFormItem('{{ course.name }}', 'id_course_name')"><span class="glyphicon glyphicon-minus"></span>&nbsp;</button>
+                  <button type="button" class="btn btn-info btn-xs" data-toggle="modal" data-target="#delete-course" onclick="setDeleteFormItem('{{ course.name }}', 'id_course_name'), ajax()"><span class="glyphicon glyphicon-minus"></span>&nbsp;</button>
                   <button type="button" class="btn btn-info btn-xs" data-toggle="modal" data-target="#edit-course" onclick="setEditFormFields('{{ course.name }}', 'course')"><span class="glyphicon glyphicon-edit"></span>&nbsp;</button>
                 </td>
                 <td name="courseName">{{ course.name }}</td>
@@ -87,6 +87,9 @@
               {{ edit_course_form.as_p }}
               <button type="submit" name="edit-course-form" class="save btn btn-default">submit</button>
             </form>
+            <div id="ajax-area">
+              <p>Ajax area</p>
+            </div>
           </div>
         </div>
       </div>
@@ -114,5 +117,17 @@
 
     {% load static %}
     <script src="{% static "js/resources.js" %}"></script>
+    <script>
+      function ajax() {
+        console.log('ajax');
+        $.post("/",
+              {
+                  requestName: "Course-Sections-Request",
+                  course: "CPE101"
+              },
+              function(data, status){
+             alert("Data: " + data + "\nStatus: " + status);
+         });
+    </script>
   </body>
 </html>
