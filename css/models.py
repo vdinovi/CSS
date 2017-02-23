@@ -197,7 +197,7 @@ class Course(models.Model):
 
 
 class SectionType(models.Model):
-    name = models.CharField(max_length=32) # eg. lecture or lab
+    name = models.CharField(max_length=32, unique=True) # eg. lecture or lab
 
     @classmethod
     def create(cls, name):

@@ -121,7 +121,6 @@ def SettingsView(request):
             res.reason_phrase = "Invalid form entry" 
     elif request.method == "POST" and "delete-section-type" in request.POST:
         section = SectionType.get_section_type(name=request.POST['section-type-name'])
-        print section
         if section is not None:
             section.delete()
             return HttpResponseRedirect('/department/settings')
@@ -190,7 +189,7 @@ def RoomsView(request):
         if form.is_valid():
             try:
                 form.save();
-                return HttpResponseRedirect("/home/rooms")
+                return HttpResponseRedirect("/resources/rooms")
             except ValidationError as e:
                 res.status_code = 400
                 res.reason_phrase = "Invalid form entry"
@@ -209,7 +208,7 @@ def RoomsView(request):
         if form.is_valid():
             form.save()
             res.status_code = 200
-            return HttpResponseRedirect('/home/rooms')
+            return HttpResponseRedirect('/resources/rooms')
         else:
             res.status_code = 400
     elif request.method == "POST" and 'delete-form' in request.POST:
@@ -217,7 +216,7 @@ def RoomsView(request):
         if form.is_valid():
             form.deleteRoom()
             res.status_code = 200
-            return HttpResponseRedirect('/home/rooms')
+            return HttpResponseRedirect('/resources/rooms')
         else:
             res.status_code = 400
     else:
@@ -240,12 +239,10 @@ def CoursesView(request):
             });
     elif request.method == "POST" and 'add-course-form' in request.POST:
         form = AddCourseForm(request.POST);
-        print form.is_valid()
         if form.is_valid():
             try:
-                print "add form view"
                 form.save();
-                return HttpResponseRedirect("/home/courses")
+                return HttpResponseRedirect("/resources/courses")
             except ValidationError as e:
                 res.status_code = 400
                 res.reason_phrase = "Invalid form entry"
@@ -264,19 +261,17 @@ def CoursesView(request):
         if form.is_valid():
             form.save()
             res.status_code = 200
-            return HttpResponseRedirect('/home/courses')
+            return HttpResponseRedirect('/resources/courses')
         else:
             res.status_code = 400
             res.reason_phrase = "Invalid form entry"
     elif request.method == "POST" and 'delete-course-form' in request.POST:
         form = DeleteCourseForm(request.POST)
-        print("delete view")
         if form.is_valid():
             form.save()
             res.status_code = 200
-            return HttpResponseRedirect('/home/courses')
+            return HttpResponseRedirect('/resources/courses')
         else:
-            #form.save()
             res.status_code = 400
             res.reason_phrase = "Invalid form entry"
 
@@ -348,7 +343,6 @@ def FacultyView(request):
         form = DeleteUserForm(request.POST)
         if form.is_valid():
             try:
-                print("delete user view")
                 form.delete_user()
                 res.status_code = 200
             except ObjectDoesNotExist:

@@ -24,15 +24,15 @@ from . import views
 urlpatterns = [
     # BASE_URL/Home* addresses
     url(r'^$', views.IndexView, name='index'),
-    url(r'^home/', include([
-        url(r'^$', views.HomeView, name='home'),
-        url(r'^schedulers/$', views.SchedulersView, name='schedulers'),
+    url(r'^home/$', views.HomeView, name='home'),
+    url(r'^resources/', include([
         url(r'^faculty/$', views.FacultyView, name='faculty'),
         url(r'^rooms/$', views.RoomsView, name='rooms'),
         url(r'^courses/$', views.CoursesView, name='courses'),
     ])),
     url(r'^scheduling/$', views.SchedulingView, name='scheduling'), 
     url(r'^department/', include([
+        url(r'^schedulers/$', views.SchedulersView, name='schedulers'),
         url(r'^settings/$', views.SettingsView, name='settings'), 
     ])),
     url(r'^register/$', views.RegistrationView, name='register'),
