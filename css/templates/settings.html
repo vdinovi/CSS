@@ -35,19 +35,19 @@
         
         <div class="well-border col-lg-10 col-lg-offset-1">
           <div class="col-lg-10 col-lg-offset-1">
-            <form class="form-horizontal" role="form" method="POST">
+            <form method="POST" action="#" class="form-horizontal" role="form">
               {% csrf_token %}
               <div class="form-group">
                 <label for=" department_name " class="col-md-6 control-label">Department Name</label>
                 <div class="col-md-3 fieldWrapper">
-                    <input type="text" class="form-control" value={{ department_chair }}>
+                    <input type="text" name="name" class="form-control" value={{ settings.name }}>
                 </div>
               </div>
 
               <div class="form-group">
                 <label for=" department_chair " class="col-md-6 control-label">Department Chair</label>
                 <div class="col-md-3">
-                    <input type="text" class="form-control" id="inputType" value={{ department_name }}>
+                    <input type="text" name="chair" class="form-control" id="inputType" value={{ settings.chair }}>
                 </div>
               </div>
 
@@ -56,14 +56,11 @@
               </div>
 
               <div class="time-inputs col-md-6 col-md-offset-3">
-                <div class="col-md-5">
-                    <input type="time" class="form-control" id="settings_form.start_time" value={{ department_start_time }} placeholder="HH:MM:SS">
+                <div class="col-md-6">
+                  <input type="time" name="start_time" class="form-control" id="settings_form.start_time" value={{ settings.start_time }} placeholder={{ settings.start_time }}>
                 </div>
-                <div class="col-md-2 dash-text">
-                  -
-                </div>
-                <div class="col-md-5">
-                    <input type="time" class="form-control" id="settings_form.end_time" value={{ department_end_time }} placeholder="HH:MM:SS">
+                <div class="col-md-6">
+                  <input type="time" name="end_time" class="form-control" id="settings_form.end_time" value={{ settings.end_time }} placeholder={{ settings.end_time }}>
                 </div>
               </div>
 
