@@ -116,12 +116,9 @@ class EditRoomForm(forms.Form):
         room.save()
 
 class DeleteRoomForm(forms.Form):
-<<<<<<< HEAD
-    roomName = forms.CharField(widget=forms.HiddenInput(), initial='defaultCourse')
-=======
+
     roomName = forms.CharField(widget=forms.HiddenInput(), initial='defaultRoom')
 
->>>>>>> 019a49d348e7368bb59f9cb603fc4c4c712b9fe5
     def deleteRoom(self):
         nameString=self.cleaned_data['roomName']
         Room.objects.filter(name=nameString).delete()

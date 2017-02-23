@@ -10,6 +10,7 @@ from .models import *
 from .forms import *
 from settings import DEPARTMENT_SETTINGS
 import MySQLdb
+import json
 
 # ---------------------------
 # --  Method-Based Views   --
@@ -259,6 +260,26 @@ def CoursesView(request):
             #form.save()
             res.status_code = 400
             res.reason_phrase = "Invalid form entry"
+    elif request.method == "POST" and 'requestName' in request.POST:
+        print("section request")
+        print request.body
+        if request.is_ajax():
+            print("is ajax")
+        else:
+            print("not ajax")
+        print(request.POST.items()[0])
+        print(request.POST.items()[1])
+        print(request.POST.items()[2])
+        courseName = request.POST.__getitem__('course')
+        print("course: " + courseName);
+        courseSet = Course.objects.filter(name=courseName)
+
+        print(courseSet.count())
+        course = courseSet.get()
+        print("course object name attribute: " + course.name)
+        sectionTypes = course.get_all_section_types()
+        print sectionTypes
+        #custom_decks = data['custom_decks']
 
     else:
         res.status_code = 400
