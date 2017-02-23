@@ -95,11 +95,11 @@ def SettingsView(request):
     res = HttpResponse()
     if request.method == "GET":
         return render(request, 'settings.html', {
-                'section_type_list': SectionType.objects.filter(),
                 'settings': DEPARTMENT_SETTINGS,
+                'section_type_list': SectionType.objects.filter().all(),
+                'add_section_type_form': AddSectionTypeForm(),
             });
     elif request.method == "POST" and "submit-settings" in request.POST:
-        print 'A'
         try:
             DEPARTMENT_SETTINGS.new_settings(chair=request.POST['chair'], 
                                              name=request.POST['name'],
@@ -112,12 +112,24 @@ def SettingsView(request):
         else:
             res.status_code = 400
             res.reason_phrase = "Invalid form entry"
-    elif request.method == "POST":
-        print 'B'
-        res.status_code = 400
-        res.reason_phrase = "NYI"
+    elif request.method == "POST" and "add-section-type" in request.POST:
+        form = AddSectionTypeForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return HttpResponseRedirect('/department/settings')
+        else:
+            res.status_code = 200
+            res.reason_phrase = "Invalid form entry" 
+    elif request.method == "POST" and "delete-section-type" in request.POST:
+        section = SectionType.get_section_type(name=request.POST['section-type-name'])
+        print section
+        if section is not None:
+            section.delete()
+            return HttpResponseRedirect('/department/settings')
+        else:
+            res.status_code = 400
+            res.reason_phrase = "SectionType " + request.POST['section-type-name'] + " does not exist"
     else:
-        print 'C'
         res.status_code = 400
     return res
 

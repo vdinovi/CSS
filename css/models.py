@@ -210,7 +210,8 @@ class SectionType(models.Model):
 
     @classmethod
     def get_section_type(cls, name):
-        cls.objects.get(name=name)
+        return cls.objects.get(name=name)
+
 
 
 # WorkInfo contains the user defined information for specific Course-SectionType pairs
