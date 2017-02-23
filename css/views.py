@@ -94,26 +94,31 @@ def SettingsView(request):
     res = HttpResponse()
     if request.method == "GET":
         return render(request, 'settings.html', {
-                'settings_form': SettingsForm(),
                 'section_type_list': SectionType.objects.filter(),
-                'department_name': DEPARTMENT_SETTINGS.name,
-                'department_chair': DEPARTMENT_SETTINGS.chair,
-                'department_start_time': DEPARTMENT_SETTINGS.start_time,
-                'department_end_time': DEPARTMENT_SETTINGS.end_time,
+                'settings': DEPARTMENT_SETTINGS,
             });
     elif request.method == "POST" and "submit-settings" in request.POST:
-        form = SettingsForm(request.POST);
-        if form.is_valid():
-            form.save()
-            return HttpResponseRedirect('/settings')
+        print 'A'
+        try:
+            DEPARTMENT_SETTINGS.new_settings(chair=request.POST['chair'], 
+                                             name=request.POST['name'],
+                                             start_time=request.POST['start_time'],
+                                             end_time=request.POST['end_time'])
+            return HttpResponseRedirect('/department/settings')
+        except ValidationError as e:
+            res.status_code = 400
+            res.reason_phrase = e[0]
         else:
             res.status_code = 400
             res.reason_phrase = "Invalid form entry"
-    if request.method == "POST":
+    elif request.method == "POST":
+        print 'B'
         res.status_code = 400
         res.reason_phrase = "NYI"
     else:
+        print 'C'
         res.status_code = 400
+    return res
 
 from .forms import LoginForm
 from django.contrib.auth import authenticate

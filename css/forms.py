@@ -135,20 +135,6 @@ class AddCourseForm(forms.Form):
         print name
         course.save();
 
-# Settings Form
-class SettingsForm(forms.Form):
-    name = forms.CharField(required=True)
-    chair = forms.CharField()
-    start_time = forms.TimeField()
-    end_time = forms.TimeField()
-
-    def save(self):
-        DEPARTMENT_SETTINGS.name = form.cleaned_data['name']
-        DEPARTMENT_SETTINGS.chair = form.cleaned_data['chair']
-        DEPARTMENT_SETTINGS.start_time = form.cleaned_data['start_time']
-        DEPARTMENT_SETTINGS.end_time = form.cleaned_data['end_time']
-        DEPARTMENT_SETTINGS.save_settings()
-
 class DeleteCourseForm(forms.Form):
     course_name = forms.CharField(widget=forms.HiddenInput(), initial='defaultCourse')
 
