@@ -80,7 +80,7 @@ def SchedulingView(request):
     res = HttpResponse()
     if request.method == "GET":
         return render(request, 'scheduling.html', {
-                     })
+                      'new_section_form':AddSectionForm()})
     elif request.method == "POST":
         res.status_code = 400
         res.reason_phrase = "NYI"

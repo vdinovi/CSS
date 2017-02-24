@@ -8,6 +8,7 @@ from django.db import IntegrityError
 from django.core.exceptions import ValidationError, ObjectDoesNotExist
 from util import DepartmentSettings
 from settings import DEPARTMENT_SETTINGS
+import json
 
 # System User class,
 # Wrapper for django builtin class, contains user + application specific data
@@ -76,6 +77,15 @@ class CUser(models.Model):
     @classmethod
     def get_all_faculty(cls): 
         return cls.objects.filter(user_type='faculty')
+    # Return faculty full name
+    @classmethod
+    def get_all_faculty_full_name(cls):
+        faculty_list = cls.objects.filter(user_type='faculty')
+        names_list = []
+        for faculty in faculty_list:
+            names_list.append('{0} {1}'.format(faculty.user.first_name, faculty.user.last_name))
+        return names_list
+
     # Return scheduler cuser by email
     @classmethod
     def get_scheduler(cls, email): # Throws ObjectDoesNotExist
@@ -367,61 +377,6 @@ class Section(models.Model):
     # for filtering by time, it will only take in an array of pairs (an array of 2-piece arrays) so that it will at least have a start time and end time.
     #### there can also be chunks of time, so there are multiple start and end times
     # for any other filter, we will pass on the keyword and array argument as it is to the filter.
-    @classmethod 
-    def filter(cls, data):
-        filter_dict = json.loads(data)
-        andSections = cls.objects
-        andDict = {}
-        orList = []
-        prevLogic = ''
-
-        # OR list ex: [('question__contains', 'dinner'), ('question__contains', 'meal'), ('pub_date', datetime.date(2010, 7, 19))]
-        # AND dict ex: {'question__contains': 'omelette', 'pub_date' : datetime.date.today()}
-        for key,tags in filter_dict.iteritems():
-            filters = tags['filters']
-            if key == "time":
-                for k,v in filters.iteritems():
-                    if k == "MWF" or k == "TR":
-                        if 'or' in prevLogic:
-                            
-                            for times in range(len(v)):
-
-                        elif 'and' in prevLogic or prevLogic is '':
-                            andDict.update({'days':k})
-                            for times in range(len(v)):
-                                andDict.update({start_time__gte:v[times][0], end_time__lte:v[times][0]})
-            elif:
-                # print "   filter(" + key + "=" + ', '.join(filters) + ")"
-                if 'or' in prevLogic:
-                    # add to List here
-                elif 'and' in prevLogic or prevLogic is '':
-                    andDict.update({key:filters})
-
-            # if 'or' in prevLogic:
-            #     # print("orSections +=")
-            #     # orSections += cls.objects.filter()
-            # elif 'and' in prevLogic or prevLogic is '':
-            #     qList += newQuery
-            #     # print("andSections x=")
-            #     #andSections = andSections.filter()
-            
-            prevLogic = tags['logic'] + " "
-
-
-
-
-        sections = Section.objects
-        for key, value in filters.iteritems():
-            if key == 'time':
-                # START
-                # reduce(lambda q, f: q | Q(creator=f), filters, Q())
-                sections = sections.filter(reduce(lambda query, filter: query | (Q(start_time >= filter[0]) & Q(end_time <= filter[1])), value, Q()))
-                # OR 
-                #for pair in value:
-                #    sections = sections.filter(start_time >= pair[0]).filter(end_time <= pair[1])
-                # END
-            else:
-                sections = sections.filter(key=value)
 
 class FacultyCoursePreferences(models.Model):
     faculty = models.ForeignKey(CUser, on_delete = models.CASCADE)

@@ -4,13 +4,21 @@
 
 .term-frame {
     margin-top: 10px;
-    background-color: #e5e5e5;
+    /*background-color: #e5e5e5;*/
     border-radius: 5px;
 }
 
+
+/* Buttons */
 .btn {
     background-color: #94bdbd;
     color: black;
+}
+
+#create-new-term-btn {
+    /*margin-top: 13px;*/
+    height:100%;
+    vertical-align: middle;
 }
 
 .manage-new-section-btn {
@@ -19,6 +27,7 @@
     height: 100%;
 }
 
+/* Frames */
 .new-section-frame {
     margin-top: 10px;
     min-width:300px;
@@ -30,7 +39,7 @@
 }
 
 .filter-frame {
-    margin-top: 10px;
+    /*margin-top: 10px;*/
     min-width:300px;
     background-color: #e5e5e5;
     border: 1px solid black;

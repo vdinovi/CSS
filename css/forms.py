@@ -1,6 +1,6 @@
 from django import forms
 from django.core.mail import send_mail
-from css.models import CUser, Room, Course
+from css.models import CUser, Room, Course, SectionType
 from django.http import HttpResponseRedirect
 from settings import DEPARTMENT_SETTINGS
 #from django.contrib.sites.models import Site
@@ -166,3 +166,22 @@ class EditCourseForm(forms.Form):
         course = Course.get_course(name=self.cleaned_data['course_name'])
         course.set_equipment_req(self.cleaned_data['equipment_req'])
         course.set_description(self.cleaned_data['description'])
+
+class AddSectionForm(forms.Form):
+    course = forms.ModelChoiceField(label='Course', queryset=Course.objects.values_list('name', flat=True), empty_label="                   ")
+    section_type = forms.ModelChoiceField(label='Section Type', queryset=SectionType.objects.values_list('name', flat=True), empty_label="                   ")
+    # faculty = forms.ModelChoiceField(label='Faculty', queryset=CUser.get_all_faculty().values_list('user__first_name', 'user__last_name'))
+    # faculty = forms.ModelChoiceField(label='Faculty', choices = [ ((p),) for p in CUser.get_all_faculty_full_name()])
+    room = forms.ModelChoiceField(label='Room', queryset=Room.objects.values_list('name', flat=True), empty_label="                   ")
+    capacity = forms.IntegerField()
+    start_time = forms.TimeField(label='Start Time', input_formats=('%I:%M %p'))
+
+    # def save(self):
+    #     section = Section.create()
+
+
+
+
+
+
+

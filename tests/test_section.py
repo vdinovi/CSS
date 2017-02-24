@@ -59,73 +59,73 @@ class SectionTestCase(TestCase):
     #     """ Test that days are retrieved properly """
     #     self.assertRaises(ObjectDoesNotExist, Section.objects.get, days="TR")
 
-    def test_section_get_faculty(self): 
-        """ Test that faculty are retrieved properly """
-        section = Section.get_section(faculty="paula@calpoly.edu")
-        self.assertEquals(section.course.name, "CPE101")
+    # def test_section_get_faculty(self): 
+    #     """ Test that faculty are retrieved properly """
+    #     section = Section.get_section(faculty="paula@calpoly.edu")
+    #     self.assertEquals(section.course.name, "CPE101")
 
-    def test_section_get_room(self): 
-        """ Test that room assignment is retrieved properly """
-        section = Section.get_section(room="14-156")
-        self.assertEquals(section.room.name, "14-156")
+    # def test_section_get_room(self): 
+    #     """ Test that room assignment is retrieved properly """
+    #     section = Section.get_section(room="14-156")
+    #     self.assertEquals(section.room.name, "14-156")
 
-    def test_section_get_section_capacity(self): 
-        """ Test that section_capacity is retrieved properly """
-        section = Section.objects.get(capacity=30)
-        self.assertEquals(section.course.name, "CPE101")
+    # def test_section_get_section_capacity(self): 
+    #     """ Test that section_capacity is retrieved properly """
+    #     section = Section.objects.get(capacity=30)
+    #     self.assertEquals(section.course.name, "CPE101")
 
-    def test_section_get_students_enrolled(self): 
-        """ Test that students_enrolled is retrieved properly """
-        section = Section.objects.get(students_enrolled=0)
-        self.assertEquals(section.course.name, "CPE101")
+    # def test_section_get_students_enrolled(self): 
+    #     """ Test that students_enrolled is retrieved properly """
+    #     section = Section.objects.get(students_enrolled=0)
+    #     self.assertEquals(section.course.name, "CPE101")
 
-    def test_section_get_students_waitlisted(self): 
-        """ Test that students_waitlisted is retrieved properly """
-        section = Section.objects.get(students_waitlisted=0)
-        self.assertEquals(section.course.name, "CPE101")
+    # def test_section_get_students_waitlisted(self): 
+    #     """ Test that students_waitlisted is retrieved properly """
+    #     section = Section.objects.get(students_waitlisted=0)
+    #     self.assertEquals(section.course.name, "CPE101")
 
-    def test_section_get_conflict1(self): 
-        """ Test that conflict is retrieved properly """
-        section = Section.objects.get(conflict='n')
-        self.assertEquals(section.course.name, "CPE101")
+    # def test_section_get_conflict1(self): 
+    #     """ Test that conflict is retrieved properly """
+    #     section = Section.objects.get(conflict='n')
+    #     self.assertEquals(section.course.name, "CPE101")
 
-    def test_section_get_conflict2(self): 
-        """ Test that conflict retrieval raises does not exist error properly """
-        self.assertRaises(ObjectDoesNotExist, Section.objects.get, conflict='y')
+    # def test_section_get_conflict2(self): 
+    #     """ Test that conflict retrieval raises does not exist error properly """
+    #     self.assertRaises(ObjectDoesNotExist, Section.objects.get, conflict='y')
 
-    def test_section_get_conflict_reason(self): 
-        """ Test that conflict_reason is retrieved properly """
-        section = Section.objects.get(conflict='n')
-        self.assertEquals(section.conflict_reason, None)
+    # def test_section_get_conflict_reason(self): 
+    #     """ Test that conflict_reason is retrieved properly """
+    #     section = Section.objects.get(conflict='n')
+    #     self.assertEquals(section.conflict_reason, None)
 
-    def test_section_get_fault(self): 
-        """ Test that fault is retrieved properly """
-        section = Section.objects.get(conflict='n')
-        self.assertEquals(section.course.name, "CPE101")
+    # def test_section_get_fault(self): 
+    #     """ Test that fault is retrieved properly """
+    #     section = Section.objects.get(conflict='n')
+    #     self.assertEquals(section.course.name, "CPE101")
 
-    def test_section_get_fault_reason(self): 
-        """ Test that fault_reason is retrieved properly """
-        section = Section.objects.get(fault='n')
-        self.assertEquals(section.fault_reason, None)
+    # def test_section_get_fault_reason(self): 
+    #     """ Test that fault_reason is retrieved properly """
+    #     section = Section.objects.get(fault='n')
+    #     self.assertEquals(section.fault_reason, None)
 
     #     #--------------- Filter Tests ----------------#
-    # def test_section_filter_course_none(self):
-    #     """ No sections match the name of one course we filter by. """
-    #     course_filter = {'course': 'CPE103'}
-    #     res_sections = Section.filter(course_filter)
-    #     self.assertEquals(len(res_sections), 0)
+    def test_section_filter_course_none(self):
+        """ No sections match the name of one course we filter by. """
+        course_filter = {'course': 'CPE103'}
+        res_sections = Section.filter(str(course_filter))
+        self.assertEquals(len(res_sections), 0)
 
-    # def test_section_filter_course_one(self):
-    #     """ One section matches the name of the one course we filter by. """
-    #     course_filter = {'course': 'CPE101'}
-    #     res_sections = Section.filter(course_filter)
-    #     self.assertEquals(len(res_sections), 1)
+    def test_section_filter_course_one(self):
+        """ One section matches the name of the one course we filter by. """
+        course_filter = {'course': 'CPE101'}
+        res_sections = Section.filter(course_filter)
+        self.assertEquals(len(res_sections), 1)
 
-    # def test_section_filter_course_multiple(self):
-    #     """ Uses multiple courses as filter. Results in 3 sections."""
-    #     course_filter = {'course': ('CPE101', 'CPE102')}   ## is this how filter would be fo multiple sections?
-    #     res_sections = Section.filter(course_filter)
-    #     self.assertEquals(len(res_sections), 3)
+    def test_section_filter_course_multiple(self):
+        """ Uses multiple courses as filter. Results in 3 sections."""
+        course_filter = {'course': ('CPE101', 'CPE102')}   ## is this how filter would be fo multiple sections?
+        res_sections = Section.filter(course_filter)
+        self.assertEquals(len(res_sections), 3)
 
     # def test_section_filter_faculty_none(self):
     #     """ No sections match the name of one faculty we filter by. """
