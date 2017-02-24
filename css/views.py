@@ -327,6 +327,7 @@ def FacultyView(request):
         return render(request, 'faculty.html', {
                 'faculty_list': CUser.objects.filter(user_type='faculty'),
                 'invite_user_form': InviteUserForm(),
+                'edit_user_form': EditUserForm(auto_id='edit_user_%s'),
                 'delete_user_form': DeleteUserForm()
             });
     elif request.method == "POST" and 'invite-form' in request.POST:
@@ -337,8 +338,14 @@ def FacultyView(request):
         else:
             res.status_code = 400
     elif request.method == "POST" and 'edit-form' in request.POST:
-        res.status_code = 400
-        res.reason_phrase = "NYI"
+        form = EditUserForm(request.POST)
+        if form.is_valid():
+            form.save()
+            res.status_code = 200
+            return HttpResponseRedirect('/resources/faculty')
+        else:
+            res.status_code = 400
+            res.reason_phrase = "Invalid form entry"
     elif request.method == "POST" and 'delete-form' in request.POST:
         form = DeleteUserForm(request.POST)
         if form.is_valid():
