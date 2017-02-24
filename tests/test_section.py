@@ -14,11 +14,11 @@ class SectionTestCase(TestCase):
         room = Room.create("14-156", "Graphics", 30, None, None)
         room = Room.create("14-157", "Security", 30, None, None)
         Section.create(
-            schedule.academic_term, course101.name, "10:00AM", "12:00PM", "MWF", 
+            schedule.academic_term, course101.name, "10:00", "12:00", "MWF", 
             "paula@calpoly.edu", "14-156", 30, 0, 0, 
             "n", None, "n", None)
         Section.create(
-            schedule.academic_term, course102.name, "12:00PM", "2:00PM", "MWF", 
+            schedule.academic_term, course102.name, "12:00", "14:00", "MWF", 
             "sigal@calpoly.edu", "14-157", 30, 0, 0, 
             "n", None, "n", None)
 
@@ -115,7 +115,7 @@ class SectionTestCase(TestCase):
     #     section = Section.objects.get(fault="n")
     #     self.assertEquals(section.fault_reason, None)
 
-    #     #--------------- Filter Tests ----------------#
+        #--------------- Filter Tests ----------------#
     def test_section_filter_course_one(self):
         """ A section matches the name of one course we filter by. """
         course_filter = '{"course": {"logic":"and", "filters":["CPE101"]}}'
@@ -167,6 +167,32 @@ class SectionTestCase(TestCase):
         res_sections = Section.filter_json(room_filter)
         self.assertEquals(len(res_sections), 2)
 
+    def test_section_time_success(self):
+        """ Successful time filter returns 1 section. """
+        time_filter = '{"time": {"logic":"and", "filters":{"MWF":[["10:00", "12:00"]], "TR":[]}}}'
+        res_sections = Section.filter_json(time_filter)
+        self.assertEquals(len(res_sections), 1)
+
+    def test_section_time_multiple(self):
+        """ Successfully filters with 2 time filters. Returns 2 sections. """ 
+        time_filter = '{"time": {"logic":"and", "filters":{"MWF":[["10:00", "12:00"], ["12:00", "14:00"]], "TR":[]}}}'
+        res_sections = Section.filter_json(time_filter)
+        self.assertEquals(len(res_sections), 2)
+
+    def test_section_time_valid_range(self):
+        """ Successful time filter results in 0 sections. """
+        time_filter = '{"time": {"logic":"and", "filters":{"MWF":[["9:00", "13:00"]], "TR":[["12:00", "13:00"]]}}}'
+        res_sections = Section.filter_json(time_filter)
+        self.assertEquals(len(res_sections), 1)
+
+    def test_section_course_faculty(self):
+        """ Successful time filter returns 1 section. """
+        course_faculty_filter = '{"course": {"logic":"and", "filters":["CPE101"]}, "faculty": {"logic":"and", "filters":["paula@calpoly.edu"]}}'
+        res_sections = Section.filter_json(course_faculty_filter)
+        self.assertEquals(len(res_sections), 1)
+
+    # # extra more complex tests to still be implemented
+
     # def test_section_time_invalid(self):
     #     """ 
     #         1. Start time is too early for department hours (8:00AM).
@@ -198,24 +224,6 @@ class SectionTestCase(TestCase):
     #     self.assertEquals(len(res_sections), 1)
 
     #     time_filter = {"time": ("10:00PM", "1:00AM")}
-    #     res_sections = Section.filter_json(time_filter)
-    #     self.assertEquals(len(res_sections), 0)
-
-    # def test_section_time_success(self):
-    #     """ Successful time filter returns 1 section. """
-    #     time_filter = {"time": ("1:00PM", "3:00PM")}
-    #     res_sections = Section.filter_json(time_filter)
-    #     self.assertEquals(len(res_sections), 1)
-
-    # def test_section_time_multiple(self):
-    #     """ Successfully filters with 2 time filters. Returns 2 sections. """ 
-    #     time_filter = {"time": (("9:00AM", "12:00PM"), ("1:00PM", "4:00PM"))}
-    #     res_sections = Section.filter_json(time_filter)
-    #     self.assertEquals(len(res_sections), 2)
-
-    # def test_section_time_valid_none(self):
-    #     """ Successful time filter results in 0 sections. """
-    #     time_filter = {"time": ("4:00PM", "5:00PM")}
     #     res_sections = Section.filter_json(time_filter)
     #     self.assertEquals(len(res_sections), 0)
 

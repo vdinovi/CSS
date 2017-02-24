@@ -315,9 +315,9 @@ class Section(models.Model):
         # the faculty and room will be passed in just as the email and room name (IDs for their models) b/c of the ForeignKey type
         faculty = CUser.get_faculty(faculty_email)
         room = Room.get_room(room_name)
-        if start_time < DEPARTMENT_SETTINGS.start_time:
+        if DEPARTMENT_SETTINGS.start_time and start_time < DEPARTMENT_SETTINGS.start_time:
             raise ValidationError("Invalid start time for department.")
-        if end_time > DEPARTMENT_SETTINGS.end_time or end_time < start_time:
+        if DEPARTMENT_SETTINGS.end_time and end_time > DEPARTMENT_SETTINGS.end_time or end_time < start_time:
             raise ValidationError("Invalid end time for department.")
         if days != "MWF" and days != "TR":
             raise ValidationError("Invalid days of the week.")
@@ -400,8 +400,9 @@ class Section(models.Model):
                     timeLogic = logic
                     if k == "MWF" or k == "TR":
                         for times in range(len(v)):
-                            timeList += reduce(operator.and_, [('days', k), ('start_time__gte', v[times][0]), ('end_time__lte', v[times][1])])
-                        timeQuery = reduce(operator.or_, timeList)
+                            timeList += [reduce(operator.and_, [Q(days=k), Q(start_time__gte=v[times][0]), Q(end_time__lte=v[times][1])])]
+                        if timeList:
+                            timeQuery = reduce(operator.or_, timeList)
             else:
                 queryLoop = Q()
                 for index in range(len(filters)):
@@ -439,8 +440,6 @@ class Section(models.Model):
                 finalQuery = orQuery
         if finalQuery == '':
             finalQuery = timeQuery
-
-        print finalQuery
         
         return Section.objects.filter(finalQuery)
             
