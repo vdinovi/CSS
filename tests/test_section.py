@@ -70,7 +70,6 @@ class SectionTestCase(TestCase):
     #     """ Test that faculty are retrieved properly """
     #     section = Section.get_section(faculty="paula@calpoly.edu")
     #     self.assertEquals(section.course.name, "CPE101")
-<<<<<<< HEAD
 
     # def test_section_get_room(self): 
     #     """ Test that room assignment is retrieved properly """
@@ -116,26 +115,6 @@ class SectionTestCase(TestCase):
     #     section = Section.objects.get(fault='n')
     #     self.assertEquals(section.fault_reason, None)
 
-    #     #--------------- Filter Tests ----------------#
-    def test_section_filter_course_none(self):
-        """ No sections match the name of one course we filter by. """
-        course_filter = {'course': 'CPE103'}
-        res_sections = Section.filter(str(course_filter))
-        self.assertEquals(len(res_sections), 0)
-
-    def test_section_filter_course_one(self):
-        """ One section matches the name of the one course we filter by. """
-        course_filter = {'course': 'CPE101'}
-        res_sections = Section.filter(course_filter)
-        self.assertEquals(len(res_sections), 1)
-
-    def test_section_filter_course_multiple(self):
-        """ Uses multiple courses as filter. Results in 3 sections."""
-        course_filter = {'course': ('CPE101', 'CPE102')}   ## is this how filter would be fo multiple sections?
-        res_sections = Section.filter(course_filter)
-        self.assertEquals(len(res_sections), 3)
-=======
-
     # def test_section_get_room(self): 
     #     """ Test that room assignment is retrieved properly """
     #     section = Section.get_section(room="14-156")
@@ -145,7 +124,6 @@ class SectionTestCase(TestCase):
     #     """ Test that section_capacity is retrieved properly """
     #     section = Section.objects.get(capacity=30)
     #     self.assertEquals(section.course.name, "CPE101")
->>>>>>> 020347406c9bba2d84f49b4c8b5a6399ed581328
 
     # def test_section_get_students_enrolled(self): 
     #     """ Test that students_enrolled is retrieved properly """
