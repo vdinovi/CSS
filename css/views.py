@@ -94,26 +94,42 @@ def SettingsView(request):
     res = HttpResponse()
     if request.method == "GET":
         return render(request, 'settings.html', {
-                'settings_form': SettingsForm(),
-                'section_type_list': SectionType.objects.filter(),
-                'department_name': DEPARTMENT_SETTINGS.name,
-                'department_chair': DEPARTMENT_SETTINGS.chair,
-                'department_start_time': DEPARTMENT_SETTINGS.start_time,
-                'department_end_time': DEPARTMENT_SETTINGS.end_time,
+                'settings': DEPARTMENT_SETTINGS,
+                'section_type_list': SectionType.objects.filter().all(),
+                'add_section_type_form': AddSectionTypeForm(),
             });
     elif request.method == "POST" and "submit-settings" in request.POST:
-        form = SettingsForm(request.POST);
-        if form.is_valid():
-            form.save()
-            return HttpResponseRedirect('/settings')
+        try:
+            DEPARTMENT_SETTINGS.new_settings(chair=request.POST['chair'], 
+                                             name=request.POST['name'],
+                                             start_time=request.POST['start_time'],
+                                             end_time=request.POST['end_time'])
+            return HttpResponseRedirect('/department/settings')
+        except ValidationError as e:
+            res.status_code = 400
+            res.reason_phrase = e[0]
         else:
             res.status_code = 400
             res.reason_phrase = "Invalid form entry"
-    if request.method == "POST":
-        res.status_code = 400
-        res.reason_phrase = "NYI"
+    elif request.method == "POST" and "add-section-type" in request.POST:
+        form = AddSectionTypeForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return HttpResponseRedirect('/department/settings')
+        else:
+            res.status_code = 200
+            res.reason_phrase = "Invalid form entry" 
+    elif request.method == "POST" and "delete-section-type" in request.POST:
+        section = SectionType.get_section_type(name=request.POST['section-type-name'])
+        if section is not None:
+            section.delete()
+            return HttpResponseRedirect('/department/settings')
+        else:
+            res.status_code = 400
+            res.reason_phrase = "SectionType " + request.POST['section-type-name'] + " does not exist"
     else:
         res.status_code = 400
+    return res
 
 from .forms import LoginForm
 from django.contrib.auth import authenticate
@@ -173,7 +189,7 @@ def RoomsView(request):
         if form.is_valid():
             try:
                 form.save();
-                return HttpResponseRedirect("/home/rooms")
+                return HttpResponseRedirect("/resources/rooms")
             except ValidationError as e:
                 res.status_code = 400
                 res.reason_phrase = "Invalid form entry"
@@ -192,7 +208,7 @@ def RoomsView(request):
         if form.is_valid():
             form.save()
             res.status_code = 200
-            return HttpResponseRedirect('/home/rooms')
+            return HttpResponseRedirect('/resources/rooms')
         else:
             res.status_code = 400
     elif request.method == "POST" and 'delete-form' in request.POST:
@@ -200,7 +216,7 @@ def RoomsView(request):
         if form.is_valid():
             form.deleteRoom()
             res.status_code = 200
-            return HttpResponseRedirect('/home/rooms')
+            return HttpResponseRedirect('/resources/rooms')
         else:
             res.status_code = 400
     else:
@@ -223,12 +239,10 @@ def CoursesView(request):
             });
     elif request.method == "POST" and 'add-course-form' in request.POST:
         form = AddCourseForm(request.POST);
-        print form.is_valid()
         if form.is_valid():
             try:
-                print "add form view"
                 form.save();
-                return HttpResponseRedirect("/home/courses")
+                return HttpResponseRedirect("/resources/courses")
             except ValidationError as e:
                 res.status_code = 400
                 res.reason_phrase = "Invalid form entry"
@@ -247,19 +261,17 @@ def CoursesView(request):
         if form.is_valid():
             form.save()
             res.status_code = 200
-            return HttpResponseRedirect('/home/courses')
+            return HttpResponseRedirect('/resources/courses')
         else:
             res.status_code = 400
             res.reason_phrase = "Invalid form entry"
     elif request.method == "POST" and 'delete-course-form' in request.POST:
         form = DeleteCourseForm(request.POST)
-        print("delete view")
         if form.is_valid():
             form.save()
             res.status_code = 200
-            return HttpResponseRedirect('/home/courses')
+            return HttpResponseRedirect('/resources/courses')
         else:
-            #form.save()
             res.status_code = 400
             res.reason_phrase = "Invalid form entry"
 
@@ -315,6 +327,7 @@ def FacultyView(request):
         return render(request, 'faculty.html', {
                 'faculty_list': CUser.objects.filter(user_type='faculty'),
                 'invite_user_form': InviteUserForm(),
+                'edit_user_form': EditUserForm(auto_id='edit_user_%s'),
                 'delete_user_form': DeleteUserForm()
             });
     elif request.method == "POST" and 'invite-form' in request.POST:
@@ -325,13 +338,18 @@ def FacultyView(request):
         else:
             res.status_code = 400
     elif request.method == "POST" and 'edit-form' in request.POST:
-        res.status_code = 400
-        res.reason_phrase = "NYI"
+        form = EditUserForm(request.POST)
+        if form.is_valid():
+            form.save()
+            res.status_code = 200
+            return HttpResponseRedirect('/resources/faculty')
+        else:
+            res.status_code = 400
+            res.reason_phrase = "Invalid form entry"
     elif request.method == "POST" and 'delete-form' in request.POST:
         form = DeleteUserForm(request.POST)
         if form.is_valid():
             try:
-                print("delete user view")
                 form.delete_user()
                 res.status_code = 200
             except ObjectDoesNotExist:
