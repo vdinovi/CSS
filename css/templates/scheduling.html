@@ -28,19 +28,49 @@
   <body>
     {% include "navbar.html" %}
     <div id="scheduling-container" class="container scheduling-container">
-      <!-- @TODO Term Frame -->
       <!-- Term Frame -->
-      <div class="row">
+
+      <!-- Previous term frame -->
+      <!-- <div class="row">
           <div id="active-term-frame" class="col-xs-8 col-xs-offset-2 term-frame">
             <div id="active-term-list-group" class="list-group text-center"> 
               <a href="#" class="list-group-item terms active">Fall 2016</a>
               <a href="#" class="list-group-item terms">Winter 2017</a>
-              <a href="#" class="list-group-item terms dropdown">Add New Term</a>
+              <a href="#" class="list-group-item terms dropdown">View New Term</a>
             </div>
           </div>
-      </div>
-      <!-- Filter Frame -->
+          
+      </div> -->
       <div class="row">
+        <div class="col-xs-10 term-frame">
+          <ul class="nav nav-tabs">
+            <li class="dropdown">
+              <a class="dropdown-toggle active" data-toggle="dropdown" href="#">Fall 2016
+              <span class="caret"></span></a>
+                <ul class="dropdown-menu" role="menu">
+                  <li><a href="#" class="dropdown-toggle" data-toggle="tab">Approve</a></li>
+                  <li><a href="#" class="dropdown-toggle" data-toggle="tab">Close Tab</a></li>
+                </ul>
+            </li>
+            <li><a href="#">Winter 2017</a></li>
+            <li><a href="#" data-toggle="modal">View New Term</a></li>
+          </ul>
+        </div>
+        <div class="col-xs-2">
+          <div id="create-new-term-btn" class="btn">Create New Term</div>
+        </div>
+      </div>
+      <div class="row">
+        <!-- New Section Frame -->
+        <!-- <div id="new-section-frame" class="col-xs-12 new-section-frame">
+          <div class="col-xs-4 outer-frame">
+            <form method="POST"> {% csrf_token %}
+              {{ new_section_form.as_p }}
+
+            </form>
+          </div>
+        </div> -->
+        <!-- Filter Frame -->
         <div id="filter-frame" class="col-xs-12 filter-frame">
           <div class="row" style="padding-top:20px">
             <button id="manage-new-sections-button" class="btn manage-new-section-btn col-xs-4 col-xs-offset-4" onclick='switchFrame("filter-frame", "new-section-frame")'>Manage New Sections</button>
@@ -94,42 +124,6 @@
                     </span> 
                   </div>
                 </div>
-                <!-- Filter Logic Frame -->
-                <!-- <div id="filter-type-logic" class="filter-logic">
-                  <div class="col-xs-3">
-                    <div class="row" style="text-align:center">
-                      <p>Courses</p>
-                    </div>
-                    <div class="logic-buttons" style="height:85% font-size:12px">
-                      <div class="row">
-                        <div id="add-option" class="input-group">
-                          <span class="input-group-addon">
-                            <input id="section-checkbox" type="checkbox">
-                          </span> 
-                        <p style="font-size:10px">AND</p>
-                          AND
-                        </div>
-                      </div>
-                      <div class="row">
-                        <div id="add-option" class="input-group">
-                          <span class="input-group-addon">
-                            <input id="section-checkbox" type="checkbox">
-                          </span> 
-                          OR
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="col-xs-3">
-                    Faculty
-                  </div>
-                  <div class="col-xs-3">
-                    Room
-                  </div>
-                  <div class="col-xs-3">
-                    Time
-                  </div>
-                </div> -->
               </div>
             </form>
           </div>
@@ -218,13 +212,6 @@
             </div> 
           </div>
         </div>
-        <!-- div id="new-section-frame" class="col-xs-12 new-section-frame">
-          <div class="col-xs-4 outer-frame">
-            <div id="specifications-frame" class="inner-frame">
-              hi
-            </div>
-          </div>
-        </div> -->
       </div>
       <!-- Section Frame -->
       <div class="row" style="padding-top: 20px;">

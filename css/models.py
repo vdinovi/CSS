@@ -79,6 +79,15 @@ class CUser(models.Model):
     @classmethod
     def get_all_faculty(cls): 
         return cls.objects.filter(user_type='faculty')
+    # Return faculty full name
+    @classmethod
+    def get_all_faculty_full_name(cls):
+        faculty_list = cls.objects.filter(user_type='faculty')
+        names_list = []
+        for faculty in faculty_list:
+            names_list.append('{0} {1}'.format(faculty.user.first_name, faculty.user.last_name))
+        return names_list
+
     # Return scheduler cuser by email
     @classmethod
     def get_scheduler(cls, email): # Throws ObjectDoesNotExist
@@ -391,6 +400,7 @@ class Section(models.Model):
     # for filtering by time, it will only take in an array of pairs (an array of 2-piece arrays) so that it will at least have a start time and end time.
     #### there can also be chunks of time, so there are multiple start and end times
     # for any other filter, we will pass on the keyword and array argument as it is to the filter.
+
     @classmethod 
     def filter_json(cls, json_string):
         return cls.filter(json.loads(json_string))
@@ -462,7 +472,6 @@ class Section(models.Model):
             finalQuery = timeQuery
         
         return Section.objects.filter(finalQuery)
-            
 
 class FacultyCoursePreferences(models.Model):
     faculty = models.ForeignKey(CUser, on_delete = models.CASCADE)
