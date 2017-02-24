@@ -8,6 +8,9 @@ from django.db import IntegrityError
 from django.core.exceptions import ValidationError, ObjectDoesNotExist
 from util import DepartmentSettings
 from settings import DEPARTMENT_SETTINGS
+import json
+import operator
+from django.db.models import Q
 
 # System User class,
 # Wrapper for django builtin class, contains user + application specific data
@@ -252,7 +255,7 @@ class Availability(models.Model):
         elif (level is None) or (level != "available" and level != "preferred" and level != "unavailable"):
             raise ValidationError("Need to input level of availability: preferred, available, or unavailable")  
         else:
-            availability = cls(faculty_member=faculty, days_of_week=days, start_time=start, end_time=end, level=level)
+            availability = cls(faculty=faculty, days_of_week=days, start_time=start, end_time=end, level=level)
             availability.save()
             return availability
 
@@ -285,8 +288,8 @@ class Schedule(models.Model):
 # Section is our systems primary scheduled object
 # Each section represents a department section that is planned for a particular schedule
 class Section(models.Model):
-    schedule = models.OneToOneField(Schedule, on_delete=models.CASCADE, unique=True)
-    course = models.OneToOneField(Course, on_delete=models.CASCADE, unique=True)
+    schedule = models.ForeignKey(Schedule, on_delete=models.CASCADE)
+    course = models.ForeignKey(Course, on_delete=models.CASCADE)
     start_time = models.TimeField()
     end_time = models.TimeField()
     days = models.CharField(max_length=8)    # MWF or TR
@@ -311,10 +314,10 @@ class Section(models.Model):
         # the faculty and room will be passed in just as the email and room name (IDs for their models) b/c of the ForeignKey type
         faculty = CUser.get_faculty(faculty_email)
         room = Room.get_room(room_name)
-        # if start_time < DEPARTMENT_SETTINGS.start_time:
-        #     raise ValidationError("Invalid start time for department.")
-        # if end_time > DEPARTMENT_SETTINGS.end_time or end_time < start_time:
-        #     raise ValidationError("Invalid end time for department.")
+        if start_time < DEPARTMENT_SETTINGS.start_time:
+            raise ValidationError("Invalid start time for department.")
+        if end_time > DEPARTMENT_SETTINGS.end_time or end_time < start_time:
+            raise ValidationError("Invalid end time for department.")
         if days != "MWF" and days != "TR":
             raise ValidationError("Invalid days of the week.")
         if capacity < 0:
@@ -368,60 +371,78 @@ class Section(models.Model):
     #### there can also be chunks of time, so there are multiple start and end times
     # for any other filter, we will pass on the keyword and array argument as it is to the filter.
     @classmethod 
-    def filter(cls, data):
-        filter_dict = json.loads(data)
-        andSections = cls.objects
-        andDict = {}
-        orList = []
-        prevLogic = ''
+    def filter_json(cls, json_string):
+        return cls.filter(json.loads(json_string))
 
-        # OR list ex: [('question__contains', 'dinner'), ('question__contains', 'meal'), ('pub_date', datetime.date(2010, 7, 19))]
-        # AND dict ex: {'question__contains': 'omelette', 'pub_date' : datetime.date.today()}
+    @classmethod 
+    def filter(cls, filter_dict):
+        andList = []
+        ands = False
+        orList = []
+        ors = False
+        timeList = []
+        timeLogicList = []
+        timeLogic = ''
+        prevLogic = ''
+        andQuery = ''
+        orQuery = ''
+        timeQuery = ''
+        finalQuery = ''
+
         for key,tags in filter_dict.iteritems():
+            if 'logic' not in tags or 'filters' not in tags:
+                raise ValidationError("JSON not set up correctly. 'logic' and 'filters' are required keys in each filter type.")
+            logic = tags['logic']
             filters = tags['filters']
             if key == "time":
                 for k,v in filters.iteritems():
+                    timeLogic = logic
                     if k == "MWF" or k == "TR":
-                        if 'or' in prevLogic:
-                            
-                            for times in range(len(v)):
-
-                        elif 'and' in prevLogic or prevLogic is '':
-                            andDict.update({'days':k})
-                            for times in range(len(v)):
-                                andDict.update({start_time__gte:v[times][0], end_time__lte:v[times][0]})
-            elif:
-                # print "   filter(" + key + "=" + ', '.join(filters) + ")"
-                if 'or' in prevLogic:
-                    # add to List here
-                elif 'and' in prevLogic or prevLogic is '':
-                    andDict.update({key:filters})
-
-            # if 'or' in prevLogic:
-            #     # print("orSections +=")
-            #     # orSections += cls.objects.filter()
-            # elif 'and' in prevLogic or prevLogic is '':
-            #     qList += newQuery
-            #     # print("andSections x=")
-            #     #andSections = andSections.filter()
-            
-            prevLogic = tags['logic'] + " "
-
-
-
-
-        sections = Section.objects
-        for key, value in filters.iteritems():
-            if key == 'time':
-                # START
-                # reduce(lambda q, f: q | Q(creator=f), filters, Q())
-                sections = sections.filter(reduce(lambda query, filter: query | (Q(start_time >= filter[0]) & Q(end_time <= filter[1])), value, Q()))
-                # OR 
-                #for pair in value:
-                #    sections = sections.filter(start_time >= pair[0]).filter(end_time <= pair[1])
-                # END
+                        for times in range(len(v)):
+                            timeList += reduce(operator.and_, [('days', k), ('start_time__gte', v[times][0]), ('end_time__lte', v[times][1])])
+                        timeQuery = reduce(operator.or_, timeList)
             else:
-                sections = sections.filter(key=value)
+                queryLoop = Q()
+                for index in range(len(filters)):
+                    if key == "course":
+                        filterObject = Course.get_course(filters[index])
+                        queryLoop = reduce(operator.or_, [queryLoop, Q(course=filterObject)])
+                    elif key == "faculty":
+                        filterObject = CUser.get_faculty(filters[index])
+                        queryLoop = reduce(operator.or_, [queryLoop, Q(faculty=filterObject)])
+                    elif key == "room":
+                        filterObject = Room.get_room(filters[index])
+                        queryLoop = reduce(operator.or_, [queryLoop, Q(room=filterObject)])
+                    else:
+                        raise ValidationError("Invalid filter type.")
+
+                if 'or' in logic:
+                    ors = True
+                    orList += [queryLoop]
+                elif 'and' in logic or logic is '':
+                    ands = True
+                    andList += [queryLoop]
+
+        if ands is True:
+            andQuery = reduce(operator.and_, andList)
+            if (timeQuery is not None) and ('and' in timeLogic):
+                andQuery = reduce(operator.and_, [andQuery, timeQuery])
+            finalQuery = andQuery
+        if ors is True:
+            orQuery = reduce(operator.and_, orList)     
+            if (timeQuery is not None) and ('or' in timeLogic):
+                orQuery = reduce(operator.or_, [orQuery, timeQuery])
+            if finalQuery != '':
+                finalQuery = reduce(operator.or_, [finalQuery, orQuery])
+            else:
+                finalQuery = orQuery
+        if finalQuery == '':
+            finalQuery = timeQuery
+
+        print finalQuery
+        
+        return Section.objects.filter(finalQuery)
+            
 
 class FacultyCoursePreferences(models.Model):
     faculty = models.ForeignKey(CUser, on_delete = models.CASCADE)
