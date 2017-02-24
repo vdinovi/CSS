@@ -84,7 +84,21 @@ class CUser(models.Model):
     @classmethod
     def get_all_schedulers(cls):
         return cls.objects.filter(user_type='scheduler')
-
+    # Set the first name
+    @classmethod
+    def set_first_name(self, first_name):
+        self.first_name = first_name
+        self.save()
+    # Set the last name
+    @classmethod
+    def set_last_name(self, last_name):
+        self.last_name = last_name
+        self.save()
+    # Set the password
+    @classmethod
+    def set_password(self, pword):
+        self.password = pword
+        self.save()
 
 class FacultyDetails(models.Model):
     # The user_id uses the User ID as a primary key.
@@ -238,22 +252,28 @@ class Availability(models.Model):
     faculty = models.OneToOneField(CUser, on_delete=models.CASCADE, null=True) 
     days_of_week = models.CharField(max_length=16) # MWF or TR
     start_time = models.TimeField()
+    start_type = models.CharField(max_length=2)
     end_time = models.TimeField()
+    end_type = models.CharField(max_length=2)
     level = models.CharField(max_length=16) # available, preferred, unavailable
 
     @classmethod
-    def create(cls, email, days, start, end, level):
+    def create(cls, email, days, start, s_type, end, e_type, level):
         faculty = CUser.get_faculty(email=email)
         if days is None or len(days) > 16 or (days != "MWF" and days != "TR"):
             raise ValidationError("Invalid days of week input")
         elif (start is None):
             raise ValidationError("Need to input start time")  
+        elif (s_type is None):
+            raise ValidationError("Need to input start type") 
         elif (end is None):
-            raise ValidationError("Need to input end time")  
+            raise ValidationError("Need to input end time")
+        elif (e_type is None):
+            raise ValidationError("Need to input end type") 
         elif (level is None) or (level != "available" and level != "preferred" and level != "unavailable"):
             raise ValidationError("Need to input level of availability: preferred, available, or unavailable")  
         else:
-            availability = cls(faculty_member=faculty, days_of_week=days, start_time=start, end_time=end, level=level)
+            availability = cls(faculty=faculty, days_of_week=days, start_time=start, start_type=s_type, end_time=end, end_type=e_type, level=level)
             availability.save()
             return availability
 
