@@ -30,6 +30,10 @@
     border-radius: 5px;
 }
 
+<<<<<<< HEAD
+/* Button for opening section management window */
+=======
+
 /* Buttons */
 .btn {
     background-color: #94bdbd;
@@ -42,17 +46,34 @@
     vertical-align: middle;
 }
 
+>>>>>>> 56099376e9640eb61aef9b2908bc43a81daf33b8
 .manage-new-section-btn {
     margin-top: 10px;
     width: 100%;
     height: 100%;
 }
 
+<<<<<<< HEAD
+/* Frame for major horizontal sections (goes in a row div) */
+.outer-frame {
+    padding:20px;
+    width:290px;
+    white-space: normal;
+}
+
+/* Frame for inner windows within outer frames */
+.inner-frame {
+    background-color: #cccccc;
+    width: 100%;
+    height: 300px;
+    margin: 0 auto;
+=======
 /* Frames */
 .new-section-frame {
     margin-top: 10px;
     min-width:300px;
     background-color: #e5e5e5;
+>>>>>>> 56099376e9640eb61aef9b2908bc43a81daf33b8
     border: 1px solid black;
     display:inline-block;
 }
