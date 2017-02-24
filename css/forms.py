@@ -71,7 +71,16 @@ class RegisterUserForm(forms.Form):
 
 # Edit User Form
 class EditUserForm(forms.Form):
-    pass
+    user_email = forms.CharField(widget=forms.HiddenInput(), initial='a@a.com')
+    first_name = forms.CharField()
+    last_name = forms.CharField()
+    password = forms.CharField()
+
+    def save(self):
+        user = CUser.get_user(email=self.cleaned_data['user_email'])
+        user.set_first_name(self.cleaned_data['first_name'])
+        user.set_last_name(self.cleaned_data['last_name'])
+        user.set_password(self.cleaned_data['password'])
 
 # Delete Form
 class DeleteUserForm(forms.Form):
@@ -80,7 +89,7 @@ class DeleteUserForm(forms.Form):
     def delete_user(self):
         email = self.cleaned_data['email']
         print("emails match")
-        CUser.get_user(email=self.cleaned_data['email']).delete()
+        CUser.get_user(user__username=self.cleaned_data['email']).delete()
 
 class AddRoomForm(forms.Form):
     name = forms.CharField()
@@ -150,7 +159,7 @@ class EditCourseForm(forms.Form):
     description = forms.CharField()
 
     def save(self):
-        course = course.get_course(name=self.cleaned_data['course_name'])
+        course = Course.get_course(name=self.cleaned_data['course_name'])
         course.set_equipment_req(self.cleaned_data['equipment_req'])
         course.set_description(self.cleaned_data['description'])
 
