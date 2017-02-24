@@ -409,7 +409,7 @@ class Section(models.Model):
         orQuery = ''
         timeQuery = ''
         finalQuery = ''
-
+        
         for key,tags in filter_dict.iteritems():
             if 'logic' not in tags or 'filters' not in tags:
                 raise ValidationError("JSON not set up correctly. 'logic' and 'filters' are required keys in each filter type.")
