@@ -163,6 +163,13 @@ class EditCourseForm(forms.Form):
         course.set_equipment_req(self.cleaned_data['equipment_req'])
         course.set_description(self.cleaned_data['description'])
 
+
+class AddSectionTypeForm(forms.Form):
+    section_type_name = forms.CharField()
+ 
+    def save(self):
+        SectionType.create(name=self.cleaned_data['section_type_name'])
+
 class AddSectionForm(forms.Form):
     course = forms.ModelChoiceField(label='Course', queryset=Course.objects.values_list('name', flat=True), empty_label="                   ")
     section_type = forms.ModelChoiceField(label='Section Type', queryset=SectionType.objects.values_list('name', flat=True), empty_label="                   ")
