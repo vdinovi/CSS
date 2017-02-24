@@ -217,10 +217,9 @@ class SectionType(models.Model):
     def create(cls, name):
         if len(name) > 32:
             raise ValidationError("Section Type name exceeds 32 characters.")
-        else:
-            section_type = cls(name=name)
-            section_type.save()
-            return section_type
+        section_type = cls(name=name)
+        section_type.save()     
+        return section_type
 
     @classmethod
     def get_section_type(cls, name):
