@@ -35,10 +35,8 @@ function selectFilter(btn) {
 // OnClick function for new section frame
 // - Toggles between new section frame and filter frame
 function switchFrame(firstFrame, secondFrame) {
-    $("#"+firstFrame)[0].style.visibility = "hidden"; 
-    $("#"+secondFrame)[0].style.visibility = "visible"; 
-    //second = document.getElementById(secondFrame).style.visibility="visible";
-    // (first, second).toggle()
+    $("#"+firstFrame).hide();
+    $("#"+secondFrame).show();
 }
 
 
