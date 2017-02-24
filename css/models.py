@@ -200,7 +200,7 @@ class Course(models.Model):
 
 
 class SectionType(models.Model):
-    name = models.CharField(max_length=32) # eg. lecture or lab
+    name = models.CharField(max_length=32, unique=True) # eg. lecture or lab
 
     @classmethod
     def create(cls, name):
@@ -209,11 +209,12 @@ class SectionType(models.Model):
         else:
             section_type = cls(name=name)
             section_type.save()
-            return cls(name=name)
+            return section_type
 
     @classmethod
     def get_section_type(cls, name):
-        cls.objects.get(name=name)
+        return cls.objects.get(name=name)
+
 
 
 # WorkInfo contains the user defined information for specific Course-SectionType pairs

@@ -1,6 +1,6 @@
 from django import forms
 from django.core.mail import send_mail
-from css.models import CUser, Room, Course
+from css.models import CUser, Room, Course, SectionType
 from django.http import HttpResponseRedirect
 from settings import DEPARTMENT_SETTINGS
 #from django.contrib.sites.models import Site
@@ -135,20 +135,6 @@ class AddCourseForm(forms.Form):
         print name
         course.save();
 
-# Settings Form
-class SettingsForm(forms.Form):
-    name = forms.CharField(required=True)
-    chair = forms.CharField()
-    start_time = forms.TimeField()
-    end_time = forms.TimeField()
-
-    def save(self):
-        DEPARTMENT_SETTINGS.name = form.cleaned_data['name']
-        DEPARTMENT_SETTINGS.chair = form.cleaned_data['chair']
-        DEPARTMENT_SETTINGS.start_time = form.cleaned_data['start_time']
-        DEPARTMENT_SETTINGS.end_time = form.cleaned_data['end_time']
-        DEPARTMENT_SETTINGS.save_settings()
-
 class DeleteCourseForm(forms.Form):
     course_name = forms.CharField(widget=forms.HiddenInput(), initial='defaultCourse')
 
@@ -157,12 +143,20 @@ class DeleteCourseForm(forms.Form):
         Course.get_course(name=self.cleaned_data['course_name']).delete()
         return
 
+# @TODO Fix naming -> EditCourseForm
 class EditCourseForm(forms.Form):
-    course_name = forms.CharField(widget=forms.HiddenInput(), initial='defaultCourse')
+    course_name = forms.CharField(widget=forms.HiddenInput(), initial='defaultcourse')
     equipment_req = forms.CharField()
     description = forms.CharField()
 
     def save(self):
-        course = Course.get_course(name=self.cleaned_data['course_name'])
+        course = course.get_course(name=self.cleaned_data['course_name'])
         course.set_equipment_req(self.cleaned_data['equipment_req'])
         course.set_description(self.cleaned_data['description'])
+
+class AddSectionTypeForm(forms.Form):
+    section_type_name = forms.CharField()
+
+    def save(self):
+        SectionType.create(name=self.cleaned_data['section_type_name'])
+
