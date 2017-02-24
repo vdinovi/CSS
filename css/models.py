@@ -377,25 +377,25 @@ class Section(models.Model):
 
         # OR list ex: [('question__contains', 'dinner'), ('question__contains', 'meal'), ('pub_date', datetime.date(2010, 7, 19))]
         # AND dict ex: {'question__contains': 'omelette', 'pub_date' : datetime.date.today()}
-        for key,tags in filter_dict.iteritems():
-            filters = tags['filters']
-            if key == "time":
-                for k,v in filters.iteritems():
-                    if k == "MWF" or k == "TR":
-                        if 'or' in prevLogic:
+        # for key,tags in filter_dict.iteritems():
+        #     filters = tags['filters']
+        #     if key == "time":
+        #         for k,v in filters.iteritems():
+        #             if k == "MWF" or k == "TR":
+        #                 if 'or' in prevLogic:
                             
-                            for times in range(len(v)):
+        #                     for times in range(len(v)):
 
-                        elif 'and' in prevLogic or prevLogic is '':
-                            andDict.update({'days':k})
-                            for times in range(len(v)):
-                                andDict.update({start_time__gte:v[times][0], end_time__lte:v[times][0]})
-            elif:
-                # print "   filter(" + key + "=" + ', '.join(filters) + ")"
-                if 'or' in prevLogic:
-                    # add to List here
-                elif 'and' in prevLogic or prevLogic is '':
-                    andDict.update({key:filters})
+        #                 elif 'and' in prevLogic or prevLogic is '':
+        #                     andDict.update({'days':k})
+        #                     for times in range(len(v)):
+        #                         andDict.update({start_time__gte:v[times][0], end_time__lte:v[times][0]})
+        #     elif:
+        #         # print "   filter(" + key + "=" + ', '.join(filters) + ")"
+        #         if 'or' in prevLogic:
+        #             # add to List here
+        #         elif 'and' in prevLogic or prevLogic is '':
+        #             andDict.update({key:filters})
 
             # if 'or' in prevLogic:
             #     # print("orSections +=")
@@ -405,7 +405,7 @@ class Section(models.Model):
             #     # print("andSections x=")
             #     #andSections = andSections.filter()
             
-            prevLogic = tags['logic'] + " "
+            # prevLogic = tags['logic'] + " "
 
 
 
