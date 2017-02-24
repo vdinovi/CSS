@@ -15,37 +15,37 @@ class AvailabilityTestCase(TestCase):
         self.assertEquals(CUser.get_faculty(email="email@email.com").user_type, "faculty")
 
     def test_valid_availability1(self):
-        availability = Availability.create("email@email.com", "MWF", "10:00", "12:00", "available")
+        availability = Availability.create("email@email.com", "MWF", "10:00", "AM", "12:00", "PM", "available")
         self.assertEquals(availability.days_of_week, "MWF")
     
     def test_valid_availability2(self):
-        availability = Availability.create("email@email.com", "MWF", "10:00AM", "12:00", "available")
+        availability = Availability.create("email@email.com", "MWF", "10:00", "PM", "12:00", "AM", "available")
         self.assertEquals(availability.days_of_week, "MWF")
 
     def test_valid_availability3(self):
-        availability = Availability.create("email@email.com", "TR", "10:00AM", "12:00", "preferred")
+        availability = Availability.create("email@email.com", "TR", "10:00", "PM", "12:00", "PM", "preferred")
         self.assertEquals(availability.days_of_week, "TR")
 
     def test_valid_availability4(self):
-        availability = Availability.create("email@email.com", "TR", "10:00AM", "12:00", "unavailable")
+        availability = Availability.create("email@email.com", "TR", "10:00", "AM", "12:00", "AM", "unavailable")
         self.assertEquals(availability.level, "unavailable")
         
     def test_availability_invalid_faculty_id(self):
-        self.assertRaises(ObjectDoesNotExist, Availability.create, "email_unique@email.com", None, None, None, None)
+        self.assertRaises(ObjectDoesNotExist, Availability.create, "email_unique@email.com", None, None, None, None, None, None)
 
     def test_availability_invalid_days_of_week(self):
-        self.assertRaises(ValidationError, Availability.create, "email@email.com", "HELLO", None, None, None)
+        self.assertRaises(ValidationError, Availability.create, "email@email.com", "HELLO", None, None, None, None, None)
 
     def test_availability_invalid_start_time(self):
-        self.assertRaises(ValidationError, Availability.create, "email@email.com", "MWF", None, "12:00", "available")
+        self.assertRaises(ValidationError, Availability.create, "email@email.com", "MWF", None, "PM", "12:00", "PM", "available")
 
     def test_availability_invalid_end_time(self):
-        self.assertRaises(ValidationError, Availability.create, "email@email.com", "TR", "12:00 AM", None, None)
+        self.assertRaises(ValidationError, Availability.create, "email@email.com", "TR", "12:00", "AM" ,None, "PM", None)
 
     def test_availability_invalid_level1(self):
-        self.assertRaises(ValidationError, Availability.create, "email@email.com", "MWF", "10:00", "12:00", None)
+        self.assertRaises(ValidationError, Availability.create, "email@email.com", "MWF", "10:00", "PM", "12:00", "PM", None)
 
     def test_availability_invalid_level2(self):
-        self.assertRaises(ValidationError, Availability.create, "email@email.com", "MWF", "10:00", "12:00", "ew")
+        self.assertRaises(ValidationError, Availability.create, "email@email.com", "MWF", "10:00", "PM", "12:00", "AM", "ew")
 
 
