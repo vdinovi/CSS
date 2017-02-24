@@ -62,57 +62,57 @@
       </div>
       <div class="row">
         <!-- New Section Frame -->
-        <!-- <div id="new-section-frame" class="col-xs-12 new-section-frame">
+        <div id="new-section-frame" class="col-xs-12 new-section-frame" style="visibility: hidden;">
+          <div class="row" style="padding-top:20px">
+            <button id="filter-frame-btn" class="btn switch-frame-btn col-xs-4 col-xs-offset-4" onclick='switchFrame("new-section-frame", "filter-frame")'>Filter Sections</button>
+          </div>
           <div class="col-xs-4 outer-frame">
             <form method="POST"> {% csrf_token %}
               {{ new_section_form.as_p }}
-
             </form>
           </div>
-        </div> -->
+        </div>
         <!-- Filter Frame -->
         <div id="filter-frame" class="col-xs-12 filter-frame">
           <div class="row" style="padding-top:20px">
-            <button id="manage-new-sections-button" class="btn manage-new-section-btn col-xs-4 col-xs-offset-4" onclick='switchFrame("filter-frame", "new-section-frame")'>Manage New Sections</button>
+            <button id="new-section-frame-btn" class="btn switch-frame-btn col-xs-4 col-xs-offset-4" onclick='switchFrame("filter-frame", "new-section-frame")'>Manage New Sections</button>
           </div>
           <div class="col-xs-3 outer-frame">
             <h2 style="text-align:center;">Filter Type</h2>
-              <div id="filter-type-frame" class="inner-frame">
-                <div id="filter-type-selection-frame" class="filter-selection-frame">
-                  <!-- COURSE FILTER -->
-                  <!--<button class="" value="inactive" style="width:100%;"onclick="selectFilter(this)">Course</button>-->
-                  <div id="course-filter-btn" class="noselect filter-type" value="inactive" style="width:100%;"onclick="selectFilter(this)">Course</div>
+            <div id="filter-type-frame" class="inner-frame">
+              <div id="filter-type-window" class="filter-type-window">
+                <!-- COURSE FILTER -->
+                <div id="course-filter-btn" class="noselect filter-type" value="inactive" style="width:100%;"onclick="selectFilter(this)">Course</div>
+                <span class="list-group">
+                  <li class="filter-options">- CPE101</li>
+                  <li class="filter-options">- CPE102</li>
+                </span>
+                <!-- FACULTY FILTER -->
+                <div id="faculty-filter" class="input-group" style="border-bottom: 1px solid black; width:100%">
+                  <div id="faculty-filter-btn" class="filter-type" value="inactive" style="width:100%;"onclick="selectFilter(this)">Faculty</div>
                   <span class="list-group">
-                    <li class="filter-selection">- CPE101</li>
-                    <li class="filter-selection">- CPE102</li>
+                    <li class="filter-options">- Kearns</li>
+                  </span> 
+                </div>
+                <!-- ROOM FILTER -->
+                <div id="room-filter" class="input-group" style="border-bottom: 1px solid black; width:100%">
+                  <div id="room-filter-btn" class="filter-type" value="inactive" style="width:100%;"onclick="selectFilter(this)">Room</div>
+                  <span class="list-group">
+                    <li class="filter-options">- 14-256</li>
                   </span>
-                  <!-- FACULTY FILTER -->
-                  <div id="faculty-filter" class="input-group" style="border-bottom: 1px solid black; width:100%">
-                    <div id="faculty-filter-btn" class="filter-type" value="inactive" style="width:100%;"onclick="selectFilter(this)">Faculty</div>
-                    <span class="list-group">
-                      <li class="filter-selection">- Kearns</li>
-                    </span> 
-                  </div>
-                  <!-- ROOM FILTER -->
-                  <div id="room-filter" class="input-group" style="border-bottom: 1px solid black; width:100%">
-                    <div id="room-filter-btn" class="filter-type" value="inactive" style="width:100%;"onclick="selectFilter(this)">Room</div>
-                    <span class="list-group">
-                      <li class="filter-selection">- 14-256</li>
-                    </span>
-                  </div>
-                  <!-- TIME FILTER -->
-                  <div id="time-filter" class="input-group" style="border-bottom: 1px solid black; width:100%">
-                    <div id="time-filter-btn" class="filter-type" value="inactive" style="width:100%;"onclick="selectFilter(this)">Time</div>
-                    <span class="list-group">
-                      <li class="filter-selection">- MWF 8:00am : 10:00am</li>
-                    </span>
-                    <span class="list-group">
-                      <li class="filter-selection">- TH 6:00pm : 8:00pm</li>
-                    </span> 
-                  </div>
+                </div>
+                <!-- TIME FILTER -->
+                <div id="time-filter" class="input-group" style="border-bottom: 1px solid black; width:100%">
+                  <div id="time-filter-btn" class="filter-type" value="inactive" style="width:100%;"onclick="selectFilter(this)">Time</div>
+                  <span class="list-group">
+                    <li class="filter-options">- MWF 8:00am : 10:00am</li>
+                  </span>
+                  <span class="list-group">
+                    <li class="filter-options">- TH 6:00pm : 8:00pm</li>
+                  </span> 
                 </div>
               </div>
-            </form>
+            </div>
           </div>
           <!-- @TODO Fill with real entries -->
           <div class="col-xs-3 outer-frame">
