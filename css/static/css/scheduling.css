@@ -1,59 +1,85 @@
+/* **************** */
+/* ***** Util ***** */
+/* **************** */
+
+/* noselect disables the default select styles. Useful for clickable divs */
+.noselect {
+  -webkit-touch-callout: none; /* iOS Safari */
+    -webkit-user-select: none; /* Safari */
+     -khtml-user-select: none; /* Konqueror HTML */
+       -moz-user-select: none; /* Firefox */
+        -ms-user-select: none; /* Internet Explorer/Edge */
+            user-select: none; /* Non-prefixed version, currently
+                                  supported by Chrome and Opera */
+}
+
+
+/* **************** */
+/* ***** Main ***** */
+/* **************** */
+
+/* Container for entire scheduling page (below navbar) */
 .scheduling-container {
     overflow-x: scroll;
 }
 
+/* Tab bar for selected terms */
 .term-frame {
     margin-top: 10px;
     background-color: #e5e5e5;
     border-radius: 5px;
 }
 
-.btn {
-    background-color: #94bdbd;
-    color: black;
-}
-
+/* Button for opening section management window */
 .manage-new-section-btn {
     margin-top: 10px;
     width: 100%;
     height: 100%;
 }
 
-.new-section-frame {
-    margin-top: 10px;
-    min-width:300px;
-    background-color: #e5e5e5;
-    border: 1px solid black;
-    border-radius: 5px;
-    overflow-x: scroll;
-    white-space: nowrap;
-}
-
-.filter-frame {
-    margin-top: 10px;
-    min-width:300px;
-    background-color: #e5e5e5;
-    border: 1px solid black;
-    border-radius: 5px;
-    overflow-x: scroll;
-    white-space: nowrap;
-}
-
+/* Frame for major horizontal sections (goes in a row div) */
 .outer-frame {
     padding:20px;
     width:290px;
     white-space: normal;
 }
 
+/* Frame for inner windows within outer frames */
 .inner-frame {
     background-color: #cccccc;
     width: 100%;
     height: 300px;
     margin: 0 auto;
     border: 1px solid black;
-    border-radius: 5px;
     display:inline-block;
 }
+
+/* Window for filters */
+.filter-frame {
+    margin-top: 10px;
+    min-width:300px;
+    background-color: #e5e5e5;
+    border: 1px solid black;
+    overflow-x: scroll;
+    white-space: nowrap;
+}
+
+/* Individual filter type div (inactive) */
+.filter-type {
+    text-align: center;
+    border: 1px solid black;
+    border: collapse;
+    background-color: #eeeeee;
+}
+
+/* Individual filter type div (active) */
+.filter-type-active {
+    text-align: center;
+    border: 1px solid black;
+    border: collapse;
+    background-color: #cccccc;
+}
+
 
 #filter-logic-frame {
     padding-left: 0px;

@@ -312,10 +312,10 @@ class Section(models.Model):
         # the faculty and room will be passed in just as the email and room name (IDs for their models) b/c of the ForeignKey type
         faculty = CUser.get_faculty(faculty_email)
         room = Room.get_room(room_name)
-        # if start_time < DEPARTMENT_SETTINGS.start_time:
-        #     raise ValidationError("Invalid start time for department.")
-        # if end_time > DEPARTMENT_SETTINGS.end_time or end_time < start_time:
-        #     raise ValidationError("Invalid end time for department.")
+        if start_time < DEPARTMENT_SETTINGS.start_time:
+            raise ValidationError("Invalid start time for department.")
+        if end_time > DEPARTMENT_SETTINGS.end_time or end_time < start_time:
+            raise ValidationError("Invalid end time for department.")
         if days != "MWF" and days != "TR":
             raise ValidationError("Invalid days of the week.")
         if capacity < 0:

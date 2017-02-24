@@ -8,7 +8,7 @@
 
 /* custom drop down */
 .dropbtn {
-    background-color: white;
+    background-color: #f8f8f8;
     min-height: 95px;
     color: #777;
     padding: 16px;
@@ -19,7 +19,7 @@
 
 /* Dropdown button on hover & focus */
 .dropbtn:hover, .dropbtn:focus {
-    background-color: #ccffff;
+    background-color: #ffffff;
     outline: none;
 }
 
@@ -27,6 +27,7 @@
 .dropdown {
     position: relative;
     display: inline-block;
+    background-color: #f8f8f8;
 }
 
 /* Dropdown Content (Hidden by Default) */
