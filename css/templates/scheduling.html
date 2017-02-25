@@ -13,9 +13,9 @@
     {% load static %}
     <link href="{% static "css/table.css" %}" rel="stylesheet">
     <link href="{% static "css/scheduling.css" %}" rel="stylesheet">
-    <!-- Nice looking checkbox, would like to use to fill box where existing checkboxes are 
+    <!-- Nice looking checkbox, would like to use to fill box where existing checkboxes are
       Has some bugs to work out. Taken from: http://bootsnipp.com/snippets/featured/checkboxradio-css-only -->
-      <link href="{% static "css/checkbox.css" %}" rel="stylesheet"> 
+      <link href="{% static "css/checkbox.css" %}" rel="stylesheet">
 
       <!-- #e0e0e0HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
       <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -49,7 +49,7 @@
           <div class="row" style="padding-top:20px">
             <button id="filter-frame-btn" class="btn switch-frame-btn col-xs-4 col-xs-offset-4" onclick='switchFrame("new-section-frame", "filter-frame")'>Filter Sections</button>
           </div>
-          <form method="POST" action="#" class="form-horizontal" role="form"> 
+          <form method="POST" action="#" class="form-horizontal" role="form">
               {% csrf_token %}
               <div class="form-group col-xs-6">
                 <!-- <label for="course" class="row control-label">Course</label> -->
@@ -120,7 +120,7 @@
                 <!-- FACULTY FILTER -->
                 <button id="faculty-filter-btn" class="noselect filter-type" value="inactive" style="width:100%;" onclick="selectFilter(this, 'faculty-options')">Faculty</button>
                 <div id="faculty-options" class="list-group" style="margin:0px">
-                </div> 
+                </div>
                 <!-- ROOM FILTER -->
                 <button id="room-filter-btn" class="noselect filter-type" value="inactive" style="width:100%;" onclick="selectFilter(this, 'room-options')">Room</button>
                 <div id="room-options" class="list-group" style="margin:0px">
@@ -147,7 +147,7 @@
                 <div id="course-filter-logic" class="filter-logic">
                   <div class="col-xs-8 col-xs-offset-2" style="height:100%;">
                     <label class="checkbox-inline"><input type="checkbox" value="">Course</label>
-                    <div class="list-group"> 
+                    <div class="list-group">
                       <a href="#" class="list-group-item logic active">OR</a>
                       <a href="#" class="list-group-item logic">AND</a>
                     </div>
@@ -156,7 +156,7 @@
                 <div id="faculty-filter-logic" class="filter-logic">
                   <div class="col-xs-8 col-xs-offset-2" style="height:100%;">
                     <label class="checkbox-inline"><input type="checkbox" value="">Faculty</label>
-                    <div class="list-group"> 
+                    <div class="list-group">
                       <a href="#" class="list-group-item logic active">OR</a>
                       <a href="#" class="list-group-item logic">AND</a>
                     </div>
@@ -165,7 +165,7 @@
                 <div id="room-filter-logic" class="filter-logic">
                   <div class="col-xs-8 col-xs-offset-2" style="height:100%;">
                     <label class="checkbox-inline"><input type="checkbox" value="">Room</label>
-                    <div class="list-group"> 
+                    <div class="list-group">
                       <a href="#" class="list-group-item logic active">OR</a>
                       <a href="#" class="list-group-item logic">AND</a>
                     </div>
@@ -203,7 +203,7 @@
                   <p class="form-control">CPE101-03</p>
                 </div>
               </ul>
-            </div> 
+            </div>
           </div>
         </div>
       </div>
@@ -243,7 +243,7 @@
             <button type="button" class="close" data-dismiss="modal">&times;</button>
           </div>
           <div id="view-term-modal-body" class="modal-body">
-            <div class="list-group">              
+            <div class="list-group">
             </div>
           </div>
         </div>
