@@ -67,9 +67,10 @@ function selectFilter(element, filterType) {
                     // Add to option window 
                     optionFrame.append(optionFormatString.format(data.options[i].name));
                     // Check if already in selected
-                    $("#"+filterType).children("li").each(function(index, value) {
-                        if (value.id == data.options[i].name)
+                    $("#"+filterType).children("div").each(function(index, value) {
+                        if (value.id == data.options[i].name) {
                             $("#option-"+data.options[i].name).children("span").children("input").prop("checked", true);
+                        }
 
                     });
                 }
@@ -99,21 +100,37 @@ function selectOption(element) {
     else if ($("#room-filter-btn")[0].value == "active") 
         filterType = $("#room-options");
     else
-        filterType = $("#time-options");
- 
+        filterType = $("#time-options"); 
     // Add option to selected option list
     if (element.checked) {
-        var optionFormatString = "<li id=\"{0}\" class=\"filter-options\">{1}</li>"
+        var optionFormatString = 
+                    "<div id=\"{0}\"class=\"selected-option\">\n" +
+                    "  <button onclick=\"unselectOption('{0}')\">x</button>\n" +
+                    "  <li class=\"filter-options\">{0}</li>\n" +
+                    "</div>"; 
         var text = element.parentNode.parentNode.innerText;
-        filterType.append(optionFormatString.format(text, "- "+text));
+        filterType.append(optionFormatString.format(text));
     }
     // Remove option to selected option list
     else {
-        filterType.children("li").each(function(index, value) {
+        filterType.children("div").each(function(index, value) {
             if (value.id == element.parentNode.parentNode.innerText)
                 value.remove();
         });
     }
+}
+
+// OnClick function for removing a selected option
+// * If a the selected options button is pressed
+//    - Remove it from the selected options list
+//    - Unselect option from options window
+function unselectOption(name) {
+    $("#option-frame").children("div").each(function(index, value) {
+        if (name == value.children[1].innerHTML) {
+            value.children[0].children[0].checked = false;
+        }
+    });
+    $("#"+name).remove();
 }
 
 // OnClick function for a section checkbox

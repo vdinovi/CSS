@@ -15,7 +15,7 @@
     <link href="{% static "css/scheduling.css" %}" rel="stylesheet">
     <!-- Nice looking checkbox, would like to use to fill box where existing checkboxes are 
       Has some bugs to work out. Taken from: http://bootsnipp.com/snippets/featured/checkboxradio-css-only -->
-      <link href="{% static "css/checkbox.css" %}" rel="stylesheet"> 
+    <link href="{% static "css/checkbox.css" %}" rel="stylesheet"> 
 
       <!-- #e0e0e0HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
       <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -82,10 +82,6 @@
                   <!-- COURSE FILTER -->
                   <button id="course-filter-btn" class="noselect filter-type" value="inactive" style="width:100%;" onclick="selectFilter(this, 'course-options')">Course</button>
                   <span id="course-options" class="list-group">
-                    <div class="selected-option">
-                      <button>x</button>
-                      <li id="CPE103" class="filter-options">CPE103</li>
-                    </div>
                   </span>
                   <!-- FACULTY FILTER -->
                   <button id="faculty-filter-btn" class="filter-type" value="inactive" style="width:100%;" onclick="selectFilter(this, 'faculty-options')">Faculty</button>
