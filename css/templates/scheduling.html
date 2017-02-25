@@ -80,54 +80,33 @@
               <div id="filter-type-frame" class="inner-frame">
                 <div id="filter-type-window" class="filter-type-window">
                   <!-- COURSE FILTER -->
-                  <div id="course-filter-btn" class="noselect filter-type" value="inactive" style="width:100%;"onclick="selectFilter(this)">Course</div>
-                  <span class="list-group">
+                  <button id="course-filter-btn" class="noselect filter-type" value="inactive" style="width:100%;" onclick="selectFilter(this)">Course</button>
+                  <span id="course-options" class="list-group">
                     <li class="filter-options">- CPE101</li>
                     <li class="filter-options">- CPE102</li>
                   </span>
                   <!-- FACULTY FILTER -->
-                  <div id="faculty-filter" class="input-group" style="border-bottom: 1px solid black; width:100%">
-                    <div id="faculty-filter-btn" class="filter-type" value="inactive" style="width:100%;"onclick="selectFilter(this)">Faculty</div>
-                    <span class="list-group">
-                      <li class="filter-options">- Kearns</li>
-                    </span> 
-                  </div>
+                  <button id="faculty-filter-btn" class="filter-type" value="inactive" style="width:100%;" onclick="selectFilter(this)">Faculty</button>
+                  <span id="faculty-options" class="list-group">
+                    <li class="filter-options">- Kearns</li>
+                  </span> 
                   <!-- ROOM FILTER -->
-                  <div id="room-filter" class="input-group" style="border-bottom: 1px solid black; width:100%">
-                    <div id="room-filter-btn" class="filter-type" value="inactive" style="width:100%;"onclick="selectFilter(this)">Room</div>
-                    <span class="list-group">
-                      <li class="filter-options">- 14-256</li>
-                    </span>
-                  </div>
+                  <button id="room-filter-btn" class="filter-type" value="inactive" style="width:100%;" onclick="selectFilter(this)">Room</button>
+                  <span id="room-options" class="list-group">
+                    <li class="filter-options">- 14-256</li>
+                  </span>
                   <!-- TIME FILTER -->
-                  <div id="time-filter" class="input-group" style="border-bottom: 1px solid black; width:100%">
-                    <div id="time-filter-btn" class="filter-type" value="inactive" style="width:100%;"onclick="selectFilter(this)">Time</div>
-                    <span class="list-group">
-                      <li class="filter-options">- MWF 8:00am : 10:00am</li>
-                    </span>
-                    <span class="list-group">
-                      <li class="filter-options">- TH 6:00pm : 8:00pm</li>
-                    </span> 
-                  </div>
+                  <button id="time-filter-btn" class="filter-type" value="inactive" style="width:100%;" onclick="selectFilter(this)">Time</button>
+                  <span id="time-options" class="list-group">
+                    <li class="filter-options">- MWF 8:00am : 10:00am</li>
+                    <li class="filter-options">- TH 6:00pm : 8:00pm</li>
+                  </span>
                 </div>
               </div>
             </div>
-            <!-- @TODO Fill with real entries -->
             <div class="col-xs-3 outer-frame">
               <h2 style="text-align:center;">Options</h2>
               <div id="option-frame" class="inner-frame">
-                <div id="option-cpe101" class="input-group">
-                  <span class="input-group-addon">
-                    <input id="option-checkbox" type="checkbox" onclick="selectFilter(this)">
-                  </span>
-                  <p class="form-control">CPE101</p>
-                </div>
-                <div id="option-cpe101" class="input-group">
-                  <span class="input-group-addon">
-                    <input id="option-checkbox" type="checkbox">
-                  </span>
-                  <p class="form-control">CPE102</p>
-                </div>
               </div>
             </div>
             <!-- Filter Logic frame -->

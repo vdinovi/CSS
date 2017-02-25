@@ -115,18 +115,18 @@
 
 /* [INACTIVE] Individual filter type div (inactive) */
 .filter-type {
+    outline: none;
     text-align: center;
-    border: 1px solid black;
     border: collapse;
     background-color: #eeeeee;
 }
 
 /* [ACTIVE] Individual filter type div */
 .filter-type-active {
+    outline: none;
     text-align: center;
-    border: 1px solid black;
     border: collapse;
-    background-color: #cccccc;
+    background-color: #94bdbd;
 }
 
 /* Options that have been selected,

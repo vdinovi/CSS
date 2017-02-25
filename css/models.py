@@ -112,6 +112,13 @@ class CUser(models.Model):
         self.password = pword
         self.save()
 
+    def to_json(self):
+        return dict(id = self.id,
+                    name = self.user.first_name + self.user.last_name,
+                    email = self.user.email)
+
+
+
 class FacultyDetails(models.Model):
     # The user_id uses the User ID as a primary key.
     # Whenever this User is deleted, this entry in the table will also be deleted
@@ -171,6 +178,22 @@ class Room(models.Model):
     def get_room(cls, name):
         return Room.objects.get(name=name)
 
+    @classmethod
+    def get_all_rooms(cls):
+        return cls.objects.filter()
+
+    def to_json(self):
+        return dict(id = self.id,
+                    name = self.name,
+                    description = self.description,
+                    capacity = self.capacity,
+                    notes = self.notes,
+                    equipment = self.equipment)
+
+
+
+
+
 # Course represents a department course offering
 class Course(models.Model):
     name = models.CharField(max_length=16, unique=True)
@@ -187,6 +210,8 @@ class Course(models.Model):
         except:
             raise ValidationError("Invalid data for course creation.")
         return course
+
+
     # Returns all course objects
     @classmethod
     def get_all_courses(cls):
@@ -196,6 +221,12 @@ class Course(models.Model):
     @classmethod
     def get_course(cls, name):
         return cls.objects.get(name=name)
+    
+    def to_json(self):
+        return dict(id = self.id,
+                    name = self.name,
+                    equipment_req = self.equipment_req,
+                    description = self.description)
 
     # Set the equipment required for this course
     def set_equipment_req(self, equipment_req):

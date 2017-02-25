@@ -1,3 +1,25 @@
+// OnClick function for new section frame
+// - Toggles between new section frame and filter frame
+function switchFrame(firstFrame, secondFrame) {
+    $("#"+firstFrame).hide();
+    $("#"+secondFrame).show();
+}
+
+// String format function
+String.prototype.format = function()
+{
+    var content = this;
+    for (var i=0; i < arguments.length; i++)
+    {
+        var replacement = '{' + i + '}';
+        var x;
+        // Using a global replace with a var is annoying, simple workaround
+        while (content != (x = content.replace(replacement, arguments[i])))
+            content = x;
+    }
+    return content;
+};
+
 // Onclick func for filter type button
 //  * If a new filter-type is selected:
 //     - Unchecks any previousely selected filter types
@@ -5,38 +27,55 @@
 //     - Checks all options that have already been selected for this filter type
 //  * A filter type may not be un-selected
 //     - Only set to inactive if another is selected
-function selectFilter(btn) {
-    if (btn.value == "inactive") {
-        btn.value = "active";
-        btn.className = "noselect filter-type-active";
-        if (btn.id != "course-filter-btn") {
-            $("#course-filter-btn").value = "inactive"
-            $("#course-filter-btn").className = "noselect filter-type"
+function selectFilter(element) {
+    if (element.value == "inactive") {
+        element.value = "active";
+        element.className = "noselect filter-type-active";
+        if (element.id != "course-filter-btn") {
+            $("#course-filter-btn")[0].value = "inactive";
+            $("#course-filter-btn")[0].className = "noselect filter-type";
         }
-        if (btn.id != "facuty-filter-btn") {
-            $("#faculty-filter-btn").value = "inactive"
-            $("#faculty-filter-btn").className = "noselect filter-type"
+        if (element.id != "faculty-filter-btn") {
+            $("#faculty-filter-btn")[0].value = "inactive";
+            $("#faculty-filter-btn")[0].className = "noselect filter-type";
         }
-        if (btn.id != "room-filter-btn") {
-            $("#room-filter-btn").value = "inactive"
-            $("#room-filter-btn").className = "noselect filter-type"
+        if (element.id != "room-filter-btn") {
+            $("#room-filter-btn")[0].value = "inactive";
+            $("#room-filter-btn")[0].className = "noselect filter-type";
         }
-        if (btn.id != "time-filter-btn") {
-            $("#time-filter-btn").value = "inactive"
-            $("#time-filter-btn").className = "noselect filter-type"
+        if (element.id != "time-filter-btn") {
+            $("#time-filter-btn")[0].value = "inactive";
+            $("#time-filter-btn")[0].className = "noselect filter-type";
         }
+        // Get options for this filter type
+        $.ajax({
+            type: "GET",
+            url: "options",
+            data: {type: element.innerHTML},
+            success: function(response) {
+                data = JSON.parse(response)
+                var optionFormatString =
+                    "<div id=\"option-{0}\" class=\"input-group\">\n" +
+                    "  <span class=\"input-group-addon\">\n" +
+                    "    <input id=\"option-checkbox\" type=\"checkbox\">\n" +
+                    "  </span>\n" +
+                    "  <p class=\"form-control\">{0}</p>\n" +
+                    "</div>\n";
+                optionFrame = $("#option-frame");
+                optionFrame.empty();
+                for (var i in data.options) {
+                    optionFrame.append(optionFormatString.format(data.options[i].name));
+                }
+            },
+            error: function(err) {
+                console.log('error: ' + err)
+            }
+        });
     }
     else {
-        btn.value = "inactive";
-        btn.className = "noselect filter-type";
+        element.value = "inactive";
+        element.className = "noselect filter-type";
     }
-}
-
-// OnClick function for new section frame
-// - Toggles between new section frame and filter frame
-function switchFrame(firstFrame, secondFrame) {
-    $("#"+firstFrame).hide();
-    $("#"+secondFrame).show();
 }
 
 

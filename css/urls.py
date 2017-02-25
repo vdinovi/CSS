@@ -30,7 +30,10 @@ urlpatterns = [
         url(r'^rooms/$', views.RoomsView, name='rooms'),
         url(r'^courses/$', views.CoursesView, name='courses'),
     ])),
-    url(r'^scheduling/$', views.SchedulingView, name='scheduling'), 
+    url(r'^scheduling/', include([
+        url(r'^$', views.SchedulingView, name='scheduling'),
+        url(r'^options$', views.OptionsView, name='options'), 
+    ])),
     url(r'^department/', include([
         url(r'^schedulers/$', views.SchedulersView, name='schedulers'),
         url(r'^settings/$', views.SettingsView, name='settings'), 
