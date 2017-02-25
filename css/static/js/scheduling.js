@@ -27,6 +27,12 @@ function switchFrame(firstFrame, secondFrame) {
     $("#"+secondFrame).show();
 }
 
+/* *** TERM *** */
+// When clicked, modal pops up and shows all existing schedules not currently selected
+function viewTerm() {
+    
+}
+
 /* *** FILTER / OPTIONS *** */ 
 
 // Onclick func for filter type button
@@ -116,6 +122,7 @@ function selectOption(element) {
     }
 }
 
+// Unselect all selected options
 function unselectAllSelectedOptions() {
     for (var i = 0; i < filters.length; ++i) {
         $("#"+filters[i]+"-options").children("div").each(function(index, value) {

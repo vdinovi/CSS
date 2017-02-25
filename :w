@@ -28,17 +28,36 @@
   <body>
     {% include "navbar.html" %}
     <div id="scheduling-container" class="container scheduling-container">
-       <div class="row">
+      <!-- Term Frame -->
+
+      <!-- Previous term frame -->
+      <!-- <div class="row">
+        <div id="active-term-frame" class="col-xs-8 col-xs-offset-2 term-frame">
+        <div id="active-term-list-group" class="list-group text-center"> 
+        <a href="#" class="list-group-item terms active">Fall 2016</a>
+        <a href="#" class="list-group-item terms">Winter 2017</a>
+        <a href="#" class="list-group-item terms dropdown">View New Term</a>
+        </div>
+        </div>
+
+        </div> -->
+        <div class="row">
           <div class="col-xs-10 term-frame">
             <ul class="nav nav-tabs">
               <li class="dropdown">
-                <a class="dropdown-toggle" data-toggle="dropdown" href="#">Fall 2016<b class="caret"></b></a>
+                <a class="dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="true">Fall 2016<b class="caret"></b></a>
                 <ul class="dropdown-menu">
-                  <li><a href="#" class="dropdown-toggle" data-toggle="tab">Approve Schedule</a></li>
-                  <li><a href="#" class="dropdown-toggle" data-toggle="tab">Close Tab</a></li>
+                  <!--<li><a href="#" class="dropdown-toggle" data-toggle="tab">Approve</a></li>
+                    <li><a href="#" class="dropdown-toggle" data-toggle="tab">Close Tab</a></li>-->
+                    <li><a href="#">Action</a></li>
+                    <li><a href="#">Another action</a></li>
+                    <li><a href="#">Something else here</a></li>
+                    <li role="separator" class="divider"></li>
+                    <li><a href="#">Separated link</a></li>
                 </ul>
               </li>
-              <li><a href="#" data-toggle="modal" data-target="#view-term-modal" >View Term</a></li>
+              <li><a href="#">Winter 2017</a></li>
+              <li><a href="#" class="dropdown-toggle">View Term</a></li>
             </ul>
           </div>
           <div class="col-xs-2">
@@ -205,29 +224,8 @@
         </div>
     </div>
 
-    <div id="view-term-modal" class="modal fade" role="dialog">
-      <div class="modal-dialog">
-        <!-- Modal content-->
-        <div class="modal-content">
-          <div class="modal-header">
-            <button type="button" class="close" data-dismiss="modal">&times;</button>
-          </div>
-          <div class="modal-body">
-            <div class="inner-frame">
-              <p>hi</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
- 
-
     <!-- Custom JS -->
     <script language="javascript">
-        // Fixes Dropdown bug.
-        $(document).ready(function () {
-            $('.dropdown-toggle').dropdown();
-        });
     </script>
     <script src="{% static "js/scheduling.js" %}"></script>
     <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
