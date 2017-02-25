@@ -552,3 +552,12 @@ class FacultyCoursePreferences(models.Model):
             course_arr += [(entry.rank, entry.course.name, entry.course.description, entry.comments)]
         course_arr.sort(key=lambda tup:tup[0]) # sort courses by rank (first spot in tuple)
         return course_arr
+
+    def remove(self):
+    	# course_list = self.get_course_list(faculty=self.faculty)
+    	# for c in course_list:
+    	# 	if c.rank > self.rank:
+    	# 		c.update(rank = c.rank + 1) 
+    	self.delete()
+    	#return course_list
+
