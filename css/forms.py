@@ -123,6 +123,30 @@ class DeleteRoomForm(forms.Form):
         nameString=self.cleaned_data['roomName']
         Room.objects.filter(name=nameString).delete()
 
+class EditCourseSectionTypeForm(forms.Form):
+    work_units = forms.IntegerField()
+    work_hours = forms.IntegerField()
+
+    def save(self):
+        name = self.cleaned_data['name']
+        work_units = self.cleaned_data['work_units']
+        work_hours = self.cleaned_data['work_hours']
+
+class AddCourseSectionTypeForm(forms.Form):
+    course = forms.CharField(widget=forms.HiddenInput(), initial='defaultCourse')
+    name = forms.CharField()
+    work_units = forms.IntegerField()
+    work_hours = forms.IntegerField()
+    def save(self):
+        courseName = self['course']
+        print("courseName:")
+        print(courseName)
+        courseObj = Course.get_course(courseName)
+        name = self['name']
+        work_units = self['work_units']
+        work_hours = self['work_hours']
+        courseObj.add_section_type(name, work_units, work_hours)
+
 class AddCourseForm(forms.Form):
     course_name = forms.CharField()
     description = forms.CharField()
@@ -152,7 +176,7 @@ class EditCourseForm(forms.Form):
     description = forms.CharField()
 
     def save(self):
-        course = course.get_course(name=self.cleaned_data['course_name'])
+        course = Course.objects.get(name=self.cleaned_data['course_name'])
         course.set_equipment_req(self.cleaned_data['equipment_req'])
         course.set_description(self.cleaned_data['description'])
 
@@ -161,4 +185,3 @@ class AddSectionTypeForm(forms.Form):
 
     def save(self):
         SectionType.create(name=self.cleaned_data['section_type_name'])
-

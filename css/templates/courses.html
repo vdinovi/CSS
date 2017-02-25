@@ -39,7 +39,7 @@
               <tr>
                 <td>
                   <button type="button" class="btn btn-info btn-xs" data-toggle="modal" data-target="#delete-course" onclick="setDeleteFormItem('{{ course.name }}', 'id_course_name')"><span class="glyphicon glyphicon-minus"></span>&nbsp;</button>
-                  <button type="button" class="btn btn-info btn-xs" data-toggle="modal" data-target="#edit-course" onclick="setEditFormFields('{{ course.name }}', 'course'), ajax('{{ course.name }}')"><span class="glyphicon glyphicon-edit"></span>&nbsp;</button>
+                  <button type="button" class="btn btn-info btn-xs" data-toggle="modal" data-target="#edit-course" onclick="setEditFormFields('{{ course.name }}', 'course'), getCourseInfo('{{ course.name }}')"><span class="glyphicon glyphicon-edit"></span>&nbsp;</button>
                 </td>
                 <td name="courseName">{{ course.name }}</td>
                 <td name="description">{{ course.description }}</td>
@@ -48,7 +48,7 @@
               {% endfor %}
             </tbody>
           </table>
-          <button type="button" class="btn btn-info btn-xs" data-toggle="modal" data-target="#add-course">+</button>
+          <button type="button" class="btn btn-info btn-xs" data-toggle="modal" data-target="#add-course"><span class="glyphicon glyphicon-plus"></button>
           <!-- <button type="button" class="btn btn-info btn-xs" data-toggle="modal" data-target="#delete-course">-</button> -->
         </div>
       </div>
@@ -83,12 +83,20 @@
           </div>
           <div class="modal-body">
             <form method="POST" action="?">{% csrf_token %}
-              <p>Edit Course</p>
+              <h4>Course Info</h4>
               {{ edit_course_form.as_p }}
+              <h4>Section Types</h4>
+              <p id="ajax-area"></p>
+              <div id="add-section-type-area" style="display: none;">
+                {{ add_course_section_type_form.as_p }}
+              </div>
+              <div style="margin-bottom: 2%;">
+                <button id="add-section-type-button" style="font-size: .7em;" type="button" class="btn btn-info btn-xs"  onclick="addSectionType()"><span class="glyphicon glyphicon-plus"></button>
+                <button id="save-section-type-button" style="font-size: .7em; display: none;" type="button" class="btn btn-info btn-xs"  onclick="submitSectionType()"><span class="glyphicon glyphicon-ok"></button>
+              </div>
               <button type="submit" name="edit-course-form" class="save btn btn-default">submit</button>
             </form>
             <div>
-              <p id="ajax-area">Ajax area</p>
             </div>
           </div>
         </div>
@@ -118,22 +126,85 @@
     {% load static %}
     <script src="{% static "js/resources.js" %}"></script>
     <script>
-      function ajax(course) {
-        console.log('ajax');
+    var currentCourse;
+
+      function addSectionType() {
+        console.log("addSectionType: display: " + $('#add-section-type-area').display);
+        $('#add-section-type-area').show();
+        $('#save-section-type-button').show();
+        $('#add-section-type-button').hide()
+
+
+      }
+      function submitSectionType() {
+        console.log("submit");
+        console.log(
+          {
+            "csrfmiddlewaretoken": "{{ csrf_token }}",
+            "request-name":'save_section_request',
+            "course": currentCourse,
+            "id_name": $('#id_name').val(),
+            "id_work_units": $('#id_work_units').val(),
+            "id_work_hours": $('#id_work_hours').val()
+        });
+
         $.post("/home/courses/",
               {
                   "csrfmiddlewaretoken": "{{ csrf_token }}",
-                  "requestName": "course-section-request",
+                  "request-name":'save-section-request',
+                  "course": currentCourse,
+                  "id_name": $('#id_name').val(),
+                  "id_work_units": $('#id_work_units').val(),
+                  "id_work_hours": $('#id_work_hours').val()
+              },
+
+              updateSectionTypesView
+        );
+        $('#add-section-type-area').hide();
+        $('#save-section-type-button').hide();
+        $('#add-section-type-button').show()
+      }
+
+      function getCourseInfo(course) {
+        console.log('');
+        currentCourse = course;
+        $.post("/home/courses/",
+              {
+                  "csrfmiddlewaretoken": "{{ csrf_token }}",
+                  "request-name": "course-section-request",
                   "course": course
               },
 
-              function(data, status){
-                   //alert("Data: " + data + "\nStatus: " + status);
-                   console.log("set text " + data);
-                   $('#ajax-area').html(data);
-                   console.log($('ajax-area').innerHTML);
-              }
+              updateSectionTypesView
         );
+      }
+      function deleteSectionType(sectionTypeName, courseName) {
+        console.log('courseName: ' + courseName);
+        console.log('sectionTypeName: ' + sectionTypeName);
+
+        $.post("/home/courses/",
+              {
+                  "csrfmiddlewaretoken": "{{ csrf_token }}",
+                  "request-name": "delete-section-type-request",
+                  "course": courseName,
+                  "section_type_name": sectionTypeName
+              },
+
+              updateSectionTypesView
+        );
+      }
+      function updateSectionTypesView(data, status){
+
+           var sectionTypes = JSON.parse(data);
+           console.log("update: " + data);
+            $('#ajax-area').empty();
+
+           for(var sectionType in sectionTypes) {
+             console.log("update: " + sectionTypes[sectionType]);
+             $('#ajax-area').append("<p><button onclick=\"deleteSectionType('" + sectionTypes[sectionType].section_type_name +"', '" + sectionTypes[sectionType].course_name + "')\"style=\"font-size: .7em;\" type=\"button\" class=\"btn btn-info btn-xs\" data-toggle=\"modal\" data-target=\"#add-section-type\"><span class=\"glyphicon glyphicon-minus\"></button> " + sectionType + " Work Units: " + sectionTypes[sectionType].work_units + " Work Hours: " + sectionTypes[sectionType].work_hours + "</p>");
+             console.log("test" + sectionTypes[sectionType]);
+          // $('#ajax-area').html(data);
+        }
       }
     </script>
   </body>

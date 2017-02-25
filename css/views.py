@@ -101,7 +101,7 @@ def SettingsView(request):
             });
     elif request.method == "POST" and "submit-settings" in request.POST:
         try:
-            DEPARTMENT_SETTINGS.new_settings(chair=request.POST['chair'], 
+            DEPARTMENT_SETTINGS.new_settings(chair=request.POST['chair'],
                                              name=request.POST['name'],
                                              start_time=request.POST['start_time'],
                                              end_time=request.POST['end_time'])
@@ -119,7 +119,7 @@ def SettingsView(request):
             return HttpResponseRedirect('/department/settings')
         else:
             res.status_code = 200
-            res.reason_phrase = "Invalid form entry" 
+            res.reason_phrase = "Invalid form entry"
     elif request.method == "POST" and "delete-section-type" in request.POST:
         section = SectionType.get_section_type(name=request.POST['section-type-name'])
         print section
@@ -232,12 +232,14 @@ from .models import Course
 from .forms import AddCourseForm
 def CoursesView(request):
     res = HttpResponse()
+    print request.body
     if request.method == "GET":
         return render(request, 'courses.html', {
                 'course_list': Course.objects.filter(),
                 'add_course_form': AddCourseForm(auto_id='add_course_%s'),
                 'edit_course_form': EditCourseForm(auto_id='edit_course_%s'),
-                'delete_course_form': DeleteCourseForm()
+                'delete_course_form': DeleteCourseForm(),
+                'add_course_section_type_form': AddCourseSectionTypeForm()
             });
     elif request.method == "POST" and 'add-course-form' in request.POST:
         form = AddCourseForm(request.POST);
@@ -280,28 +282,63 @@ def CoursesView(request):
             #form.save()
             res.status_code = 400
             res.reason_phrase = "Invalid form entry"
-    elif request.method == "POST" and 'requestName' in request.POST:
+
+    elif request.method == "POST" and request.POST['request-name'] == 'course-section-request':
         print("section request")
         print request.body
-        if request.is_ajax():
-            print("is ajax")
-        else:
-            print("not ajax")
-        print(request.POST.items()[0])
-        print(request.POST.items()[1])
-        print(request.POST.items()[2])
+
         courseName = request.POST.__getitem__('course')
         print("course: " + courseName);
-        courseSet = Course.objects.filter(name=courseName)
+        #courseSet = Course.objects.filter(name=courseName)
+        course = Course.get_course(courseName)
 
-        print(courseSet.count())
-        course = courseSet.get()
-        print("course object name attribute: " + course.name)
-        sectionTypes = course.get_all_section_types()
-        print sectionTypes
-        #custom_decks = data['custom_decks']
+        #print(courseSet.count())
+        #course = courseSet.get()
+
+        res.content = course.get_all_section_types_JSON()
+        print res.content
+
+    elif request.method == "POST" and request.POST['request-name'] == 'delete-section-type-request':
+        print("remove section request")
+        print request.body
+
+        courseName = request.POST.__getitem__('course')
+        sectionTypeName = request.POST.__getitem__('section_type_name')
+
+        print("course: " + courseName);
+        print("sectionTYpe: " + sectionTypeName)
+
+        course = Course.get_course(courseName)
+        #courseSet = Course.objects.filter(name=courseName)
+
+        #print(courseSet.count())
+        #course = courseSet.get()
+        course.remove_section_type(sectionTypeName)
+
+
+        res.content = course.get_all_section_types_JSON()
+        print res.content
+    elif request.method == "POST" and request.POST['request-name'] == 'save-section-request':
+            print("save section request")
+            print request.body
+
+            #SectionType.create("Lecture10")
+
+            courseName = request.POST.__getitem__('course')
+
+            course = Course.get_course(courseName)
+
+            name = request.POST.__getitem__('id_name')
+            work_units = request.POST.__getitem__('id_work_units')
+            work_hours = request.POST.__getitem__('id_work_hours')
+
+            course.add_section_type(name, work_units, work_hours)
+
+            res.content = course.get_all_section_types_JSON()
+            print res.content
 
     else:
+        print res.content
         res.status_code = 400
     return res
 

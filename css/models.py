@@ -8,15 +8,16 @@ from django.db import IntegrityError
 from django.core.exceptions import ValidationError, ObjectDoesNotExist
 from util import DepartmentSettings
 from settings import DEPARTMENT_SETTINGS
+from django.http import JsonResponse
 
 # System User class,
 # Wrapper for django builtin class, contains user + application specific data
 class CUser(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     user_type = models.CharField(max_length=16)
-    
+
     @staticmethod
-    def validate_email(email): 
+    def validate_email(email):
         if re.match(r'^[A-Za-z0-9\._%+\-]+@[A-Za-z0-9\.\-]+\.[A-Za-z]{2,}$', email) is None:
             raise ValidationError("Attempted CUser creation"+"with invalid email address")
         return email
@@ -50,7 +51,7 @@ class CUser(models.Model):
     @classmethod
     def create(cls, email, password, user_type, first_name, last_name):
         try:
-            user = cls(user=User.objects.create_user(username=cls.validate_email(email), 
+            user = cls(user=User.objects.create_user(username=cls.validate_email(email),
                                                      email=cls.validate_email(email),
                                                      password=cls.validate_password(password),
                                                      first_name=cls.validate_first_name(first_name),
@@ -74,7 +75,7 @@ class CUser(models.Model):
         return cls.objects.get(user__username=email, user_type='faculty')
     # Return all faculty cusers
     @classmethod
-    def get_all_faculty(cls): 
+    def get_all_faculty(cls):
         return cls.objects.filter(user_type='faculty')
     # Return scheduler cuser by email
     @classmethod
@@ -92,7 +93,7 @@ class FacultyDetails(models.Model):
     faculty = models.OneToOneField(CUser, on_delete=models.CASCADE)
     target_work_units = models.IntegerField(default=0, null=True) # in units
     target_work_hours = models.IntegerField(default=0, null=True) # in hours
-    changed_preferences = models.CharField(max_length=1) # 'y' or 'n' 
+    changed_preferences = models.CharField(max_length=1) # 'y' or 'n'
 
     @classmethod
     def create(cls, faculty, target_work_units, target_work_hours):
@@ -106,7 +107,7 @@ class FacultyDetails(models.Model):
             self.target_work_units = new_work_units
         if new_work_hours:
             self.target_work_hours = new_work_hours
-        self.changed_preferences = 'y' 
+        self.changed_preferences = 'y'
 
     # @TODO Function to yes changed_preferences to 'n'? Also consider naming it something
     #       more indicative -> preferences_have_changed? has_changed_preferences? etc.
@@ -119,7 +120,7 @@ class Room(models.Model):
     capacity = models.IntegerField(default=0)
     notes = models.CharField(max_length=1024, null=True)
     equipment = models.CharField(max_length=1024, null=True)
-    
+
     @classmethod
     def create(cls, name, description, capacity, notes, equipment):
         if name is None:
@@ -133,10 +134,10 @@ class Room(models.Model):
         elif equipment and len(equipment) > 256:
             raise ValidationError("Room equipment is longer than 1024 characters")
         else:
-            room = cls(name=name, 
-                       description=description, 
+            room = cls(name=name,
+                       description=description,
                        capacity=capacity,
-                       notes=notes, 
+                       notes=notes,
                        equipment=equipment)
             room.save()
             return room
@@ -154,8 +155,8 @@ class Course(models.Model):
     @classmethod
     def create(cls, name, equipment_req, description):
         try:
-            course = cls(name=name, 
-                         equipment_req=equipment_req, 
+            course = cls(name=name,
+                         equipment_req=equipment_req,
                          description=description)
             course.save()
         except:
@@ -169,6 +170,7 @@ class Course(models.Model):
     # Returns course by name
     @classmethod
     def get_course(cls, name):
+        print("get_course: " + str(name))
         return cls.objects.get(name=name)
 
     # Set the equipment required for this course
@@ -183,17 +185,38 @@ class Course(models.Model):
 
     # Get all section types associated with this course
     def get_all_section_types(self):
-        return WorkInfo.filter(course=self)
+        print(str(WorkInfo.objects.filter(course=self).count()) + " section types found")
+        return WorkInfo.objects.filter(course=self)
 
     # Get a specific section type associated with this course
     def get_section_type(self, section_type_name): # Throws ObjectDoesNotExist, MultipleObjectsReturned
         section_type = SectionType.get_section_type(section_type_name)
-        WorkInfo.objects.get(course=self, section_type=section_type)
+        return WorkInfo.objects.get(course=self, section_type=section_type)
 
     # Associate a new section type with this course
     def add_section_type(self, section_type_name, work_units, work_hours): # Throws ObjectDoesNotExist
         section_type = SectionType.get_section_type(section_type_name)
         WorkInfo.create(self, section_type, work_units, work_hours)
+
+    # Remove association between section type and course
+    def remove_section_type(self, section_type_name): # Throws ObjectDoesNotExist
+        #section_type = SectionType.get_section_type(section_type_name)
+        self.get_section_type(section_type_name).delete()
+        #WorkInfo.create(self, section_type, work_units, work_hours)
+
+    def get_all_section_types_JSON(self):
+        sectionTypes = self.get_all_section_types()
+        print("Found " + str(sectionTypes.count()) + " section types")
+        sectionTypesDictionary = {}
+        for sectionType in sectionTypes:
+            print sectionType.section_type.name
+            sectionTypesDictionary[sectionType.section_type.name] = {
+                'course_name': sectionType.course.name,
+                'section_type_name': sectionType.section_type.name,
+                'work_units': sectionType.work_units,
+                'work_hours': sectionType.work_hours
+            }
+        return JsonResponse(sectionTypesDictionary)
 
 
 class SectionType(models.Model):
@@ -212,17 +235,25 @@ class SectionType(models.Model):
     def get_section_type(cls, name):
         return cls.objects.get(name=name)
 
-
-
 # WorkInfo contains the user defined information for specific Course-SectionType pairs
 # Each pair has an associated work units and work hours defined by the department
-class WorkInfo(models.Model): 
+class WorkInfo(models.Model):
     class Meta:
         unique_together = (("course", "section_type"),)
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
     section_type = models.ForeignKey(SectionType, on_delete=models.CASCADE)
     work_units = models.IntegerField(default=0)
     work_hours = models.IntegerField(default=0)
+
+    #classmethod?
+    def getJSON(self):
+        return JsonResponse({
+            'course_name': self.course.name,
+            'section_type_name': self.section_type.name,
+            'work_units': self.work_units,
+            'work_hours': self.work_hours
+        })
+
 
     @classmethod
     def create(cls, course, section_type, work_units, work_hours):
@@ -233,9 +264,9 @@ class WorkInfo(models.Model):
 
 
 class Availability(models.Model):
-    class Meta: 
+    class Meta:
         unique_together = (("faculty", "days_of_week", "start_time"),)
-    faculty = models.OneToOneField(CUser, on_delete=models.CASCADE, null=True) 
+    faculty = models.OneToOneField(CUser, on_delete=models.CASCADE, null=True)
     days_of_week = models.CharField(max_length=16) # MWF or TR
     start_time = models.TimeField()
     end_time = models.TimeField()
@@ -247,11 +278,11 @@ class Availability(models.Model):
         if days is None or len(days) > 16 or (days != "MWF" and days != "TR"):
             raise ValidationError("Invalid days of week input")
         elif (start is None):
-            raise ValidationError("Need to input start time")  
+            raise ValidationError("Need to input start time")
         elif (end is None):
-            raise ValidationError("Need to input end time")  
+            raise ValidationError("Need to input end time")
         elif (level is None) or (level != "available" and level != "preferred" and level != "unavailable"):
-            raise ValidationError("Need to input level of availability: preferred, available, or unavailable")  
+            raise ValidationError("Need to input level of availability: preferred, available, or unavailable")
         else:
             availability = cls(faculty_member=faculty, days_of_week=days, start_time=start, end_time=end, level=level)
             availability.save()
@@ -261,7 +292,7 @@ class Availability(models.Model):
 # Schedule is a container for scheduled sections and correponds to exactly 1 academic term
 class Schedule(models.Model):
     academic_term = models.CharField(max_length=16, unique=True) # eg. "Fall 2016"
-    state = models.CharField(max_length=16, default="active") # eg. active or finalized 
+    state = models.CharField(max_length=16, default="active") # eg. active or finalized
 
     def finalize_schedule(self):
         self.state = "finalized"
@@ -304,7 +335,7 @@ class Section(models.Model):
     @classmethod
     def create(
         cls, term_name, course_name, start_time, end_time, days, faculty_email, room_name,
-        capacity, students_enrolled, students_waitlisted, conflict, 
+        capacity, students_enrolled, students_waitlisted, conflict,
         conflict_reason, fault, fault_reason):
         # the schedule and course object will actually be passed into the Section as a OneToOneField
         schedule = Schedule.get_schedule(term_name)
@@ -333,19 +364,19 @@ class Section(models.Model):
         if fault == 'y' and fault_reason != "faculty" and fault_reason != "room":
             raise ValidationError("Invalid fault reason.")
         section = cls(
-                  schedule=schedule, 
-                  course=course, 
-                  start_time=start_time, 
-                  end_time=end_time, 
-                  days=days, 
-                  faculty=faculty, 
+                  schedule=schedule,
+                  course=course,
+                  start_time=start_time,
+                  end_time=end_time,
+                  days=days,
+                  faculty=faculty,
                   room=room,
-                  capacity=capacity, 
-                  students_enrolled=students_enrolled, 
-                  students_waitlisted=students_waitlisted, 
+                  capacity=capacity,
+                  students_enrolled=students_enrolled,
+                  students_waitlisted=students_waitlisted,
                   conflict=conflict,
-                  conflict_reason=conflict_reason, 
-                  fault=fault, 
+                  conflict_reason=conflict_reason,
+                  fault=fault,
                   fault_reason=fault_reason)
         section.save()
         return section
@@ -369,7 +400,7 @@ class Section(models.Model):
     # for filtering by time, it will only take in an array of pairs (an array of 2-piece arrays) so that it will at least have a start time and end time.
     #### there can also be chunks of time, so there are multiple start and end times
     # for any other filter, we will pass on the keyword and array argument as it is to the filter.
-    @classmethod 
+    @classmethod
     def filter(cls, data):
         filter_dict = json.loads(data)
         andSections = cls.objects
@@ -385,7 +416,7 @@ class Section(models.Model):
                 for k,v in filters.iteritems():
                     if k == "MWF" or k == "TR":
                         if 'or' in prevLogic:
-                            
+
                             for times in range(len(v)):
 
                         elif 'and' in prevLogic or prevLogic is '':
@@ -406,7 +437,7 @@ class Section(models.Model):
             #     qList += newQuery
             #     # print("andSections x=")
             #     #andSections = andSections.filter()
-            
+
             prevLogic = tags['logic'] + " "
 
 
@@ -418,7 +449,7 @@ class Section(models.Model):
                 # START
                 # reduce(lambda q, f: q | Q(creator=f), filters, Q())
                 sections = sections.filter(reduce(lambda query, filter: query | (Q(start_time >= filter[0]) & Q(end_time <= filter[1])), value, Q()))
-                # OR 
+                # OR
                 #for pair in value:
                 #    sections = sections.filter(start_time >= pair[0]).filter(end_time <= pair[1])
                 # END
