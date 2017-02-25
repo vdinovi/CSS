@@ -1,26 +1,34 @@
-from django.template import Context, Template
+from django.template import Context, Template, RequestContext
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from django.shortcuts import render, render_to_response
 from django.views.generic import TemplateView
 from django.http import HttpResponse, HttpResponseRedirect
+from django.core import serializers
+import MySQLdb
 from django.db import IntegrityError
 from .models import *
 from .forms import *
+from settings import DEPARTMENT_SETTINGS
+import json
 import MySQLdb
-
 
 # ---------------------------
 # --  Method-Based Views   --
 # ---------------------------
 def RegistrationView(request):
     res = HttpResponse()
+    #pass these credentials to the RegisterUserForm
+    first_name = request.GET.get('first')
+    last_name = request.GET.get('last')
+    user_type = request.GET.get('type')
+
     if request.method == "GET":
         storage = messages.get_messages(request)
         for msg in storage:
             pass
         return render(request, 'registration.html', {
-                          'registration_form': RegisterUserForm()
+                          'registration_form': RegisterUserForm(first=first_name,last=last_name,type=user_type)
                       })
     elif request.method == "POST":
         form = RegisterUserForm(request.POST)
@@ -67,9 +75,8 @@ def IndexView(request):
 def HomeView(request):
     return render(request, 'home.html')
 
-def SchedulingView(request):
-    #@TODO NYI
-    return render_to_response('nyi.html')
+def AvailabilityView(request):
+    return render(request, 'availability.html')
 
 def LandingView(request):
     return render(request,'landing.html')
@@ -78,15 +85,42 @@ def SettingsView(request):
     res = HttpResponse()
     if request.method == "GET":
         return render(request, 'settings.html', {
-                'section_type_list': SectionType.objects.filter(),
-                # 'department_name': DepartmentSettings.objects.filter()
+                'settings': DEPARTMENT_SETTINGS,
+                'section_type_list': SectionType.objects.filter().all(),
+                'add_section_type_form': AddSectionTypeForm(),
             });
-    elif request.method == "POST":
-        form = AddCourseForm(request.POST);
+    elif request.method == "POST" and "submit-settings" in request.POST:
+        try:
+            DEPARTMENT_SETTINGS.new_settings(chair=request.POST['chair'], 
+                                             name=request.POST['name'],
+                                             start_time=request.POST['start_time'],
+                                             end_time=request.POST['end_time'])
+            return HttpResponseRedirect('/department/settings')
+        except ValidationError as e:
+            res.status_code = 400
+            res.reason_phrase = e[0]
+        else:
+            res.status_code = 400
+            res.reason_phrase = "Invalid form entry"
+    elif request.method == "POST" and "add-section-type" in request.POST:
+        form = AddSectionTypeForm(request.POST)
         if form.is_valid():
-            form.addCourse();
+            form.save()
+            return HttpResponseRedirect('/department/settings')
+        else:
             res.status_code = 200
-    return render(request, 'settings.html')
+            res.reason_phrase = "Invalid form entry" 
+    elif request.method == "POST" and "delete-section-type" in request.POST:
+        section = SectionType.get_section_type(name=request.POST['section-type-name'])
+        if section is not None:
+            section.delete()
+            return HttpResponseRedirect('/department/settings')
+        else:
+            res.status_code = 400
+            res.reason_phrase = "SectionType " + request.POST['section-type-name'] + " does not exist"
+    else:
+        res.status_code = 400
+    return res
 
 from .forms import LoginForm
 from django.contrib.auth import authenticate
@@ -103,10 +137,18 @@ def LoginView(request):
             email = form.cleaned_data['email']
             password = form.cleaned_data['password']
             user = authenticate(username=email, password=password)
-            print(user)
+            # Authentication success
             if user is not None:
                 login(request,user)
+                cuser = CUser.objects.get(user=user)
+                request.session['user_id'] = user.id
+                request.session['email'] = user.username
+                request.session['user_type'] = cuser.user_type
+                request.session['first_name'] = user.first_name
+                request.session['last_name'] = user.last_name
+                request.session.set_expiry(300) # 5 min session duration
                 return HttpResponseRedirect('/home')
+            # Authentication failed
             else:
                 messages.error(request, "Invalid login credentials. Please try again.")
                 return render(request,'login.html', {'login_form':LoginForm(),'errors': messages.get_messages(request)})
@@ -126,7 +168,6 @@ def LogoutView(request):
 # @update 2/2/17
 def RoomsView(request):
     res = HttpResponse()
-
     if request.method == "GET":
         return render(request, 'rooms.html', {
                 'room_list': Room.objects.filter(),
@@ -137,35 +178,41 @@ def RoomsView(request):
     elif request.method == "POST" and 'add-form' in request.POST:
         form = AddRoomForm(request.POST)
         if form.is_valid():
-            form.save()
-            res.status_code = 200
-            return HttpResponseRedirect('/home/rooms')
+            try:
+                form.save();
+                return HttpResponseRedirect("/resources/rooms")
+            except ValidationError as e:
+                res.status_code = 400
+                res.reason_phrase = "Invalid form entry"
+            except IntegrityError as e:
+                if not e[0] == 1062:
+                    res.status_code = 500
+                    res.reason_phrase = "db error:" + e[0]
+                else:
+                    res.status_code = 400
+                    res.reason_phrase = "Duplicate entry"
         else:
             res.status_code = 400
+            res.reason_phrase = "Invalid form entry"
     elif request.method == "POST" and 'edit-form' in request.POST:
         form = EditRoomForm(request.POST)
         if form.is_valid():
             form.save()
             res.status_code = 200
-            return HttpResponseRedirect('/home/rooms')
+            return HttpResponseRedirect('/resources/rooms')
         else:
             res.status_code = 400
     elif request.method == "POST" and 'delete-form' in request.POST:
         form = DeleteRoomForm(request.POST)
         if form.is_valid():
-            print request.POST
             form.deleteRoom()
             res.status_code = 200
-            return HttpResponseRedirect('/home/rooms')
+            return HttpResponseRedirect('/resources/rooms')
         else:
             res.status_code = 400
-    elif request.method == "POST":
-        print request.POST
-
     else:
         res.status_code = 400
     return res
-
 
 #  Courses View
 # @descr
@@ -177,14 +224,51 @@ def CoursesView(request):
     if request.method == "GET":
         return render(request, 'courses.html', {
                 'course_list': Course.objects.filter(),
-                'add_course_form':AddCourseForm()
+                'add_course_form': AddCourseForm(auto_id='add_course_%s'),
+                'edit_course_form': EditCourseForm(auto_id='edit_course_%s'),
+                'delete_course_form': DeleteCourseForm()
             });
-    elif request.method == "POST":
+    elif request.method == "POST" and 'add-course-form' in request.POST:
         form = AddCourseForm(request.POST);
         if form.is_valid():
-            form.addCourse();
+            try:
+                form.save();
+                return HttpResponseRedirect("/resources/courses")
+            except ValidationError as e:
+                res.status_code = 400
+                res.reason_phrase = "Invalid form entry"
+            except IntegrityError as e:
+                if not e[0] == 1062:
+                    res.status_code = 500
+                    res.reason_phrase = "db error:" + e[0]
+                else:
+                    res.status_code = 400
+                    res.reason_phrase = "Duplicate entry"
+        else:
+            res.status_code = 400
+            res.reason_phrase = "Invalid form entry"
+    elif request.method == "POST" and 'edit-course-form' in request.POST:
+        form = EditCourseForm(request.POST)
+        if form.is_valid():
+            form.save()
             res.status_code = 200
-    return render(request, 'courses.html')
+            return HttpResponseRedirect('/resources/courses')
+        else:
+            res.status_code = 400
+            res.reason_phrase = "Invalid form entry"
+    elif request.method == "POST" and 'delete-course-form' in request.POST:
+        form = DeleteCourseForm(request.POST)
+        if form.is_valid():
+            form.save()
+            res.status_code = 200
+            return HttpResponseRedirect('/resources/courses')
+        else:
+            res.status_code = 400
+            res.reason_phrase = "Invalid form entry"
+
+    else:
+        res.status_code = 400
+    return res
 
 #  Schedulers View
 # @descr Displays all of the schedulers currecntly registered in the database.
@@ -201,7 +285,7 @@ def SchedulersView(request):
     elif request.method == "POST" and 'invite-form' in request.POST:
         form = InviteUserForm(request.POST)
         if form.is_valid():
-            form.send_invite('scheduler')
+            form.send_invite('scheduler', request)
             res.status_code = 200
         else:
             res.status_code = 400
@@ -219,6 +303,7 @@ def SchedulersView(request):
                 res.reason_phrase = "User not found"
         else:
             res.status_code = 400
+            res.reason_phrase = "Invalid form entry"
     else:
         res.status_code = 400
     return res
@@ -233,19 +318,25 @@ def FacultyView(request):
         return render(request, 'faculty.html', {
                 'faculty_list': CUser.objects.filter(user_type='faculty'),
                 'invite_user_form': InviteUserForm(),
+                'edit_user_form': EditUserForm(auto_id='edit_user_%s'),
                 'delete_user_form': DeleteUserForm()
             });
     elif request.method == "POST" and 'invite-form' in request.POST:
         form = InviteUserForm(request.POST)
         if form.is_valid():
-            form.send_invite('faculty',request)
+            form.send_invite('faculty', request)
             res.status_code = 200
         else:
-            print form.errors
             res.status_code = 400
     elif request.method == "POST" and 'edit-form' in request.POST:
-        res.status_code = 400
-        res.reason_phrase = "NYI"
+        form = EditUserForm(request.POST)
+        if form.is_valid():
+            form.save()
+            res.status_code = 200
+            return HttpResponseRedirect('/resources/faculty')
+        else:
+            res.status_code = 400
+            res.reason_phrase = "Invalid form entry"
     elif request.method == "POST" and 'delete-form' in request.POST:
         form = DeleteUserForm(request.POST)
         if form.is_valid():
@@ -260,11 +351,23 @@ def FacultyView(request):
             res.reason_phrase = "Invalid form entry"
 
     else:
-        print "didnt even post"
         res.status_code = 400
     return res
 
+# Primary scheduling page view
+def SchedulingView(request):
+    res = HttpResponse()
+    if request.method == "GET":
+        return render(request, 'scheduling.html', {
+                      'new_section_form':AddSectionForm()})
+    elif request.method == "POST":
+        res.status_code = 400
+        res.reason_phrase = "NYI"
+    else:
+        res.status_code = 400
+
 #  FAQ View
+# -- Low Priority --
 # @descr FAQ view that shows all current FAQ items
 # @TODO Create FAQ model and use to populate view
 # @Note These FAQ objects could be done without the database
@@ -278,6 +381,7 @@ def FAQView(request):
     else:
        res.status_code = 400;
     return res
+
 
 
 # ---------------------------

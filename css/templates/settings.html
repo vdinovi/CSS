@@ -11,7 +11,7 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
     <!-- Custom -->
     {% load static %}
-    <link href="{% static "css/custom.css" %}" rel="stylesheet">
+    <link href="{% static "css/table.css" %}" rel="stylesheet">
     <link href="{% static "css/settings.css" %}" rel="stylesheet">
 
 
@@ -25,85 +25,111 @@
   </head>
   <body>
     {% include "navbar.html" %}
-    
+
     <div class="container">
       <div class="row">
         <div class="col-sm-12">
           <h1>Department Settings</h1>
         </div>
       </div>
-        
-        <div class="well-border col-lg-10 col-lg-offset-1">
-          <div class="col-lg-10 col-lg-offset-1">
-            <form class="form-horizontal" role="form">
 
-              <div class="form-group">
-                <label for="department_name" class="col-md-6 control-label">Department Name</label>
-                <div class="col-md-3">
-                    <input type="text" class="form-control" id="inputType" value="hello">
-                </div>
+      <div class="col-lg-10 col-lg-offset-1">
+        <div class="col-lg-10 col-lg-offset-1">
+          <form method="POST" action="#" class="form-horizontal" role="form">
+            {% csrf_token %}
+            <div class="form-group">
+              <label for=" department_name " class="col-md-6 control-label">Department Name</label>
+              <div class="col-md-3 fieldWrapper">
+                <input type="text" name="name" class="form-control" value={{ settings.name }}>
               </div>
-
-              <div class="form-group">
-                <label for="department_chair" class="col-md-6 control-label">Department Chair</label>
-                <div class="col-md-3">
-                    <input type="text" class="form-control" id="inputType" value = "Timothy Kearns">
-                </div>
-              </div>
-
-              <div class="form-group">
-                <label for="dep_hours" class="col-md-6 col-md-offset-3 hours-label">Department Hours</label>
-              </div>
-
-              <div class="time-inputs col-md-6 col-md-offset-3">
-                <div class="col-md-5">
-                    <input type="time" class="form-control" id="inputType" value="15:00:00" placeholder="HH:MM:SS">
-                </div>
-                <div class="col-md-2 dash-text">
-                  -
-                </div>
-                <div class="col-md-5">
-                    <input type="time" class="form-control" id="inputType" value="15:00:00" placeholder="HH:MM:SS">
-                </div>
-              </div>
-
-              <div class="section-types">
-
-              </div>
-            </form>
-          </div>
-
-          <div class="space col-md-12"> 
-          </div>
-
-          <button type="submit" class="btn btn-small col-md-2 col-md-offset-5">Submit Settings</button>
-
-
-          <div class="space col-md-12"> 
-          </div>
-
-          <div class="panel panel-default col-md-4 col-md-offset-4">
-            <div class="panel-heading">
-              <h4>
-                Section Types 
-              </h4>
             </div>
-            <table class="table table-fixed table-bordered">
-              <tbody>
-                {% for section in section_type_list %}
-                <tr>
-                  <td>{{ section.section_type }}</td>
-                </tr>
-                {% endfor %}
-              </tbody>
-            </table>
-            <button type="button" class="col-md-6 col-md-offset-3 btn btn-small">Add New </button>
+
+            <div class="form-group">
+              <label for=" department_chair " class="col-md-6 control-label">Department Chair</label>
+              <div class="col-md-3">
+                <input type="text" name="chair" class="form-control" id="inputType" value={{ settings.chair }}>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="hours" class="col-md-6 col-md-offset-3 hours-label">Department Hours</label>
+            </div>
+
+            <div class="time-inputs col-md-6 col-md-offset-3">
+              <div class="col-md-6">
+                <input type="time" name="start_time" class="form-control" id="settings_form.start_time" value={{ settings.start_time }} placeholder={{ settings.start_time }}>
+              </div>
+              <div class="col-md-6">
+                <input type="time" name="end_time" class="form-control" id="settings_form.end_time" value={{ settings.end_time }} placeholder={{ settings.end_time }}>
+              </div>
+            </div>
+
+            <div class="col-md-12 space">
+            </div>
+
+            <input name="submit-settings" type="submit" class="btn btn-small col-md-2 col-md-offset-5" value="Submit Settings">
+
+            <div class="col-md-12 space">
+            </div>
+          </form>
+       </div>
+
+        <div class="panel panel-default col-md-4 col-md-offset-4">
+          <div class="panel-heading">
+            <h4>
+              Section Types 
+            </h4>
+          </div>
+          <table class="table table-fixed table-bordered section-type-table">
+            <thead>
+              <tr>
+                <th>Delete</th>
+                <th>Section Type Name</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for section in section_type_list %}
+              <tr>
+                <td>
+                  <form method="POST" action="#">{% csrf_token %}
+                    <input type="hidden" name="section-type-name" value="{{ section.name }}">
+                    <button type="submit" name="delete-section-type">
+                      <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+                    </button>
+                  </form>
+                </td>
+                <td>
+                  <p>{{ section.name }}</p>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+          <button type="button" class="col-md-6 col-md-offset-3 btn btn-small" data-toggle="modal" data-target="#add-section-type">Add New</button>
+        </div>
+      </div>
+
+      <div id="add-section-type" class="modal fade" role="dialog">
+        <div class="modal-dialog">
+          <!-- Modal content-->
+          <div class="modal-content">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal">&times;</button>
+              <h4 class="modal-title">Add Section Type</h
+            </div>
+            <div class="modal-body">
+              <form method="POST" action="#">{% csrf_token %}
+                {{ add_section_type_form.as_p }}
+                <button type="submit" name="add-section-type" class="save btn btn-default">submit</button>
+              </form>
+            </div>
           </div>
         </div>
+      </div>
 
-    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
-    <!-- Include all compiled plugins (below), or include individual files as needed -->
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+      <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+      <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+      <!-- Include all compiled plugins (below), or include individual files as needed -->
+      <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
   </body>
 </html>

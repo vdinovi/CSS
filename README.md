@@ -1,5 +1,5 @@
 # CS<sup>2</sup>
-Master: [![Build Status](https://travis-ci.com/vdinovi/CSS.svg?token=Dszp13uKbE4rTQ1QWTX4&branch=master)](https://travis-ci.com/vdinovi/CSS) 
+Master: [![Build Status](https://travis-ci.com/vdinovi/CSS.svg?token=Dszp13uKbE4rTQ1QWTX4&branch=master)](https://travis-ci.com/vdinovi/CSS)
 Prod: [![Build Status](https://travis-ci.com/vdinovi/CSS.svg?token=Dszp13uKbE4rTQ1QWTX4&branch=prod)](https://travis-ci.com/vdinovi/CSS)
 
 # Overview
@@ -38,7 +38,7 @@ The softwares goal is to improve the schedule planning process by providing a fl
 
 ## For working on shared features:
 
-1. Create a feature branch 
+1. Create a feature branch
 2. Tell other collaborators
 3. Work on your branch ...
 4. Merge changes into master
@@ -56,5 +56,5 @@ Members:
 * Technical Lead - Sigal Shaul - sshaul@calpoly.edu
 * Technical Lead - Makenna Johnstone - makennajohnstone@gmail.com
 * Document Specialist - Andrew Lam - werdna.mal222@gmail.com
-* Quality Assurance - Jason Sawatsky - jasonmsawatzky@gmail.com
+* Quality Assurance - Jason Sawatzky - jasonmsawatzky@gmail.com
 * Secretary/Librarian - Paula Ledgerwood - paledger@gmail.com
