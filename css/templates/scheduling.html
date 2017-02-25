@@ -13,9 +13,9 @@
     {% load static %}
     <link href="{% static "css/table.css" %}" rel="stylesheet">
     <link href="{% static "css/scheduling.css" %}" rel="stylesheet">
-    <!-- Nice looking checkbox, would like to use to fill box where existing checkboxes are 
+    <!-- Nice looking checkbox, would like to use to fill box where existing checkboxes are
       Has some bugs to work out. Taken from: http://bootsnipp.com/snippets/featured/checkboxradio-css-only -->
-      <link href="{% static "css/checkbox.css" %}" rel="stylesheet"> 
+      <link href="{% static "css/checkbox.css" %}" rel="stylesheet">
 
       <!-- #e0e0e0HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
       <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -49,11 +49,60 @@
           <div class="row" style="padding-top:20px">
             <button id="filter-frame-btn" class="btn switch-frame-btn col-xs-4 col-xs-offset-4" onclick='switchFrame("new-section-frame", "filter-frame")'>Filter Sections</button>
           </div>
-          <div class="col-xs-4 outer-frame">
-            <form method="POST"> {% csrf_token %}
-              {{ new_section_form.as_p }}
+          <form method="POST" action="#" class="form-horizontal" role="form">
+              {% csrf_token %}
+              <div class="form-group col-xs-6">
+                <!-- <label for="course" class="row control-label">Course</label> -->
+                <div  class="row new-section-inputs">
+                  {{ new_section_form.academic_term.label }}
+                  {{ new_section_form.academic_term }}
+                </div>
+                <div class="row new-section-inputs">
+                  {{ new_section_form.course.label }}
+                  {{ new_section_form.course }}
+                </div>
+                <div class="row new-section-inputs">
+                  {{ new_section_form.section_type.label }}
+                  {{ new_section_form.section_type }}
+                </div>
+                <div class="row new-section-inputs">
+                  {{ new_section_form.faculty.label }}
+                  {{ new_section_form.faculty }}
+                </div>
+                <div class="row new-section-inputs">
+                  {{ new_section_form.room.label }}
+                  {{ new_section_form.room }}
+                </div>
+                <div class="row new-section-inputs">
+                  {{ new_section_form.capacity.label }}
+                  {{ new_section_form.capacity }}
+                </div>
+                <button type="submit" class="btn btn-primary">Create Section</button>
+              </div>
+              <div class="form-group col-xs-6">
+                <!-- <div class="btn-group row" data-toggle="buttons">
+                  <label class="btn btn-primary active">
+                    <input type="radio" name="days" id="MWF" autocomplete="off" checked onclick="setDays(this, new_section_form)"> MWF
+                  </label>
+                  <label class="btn btn-primary active">
+                    <input type="radio" name="days" id="TR" autocomplete="off" onclick="setDays(this, new_section_form)"> TR
+                  </label>
+
+                </div> -->
+                <div class="row">
+                  {{ new_section_form.days.label }}
+                  {{ new_section_form.days }}
+                </div>
+                <div class="row">
+                  {{ new_section_form.start_time.label }}
+                  {{ new_section_form.start_time }}
+                </div>
+                <div class="row">
+                  {{ new_section_form.end_time.label }}
+                  {{ new_section_form.end_time }}
+                </div>
+              </div>
             </form>
-          </div>
         </div>
         <!-- Filter Window -->
         <div id="filter-frame" class="col-xs-12 filter-frame">
@@ -71,7 +120,7 @@
                 <!-- FACULTY FILTER -->
                 <button id="faculty-filter-btn" class="noselect filter-type" value="inactive" style="width:100%;" onclick="selectFilter(this, 'faculty-options')">Faculty</button>
                 <div id="faculty-options" class="list-group" style="margin:0px">
-                </div> 
+                </div>
                 <!-- ROOM FILTER -->
                 <button id="room-filter-btn" class="noselect filter-type" value="inactive" style="width:100%;" onclick="selectFilter(this, 'room-options')">Room</button>
                 <div id="room-options" class="list-group" style="margin:0px">
@@ -98,7 +147,7 @@
                 <div id="course-filter-logic" class="filter-logic">
                   <div class="col-xs-8 col-xs-offset-2" style="height:100%;">
                     <label class="checkbox-inline"><input type="checkbox" value="">Course</label>
-                    <div class="list-group"> 
+                    <div class="list-group">
                       <a href="#" class="list-group-item logic active">OR</a>
                       <a href="#" class="list-group-item logic">AND</a>
                     </div>
@@ -107,7 +156,7 @@
                 <div id="faculty-filter-logic" class="filter-logic">
                   <div class="col-xs-8 col-xs-offset-2" style="height:100%;">
                     <label class="checkbox-inline"><input type="checkbox" value="">Faculty</label>
-                    <div class="list-group"> 
+                    <div class="list-group">
                       <a href="#" class="list-group-item logic active">OR</a>
                       <a href="#" class="list-group-item logic">AND</a>
                     </div>
@@ -116,7 +165,7 @@
                 <div id="room-filter-logic" class="filter-logic">
                   <div class="col-xs-8 col-xs-offset-2" style="height:100%;">
                     <label class="checkbox-inline"><input type="checkbox" value="">Room</label>
-                    <div class="list-group"> 
+                    <div class="list-group">
                       <a href="#" class="list-group-item logic active">OR</a>
                       <a href="#" class="list-group-item logic">AND</a>
                     </div>
@@ -154,7 +203,7 @@
                   <p class="form-control">CPE101-03</p>
                 </div>
               </ul>
-            </div> 
+            </div>
           </div>
         </div>
       </div>
@@ -194,7 +243,7 @@
             <button type="button" class="close" data-dismiss="modal">&times;</button>
           </div>
           <div id="view-term-modal-body" class="modal-body">
-            <div class="list-group">              
+            <div class="list-group">
             </div>
           </div>
         </div>

@@ -241,3 +241,9 @@ body input[type=checkbox] {
 }
 
 
+/* New Section Form */
+.new_section_inputs {
+    position:relative;
+    text-align: center;
+}
+

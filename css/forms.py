@@ -1,10 +1,10 @@
 from django import forms
 from django.core.mail import send_mail
-from css.models import CUser, Room, Course, SectionType
+from css.models import CUser, Room, Course, SectionType, Schedule, Section
 from django.http import HttpResponseRedirect
 from settings import DEPARTMENT_SETTINGS
-#from django.contrib.sites.models import Site
 import re
+from django.forms import ModelChoiceField
 
 #  Login Form
 class LoginForm(forms.Form):
@@ -38,8 +38,8 @@ class InviteUserForm(forms.Form):
         print("sent email to " + self.cleaned_data['email'])
 
 # Registration Form
-# @TODO show failure if field not able to be loaded:
-#       Fields to pull: email
+# @TODO on load, pull fields from query string -> show failure if field not able to be loaded:
+#       Fields to pull: email, first_name, last_name, user_type
 class RegisterUserForm(forms.Form):
     first_name = forms.CharField()
     last_name = forms.CharField()
@@ -53,7 +53,7 @@ class RegisterUserForm(forms.Form):
         self.first_name = kwargs.pop('first')
         self.last_name = kwargs.pop('last')
         self.user_type = kwargs.pop('type')
-        
+
         self.declared_fields['first_name'].initial = self.first_name
         self.declared_fields['last_name'].initial = self.last_name
         self.declared_fields['user_type'].initial = self.user_type
@@ -68,6 +68,7 @@ class RegisterUserForm(forms.Form):
                             last_name=self.cleaned_data['last_name'])
         user.save()
         return user
+
 
 # Edit User Form
 class EditUserForm(forms.Form):
@@ -124,11 +125,36 @@ class EditRoomForm(forms.Form):
         room.save()
 
 class DeleteRoomForm(forms.Form):
+
     roomName = forms.CharField(widget=forms.HiddenInput(), initial='defaultRoom')
 
     def deleteRoom(self):
         nameString=self.cleaned_data['roomName']
         Room.objects.filter(name=nameString).delete()
+
+class EditCourseSectionTypeForm(forms.Form):
+    work_units = forms.IntegerField()
+    work_hours = forms.IntegerField()
+
+    def save(self):
+        name = self.cleaned_data['name']
+        work_units = self.cleaned_data['work_units']
+        work_hours = self.cleaned_data['work_hours']
+
+class AddCourseSectionTypeForm(forms.Form):
+    course = forms.CharField(widget=forms.HiddenInput(), initial='defaultCourse')
+    name = forms.CharField()
+    work_units = forms.IntegerField()
+    work_hours = forms.IntegerField()
+    def save(self):
+        courseName = self['course']
+        print("courseName:")
+        print(courseName)
+        courseObj = Course.get_course(courseName)
+        name = self['name']
+        work_units = self['work_units']
+        work_hours = self['work_hours']
+        courseObj.add_section_type(name, work_units, work_hours)
 
 class AddCourseForm(forms.Form):
     course_name = forms.CharField()
@@ -163,22 +189,47 @@ class EditCourseForm(forms.Form):
         course.set_equipment_req(self.cleaned_data['equipment_req'])
         course.set_description(self.cleaned_data['description'])
 
-
 class AddSectionTypeForm(forms.Form):
     section_type_name = forms.CharField()
- 
+
     def save(self):
         SectionType.create(name=self.cleaned_data['section_type_name'])
 
+
+# Custom ModelChoiceField for faculty full names
+class FacultyModelChoiceField(ModelChoiceField):
+    def label_from_instance(self, obj):
+        return obj.user.first_name + " " + obj.user.last_name
+
 class AddSectionForm(forms.Form):
+    academic_term = forms.ModelChoiceField(label='Term', queryset=Schedule.objects.values_list('academic_term', flat=True), empty_label="                    ")
     course = forms.ModelChoiceField(label='Course', queryset=Course.objects.values_list('name', flat=True), empty_label="                   ")
-    section_type = forms.ModelChoiceField(label='Section Type', queryset=SectionType.objects.values_list('name', flat=True), empty_label="                   ")
-    # faculty = forms.ModelChoiceField(label='Faculty', queryset=CUser.get_all_faculty().values_list('user__first_name', 'user__last_name'))
-    # faculty = forms.ModelChoiceField(label='Faculty', choices = [ ((p),) for p in CUser.get_all_faculty_full_name()])
+    start_time = forms.TimeField(label='Start Time', input_formats=('%I:%M %p'))
+    end_time = forms.TimeField(label='End Time', input_formats=('%I:%M %p'))
+    days = forms.CharField(label='Days')
+    days = forms.ChoiceField(label='Days', choices=[('MWF', 'MWF'), ('TR', 'TR')])
+    faculty = FacultyModelChoiceField(label='Faculty', queryset=CUser.objects.filter(user_type='faculty'))
     room = forms.ModelChoiceField(label='Room', queryset=Room.objects.values_list('name', flat=True), empty_label="                   ")
     capacity = forms.IntegerField()
-    start_time = forms.TimeField(label='Start Time', input_formats=('%I:%M %p'))
 
-    # def save(self):
-    #     section = Section.create()
 
+    section_type = forms.ModelChoiceField(label='Section Type', queryset=SectionType.objects.values_list('name', flat=True), empty_label="                   ")
+
+
+    def save(self):
+        section = Section.create (schedule = Schedule.objects.get(academic_term=self.cleaned_data['academic_term']),
+                                  course = Course.objects.get(course=self.cleaned_data['course']),
+                                  start_time = self.cleaned_data['start_time'],
+                                  end_time = self.cleaned_data['end_time'],
+                                  days = self.cleaned_data['days'],
+                                  faculty = CUser.get_cuser_by_full_name(self.cleaned_data['faculty']),
+                                  room = Room.objects.get(name=self.cleaned_data['room']),
+                                  capacity = self.cleaned_data['capacity'],
+                                  students_enrolled = 0,
+                                  students_waitlisted = 0,
+                                  conflict = 'n',
+                                  conflict_reason = null,
+                                  fault = 'n',
+                                  fault_reason = null)
+        section.save()
+        return
