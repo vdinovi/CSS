@@ -12,6 +12,7 @@ import json
 import operator
 from django.db.models import Q
 
+
 # System User class,
 # Wrapper for django builtin class, contains user + application specific data
 class CUser(models.Model):
