@@ -19,9 +19,14 @@ import MySQLdb
 def RegistrationView(request):
     res = HttpResponse()
     #pass these credentials to the RegisterUserForm
+ 
     first_name = request.GET.get('first')
     last_name = request.GET.get('last')
     user_type = request.GET.get('type')
+    if first_name is None or last_name is None or user_type is None:
+        res.status_code = 400
+        res.reason_phrase = "Bad query string"
+        return res
 
     if request.method == "GET":
         storage = messages.get_messages(request)
