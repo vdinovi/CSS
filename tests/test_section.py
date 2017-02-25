@@ -115,7 +115,8 @@ class SectionTestCase(TestCase):
         section = Section.objects.get(fault="n")
         self.assertEquals(section.fault_reason, None)
 
-        --------------- Filter Tests ----------------#
+        #--------------- Filter Tests ----------------#
+
     def test_section_filter_course_one(self):
         """ A section matches the name of one course we filter by. """
         course_filter = '{"course": {"logic":"and", "filters":["CPE101"]}}'

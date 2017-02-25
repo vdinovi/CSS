@@ -1,40 +1,52 @@
+/* **************** */
+/* ***** Util ***** */
+/* **************** */
+
+/* noselect disables the default select styles. Useful for clickable divs */
+.noselect {
+  -webkit-touch-callout: none; /* iOS Safari */
+    -webkit-user-select: none; /* Safari */
+     -khtml-user-select: none; /* Konqueror HTML */
+       -moz-user-select: none; /* Firefox */
+        -ms-user-select: none; /* Internet Explorer/Edge */
+            user-select: none; /* Non-prefixed version, currently
+                                  supported by Chrome and Opera */
+}
+
+
+/* ****************** */
+/* ***** Frames ***** */
+/* ***************** */
+
+/* Container for entire scheduling page (below navbar) */
 .scheduling-container {
     overflow-x: scroll;
 }
 
+/* Tab bar for selected terms */
 .term-frame {
     margin-top: 10px;
-    background-color: #e5e5e5;
+    /*background-color: #e5e5e5;*/
     border-radius: 5px;
 }
 
-.btn {
-    background-color: #94bdbd;
-    color: black;
-}
-
-.manage-new-section-btn {
-    margin-top: 10px;
-    width: 100%;
-    height: 100%;
-}
-
+/* Frame for section creation */
 .new-section-frame {
+    position: absolute;
     margin-top: 10px;
     min-width:300px;
     background-color: #e5e5e5;
     border: 1px solid black;
-    border-radius: 5px;
-    overflow-x: scroll;
-    white-space: nowrap;
+    display:inline-block;
 }
 
+/* Window for filters */
 .filter-frame {
-    margin-top: 10px;
+    /*margin-top: 10px;*/
+    position: absolute;
     min-width:300px;
     background-color: #e5e5e5;
     border: 1px solid black;
-    border-radius: 5px;
     overflow-x: scroll;
     white-space: nowrap;
 }
@@ -50,7 +62,7 @@
     width: 100%;
     height: 300px;
     margin: 0 auto;
-    border: 1px solid black;
+    /*border: 1px solid black;*/
     border-radius: 5px;
     display:inline-block;
 }
@@ -59,10 +71,71 @@
     padding-left: 0px;
 }
 
-.filter-selection {
+/* ********************** */
+/* ***** Components ***** */
+/* ********************** */
+
+.btn {
+    background-color: #94bdbd;
+    color: black;
+}
+
+/* ********************** */
+/* ***** TERM ***** */
+/* ********************** */
+
+/* Create new academic term button */
+#create-new-term-btn {
+    /*margin-top: 13px;*/
+    height:100%;
+    vertical-align: middle;
+}
+
+/* **************************** */
+/* ***** Section Creation ***** */
+/* **************************** */
+
+/* Manage section button */
+.manage-new-section-btn {
+    margin-top: 10px;
+    width: 100%;
+    height: 100%;
+}
+
+/* ****************** */
+/* ***** FILTER ***** */
+/* ****************** */
+
+/* Window for filter types */
+.filter-type-window {
+    width: 100%;
+    height: 100%;
+    overflow-y: scroll;
+}
+
+/* [INACTIVE] Individual filter type div (inactive) */
+.filter-type {
+    outline: none;
+    text-align: center;
+    border: collapse;
+    background-color: #eeeeee;
+}
+
+/* [ACTIVE] Individual filter type div */
+.filter-type-active {
+    outline: none;
+    text-align: center;
+    border: collapse;
+    background-color: #94bdbd;
+}
+
+/* Options that have been selected,
+ * show up in filter window */
+.filter-options {
     background-color: white;
     position: relative;
     display: block;
+    margin: 0px;
     padding: 0px;
     padding-left: 15px;
     border: 1px solid #cccccc;
@@ -70,17 +143,35 @@
     border-bottom: 0px;
 }
 
+.selected-option {
+    display: inline-block;
+    width: 100%;
+    height: 25px;
+}
+
+.selected-option button {
+    float: left;
+    width: 20%;
+    height:25px;
+}
+
+.selected-option li {
+    float: right;
+    width: 80%;
+    height:25px;
+}
+
+
+
+/************* ABOVE IS ORGANIZED *************/
+
 .filter-div-heading {
     background-color: #eeeeee;
     width:100%;
     height:100%;
 }
 
-.filter-selection-frame {
-    width: 100%;
-    height: 100%;
-    overflow-y: scroll;
-}
+
 
 .filter-logic {
     background-color: #ccccc9;

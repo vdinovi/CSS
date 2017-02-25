@@ -79,6 +79,15 @@ class CUser(models.Model):
     @classmethod
     def get_all_faculty(cls): 
         return cls.objects.filter(user_type='faculty')
+    # Return faculty full name
+    @classmethod
+    def get_all_faculty_full_name(cls):
+        faculty_list = cls.objects.filter(user_type='faculty')
+        names_list = []
+        for faculty in faculty_list:
+            names_list.append('{0} {1}'.format(faculty.user.first_name, faculty.user.last_name))
+        return names_list
+
     # Return scheduler cuser by email
     @classmethod
     def get_scheduler(cls, email): # Throws ObjectDoesNotExist
@@ -102,6 +111,13 @@ class CUser(models.Model):
     def set_password(self, pword):
         self.password = pword
         self.save()
+
+    def to_json(self):
+        return dict(id = self.id,
+                    name = self.user.first_name + self.user.last_name,
+                    email = self.user.email)
+
+
 
 class FacultyDetails(models.Model):
     # The user_id uses the User ID as a primary key.
@@ -162,6 +178,22 @@ class Room(models.Model):
     def get_room(cls, name):
         return Room.objects.get(name=name)
 
+    @classmethod
+    def get_all_rooms(cls):
+        return cls.objects.filter()
+
+    def to_json(self):
+        return dict(id = self.id,
+                    name = self.name,
+                    description = self.description,
+                    capacity = self.capacity,
+                    notes = self.notes,
+                    equipment = self.equipment)
+
+
+
+
+
 # Course represents a department course offering
 class Course(models.Model):
     name = models.CharField(max_length=16, unique=True)
@@ -178,6 +210,8 @@ class Course(models.Model):
         except:
             raise ValidationError("Invalid data for course creation.")
         return course
+
+
     # Returns all course objects
     @classmethod
     def get_all_courses(cls):
@@ -187,6 +221,12 @@ class Course(models.Model):
     @classmethod
     def get_course(cls, name):
         return cls.objects.get(name=name)
+    
+    def to_json(self):
+        return dict(id = self.id,
+                    name = self.name,
+                    equipment_req = self.equipment_req,
+                    description = self.description)
 
     # Set the equipment required for this course
     def set_equipment_req(self, equipment_req):
@@ -220,10 +260,9 @@ class SectionType(models.Model):
     def create(cls, name):
         if len(name) > 32:
             raise ValidationError("Section Type name exceeds 32 characters.")
-        else:
-            section_type = cls(name=name)
-            section_type.save()
-            return section_type
+        section_type = cls(name=name)
+        section_type.save()     
+        return section_type
 
     @classmethod
     def get_section_type(cls, name):
@@ -312,9 +351,7 @@ class Section(models.Model):
     schedule = models.ForeignKey(Schedule, on_delete=models.CASCADE)
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
     start_time = models.TimeField()
-    start_type = models.CharField(max_length=2, default="AM")
     end_time = models.TimeField()
-    end_type = models.CharField(max_length=2, default="AM")
     days = models.CharField(max_length=8)    # MWF or TR
     faculty = models.ForeignKey(CUser, null=True, on_delete=models.SET_NULL)
     room = models.ForeignKey(Room, null=True, on_delete=models.SET_NULL)
@@ -361,9 +398,7 @@ class Section(models.Model):
                   schedule=schedule, 
                   course=course, 
                   start_time=start_time, 
-                  start_type=s_type,
                   end_time=end_time, 
-                  end_type=e_type,
                   days=days, 
                   faculty=faculty, 
                   room=room,
@@ -395,6 +430,7 @@ class Section(models.Model):
     # for filtering by time, it will only take in an array of pairs (an array of 2-piece arrays) so that it will at least have a start time and end time.
     #### there can also be chunks of time, so there are multiple start and end times
     # for any other filter, we will pass on the keyword and array argument as it is to the filter.
+
     @classmethod 
     def filter_json(cls, json_string):
         return cls.filter(json.loads(json_string))
@@ -413,7 +449,7 @@ class Section(models.Model):
         orQuery = ''
         timeQuery = ''
         finalQuery = ''
-
+        
         for key,tags in filter_dict.iteritems():
             if 'logic' not in tags or 'filters' not in tags:
                 raise ValidationError("JSON not set up correctly. 'logic' and 'filters' are required keys in each filter type.")
@@ -466,7 +502,6 @@ class Section(models.Model):
             finalQuery = timeQuery
         
         return Section.objects.filter(finalQuery)
-            
 
 class FacultyCoursePreferences(models.Model):
     faculty = models.ForeignKey(CUser, on_delete = models.CASCADE)

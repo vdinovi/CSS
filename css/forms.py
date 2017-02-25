@@ -163,9 +163,22 @@ class EditCourseForm(forms.Form):
         course.set_equipment_req(self.cleaned_data['equipment_req'])
         course.set_description(self.cleaned_data['description'])
 
+
 class AddSectionTypeForm(forms.Form):
     section_type_name = forms.CharField()
-
+ 
     def save(self):
         SectionType.create(name=self.cleaned_data['section_type_name'])
+
+class AddSectionForm(forms.Form):
+    course = forms.ModelChoiceField(label='Course', queryset=Course.objects.values_list('name', flat=True), empty_label="                   ")
+    section_type = forms.ModelChoiceField(label='Section Type', queryset=SectionType.objects.values_list('name', flat=True), empty_label="                   ")
+    # faculty = forms.ModelChoiceField(label='Faculty', queryset=CUser.get_all_faculty().values_list('user__first_name', 'user__last_name'))
+    # faculty = forms.ModelChoiceField(label='Faculty', choices = [ ((p),) for p in CUser.get_all_faculty_full_name()])
+    room = forms.ModelChoiceField(label='Room', queryset=Room.objects.values_list('name', flat=True), empty_label="                   ")
+    capacity = forms.IntegerField()
+    start_time = forms.TimeField(label='Start Time', input_formats=('%I:%M %p'))
+
+    # def save(self):
+    #     section = Section.create()
 
