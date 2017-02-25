@@ -255,9 +255,9 @@ class Availability(models.Model):
     faculty = models.OneToOneField(CUser, on_delete=models.CASCADE, null=True) 
     days_of_week = models.CharField(max_length=16) # MWF or TR
     start_time = models.TimeField()
-    start_type = models.CharField(max_length=2)
+    start_type = models.CharField(max_length=2, default="AM")
     end_time = models.TimeField()
-    end_type = models.CharField(max_length=2)
+    end_type = models.CharField(max_length=2, default="AM")
     level = models.CharField(max_length=16) # available, preferred, unavailable
 
     @classmethod
@@ -312,7 +312,9 @@ class Section(models.Model):
     schedule = models.ForeignKey(Schedule, on_delete=models.CASCADE)
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
     start_time = models.TimeField()
+    start_type = models.CharField(max_length=2, default="AM")
     end_time = models.TimeField()
+    end_type = models.CharField(max_length=2, default="AM")
     days = models.CharField(max_length=8)    # MWF or TR
     faculty = models.ForeignKey(CUser, null=True, on_delete=models.SET_NULL)
     room = models.ForeignKey(Room, null=True, on_delete=models.SET_NULL)
@@ -359,7 +361,9 @@ class Section(models.Model):
                   schedule=schedule, 
                   course=course, 
                   start_time=start_time, 
+                  start_type=s_type,
                   end_time=end_time, 
+                  end_type=e_type,
                   days=days, 
                   faculty=faculty, 
                   room=room,
