@@ -37,9 +37,9 @@ class FacultyCoursePreferencesTestCase(TestCase):
     	FacultyCoursePreferences.create(faculty, course1, None, 2)
     	FacultyCoursePreferences.create(faculty, course2, None, 1)
 
- 	#enter a faculty member and return a list of the course objects and their ranks
-    def test_get_faculty(self):
-    	faculty = CUser.get_faculty('makennajohnstone@gmail.com')
+ 	#faculty email 
+    def test_get_faculty_email(self):
+    	faculty = CUser.get_faculty('makennajohnstone@gmail.com)
     	faculty_pref = FacultyCoursePreferences.objects.get(course="CPE 309")
     	self.assertEquals(faculty_pref.faculty.user.email, 'makennajohnstone@gmail.com')
 

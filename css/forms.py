@@ -3,7 +3,6 @@ from django.core.mail import send_mail
 from css.models import CUser, Room, Course, SectionType
 from django.http import HttpResponseRedirect
 from settings import DEPARTMENT_SETTINGS
-#from django.contrib.sites.models import Site
 import re
 
 #  Login Form
@@ -169,6 +168,7 @@ class AddSectionTypeForm(forms.Form):
  
     def save(self):
         SectionType.create(name=self.cleaned_data['section_type_name'])
+        
 
 class AddSectionForm(forms.Form):
     course = forms.ModelChoiceField(label='Course', queryset=Course.objects.values_list('name', flat=True), empty_label="                   ")
