@@ -29,9 +29,38 @@ function switchFrame(firstFrame, secondFrame) {
 
 /* *** TERM *** */
 // When clicked, modal pops up and shows all existing schedules not currently selected
-function viewTerm() {
-    
+function getSchedules() {
+    $.ajax({
+        type: "GET",
+        url: "schedules",
+        success: function(response) {
+            data = JSON.parse(response);
+            list = $("#view-term-modal-body").children("div");
+            var scheduleFormatString = "<button class=\"list-group-item\" onclick=\"addSchedule(\"{0}\")\">{0}</button>\n";
+            console.log(data.active[0].academic_term);
+            for (var i = 0; i < data.active.length; ++i) {
+                list.append(scheduleFormatString.format(data.active[i].academic_term));
+            }
+        },
+        error: function(err) {
+            console.log(err);
+        }
+    });
 }
+
+/*
+function addSchedule(name) {
+    /*var scheduleFormatString = 
+        "<li class=\"dropdown\">\n" +
+        "  <a class=\"dropdown-toggle\" data-toggle=\"dropdown\" href=\"#\">"+name+"<b class=\"caret\"></b></a>\n" +
+        "  <ul class=\"dropdown-menu\">\n" +
+        "    <li><a href=\"#\" class=\"dropdown-toggle\" data-toggle=\"tab\">Approve Schedule</a></li>\n" +
+        "    <li><a href=\"#\" class=\"dropdown-toggle\" data-toggle=\"tab\">Close Tab</a></li>\n" +
+        "  </ul>\n" +
+        "</li>\n";
+    console.log($("#term-frame").children("ul"));
+    //$("#term-frame").children("ul")[0].append(scheduleFormatString.format(name)); 
+}*/
 
 /* *** FILTER / OPTIONS *** */ 
 
