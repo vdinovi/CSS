@@ -164,11 +164,16 @@ class EditCourseForm(forms.Form):
         course.set_equipment_req(self.cleaned_data['equipment_req'])
         course.set_description(self.cleaned_data['description'])
 
+class AddSectionTypeForm(forms.Form):
+    section_type_name = forms.CharField()
+ 
+    def save(self):
+        SectionType.create(name=self.cleaned_data['section_type_name'])
+
 # Custom ModelChoiceField for faculty full names
 class FacultyModelChoiceField(ModelChoiceField):
     def label_from_instance(self, obj):
         return obj.user.first_name + " " + obj.user.last_name
-
 
 class AddSectionForm(forms.Form):
     academic_term = forms.ModelChoiceField(label='Term', queryset=Schedule.objects.values_list('academic_term', flat=True), empty_label="                    ")

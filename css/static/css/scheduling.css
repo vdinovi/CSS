@@ -14,9 +14,10 @@
 }
 
 
-/* **************** */
-/* ***** Main ***** */
-/* **************** */
+/* ****************** */
+/* ***** Frames ***** */
+/* ***************** */
+
 
 /* Container for entire scheduling page (below navbar) */
 .scheduling-container {
@@ -30,26 +31,9 @@
     border-radius: 5px;
 }
 
-/* Buttons */
-.btn {
-    background-color: #94bdbd;
-    color: black;
-}
-
-#create-new-term-btn {
-    /*margin-top: 13px;*/
-    height:100%;
-    vertical-align: middle;
-}
-
-.manage-new-section-btn {
-    margin-top: 10px;
-    width: 100%;
-    height: 100%;
-}
-
-/* Frames */
+/* Frame for section creation */
 .new-section-frame {
+    position: absolute;
     margin-top: 10px;
     min-width:300px;
     background-color: #e5e5e5;
@@ -60,6 +44,7 @@
 /* Window for filters */
 .filter-frame {
     /*margin-top: 10px;*/
+    position: absolute;
     min-width:300px;
     background-color: #e5e5e5;
     border: 1px solid black;
@@ -67,31 +52,96 @@
     white-space: nowrap;
 }
 
-/* Individual filter type div (inactive) */
-.filter-type {
-    text-align: center;
-    border: 1px solid black;
-    border: collapse;
-    background-color: #eeeeee;
+.outer-frame {
+    padding:20px;
+    width:290px;
+    white-space: normal;
 }
 
-/* Individual filter type div (active) */
-.filter-type-active {
-    text-align: center;
-    border: 1px solid black;
-    border: collapse;
+.inner-frame {
     background-color: #cccccc;
+    width: 100%;
+    height: 300px;
+    margin: 0 auto;
+    border: 1px solid black;
+    border-radius: 5px;
+    display:inline-block;
 }
-
 
 #filter-logic-frame {
     padding-left: 0px;
 }
 
-.filter-selection {
+/* ********************** */
+/* ***** Components ***** */
+/* ********************** */
+
+.btn {
+    background-color: #94bdbd;
+    color: black;
+}
+
+/* Enlarged text box */
+body input[type=checkbox] {
+  transform: scale(2);
+}
+
+/* ********************** */
+/* ***** TERM ***** */
+/* ********************** */
+
+/* Create new academic term button */
+#create-new-term-btn {
+    /*margin-top: 13px;*/
+    height:100%;
+    vertical-align: middle;
+}
+
+/* **************************** */
+/* ***** Section Creation ***** */
+/* **************************** */
+
+/* Manage section button */
+.manage-new-section-btn {
+    margin-top: 10px;
+    width: 100%;
+    height: 100%;
+}
+
+/* ****************** */
+/* ***** FILTER ***** */
+/* ****************** */
+
+/* Window for filter types */
+.filter-type-window {
+    width: 100%;
+    height: 100%;
+    overflow-y: scroll;
+}
+
+/* [INACTIVE] Individual filter type div (inactive) */
+.filter-type {
+    outline: none;
+    text-align: center;
+    border: collapse;
+    background-color: #eeeeee;
+}
+
+/* [ACTIVE] Individual filter type div */
+.filter-type-active {
+    outline: none;
+    text-align: center;
+    border: collapse;
+    background-color: #94bdbd;
+}
+
+/* Options that have been selected,
+ * show up in filter window */
+.filter-options {
     background-color: white;
     position: relative;
     display: block;
+    margin: 0px;
     padding: 0px;
     padding-left: 15px;
     border: 1px solid #cccccc;
@@ -99,17 +149,35 @@
     border-bottom: 0px;
 }
 
+.selected-option {
+    display: inline-block;
+    width: 100%;
+    height: 25px;
+}
+
+.selected-option button {
+    float: left;
+    width: 20%;
+    height:25px;
+}
+
+.selected-option li {
+    float: right;
+    width: 80%;
+    height:25px;
+}
+
+
+
+/************* ABOVE IS ORGANIZED *************/
+
 .filter-div-heading {
     background-color: #eeeeee;
     width:100%;
     height:100%;
 }
 
-.filter-selection-frame {
-    width: 100%;
-    height: 100%;
-    overflow-y: scroll;
-}
+
 
 .filter-logic {
     background-color: #ccccc9;
