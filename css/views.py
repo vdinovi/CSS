@@ -82,9 +82,11 @@ def SchedulingView(request):
         return render(request, 'scheduling.html', {
                       'new_section_form':AddSectionForm()})
     elif request.method == "POST":
-        res.status_code = 400
-        res.reason_phrase = "NYI"
+        form = AddSectionForm(request.POST)
+        form.save()
+        return render(request, 'scheduling.html')
     else:
+        print 'in outer else'
         res.status_code = 400
 
 def LandingView(request):

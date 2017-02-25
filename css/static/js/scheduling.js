@@ -68,3 +68,9 @@ function addLogic(element) {
 
 }
 
+
+// OnClick function to set the days for a new section
+function setDays(element, form) {
+    form.days=element.id;
+    form.save();
+}
