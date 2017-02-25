@@ -452,7 +452,7 @@ class FacultyCoursePreferences(models.Model):
     rank = models.IntegerField(default = 0)
 
     @classmethod
-    def create(faculty, course, rank):
+    def create(cls,faculty, course, rank):
         course_pref = cls(
             faculty=faculty,
             course=course,

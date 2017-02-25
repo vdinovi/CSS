@@ -31,13 +31,17 @@ from css.models import *
 
 class FacultyCoursePreferencesTestCase(TestCase):
     def setUp(self):
-    	faculty = CUser.create('makennajohnstone@gmail.com', '', 'faculty','Makenna','Johnstone')
+    	faculty = CUser.create('makennajohnstone@gmail.com', 'password#0', 'faculty','Makenna','Johnstone')
     	course = Course.create('CPE 309', 'computers, projector','Software Engineering II')
-    	FacultyCoursePreferences(faculty,course,3)
+    	FacultyCoursePreferences.create(faculty, course, 3)
 
- 	#enter a faculty member and return a list of the course objects and their ranks
-    def test_get_faculty(self):
+ 	#faculty email 
+    def test_get_faculty_email(self):
     	faculty = CUser.get_faculty('makennajohnstone@gmail.com')
-    	faculty_pref = FacultyCoursePreferences.objects.get(faculty=faculty)
-    	self.assertEquals(FacultyCoursePreferences.faculty.email, 'makennajohnstone@gmail.com')
-		#course = Course.objects.get(name='CPE 309')
+    	faculty_course_pref = FacultyCoursePreferences.objects.get(faculty=faculty)
+    	self.assertEquals(faculty_course_pref.faculty__email, 'makennajohnstone@gmail.com')
+    	
+    def test_get_faculty_email(self):
+    	faculty = CUser.get_faculty('makennajohnstone@gmail.com')
+    	faculty_course_pref = FacultyCoursePreferences.objects.get(faculty=faculty)
+    	self.assertEquals(faculty_course_pref.faculty__email, 'makennajohnstone@gmail.com')
