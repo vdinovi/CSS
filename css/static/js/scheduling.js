@@ -27,7 +27,7 @@ String.prototype.format = function()
 //     - Checks all options that have already been selected for this filter type
 //  * A filter type may not be un-selected
 //     - Only set to inactive if another is selected
-function selectFilter(element) {
+function selectFilter(element, filterType) {
     if (element.value == "inactive") {
         element.value = "active";
         element.className = "noselect filter-type-active";
@@ -64,8 +64,14 @@ function selectFilter(element) {
                 optionFrame = $("#option-frame");
                 optionFrame.empty();
                 for (var i in data.options) {
-                    //@TODO if option is selected in filter window -> auto check
+                    // Add to option window 
                     optionFrame.append(optionFormatString.format(data.options[i].name));
+                    // Check if already in selected
+                    $("#"+filterType).children("li").each(function(index, value) {
+                        if (value.id == data.options[i].name)
+                            $("#option-"+data.options[i].name).children("span").children("input").prop("checked", true);
+
+                    });
                 }
             },
             error: function(err) {
