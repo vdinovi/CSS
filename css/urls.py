@@ -18,7 +18,7 @@ from django.contrib import admin
 from django.conf.urls.static import static
 from django.conf import settings
 from django.views.generic import TemplateView
-from . import views
+from . import views, scheduling
 
 
 urlpatterns = [
@@ -30,7 +30,11 @@ urlpatterns = [
         url(r'^rooms/$', views.RoomsView, name='rooms'),
         url(r'^courses/$', views.CoursesView, name='courses'),
     ])),
-    url(r'^scheduling/$', views.SchedulingView, name='scheduling'), 
+    url(r'^scheduling/', include([
+        url(r'^$', views.SchedulingView, name='scheduling'),
+        url(r'^options$', scheduling.Options, name='options'), 
+        url(r'^schedules$', scheduling.Schedules, name='schedules'),
+    ])),
     url(r'^department/', include([
         url(r'^schedulers/$', views.SchedulersView, name='schedulers'),
         url(r'^settings/$', views.SettingsView, name='settings'), 

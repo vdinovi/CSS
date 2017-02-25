@@ -4,11 +4,13 @@ from django.contrib import messages
 from django.shortcuts import render, render_to_response
 from django.views.generic import TemplateView
 from django.http import HttpResponse, HttpResponseRedirect
+from django.core import serializers
 import MySQLdb
 from django.db import IntegrityError
 from .models import *
 from .forms import *
 from settings import DEPARTMENT_SETTINGS
+import json
 import MySQLdb
 
 # ---------------------------
@@ -75,17 +77,6 @@ def HomeView(request):
 
 def AvailabilityView(request):
     return render(request, 'availability.html')
-
-def SchedulingView(request):
-    res = HttpResponse()
-    if request.method == "GET":
-        return render(request, 'scheduling.html', {
-                     })
-    elif request.method == "POST":
-        res.status_code = 400
-        res.reason_phrase = "NYI"
-    else:
-        res.status_code = 400
 
 def LandingView(request):
     return render(request,'landing.html')
@@ -363,7 +354,20 @@ def FacultyView(request):
         res.status_code = 400
     return res
 
+# Primary scheduling page view
+def SchedulingView(request):
+    res = HttpResponse()
+    if request.method == "GET":
+        return render(request, 'scheduling.html', {
+                      'new_section_form':AddSectionForm()})
+    elif request.method == "POST":
+        res.status_code = 400
+        res.reason_phrase = "NYI"
+    else:
+        res.status_code = 400
+
 #  FAQ View
+# -- Low Priority --
 # @descr FAQ view that shows all current FAQ items
 # @TODO Create FAQ model and use to populate view
 # @Note These FAQ objects could be done without the database
@@ -377,6 +381,7 @@ def FAQView(request):
     else:
        res.status_code = 400;
     return res
+
 
 
 # ---------------------------
