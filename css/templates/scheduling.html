@@ -84,18 +84,19 @@
                   <span id="course-options" class="list-group">
                   </span>
                   <!-- FACULTY FILTER -->
-                  <button id="faculty-filter-btn" class="filter-type" value="inactive" style="width:100%;" onclick="selectFilter(this, 'faculty-options')">Faculty</button>
+                  <button id="faculty-filter-btn" class="noselect filter-type" value="inactive" style="width:100%;" onclick="selectFilter(this, 'faculty-options')">Faculty</button>
                   <span id="faculty-options" class="list-group">
                   </span> 
                   <!-- ROOM FILTER -->
-                  <button id="room-filter-btn" class="filter-type" value="inactive" style="width:100%;" onclick="selectFilter(this, 'room-options')">Room</button>
+                  <button id="room-filter-btn" class="noselect filter-type" value="inactive" style="width:100%;" onclick="selectFilter(this, 'room-options')">Room</button>
                   <span id="room-options" class="list-group">
                   </span>
                   <!-- TIME FILTER -->
-                  <button id="time-filter-btn" class="filter-type" value="inactive" style="width:100%;" onclick="selectFilter(this, 'time-options')">Time</button>
+                  <button id="time-filter-btn" class="noselect filter-type" value="inactive" style="width:100%;" onclick="selectFilter(this, 'time-options')">Time</button>
                   <span id="time-options" class="list-group">
                   </span>
                 </div>
+                <button id="clear-filter-btn" class="btn" style="margin-top:5px;" onclick="unselectAllSelectedOptions()">Clear</button>
               </div>
             </div>
             <!-- Option Window -->
