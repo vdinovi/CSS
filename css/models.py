@@ -350,6 +350,7 @@ class Schedule(models.Model):
 class Section(models.Model):
     schedule = models.ForeignKey(Schedule, on_delete=models.CASCADE)
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
+    section_type = models.ForeignKey(SectionType, null=True, on_delete=models.SET_NULL)
     start_time = models.TimeField()
     end_time = models.TimeField()
     days = models.CharField(max_length=8)    # MWF or TR
@@ -365,13 +366,13 @@ class Section(models.Model):
 
     @classmethod
     def create(
-        cls, term_name, course_name, start_time, end_time, days, faculty_email, room_name,
+        cls, term_name, course_name, section_type, start_time, end_time, days, faculty_email, room_name,
         capacity, students_enrolled, students_waitlisted, conflict, 
         conflict_reason, fault, fault_reason):
-        # the schedule and course object will actually be passed into the Section as a OneToOneField
+        # these objects will actually be passed into the Section because of the ForeignKey
         schedule = Schedule.get_schedule(term_name)
         course = Course.get_course(course_name)
-        # the faculty and room will be passed in just as the email and room name (IDs for their models) b/c of the ForeignKey type
+        section_type = SectionType.get_section_type(section_type)
         faculty = CUser.get_faculty(faculty_email)
         room = Room.get_room(room_name)
         if DEPARTMENT_SETTINGS.start_time and start_time < DEPARTMENT_SETTINGS.start_time:
@@ -397,6 +398,7 @@ class Section(models.Model):
         section = cls(
                   schedule=schedule, 
                   course=course, 
+                  section_type=section_type,
                   start_time=start_time, 
                   end_time=end_time, 
                   days=days, 
