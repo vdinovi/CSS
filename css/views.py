@@ -308,7 +308,7 @@ def CoursesView(request):
             print("save section request")
             print request.body
 
-            #SectionType.create("Lecture10")
+            #SectionType.create("Lecture1000")
 
             courseName = request.POST.__getitem__('course')
 
@@ -429,7 +429,7 @@ def SchedulingView(request):
 def OptionsView(request):
     res = HttpResponse()
     if request.method == "GET":
-        option_type = request.GET.get('type') 
+        option_type = request.GET.get('type')
         if option_type is None:
             res.status_code = 400
             res.reason_phrase = "Missing option type"
@@ -454,10 +454,10 @@ def OptionsView(request):
                 res.status_code = 400
                 res.reason_phrase = "Missing option type"
     else:
-        res.status_code = 400 
+        res.status_code = 400
     return res
 
-        
+
 
 
 

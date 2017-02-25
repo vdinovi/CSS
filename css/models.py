@@ -8,13 +8,10 @@ from django.db import IntegrityError
 from django.core.exceptions import ValidationError, ObjectDoesNotExist
 from util import DepartmentSettings
 from settings import DEPARTMENT_SETTINGS
-<<<<<<< HEAD
-from django.http import JsonResponse
-=======
 import json
 import operator
 from django.db.models import Q
->>>>>>> 0ca3e5d4705bdba57ff0d3e6ff3dbfca22473328
+from django.http import JsonResponse
 
 # System User class,
 # Wrapper for django builtin class, contains user + application specific data
@@ -464,13 +461,6 @@ class Section(models.Model):
     # for filtering by time, it will only take in an array of pairs (an array of 2-piece arrays) so that it will at least have a start time and end time.
     #### there can also be chunks of time, so there are multiple start and end times
     # for any other filter, we will pass on the keyword and array argument as it is to the filter.
-<<<<<<< HEAD
-    @classmethod
-    def filter(cls, data):
-        filter_dict = json.loads(data)
-        andSections = cls.objects
-        andDict = {}
-=======
 
     @classmethod
     def filter_json(cls, json_string):
@@ -480,7 +470,6 @@ class Section(models.Model):
     def filter(cls, filter_dict):
         andList = []
         ands = False
->>>>>>> 0ca3e5d4705bdba57ff0d3e6ff3dbfca22473328
         orList = []
         ors = False
         timeList = []
@@ -501,46 +490,6 @@ class Section(models.Model):
                 for k,v in filters.iteritems():
                     timeLogic = logic
                     if k == "MWF" or k == "TR":
-<<<<<<< HEAD
-                        if 'or' in prevLogic:
-
-                            for times in range(len(v)):
-
-                        elif 'and' in prevLogic or prevLogic is '':
-                            andDict.update({'days':k})
-                            for times in range(len(v)):
-                                andDict.update({start_time__gte:v[times][0], end_time__lte:v[times][0]})
-            elif:
-                # print "   filter(" + key + "=" + ', '.join(filters) + ")"
-                if 'or' in prevLogic:
-                    # add to List here
-                elif 'and' in prevLogic or prevLogic is '':
-                    andDict.update({key:filters})
-
-            # if 'or' in prevLogic:
-            #     # print("orSections +=")
-            #     # orSections += cls.objects.filter()
-            # elif 'and' in prevLogic or prevLogic is '':
-            #     qList += newQuery
-            #     # print("andSections x=")
-            #     #andSections = andSections.filter()
-
-            prevLogic = tags['logic'] + " "
-
-
-
-
-        sections = Section.objects
-        for key, value in filters.iteritems():
-            if key == 'time':
-                # START
-                # reduce(lambda q, f: q | Q(creator=f), filters, Q())
-                sections = sections.filter(reduce(lambda query, filter: query | (Q(start_time >= filter[0]) & Q(end_time <= filter[1])), value, Q()))
-                # OR
-                #for pair in value:
-                #    sections = sections.filter(start_time >= pair[0]).filter(end_time <= pair[1])
-                # END
-=======
                         for times in range(len(v)):
                             timeList += [reduce(operator.and_, [Q(days=k), Q(start_time__gte=v[times][0]), Q(end_time__lte=v[times][1])])]
                         if timeList:
@@ -578,7 +527,6 @@ class Section(models.Model):
                 orQuery = reduce(operator.or_, [orQuery, timeQuery])
             if finalQuery != '':
                 finalQuery = reduce(operator.or_, [finalQuery, orQuery])
->>>>>>> 0ca3e5d4705bdba57ff0d3e6ff3dbfca22473328
             else:
                 finalQuery = orQuery
         if finalQuery == '':

@@ -148,7 +148,7 @@
             "id_work_hours": $('#id_work_hours').val()
         });
 
-        $.post("/home/courses/",
+        $.post("/resources/courses/",
               {
                   "csrfmiddlewaretoken": "{{ csrf_token }}",
                   "request-name":'save-section-request',
@@ -168,7 +168,7 @@
       function getCourseInfo(course) {
         console.log('');
         currentCourse = course;
-        $.post("/home/courses/",
+        $.post("/resources/courses/",
               {
                   "csrfmiddlewaretoken": "{{ csrf_token }}",
                   "request-name": "course-section-request",
@@ -182,7 +182,7 @@
         console.log('courseName: ' + courseName);
         console.log('sectionTypeName: ' + sectionTypeName);
 
-        $.post("/home/courses/",
+        $.post("/resources/courses/",
               {
                   "csrfmiddlewaretoken": "{{ csrf_token }}",
                   "request-name": "delete-section-type-request",

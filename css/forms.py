@@ -195,8 +195,6 @@ class AddSectionTypeForm(forms.Form):
 
     def save(self):
         SectionType.create(name=self.cleaned_data['section_type_name'])
-<<<<<<< HEAD
-=======
 
 class AddSectionForm(forms.Form):
     course = forms.ModelChoiceField(label='Course', queryset=Course.objects.values_list('name', flat=True), empty_label="                   ")
@@ -209,5 +207,3 @@ class AddSectionForm(forms.Form):
 
     # def save(self):
     #     section = Section.create()
-
->>>>>>> 0ca3e5d4705bdba57ff0d3e6ff3dbfca22473328
