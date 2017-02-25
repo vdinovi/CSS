@@ -52,8 +52,18 @@ class CUser(models.Model):
         return last_name
 
     @classmethod
+    def validate_name(cls, first_name, last_name):
+        if first_name and len(first_name) > 30:
+            raise ValidationError("Attempted CUser creation with a first_name longer than 30 characters")
+        if last_name and len(last_name) > 30:
+            raise ValidationError("Attempted CUser creation with a last_name longer than 30 characters")
+        if CUser.objects.filter(user__first_name=first_name, user__last_name=last_name).exists():
+            raise ValidationError("Attempted CUser creation with duplicate full name.")
+
+    @classmethod
     def create(cls, email, password, user_type, first_name, last_name):
         try:
+            cls.validate_name(first_name, last_name)
             user = cls(user=User.objects.create_user(username=cls.validate_email(email), 
                                                      email=cls.validate_email(email),
                                                      password=cls.validate_password(password),
@@ -72,6 +82,13 @@ class CUser(models.Model):
     @classmethod
     def get_user(cls, email): # Throws ObjectDoesNotExist
         return cls.objects.get(user__username=email)
+    # Return cuser by full name
+    def get_cuser_by_full_name(cls, full_name):
+        first_name = full_name.split()[0]
+        last_name = full_name.split()[1]
+        print first_name + last_name
+        return cls.objects.get(user__first_name=first_name,
+                               user__last_name=last_name)
     # Return faculty cuser by email
     @classmethod
     def get_faculty(cls, email): # Throws ObjectDoesNotExist
@@ -88,7 +105,6 @@ class CUser(models.Model):
         for faculty in faculty_list:
             names_list.append('{0} {1}'.format(faculty.user.first_name, faculty.user.last_name))
         return names_list
-
     # Return scheduler cuser by email
     @classmethod
     def get_scheduler(cls, email): # Throws ObjectDoesNotExist

@@ -78,6 +78,19 @@ def HomeView(request):
 def AvailabilityView(request):
     return render(request, 'availability.html')
 
+def SchedulingView(request):
+    res = HttpResponse()
+    if request.method == "GET":
+        return render(request, 'scheduling.html', {
+                      'new_section_form':AddSectionForm()})
+    elif request.method == "POST":
+        form = AddSectionForm(request.POST)
+        form.save()
+        return render(request, 'scheduling.html')
+    else:
+        print 'in outer else'
+        res.status_code = 400
+
 def LandingView(request):
     return render(request,'landing.html')
 
