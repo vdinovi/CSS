@@ -6,7 +6,10 @@ from datetime import datetime
 
 class SectionTestCase(TestCase): 
     def setUp(self):
-        schedule = Schedule.create("Spring 2017", "active")
+        schedule1 = Schedule.create("Spring 2017", "active")
+        schedule2 = Schedule.create("Winter 2017", "finalized")
+        type1 = SectionType.create("Lecture")
+        type2 = SectionType.create("Lab")
         course101 = Course.create("CPE101", "computers", "Fundamentals of Computer Science I")
         course102 = Course.create("CPE102", "computers", "Fundamentals of Computer Science II")
         faculty1 = CUser.create("paula@calpoly.edu", "@1Testpass", "faculty", "Paula", "Ledgerwood")
@@ -14,152 +17,114 @@ class SectionTestCase(TestCase):
         room = Room.create("14-156", "Graphics", 30, None, None)
         room = Room.create("14-157", "Security", 30, None, None)
         Section.create(
-            schedule.academic_term, course101.name, "10:00", "12:00", "MWF", 
+            schedule1.academic_term, course101.name, type1.name, "10:00", "12:00", "MWF", 
             "paula@calpoly.edu", "14-156", 30, 0, 0, 
             "n", None, "n", None)
         Section.create(
-            schedule.academic_term, course102.name, "12:00", "14:00", "MWF", 
-            "sigal@calpoly.edu", "14-157", 30, 0, 0, 
+            schedule2.academic_term, course102.name, type2.name, "12:00", "14:00", "MWF", 
+            "sigal@calpoly.edu", "14-157", 50, 0, 0, 
+            "y", "faculty", "y", "room")
+        
+
+    def test_section_get_schedule1(self): 
+        """ Test that schedule is retrieved properly """
+        section = Section.get_section(schedule="Spring 2017")
+        self.assertEquals(section.course.name, "CPE101")
+
+    def test_section_get_schedule2(self): 
+        """ Test that creting section with nonexistant scheudule is raising error """
+        self.assertRaises(ObjectDoesNotExist, Section.create,
+            "Spring 2018", "CPE101", "Lab", "10:00AM", "12:00PM", "MWF", 
+            "paula@calpoly.edu", "14-156", 50, 0, 0, 
+            "n", None, "n", None
+            )
+
+    def test_section_get_course1(self): 
+        """ Test that course are retrieved properly """
+        section = Section.get_section(course="CPE101")
+        self.assertEquals(section.schedule.academic_term, "Spring 2017")
+
+    def test_section_get_course2(self): 
+        """ Test that creting section with nonexistant course is raising error """
+        self.assertRaises(ObjectDoesNotExist, Section.create,
+            "Spring 2017", "CPE103", "Lecture", "10:00AM", "12:00PM", "MWF", 
+            "paula@calpoly.edu", "14-156", 30, 0, 0, 
             "n", None, "n", None)
 
-    # def test_section_get_schedule1(self): 
-    #     """ Test that schedule is retrieved properly """
-    #     section = Section.Objects.get(schedule="Spring 2017")
-    #     self.assertEquals(section.course.name, "CPE101")
+    def test_section_get_start_time(self): 
+        """ Test that start_time in retrieved properly """
+        section = Section.objects.get(start_time="10:00AM")
+        self.assertEquals(section.end_time.strftime("%H:%M%p"), "12:00PM")
 
-    # def test_section_get_schedule2(self): 
-    #     """ Test that creting section with nonexistant scheudule is raising error """
-    #     self.assertRaises(ObjectDoesNotExist, Section.create,
-    #         "Spring 2018", "CPE101", "10:00AM", "12:00PM", "MWF", 
-    #         "paula@calpoly.edu", "14-156", 30, 0, 0, 
-    #         "n", None, "n", None
-    #         )
+    def test_section_get_end_time(self): 
+        """ Test that end_time is retrieved properly """
+        section = Section.objects.get(end_time="12:00PM")
+        self.assertEquals(section.start_time.strftime("%H:%M%p"), "10:00AM")
 
-    # def test_section_get_course1(self): 
-    #     """ Test that course are retrieved properly """
-    #     section = Section.Objects.get(course="CPE101")
-    #     self.assertEquals(section.schedule.academic_term, "Spring 2017")
+    def test_section_get_days1(self): 
+        """ Test that days are retrieved properly """
+        faculty = CUser.get_faculty("paula@calpoly.edu")
+        section = Section.objects.get(faculty=faculty, days="MWF")
+        self.assertEquals(section.start_time.strftime("%H:%M%p"), "10:00AM")
 
-    # def test_section_get_course2(self): 
-    #     """ Test that creting section with nonexistant course is raising error """
-    #     self.assertRaises(ObjectDoesNotExist, Section.create,
-    #         "Spring 2017", "CPE102", "10:00AM", "12:00PM", "MWF", 
-    #         "paula@calpoly.edu", "14-156", 30, 0, 0, 
-    #         "n", None, "n", None)
+    def test_section_get_days2(self): 
+        """ Test that days are retrieved properly """
+        self.assertRaises(ObjectDoesNotExist, Section.objects.get, days="TR")
 
-    # def test_section_get_start_time(self): 
-    #     """ Test that start_time in retrieved properly """
-    #     section = Section.objects.get(start_time="10:00AM")
-    #     self.assertEquals(section.end_time.strftime("%H:%M%p"), "12:00PM")
+    def test_section_get_faculty(self): 
+        """ Test that faculty are retrieved properly """
+        section = Section.get_section(faculty="paula@calpoly.edu")
+        self.assertEquals(section.course.name, "CPE101")
 
-    # def test_section_get_end_time(self): 
-    #     """ Test that end_time is retrieved properly """
-    #     section = Section.objects.get(end_time="12:00PM")
-    #     self.assertEquals(section.start_time.strftime("%H:%M%p"), "10:00AM")
+    def test_section_get_room(self): 
+        """ Test that room assignment is retrieved properly """
+        section = Section.get_section(room="14-156")
+        self.assertEquals(section.room.name, "14-156")
 
-    # def test_section_get_days1(self): 
-    #     """ Test that days are retrieved properly """
-    #     section = Section.objects.get(days="MWF")
-    #     self.assertEquals(section.start_time.strftime("%H:%M%p"), "10:00AM")
+    def test_section_get_section_capacity(self): 
+        """ Test that section_capacity is retrieved properly """
+        section = Section.objects.get(capacity=30)
+        self.assertEquals(section.course.name, "CPE101")
 
-    # def test_section_get_days2(self): 
-    #     """ Test that days are retrieved properly """
-    #     self.assertRaises(ObjectDoesNotExist, Section.objects.get, days="TR")
+    def test_section_get_students_enrolled(self): 
+        """ Test that students_enrolled is retrieved properly """
+        faculty = CUser.get_faculty("sigal@calpoly.edu")
+        section = Section.objects.get(faculty=faculty, students_enrolled=0)
+        self.assertEquals(section.course.name, "CPE102")
 
-    # def test_section_get_faculty(self): 
-    #     """ Test that faculty are retrieved properly """
-    #     section = Section.get_section(faculty="paula@calpoly.edu")
-    #     self.assertEquals(section.course.name, "CPE101")
+    def test_section_get_students_waitlisted(self): 
+        """ Test that students_waitlisted is retrieved properly """
+        faculty = CUser.get_faculty("paula@calpoly.edu")
+        section = Section.objects.get(faculty=faculty,students_waitlisted=0)
+        self.assertEquals(section.course.name, "CPE101")
 
-    # def test_section_get_room(self): 
-    #     """ Test that room assignment is retrieved properly """
-    #     section = Section.get_section(room="14-156")
-    #     self.assertEquals(section.room.name, "14-156")
+    def test_section_get_conflict1(self): 
+        """ Test that conflict is retrieved properly """
+        section = Section.objects.get(conflict="n")
+        self.assertEquals(section.course.name, "CPE101")
 
-    # def test_section_get_section_capacity(self): 
-    #     """ Test that section_capacity is retrieved properly """
-    #     section = Section.objects.get(capacity=30)
-    #     self.assertEquals(section.course.name, "CPE101")
+    def test_section_get_conflict2(self): 
+        """ Test that conflict retrieval raises does not exist error properly """
+        faculty = CUser.get_faculty("paula@calpoly.edu")
+        self.assertRaises(ObjectDoesNotExist, Section.objects.get, faculty=faculty, conflict="y")
 
-    # def test_section_get_students_enrolled(self): 
-    #     """ Test that students_enrolled is retrieved properly """
-    #     section = Section.objects.get(students_enrolled=0)
-    #     self.assertEquals(section.course.name, "CPE101")
+    def test_section_get_conflict_reason(self): 
+        """ Test that conflict_reason is retrieved properly """
+        section = Section.objects.get(conflict="n")
+        self.assertEquals(section.conflict_reason, None)
 
-    # def test_section_get_students_waitlisted(self): 
-    #     """ Test that students_waitlisted is retrieved properly """
-    #     section = Section.objects.get(students_waitlisted=0)
-    #     self.assertEquals(section.course.name, "CPE101")
+    def test_section_get_fault(self): 
+        """ Test that fault is retrieved properly """
+        section = Section.objects.get(conflict="n")
+        self.assertEquals(section.course.name, "CPE101")
 
-    # def test_section_get_conflict1(self): 
-    #     """ Test that conflict is retrieved properly """
-    #     section = Section.objects.get(conflict='n')
-    #     self.assertEquals(section.course.name, "CPE101")
-
-    # def test_section_get_conflict2(self): 
-    #     """ Test that conflict retrieval raises does not exist error properly """
-    #     self.assertRaises(ObjectDoesNotExist, Section.objects.get, conflict='y')
-
-    # def test_section_get_conflict_reason(self): 
-    #     """ Test that conflict_reason is retrieved properly """
-    #     section = Section.objects.get(conflict='n')
-    #     self.assertEquals(section.conflict_reason, None)
-
-    # def test_section_get_fault(self): 
-    #     """ Test that fault is retrieved properly """
-    #     section = Section.objects.get(conflict='n')
-    #     self.assertEquals(section.course.name, "CPE101")
-
-    # def test_section_get_fault_reason(self): 
-    #     """ Test that fault_reason is retrieved properly """
-    #     section = Section.objects.get(fault='n')
-    #     self.assertEquals(section.fault_reason, None)
-
-    # def test_section_get_room(self): 
-    #     """ Test that room assignment is retrieved properly """
-    #     section = Section.get_section(room="14-156")
-    #     self.assertEquals(section.room.name, "14-156")
-
-    # def test_section_get_section_capacity(self): 
-    #     """ Test that section_capacity is retrieved properly """
-    #     section = Section.objects.get(capacity=30)
-    #     self.assertEquals(section.course.name, "CPE101")
-
-    # def test_section_get_students_enrolled(self): 
-    #     """ Test that students_enrolled is retrieved properly """
-    #     section = Section.objects.get(students_enrolled=0)
-    #     self.assertEquals(section.course.name, "CPE101")
-
-    # def test_section_get_students_waitlisted(self): 
-    #     """ Test that students_waitlisted is retrieved properly """
-    #     section = Section.objects.get(students_waitlisted=0)
-    #     self.assertEquals(section.course.name, "CPE101")
-
-    # def test_section_get_conflict1(self): 
-    #     """ Test that conflict is retrieved properly """
-    #     section = Section.objects.get(conflict="n")
-    #     self.assertEquals(section.course.name, "CPE101")
-
-    # def test_section_get_conflict2(self): 
-    #     """ Test that conflict retrieval raises does not exist error properly """
-    #     self.assertRaises(ObjectDoesNotExist, Section.objects.get, conflict="y")
-
-    # def test_section_get_conflict_reason(self): 
-    #     """ Test that conflict_reason is retrieved properly """
-    #     section = Section.objects.get(conflict="n")
-    #     self.assertEquals(section.conflict_reason, None)
-
-    # def test_section_get_fault(self): 
-    #     """ Test that fault is retrieved properly """
-    #     section = Section.objects.get(conflict="n")
-    #     self.assertEquals(section.course.name, "CPE101")
-
-    # def test_section_get_fault_reason(self): 
-    #     """ Test that fault_reason is retrieved properly """
-    #     section = Section.objects.get(fault="n")
-    #     self.assertEquals(section.fault_reason, None)
+    def test_section_get_fault_reason(self): 
+        """ Test that fault_reason is retrieved properly """
+        section = Section.objects.get(fault="n")
+        self.assertEquals(section.fault_reason, None)
 
         #--------------- Filter Tests ----------------#
+
     def test_section_filter_course_one(self):
         """ A section matches the name of one course we filter by. """
         course_filter = '{"course": {"logic":"and", "filters":["CPE101"]}}'
@@ -232,6 +197,12 @@ class SectionTestCase(TestCase):
     def test_section_course_faculty(self):
         """ Successful time filter returns 1 section. """
         course_faculty_filter = '{"course": {"logic":"and", "filters":["CPE101"]}, "faculty": {"logic":"and", "filters":["paula@calpoly.edu"]}}'
+        res_sections = Section.filter_json(course_faculty_filter)
+        self.assertEquals(len(res_sections), 1)
+
+    def test_section_course_faculty_time(self):
+        """ Successful time filter returns 1 section. """
+        course_faculty_filter = '{"course": {"logic":"and", "filters":["CPE101"]}, "faculty": {"logic":"and", "filters":["paula@calpoly.edu"]}, "time": {"logic":"and", "filters":{"MWF":[["9:00", "13:00"]], "TR":[["12:00", "13:00"]]}}}'
         res_sections = Section.filter_json(course_faculty_filter)
         self.assertEquals(len(res_sections), 1)
 

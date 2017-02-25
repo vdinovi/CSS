@@ -61,7 +61,7 @@ class CourseTestCase(TestCase):
 
     def test_name_too_long(self):
         """ Invalid course name raises validation error. """
-        self.assertRaisesRegexp(ValidationError, "Invalid data for course creation.", Course.create, "CourseNameTooLong", None, None)
+        self.assertRaises(ValidationError, Course.create, "CourseNameTooLong", None, None)
 
     # Test setters
     def test_set_equipment_req(self):
