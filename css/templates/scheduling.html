@@ -15,7 +15,7 @@
     <link href="{% static "css/scheduling.css" %}" rel="stylesheet">
     <!-- Nice looking checkbox, would like to use to fill box where existing checkboxes are 
       Has some bugs to work out. Taken from: http://bootsnipp.com/snippets/featured/checkboxradio-css-only -->
-    <link href="{% static "css/checkbox.css" %}" rel="stylesheet"> 
+      <link href="{% static "css/checkbox.css" %}" rel="stylesheet"> 
 
       <!-- #e0e0e0HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
       <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -28,202 +28,192 @@
   <body>
     {% include "navbar.html" %}
     <div id="scheduling-container" class="container scheduling-container">
-      <!-- Term Frame -->
-
-      <!-- Previous term frame -->
-      <!-- <div class="row">
-        <div id="active-term-frame" class="col-xs-8 col-xs-offset-2 term-frame">
-        <div id="active-term-list-group" class="list-group text-center"> 
-        <a href="#" class="list-group-item terms active">Fall 2016</a>
-        <a href="#" class="list-group-item terms">Winter 2017</a>
-        <a href="#" class="list-group-item terms dropdown">View New Term</a>
+      <div class="row">
+        <div id="term-frame" class="col-xs-10 term-frame">
+          <ul class="nav nav-tabs">
+            <li class="dropdown">
+              <a class="dropdown-toggle" data-toggle="dropdown" href="#">Fall 2016<b class="caret"></b></a>
+              <ul class="dropdown-menu">
+                <li><a href="#" class="dropdown-toggle" data-toggle="tab">Approve Schedule</a></li>
+                <li><a href="#" class="dropdown-toggle" data-toggle="tab">Close Tab</a></li>
+              </ul>
+            </li>
+            <li><a href="#" data-toggle="modal" data-target="#view-term-modal" >View Term</a></li>
+          </ul>
         </div>
+        <div class="col-xs-2">
+          <div id="create-new-term-btn" class="btn">Create New Term</div>
         </div>
-
-        </div> -->
-        <div class="row">
-          <div class="col-xs-10 term-frame">
-            <ul class="nav nav-tabs">
-              <li class="dropdown">
-                <a class="dropdown-toggle active" data-toggle="dropdown" href="#">Fall 2016
-                  <span class="caret"></span></a>
-                <ul class="dropdown-menu" role="menu">
-                  <li><a href="#" class="dropdown-toggle" data-toggle="tab">Approve</a></li>
-                  <li><a href="#" class="dropdown-toggle" data-toggle="tab">Close Tab</a></li>
-                </ul>
-              </li>
-              <li><a href="#">Winter 2017</a></li>
-              <li><a href="#" data-toggle="modal">View New Term</a></li>
-            </ul>
+        <!-- New Section Frame -->
+        <div id="new-section-frame" class="col-xs-12 new-section-frame" style="display:none;">
+          <div class="row" style="padding-top:20px">
+            <button id="filter-frame-btn" class="btn switch-frame-btn col-xs-4 col-xs-offset-4" onclick='switchFrame("new-section-frame", "filter-frame")'>Filter Sections</button>
           </div>
-          <div class="col-xs-2">
-            <div id="create-new-term-btn" class="btn">Create New Term</div>
+          <div class="col-xs-4 outer-frame">
+            <form method="POST"> {% csrf_token %}
+              {{ new_section_form.as_p }}
+            </form>
           </div>
-          <!-- New Section Frame -->
-          <div id="new-section-frame" class="col-xs-12 new-section-frame" style="display:none;">
-            <div class="row" style="padding-top:20px">
-              <button id="filter-frame-btn" class="btn switch-frame-btn col-xs-4 col-xs-offset-4" onclick='switchFrame("new-section-frame", "filter-frame")'>Filter Sections</button>
-            </div>
-            <div class="col-xs-4 outer-frame">
-              <form method="POST"> {% csrf_token %}
-                {{ new_section_form.as_p }}
-              </form>
-            </div>
+        </div>
+        <!-- Filter Window -->
+        <div id="filter-frame" class="col-xs-12 filter-frame">
+          <div class="row" style="padding-top:20px">
+            <button id="new-section-frame-btn" class="btn switch-frame-btn col-xs-4 col-xs-offset-4" onclick='switchFrame("filter-frame", "new-section-frame")'>Manage New Sections</button>
           </div>
-          <!-- Filter Window -->
-          <div id="filter-frame" class="col-xs-12 filter-frame">
-            <div class="row" style="padding-top:20px">
-              <button id="new-section-frame-btn" class="btn switch-frame-btn col-xs-4 col-xs-offset-4" onclick='switchFrame("filter-frame", "new-section-frame")'>Manage New Sections</button>
-            </div>
-            <div class="col-xs-3 outer-frame">
-              <h2 style="text-align:center;">Filter Type</h2>
-              <div id="filter-type-frame" class="inner-frame">
-                <div id="filter-type-window" class="filter-type-window">
-                  <!-- COURSE FILTER -->
-                  <button id="course-filter-btn" class="noselect filter-type" value="inactive" style="width:100%;" onclick="selectFilter(this, 'course-options')">Course</button>
-                  <span id="course-options" class="list-group">
-                  </span>
-                  <!-- FACULTY FILTER -->
-                  <button id="faculty-filter-btn" class="noselect filter-type" value="inactive" style="width:100%;" onclick="selectFilter(this, 'faculty-options')">Faculty</button>
-                  <span id="faculty-options" class="list-group">
-                  </span> 
-                  <!-- ROOM FILTER -->
-                  <button id="room-filter-btn" class="noselect filter-type" value="inactive" style="width:100%;" onclick="selectFilter(this, 'room-options')">Room</button>
-                  <span id="room-options" class="list-group">
-                  </span>
-                  <!-- TIME FILTER -->
-                  <button id="time-filter-btn" class="noselect filter-type" value="inactive" style="width:100%;" onclick="selectFilter(this, 'time-options')">Time</button>
-                  <span id="time-options" class="list-group">
-                  </span>
+          <div class="col-xs-3 outer-frame">
+            <h2 style="text-align:center;">Filter Type</h2>
+            <div id="filter-type-frame" class="inner-frame">
+              <div id="filter-type-window" class="filter-type-window">
+                <!-- COURSE FILTER -->
+                <button id="course-filter-btn" class="noselect filter-type" value="inactive" style="width:100%;" onclick="selectFilter(this, 'course-options')">Course</button>
+                <div id="course-options" class="list-group" style="margin:0px">
                 </div>
-                <button id="clear-filter-btn" class="btn" style="margin-top:5px;" onclick="unselectAllSelectedOptions()">Clear</button>
+                <!-- FACULTY FILTER -->
+                <button id="faculty-filter-btn" class="noselect filter-type" value="inactive" style="width:100%;" onclick="selectFilter(this, 'faculty-options')">Faculty</button>
+                <div id="faculty-options" class="list-group" style="margin:0px">
+                </div> 
+                <!-- ROOM FILTER -->
+                <button id="room-filter-btn" class="noselect filter-type" value="inactive" style="width:100%;" onclick="selectFilter(this, 'room-options')">Room</button>
+                <div id="room-options" class="list-group" style="margin:0px">
+                </div>
+                <!-- TIME FILTER -->
+                <button id="time-filter-btn" class="noselect filter-type" value="inactive" style="width:100%;" onclick="selectFilter(this, 'time-options')">Time&ltTODO&gt</button>
+                <div id="time-options" class="list-group" style="margin:0px">
+                </div>
               </div>
+              <button id="clear-filter-btn" class="btn" style="margin-top:5px;" onclick="unselectAllSelectedOptions()">Clear</button>
             </div>
-            <!-- Option Window -->
-            <div class="col-xs-3 outer-frame">
-              <h2 style="text-align:center;">Options</h2>
-              <div id="option-frame" class="inner-frame">
-              </div>
+          </div>
+          <!-- Option Window -->
+          <div class="col-xs-3 outer-frame">
+            <h2 style="text-align:center;">Options</h2>
+            <div id="option-frame" class="inner-frame">
             </div>
-            <!-- Filter Logic Window -->
-            <div class="col-xs-3 outer-frame">
-              <h2 style="text-align:center;">Filter Logic</h2>
-              <form class="form-horizontal" role="form">
-                <div id="filter-logic-frame" class="inner-frame" style="padding-top: 5%">
-                  <div id="course-filter-logic" class="filter-logic">
-                    <div class="col-xs-8 col-xs-offset-2" style="height:100%;">
-                      <label class="checkbox-inline"><input type="checkbox" value="">Course</label>
-                      <div class="list-group"> 
-                        <a href="#" class="list-group-item logic active">OR</a>
-                        <a href="#" class="list-group-item logic">AND</a>
-                      </div>
-                    </div>
-                  </div>
-                  <div id="faculty-filter-logic" class="filter-logic">
-                    <div class="col-xs-8 col-xs-offset-2" style="height:100%;">
-                      <label class="checkbox-inline"><input type="checkbox" value="">Faculty</label>
-                      <div class="list-group"> 
-                        <a href="#" class="list-group-item logic active">OR</a>
-                        <a href="#" class="list-group-item logic">AND</a>
-                      </div>
-                    </div>
-                  </div>
-                  <div id="room-filter-logic" class="filter-logic">
-                    <div class="col-xs-8 col-xs-offset-2" style="height:100%;">
-                      <label class="checkbox-inline"><input type="checkbox" value="">Room</label>
-                      <div class="list-group"> 
-                        <a href="#" class="list-group-item logic active">OR</a>
-                        <a href="#" class="list-group-item logic">AND</a>
-                      </div>
-                    </div>
-                  </div>
-                  <div id="time-filter-logic" class="filter-logic">
-                    <div class="col-xs-8 col-xs-offset-2" style="height:100%;">
-                      <label class="checkbox-inline"><input type="checkbox" value="">Time</label>
+          </div>
+          <!-- Filter Logic Window -->
+          <div class="col-xs-3 outer-frame">
+            <h2 style="text-align:center;">Filter Logic</h2>
+            <form class="form-horizontal" role="form">
+              <div id="filter-logic-frame" class="inner-frame" style="padding-top: 5%">
+                <div id="course-filter-logic" class="filter-logic">
+                  <div class="col-xs-8 col-xs-offset-2" style="height:100%;">
+                    <label class="checkbox-inline"><input type="checkbox" value="">Course</label>
+                    <div class="list-group"> 
+                      <a href="#" class="list-group-item logic active">OR</a>
+                      <a href="#" class="list-group-item logic">AND</a>
                     </div>
                   </div>
                 </div>
-              </form>
-            </div>
+                <div id="faculty-filter-logic" class="filter-logic">
+                  <div class="col-xs-8 col-xs-offset-2" style="height:100%;">
+                    <label class="checkbox-inline"><input type="checkbox" value="">Faculty</label>
+                    <div class="list-group"> 
+                      <a href="#" class="list-group-item logic active">OR</a>
+                      <a href="#" class="list-group-item logic">AND</a>
+                    </div>
+                  </div>
+                </div>
+                <div id="room-filter-logic" class="filter-logic">
+                  <div class="col-xs-8 col-xs-offset-2" style="height:100%;">
+                    <label class="checkbox-inline"><input type="checkbox" value="">Room</label>
+                    <div class="list-group"> 
+                      <a href="#" class="list-group-item logic active">OR</a>
+                      <a href="#" class="list-group-item logic">AND</a>
+                    </div>
+                  </div>
+                </div>
+                <div id="time-filter-logic" class="filter-logic">
+                  <div class="col-xs-8 col-xs-offset-2" style="height:100%;">
+                    <label class="checkbox-inline"><input type="checkbox" value="">Time</label>
+                  </div>
+                </div>
+              </div>
+            </form>
+          </div>
+          <!-- @TODO Fill with real entries -->
+          <div class="col-xs-3 outer-frame">
+            <h2 style="text-align:center;">Sections</h2>
+            <div id="section-frame" class="inner-frame">
+              <ul class="list-group">
+                <div id="section-cpe101-01" class="input-group">
+                  <span class="input-group-addon">
+                    <input id="section-checkbox" type="checkbox">
+                  </span>
+                  <p class="form-control">CPE101-01</p>
+                </div>
+                <div id="section-cpe101-02" class="input-group">
+                  <span class="input-group-addon">
+                    <input id="option-checkbox" type="checkbox">
+                  </span>
+                  <p class="form-control">CPE101-02</p>
+                </div>
+                <div id="section-cpe101-03" class="input-group">
+                  <span class="input-group-addon">
+                    <input id="option-checkbox" type="checkbox">
+                  </span>
+                  <p class="form-control">CPE101-03</p>
+                </div>
+              </ul>
+            </div> 
+          </div>
+        </div>
+      </div>
+      <!-- Section Frame -->
+      <div class="row" style="padding-top: 20px;">
+        <h2 style="text-align:center"> Section Details </h2>
+      </div>
+      <div class="row">
+        <div class="section-detail-frame">
+          <table class="table table-striped table-hover table-bordered">
+            <thead>
+              <tr class="top">
+                <th>Term</th>
+                <th>Section</th>
+                <th>Course</th>
+                <th>Type</th>
+                <th>Days</th>
+                <th>Start Time</th>
+                <th>End Time</th>
+                <th>Faculty</th>
+                <th>Room</th>
+              </tr>
+            </thead>
             <!-- @TODO Fill with real entries -->
-            <div class="col-xs-3 outer-frame">
-              <h2 style="text-align:center;">Sections</h2>
-              <div id="section-frame" class="inner-frame">
-                <ul class="list-group">
-                  <div id="section-cpe101-01" class="input-group">
-                    <span class="input-group-addon">
-                      <input id="section-checkbox" type="checkbox">
-                    </span>
-                    <p class="form-control">CPE101-01</p>
-                  </div>
-                  <div id="section-cpe101-02" class="input-group">
-                    <span class="input-group-addon">
-                      <input id="option-checkbox" type="checkbox">
-                    </span>
-                    <p class="form-control">CPE101-02</p>
-                  </div>
-                  <div id="section-cpe101-03" class="input-group">
-                    <span class="input-group-addon">
-                      <input id="option-checkbox" type="checkbox">
-                    </span>
-                    <p class="form-control">CPE101-03</p>
-                  </div>
-                </ul>
-              </div> 
-            </div>
-          </div>
+            <tbody>
+            </tbody>
+          </table>
         </div>
-        <!-- Section Frame -->
-        <div class="row" style="padding-top: 20px;">
-          <h2 style="text-align:center"> Section Details </h2>
-        </div>
-        <div class="row">
-          <div class="section-detail-frame">
-            <table class="table table-striped table-hover table-bordered">
-              <thead>
-                <tr class="top">
-                  <th>Section</th>
-                  <th>Course</th>
-                  <th>Type</th>
-                  <th>Days</th>
-                  <th>Start Time</th>
-                  <th>End Time</th>
-                  <th>Faculty</th>
-                  <th>Room</th>
-                </tr>
-              </thead>
-              <!-- @TODO Fill with real entries -->
-              <tbody>
-                <tr>
-                  <td>01</td>
-                  <td>CPE309</td>
-                  <td>LEC</td>
-                  <td>MWF</td>
-                  <td>9:00am</td>
-                  <td>10:00am</td>
-                  <td>Kearns</td>
-                  <td>14-229</td>
-                </tr>
-                <tr>
-                  <td>01</td>
-                  <td>CPE309</td>
-                  <td>LAB</td>
-                  <td>MWF</td>
-                  <td>10:00am</td>
-                  <td>11:00am</td>
-                  <td>Kearns</td>
-                  <td>14-229</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
+      </div>
     </div>
 
+    <div id="view-term-modal" class="modal fade" role="dialog">
+      <div class="modal-dialog">
+        <!-- Modal content-->
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+          </div>
+          <div id="view-term-modal-body" class="modal-body">
+            <div class="list-group">              
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
     <!-- Custom JS -->
-    <script language="javascript">
-    </script>
     <script src="{% static "js/scheduling.js" %}"></script>
+    <script language="javascript">
+        // Populate 'view-term' modal with all terms
+        $('#view-term-modal').on('show.bs.modal', function () {
+            getSchedules();
+        });
+        // Fixes Dropdown bug.
+        $(document).ready(function () {
+            $('.dropdown-toggle').dropdown();
+        });
+    </script>
     <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
     <!-- Include all compiled plugins (below), or include individual files as needed -->

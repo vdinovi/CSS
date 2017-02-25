@@ -352,6 +352,15 @@ class Schedule(models.Model):
     def get_schedule(cls, term_name):
         return cls.objects.get(academic_term=term_name)
 
+    @classmethod
+    def get_all_schedules(cls):
+        return cls.objects.filter();
+
+    def to_json(self):
+        return dict(
+                academic_term = self.academic_term)
+                
+
 
 # Section is our systems primary scheduled object
 # Each section represents a department section that is planned for a particular schedule
