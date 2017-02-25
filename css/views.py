@@ -379,44 +379,6 @@ def SchedulingView(request):
     else:
         res.status_code = 400
 
-
-# Used to retrieve options when new filter type is selected
-def OptionsView(request):
-    res = HttpResponse()
-    if request.method == "GET":
-        option_type = request.GET.get('type') 
-        if option_type is None:
-            res.status_code = 400
-            res.reason_phrase = "Missing option type"
-        else:
-            res.content_type = "application/json"
-            if option_type == "Course":
-                data = json.dumps({"options": [x.to_json() for x in Course.get_all_courses().all()] })
-                res.write(data)
-                res.status_code = 200
-            elif option_type == "Faculty":
-                data = json.dumps({"options": [x.to_json() for x in CUser.get_all_faculty().all()] })
-                res.write(data)
-                res.status_code = 200
-            elif option_type == "Room":
-                data = json.dumps({"options": [x.to_json() for x in Room.get_all_rooms().all()] })
-                res.write(data)
-                res.status_code = 200
-            elif option_type == "Time":
-                res.status_code = 400
-                res.reason_phrase = "NYI"
-            else:
-                res.status_code = 400
-                res.reason_phrase = "Missing option type"
-    else:
-        res.status_code = 400 
-    return res
-
-        
-
-
-
-
 #  FAQ View
 # -- Low Priority --
 # @descr FAQ view that shows all current FAQ items
