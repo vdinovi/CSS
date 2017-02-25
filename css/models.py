@@ -245,7 +245,6 @@ class Course(models.Model):
     # Returns course by name
     @classmethod
     def get_course(cls, name):
-        print("get_course: " + str(name))
         return cls.objects.get(name=name)
 
     def to_json(self):
@@ -266,7 +265,6 @@ class Course(models.Model):
 
     # Get all section types associated with this course
     def get_all_section_types(self):
-        print(str(WorkInfo.objects.filter(course=self).count()) + " section types found")
         return WorkInfo.objects.filter(course=self)
 
     # Get a specific section type associated with this course
@@ -286,16 +284,25 @@ class Course(models.Model):
         #WorkInfo.create(self, section_type, work_units, work_hours)
 
     def get_all_section_types_JSON(self):
-        sectionTypes = self.get_all_section_types()
-        print("Found " + str(sectionTypes.count()) + " section types")
+        courseSectionTypes = self.get_all_section_types()
+        print("Found " + str(courseSectionTypes.count()) + " course section types")
         sectionTypesDictionary = {}
-        for sectionType in sectionTypes:
-            print sectionType.section_type.name
+        for sectionType in courseSectionTypes:
+            print type(sectionType)
+            print type(sectionType.section_type)
             sectionTypesDictionary[sectionType.section_type.name] = {
                 'course_name': sectionType.course.name,
                 'section_type_name': sectionType.section_type.name,
                 'work_units': sectionType.work_units,
                 'work_hours': sectionType.work_hours
+            }
+        sectionTypes = SectionType.get_all_section_types()
+        print("Found " + str(sectionTypes.count()) + "general section types")
+        for sectionType in sectionTypes:
+            print sectionType.section_type.name
+            sectionTypesDictionary[sectionType.section_type.name] = {
+                'course_name': '',
+                'section_type_name': sectionType.section_type.name,
             }
         return JsonResponse(sectionTypesDictionary)
 
@@ -314,6 +321,10 @@ class SectionType(models.Model):
     @classmethod
     def get_section_type(cls, name):
         return cls.objects.get(name=name)
+
+    @classmethod
+    def get_all_section_types(cls):
+        return SectionType.objects.all()
 
 # WorkInfo contains the user defined information for specific Course-SectionType pairs
 # Each pair has an associated work units and work hours defined by the department
