@@ -102,9 +102,9 @@
     height: 100%;
 }
 
-/* ********************** */
-/* ***** TERM ***** */
-/* ********************** */
+/* ****************** */
+/* ***** FILTER ***** */
+/* ****************** */
 
 /* Window for filter types */
 .filter-type-window {
@@ -141,6 +141,26 @@
     border-top: 0px;
     border-bottom: 0px;
 }
+
+.selected-option {
+    display: inline-block;
+    width: 100%;
+    height: 25px;
+}
+
+.selected-option button {
+    float: left;
+    width: 20%;
+    height:25px;
+}
+
+.selected-option li {
+    float: right;
+    width: 80%;
+    height:25px;
+}
+
+
 
 /************* ABOVE IS ORGANIZED *************/
 
