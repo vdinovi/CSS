@@ -36,11 +36,11 @@ function getSchedules() {
         success: function(response) {
             data = JSON.parse(response);
             list = $("#view-term-modal-body").children("div");
-            var scheduleFormatString = "<button class=\"list-group-item\" onclick=\"addSchedule(\"{0}\")\">{0}</button>\n";
+            /*var scheduleFormatString = "<button class=\"list-group-item\" onclick=\"addSchedule(\"{0}\")\">{0}</button>\n";
             console.log(data.active[0].academic_term);
             for (var i = 0; i < data.active.length; ++i) {
                 list.append(scheduleFormatString.format(data.active[i].academic_term));
-            }
+            }*/
         },
         error: function(err) {
             console.log(err);
