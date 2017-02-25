@@ -1,10 +1,10 @@
 from django import forms
 from django.core.mail import send_mail
-from css.models import CUser, Room, Course, SectionType
+from css.models import CUser, Room, Course, SectionType, Schedule, Section
 from django.http import HttpResponseRedirect
 from settings import DEPARTMENT_SETTINGS
-#from django.contrib.sites.models import Site
 import re
+from django.forms import ModelChoiceField
 
 #  Login Form
 class LoginForm(forms.Form):
@@ -189,21 +189,47 @@ class EditCourseForm(forms.Form):
         course.set_equipment_req(self.cleaned_data['equipment_req'])
         course.set_description(self.cleaned_data['description'])
 
-
 class AddSectionTypeForm(forms.Form):
     section_type_name = forms.CharField()
 
     def save(self):
         SectionType.create(name=self.cleaned_data['section_type_name'])
 
+
+# Custom ModelChoiceField for faculty full names
+class FacultyModelChoiceField(ModelChoiceField):
+    def label_from_instance(self, obj):
+        return obj.user.first_name + " " + obj.user.last_name
+
 class AddSectionForm(forms.Form):
+    academic_term = forms.ModelChoiceField(label='Term', queryset=Schedule.objects.values_list('academic_term', flat=True), empty_label="                    ")
     course = forms.ModelChoiceField(label='Course', queryset=Course.objects.values_list('name', flat=True), empty_label="                   ")
-    section_type = forms.ModelChoiceField(label='Section Type', queryset=SectionType.objects.values_list('name', flat=True), empty_label="                   ")
-    # faculty = forms.ModelChoiceField(label='Faculty', queryset=CUser.get_all_faculty().values_list('user__first_name', 'user__last_name'))
-    # faculty = forms.ModelChoiceField(label='Faculty', choices = [ ((p),) for p in CUser.get_all_faculty_full_name()])
+    start_time = forms.TimeField(label='Start Time', input_formats=('%I:%M %p'))
+    end_time = forms.TimeField(label='End Time', input_formats=('%I:%M %p'))
+    days = forms.CharField(label='Days')
+    days = forms.ChoiceField(label='Days', choices=[('MWF', 'MWF'), ('TR', 'TR')])
+    faculty = FacultyModelChoiceField(label='Faculty', queryset=CUser.objects.filter(user_type='faculty'))
     room = forms.ModelChoiceField(label='Room', queryset=Room.objects.values_list('name', flat=True), empty_label="                   ")
     capacity = forms.IntegerField()
-    start_time = forms.TimeField(label='Start Time', input_formats=('%I:%M %p'))
 
-    # def save(self):
-    #     section = Section.create()
+
+    section_type = forms.ModelChoiceField(label='Section Type', queryset=SectionType.objects.values_list('name', flat=True), empty_label="                   ")
+
+
+    def save(self):
+        section = Section.create (schedule = Schedule.objects.get(academic_term=self.cleaned_data['academic_term']),
+                                  course = Course.objects.get(course=self.cleaned_data['course']),
+                                  start_time = self.cleaned_data['start_time'],
+                                  end_time = self.cleaned_data['end_time'],
+                                  days = self.cleaned_data['days'],
+                                  faculty = CUser.get_cuser_by_full_name(self.cleaned_data['faculty']),
+                                  room = Room.objects.get(name=self.cleaned_data['room']),
+                                  capacity = self.cleaned_data['capacity'],
+                                  students_enrolled = 0,
+                                  students_waitlisted = 0,
+                                  conflict = 'n',
+                                  conflict_reason = null,
+                                  fault = 'n',
+                                  fault_reason = null)
+        section.save()
+        return

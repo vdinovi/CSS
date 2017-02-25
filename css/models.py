@@ -13,6 +13,7 @@ import operator
 from django.db.models import Q
 from django.http import JsonResponse
 
+
 # System User class,
 # Wrapper for django builtin class, contains user + application specific data
 class CUser(models.Model):
@@ -52,8 +53,18 @@ class CUser(models.Model):
         return last_name
 
     @classmethod
+    def validate_name(cls, first_name, last_name):
+        if first_name and len(first_name) > 30:
+            raise ValidationError("Attempted CUser creation with a first_name longer than 30 characters")
+        if last_name and len(last_name) > 30:
+            raise ValidationError("Attempted CUser creation with a last_name longer than 30 characters")
+        if CUser.objects.filter(user__first_name=first_name, user__last_name=last_name).exists():
+            raise ValidationError("Attempted CUser creation with duplicate full name.")
+
+    @classmethod
     def create(cls, email, password, user_type, first_name, last_name):
         try:
+            cls.validate_name(first_name, last_name)
             user = cls(user=User.objects.create_user(username=cls.validate_email(email),
                                                      email=cls.validate_email(email),
                                                      password=cls.validate_password(password),
@@ -72,6 +83,13 @@ class CUser(models.Model):
     @classmethod
     def get_user(cls, email): # Throws ObjectDoesNotExist
         return cls.objects.get(user__username=email)
+    # Return cuser by full name
+    def get_cuser_by_full_name(cls, full_name):
+        first_name = full_name.split()[0]
+        last_name = full_name.split()[1]
+        print first_name + last_name
+        return cls.objects.get(user__first_name=first_name,
+                               user__last_name=last_name)
     # Return faculty cuser by email
     @classmethod
     def get_faculty(cls, email): # Throws ObjectDoesNotExist
@@ -88,7 +106,6 @@ class CUser(models.Model):
         for faculty in faculty_list:
             names_list.append('{0} {1}'.format(faculty.user.first_name, faculty.user.last_name))
         return names_list
-
     # Return scheduler cuser by email
     @classmethod
     def get_scheduler(cls, email): # Throws ObjectDoesNotExist
@@ -97,6 +114,10 @@ class CUser(models.Model):
     @classmethod
     def get_all_schedulers(cls):
         return cls.objects.filter(user_type='scheduler')
+    # Return cuser email
+    @classmethod
+    def get_email(self):
+        return self.user.username
     # Set the first name
     @classmethod
     def set_first_name(self, first_name):
@@ -203,13 +224,16 @@ class Course(models.Model):
 
     @classmethod
     def create(cls, name, equipment_req, description):
-        try:
-            course = cls(name=name,
+        if len(name) > 16:
+            raise ValidationError("Name is longer than 16 characters, making it invalid.")
+        if len(equipment_req) > 2048:
+            raise ValidationError("Description is longer than 2048 characters, making it invalid.")
+        if len(description) > 2048:
+            raise ValidationError("Description is longer than 2048 characters, making it invalid.")
+        course = cls(name=name,
                          equipment_req=equipment_req,
                          description=description)
-            course.save()
-        except:
-            raise ValidationError("Invalid data for course creation.")
+        course.save()
         return course
 
 
@@ -325,9 +349,9 @@ class Availability(models.Model):
     faculty = models.OneToOneField(CUser, on_delete=models.CASCADE, null=True)
     days_of_week = models.CharField(max_length=16) # MWF or TR
     start_time = models.TimeField()
-    start_type = models.CharField(max_length=2)
+    start_type = models.CharField(max_length=2, default="AM")
     end_time = models.TimeField()
-    end_type = models.CharField(max_length=2)
+    end_type = models.CharField(max_length=2, default="AM")
     level = models.CharField(max_length=16) # available, preferred, unavailable
 
     @classmethod
@@ -375,12 +399,22 @@ class Schedule(models.Model):
     def get_schedule(cls, term_name):
         return cls.objects.get(academic_term=term_name)
 
+    @classmethod
+    def get_all_schedules(cls):
+        return cls.objects.filter();
+
+    def to_json(self):
+        return dict(
+                academic_term = self.academic_term)
+
+
 
 # Section is our systems primary scheduled object
 # Each section represents a department section that is planned for a particular schedule
 class Section(models.Model):
     schedule = models.ForeignKey(Schedule, on_delete=models.CASCADE)
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
+    section_type = models.ForeignKey(SectionType, null=True, on_delete=models.SET_NULL)
     start_time = models.TimeField()
     end_time = models.TimeField()
     days = models.CharField(max_length=8)    # MWF or TR
@@ -396,13 +430,13 @@ class Section(models.Model):
 
     @classmethod
     def create(
-        cls, term_name, course_name, start_time, end_time, days, faculty_email, room_name,
+        cls, term_name, course_name, section_type, start_time, end_time, days, faculty_email, room_name,
         capacity, students_enrolled, students_waitlisted, conflict,
         conflict_reason, fault, fault_reason):
-        # the schedule and course object will actually be passed into the Section as a OneToOneField
+        # these objects will actually be passed into the Section because of the ForeignKey
         schedule = Schedule.get_schedule(term_name)
         course = Course.get_course(course_name)
-        # the faculty and room will be passed in just as the email and room name (IDs for their models) b/c of the ForeignKey type
+        section_type = SectionType.get_section_type(section_type)
         faculty = CUser.get_faculty(faculty_email)
         room = Room.get_room(room_name)
         if DEPARTMENT_SETTINGS.start_time and start_time < DEPARTMENT_SETTINGS.start_time:
@@ -428,6 +462,7 @@ class Section(models.Model):
         section = cls(
                   schedule=schedule,
                   course=course,
+                  section_type=section_type,
                   start_time=start_time,
                   end_time=end_time,
                   days=days,
@@ -537,27 +572,30 @@ class Section(models.Model):
 class FacultyCoursePreferences(models.Model):
     faculty = models.ForeignKey(CUser, on_delete = models.CASCADE)
     course = models.ForeignKey(Course, on_delete = models.CASCADE)
+    comments = models.CharField(max_length=2048, null=True, default="No comments.")
     rank = models.IntegerField(default = 0)
 
     @classmethod
-    def create(faculty, course, rank):
+    def create(cls, faculty, course, comments, rank):
         course_pref = cls(
             faculty=faculty,
             course=course,
+            comments=comments,
             rank=rank)
         course_pref.save()
         return course_pref
 
     @classmethod
     def get_faculty_pref(cls, faculty):
-        entries = cls.objects.filter(faculty='faculty')
-        #join the course ID to the course table
-        course_arr = {}
-        i = 0
-        for entry in entries:
-            course_id = entry.value(course)
-            #course_obj holds the entry in the table in the course table
-            course_obj = Course.objects.get(id=course_id)
-            course_arr[course_obj.rank] = course_obj.course_name
-        course_arr.sort()
-        return course_arr.values()
+        entries = cls.objects.filter(faculty=faculty)
+        return entries
+
+    @classmethod
+    def get_course_list(cls, faculty):
+        entries = cls.objects.filter(faculty=faculty)
+        # join the course ID to the course table
+        course_arr = []
+        for entry in entries: # go through and make list of tuples (rank, course_name, course_description, comments)
+            course_arr += [(entry.rank, entry.course.name, entry.course.description, entry.comments)]
+        course_arr.sort(key=lambda tup:tup[0]) # sort courses by rank (first spot in tuple)
+        return course_arr

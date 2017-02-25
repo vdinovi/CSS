@@ -18,6 +18,7 @@
 /* ***** Frames ***** */
 /* ***************** */
 
+
 /* Container for entire scheduling page (below navbar) */
 .scheduling-container {
     overflow-x: scroll;
@@ -33,8 +34,8 @@
 /* Frame for section creation */
 .new-section-frame {
     position: absolute;
-    margin-top: 10px;
     min-width:300px;
+    height: 550px;
     background-color: #e5e5e5;
     border: 1px solid black;
     display:inline-block;
@@ -42,9 +43,9 @@
 
 /* Window for filters */
 .filter-frame {
-    /*margin-top: 10px;*/
     position: absolute;
     min-width:300px;
+    height: 550px;
     background-color: #e5e5e5;
     border: 1px solid black;
     overflow-x: scroll;
@@ -62,7 +63,7 @@
     width: 100%;
     height: 300px;
     margin: 0 auto;
-    /*border: 1px solid black;*/
+    border: 1px solid black;
     border-radius: 5px;
     display:inline-block;
 }
@@ -78,6 +79,11 @@
 .btn {
     background-color: #94bdbd;
     color: black;
+}
+
+/* Enlarged text box */
+body input[type=checkbox] {
+  transform: scale(2);
 }
 
 /* ********************** */
@@ -102,9 +108,9 @@
     height: 100%;
 }
 
-/* ********************** */
-/* ***** TERM ***** */
-/* ********************** */
+/* ****************** */
+/* ***** FILTER ***** */
+/* ****************** */
 
 /* Window for filter types */
 .filter-type-window {
@@ -135,12 +141,35 @@
     background-color: white;
     position: relative;
     display: block;
+    margin: 0px;
     padding: 0px;
     padding-left: 15px;
     border: 1px solid #cccccc;
     border-top: 0px;
     border-bottom: 0px;
 }
+
+.selected-option {
+    display: inline-block;
+    float: left;
+    width: 100%;
+    height: 25px;
+}
+
+.selected-option button {
+    float: left;
+    width: 20%;
+    height:25px;
+}
+
+.selected-option li {
+    border-bottom: 1px solid grey;
+    float: right;
+    width: 80%;
+    height:25px;
+}
+
+
 
 /************* ABOVE IS ORGANIZED *************/
 
@@ -211,4 +240,10 @@
     padding-top:0;
 }
 
+
+/* New Section Form */
+.new_section_inputs {
+    position:relative;
+    text-align: center;
+}
 
