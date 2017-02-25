@@ -8,7 +8,13 @@ from django.db import IntegrityError
 from django.core.exceptions import ValidationError, ObjectDoesNotExist
 from util import DepartmentSettings
 from settings import DEPARTMENT_SETTINGS
+<<<<<<< HEAD
 from django.http import JsonResponse
+=======
+import json
+import operator
+from django.db.models import Q
+>>>>>>> 0ca3e5d4705bdba57ff0d3e6ff3dbfca22473328
 
 # System User class,
 # Wrapper for django builtin class, contains user + application specific data
@@ -77,6 +83,15 @@ class CUser(models.Model):
     @classmethod
     def get_all_faculty(cls):
         return cls.objects.filter(user_type='faculty')
+    # Return faculty full name
+    @classmethod
+    def get_all_faculty_full_name(cls):
+        faculty_list = cls.objects.filter(user_type='faculty')
+        names_list = []
+        for faculty in faculty_list:
+            names_list.append('{0} {1}'.format(faculty.user.first_name, faculty.user.last_name))
+        return names_list
+
     # Return scheduler cuser by email
     @classmethod
     def get_scheduler(cls, email): # Throws ObjectDoesNotExist
@@ -85,6 +100,27 @@ class CUser(models.Model):
     @classmethod
     def get_all_schedulers(cls):
         return cls.objects.filter(user_type='scheduler')
+    # Set the first name
+    @classmethod
+    def set_first_name(self, first_name):
+        self.first_name = first_name
+        self.save()
+    # Set the last name
+    @classmethod
+    def set_last_name(self, last_name):
+        self.last_name = last_name
+        self.save()
+    # Set the password
+    @classmethod
+    def set_password(self, pword):
+        self.password = pword
+        self.save()
+
+    def to_json(self):
+        return dict(id = self.id,
+                    name = self.user.first_name + self.user.last_name,
+                    email = self.user.email)
+
 
 
 class FacultyDetails(models.Model):
@@ -146,6 +182,22 @@ class Room(models.Model):
     def get_room(cls, name):
         return Room.objects.get(name=name)
 
+    @classmethod
+    def get_all_rooms(cls):
+        return cls.objects.filter()
+
+    def to_json(self):
+        return dict(id = self.id,
+                    name = self.name,
+                    description = self.description,
+                    capacity = self.capacity,
+                    notes = self.notes,
+                    equipment = self.equipment)
+
+
+
+
+
 # Course represents a department course offering
 class Course(models.Model):
     name = models.CharField(max_length=16, unique=True)
@@ -162,6 +214,8 @@ class Course(models.Model):
         except:
             raise ValidationError("Invalid data for course creation.")
         return course
+
+
     # Returns all course objects
     @classmethod
     def get_all_courses(cls):
@@ -172,6 +226,12 @@ class Course(models.Model):
     def get_course(cls, name):
         print("get_course: " + str(name))
         return cls.objects.get(name=name)
+
+    def to_json(self):
+        return dict(id = self.id,
+                    name = self.name,
+                    equipment_req = self.equipment_req,
+                    description = self.description)
 
     # Set the equipment required for this course
     def set_equipment_req(self, equipment_req):
@@ -220,16 +280,15 @@ class Course(models.Model):
 
 
 class SectionType(models.Model):
-    name = models.CharField(max_length=32) # eg. lecture or lab
+    name = models.CharField(max_length=32, unique=True) # eg. lecture or lab
 
     @classmethod
     def create(cls, name):
         if len(name) > 32:
             raise ValidationError("Section Type name exceeds 32 characters.")
-        else:
-            section_type = cls(name=name)
-            section_type.save()
-            return section_type
+        section_type = cls(name=name)
+        section_type.save()
+        return section_type
 
     @classmethod
     def get_section_type(cls, name):
@@ -269,22 +328,28 @@ class Availability(models.Model):
     faculty = models.OneToOneField(CUser, on_delete=models.CASCADE, null=True)
     days_of_week = models.CharField(max_length=16) # MWF or TR
     start_time = models.TimeField()
+    start_type = models.CharField(max_length=2)
     end_time = models.TimeField()
+    end_type = models.CharField(max_length=2)
     level = models.CharField(max_length=16) # available, preferred, unavailable
 
     @classmethod
-    def create(cls, email, days, start, end, level):
+    def create(cls, email, days, start, s_type, end, e_type, level):
         faculty = CUser.get_faculty(email=email)
         if days is None or len(days) > 16 or (days != "MWF" and days != "TR"):
             raise ValidationError("Invalid days of week input")
         elif (start is None):
             raise ValidationError("Need to input start time")
+        elif (s_type is None):
+            raise ValidationError("Need to input start type")
         elif (end is None):
             raise ValidationError("Need to input end time")
+        elif (e_type is None):
+            raise ValidationError("Need to input end type")
         elif (level is None) or (level != "available" and level != "preferred" and level != "unavailable"):
             raise ValidationError("Need to input level of availability: preferred, available, or unavailable")
         else:
-            availability = cls(faculty_member=faculty, days_of_week=days, start_time=start, end_time=end, level=level)
+            availability = cls(faculty=faculty, days_of_week=days, start_time=start, start_type=s_type, end_time=end, end_type=e_type, level=level)
             availability.save()
             return availability
 
@@ -317,8 +382,8 @@ class Schedule(models.Model):
 # Section is our systems primary scheduled object
 # Each section represents a department section that is planned for a particular schedule
 class Section(models.Model):
-    schedule = models.OneToOneField(Schedule, on_delete=models.CASCADE, unique=True)
-    course = models.OneToOneField(Course, on_delete=models.CASCADE, unique=True)
+    schedule = models.ForeignKey(Schedule, on_delete=models.CASCADE)
+    course = models.ForeignKey(Course, on_delete=models.CASCADE)
     start_time = models.TimeField()
     end_time = models.TimeField()
     days = models.CharField(max_length=8)    # MWF or TR
@@ -343,10 +408,10 @@ class Section(models.Model):
         # the faculty and room will be passed in just as the email and room name (IDs for their models) b/c of the ForeignKey type
         faculty = CUser.get_faculty(faculty_email)
         room = Room.get_room(room_name)
-        # if start_time < DEPARTMENT_SETTINGS.start_time:
-        #     raise ValidationError("Invalid start time for department.")
-        # if end_time > DEPARTMENT_SETTINGS.end_time or end_time < start_time:
-        #     raise ValidationError("Invalid end time for department.")
+        if DEPARTMENT_SETTINGS.start_time and start_time < DEPARTMENT_SETTINGS.start_time:
+            raise ValidationError("Invalid start time for department.")
+        if DEPARTMENT_SETTINGS.end_time and end_time > DEPARTMENT_SETTINGS.end_time or end_time < start_time:
+            raise ValidationError("Invalid end time for department.")
         if days != "MWF" and days != "TR":
             raise ValidationError("Invalid days of the week.")
         if capacity < 0:
@@ -395,26 +460,48 @@ class Section(models.Model):
             else:
                 return cls.objects.get(k=v)
 
-    """
     # this function takes in a dictionary object of filters that has been serialized from a JSON object based on what the user has selected
     # for filtering by time, it will only take in an array of pairs (an array of 2-piece arrays) so that it will at least have a start time and end time.
     #### there can also be chunks of time, so there are multiple start and end times
     # for any other filter, we will pass on the keyword and array argument as it is to the filter.
+<<<<<<< HEAD
     @classmethod
     def filter(cls, data):
         filter_dict = json.loads(data)
         andSections = cls.objects
         andDict = {}
-        orList = []
-        prevLogic = ''
+=======
 
-        # OR list ex: [('question__contains', 'dinner'), ('question__contains', 'meal'), ('pub_date', datetime.date(2010, 7, 19))]
-        # AND dict ex: {'question__contains': 'omelette', 'pub_date' : datetime.date.today()}
+    @classmethod
+    def filter_json(cls, json_string):
+        return cls.filter(json.loads(json_string))
+
+    @classmethod
+    def filter(cls, filter_dict):
+        andList = []
+        ands = False
+>>>>>>> 0ca3e5d4705bdba57ff0d3e6ff3dbfca22473328
+        orList = []
+        ors = False
+        timeList = []
+        timeLogicList = []
+        timeLogic = ''
+        prevLogic = ''
+        andQuery = ''
+        orQuery = ''
+        timeQuery = ''
+        finalQuery = ''
+
         for key,tags in filter_dict.iteritems():
+            if 'logic' not in tags or 'filters' not in tags:
+                raise ValidationError("JSON not set up correctly. 'logic' and 'filters' are required keys in each filter type.")
+            logic = tags['logic']
             filters = tags['filters']
             if key == "time":
                 for k,v in filters.iteritems():
+                    timeLogic = logic
                     if k == "MWF" or k == "TR":
+<<<<<<< HEAD
                         if 'or' in prevLogic:
 
                             for times in range(len(v)):
@@ -453,9 +540,51 @@ class Section(models.Model):
                 #for pair in value:
                 #    sections = sections.filter(start_time >= pair[0]).filter(end_time <= pair[1])
                 # END
+=======
+                        for times in range(len(v)):
+                            timeList += [reduce(operator.and_, [Q(days=k), Q(start_time__gte=v[times][0]), Q(end_time__lte=v[times][1])])]
+                        if timeList:
+                            timeQuery = reduce(operator.or_, timeList)
             else:
-                sections = sections.filter(key=value)
-    """
+                queryLoop = Q()
+                for index in range(len(filters)):
+                    if key == "course":
+                        filterObject = Course.get_course(filters[index])
+                        queryLoop = reduce(operator.or_, [queryLoop, Q(course=filterObject)])
+                    elif key == "faculty":
+                        filterObject = CUser.get_faculty(filters[index])
+                        queryLoop = reduce(operator.or_, [queryLoop, Q(faculty=filterObject)])
+                    elif key == "room":
+                        filterObject = Room.get_room(filters[index])
+                        queryLoop = reduce(operator.or_, [queryLoop, Q(room=filterObject)])
+                    else:
+                        raise ValidationError("Invalid filter type.")
+
+                if 'or' in logic:
+                    ors = True
+                    orList += [queryLoop]
+                elif 'and' in logic or logic is '':
+                    ands = True
+                    andList += [queryLoop]
+
+        if ands is True:
+            andQuery = reduce(operator.and_, andList)
+            if (timeQuery is not None) and ('and' in timeLogic):
+                andQuery = reduce(operator.and_, [andQuery, timeQuery])
+            finalQuery = andQuery
+        if ors is True:
+            orQuery = reduce(operator.and_, orList)
+            if (timeQuery is not None) and ('or' in timeLogic):
+                orQuery = reduce(operator.or_, [orQuery, timeQuery])
+            if finalQuery != '':
+                finalQuery = reduce(operator.or_, [finalQuery, orQuery])
+>>>>>>> 0ca3e5d4705bdba57ff0d3e6ff3dbfca22473328
+            else:
+                finalQuery = orQuery
+        if finalQuery == '':
+            finalQuery = timeQuery
+
+        return Section.objects.filter(finalQuery)
 
 class FacultyCoursePreferences(models.Model):
     faculty = models.ForeignKey(CUser, on_delete = models.CASCADE)

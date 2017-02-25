@@ -72,7 +72,16 @@ class RegisterUserForm(forms.Form):
 
 # Edit User Form
 class EditUserForm(forms.Form):
-    pass
+    user_email = forms.CharField(widget=forms.HiddenInput(), initial='a@a.com')
+    first_name = forms.CharField()
+    last_name = forms.CharField()
+    password = forms.CharField()
+
+    def save(self):
+        user = CUser.get_user(email=self.cleaned_data['user_email'])
+        user.set_first_name(self.cleaned_data['first_name'])
+        user.set_last_name(self.cleaned_data['last_name'])
+        user.set_password(self.cleaned_data['password'])
 
 # Delete Form
 class DeleteUserForm(forms.Form):
@@ -81,7 +90,7 @@ class DeleteUserForm(forms.Form):
     def delete_user(self):
         email = self.cleaned_data['email']
         print("emails match")
-        CUser.get_user(email=self.cleaned_data['email']).delete()
+        CUser.get_user(user__username=self.cleaned_data['email']).delete()
 
 class AddRoomForm(forms.Form):
     name = forms.CharField()
@@ -176,12 +185,29 @@ class EditCourseForm(forms.Form):
     description = forms.CharField()
 
     def save(self):
-        course = Course.objects.get(name=self.cleaned_data['course_name'])
+        course = Course.get_course(name=self.cleaned_data['course_name'])
         course.set_equipment_req(self.cleaned_data['equipment_req'])
         course.set_description(self.cleaned_data['description'])
+
 
 class AddSectionTypeForm(forms.Form):
     section_type_name = forms.CharField()
 
     def save(self):
         SectionType.create(name=self.cleaned_data['section_type_name'])
+<<<<<<< HEAD
+=======
+
+class AddSectionForm(forms.Form):
+    course = forms.ModelChoiceField(label='Course', queryset=Course.objects.values_list('name', flat=True), empty_label="                   ")
+    section_type = forms.ModelChoiceField(label='Section Type', queryset=SectionType.objects.values_list('name', flat=True), empty_label="                   ")
+    # faculty = forms.ModelChoiceField(label='Faculty', queryset=CUser.get_all_faculty().values_list('user__first_name', 'user__last_name'))
+    # faculty = forms.ModelChoiceField(label='Faculty', choices = [ ((p),) for p in CUser.get_all_faculty_full_name()])
+    room = forms.ModelChoiceField(label='Room', queryset=Room.objects.values_list('name', flat=True), empty_label="                   ")
+    capacity = forms.IntegerField()
+    start_time = forms.TimeField(label='Start Time', input_formats=('%I:%M %p'))
+
+    # def save(self):
+    #     section = Section.create()
+
+>>>>>>> 0ca3e5d4705bdba57ff0d3e6ff3dbfca22473328

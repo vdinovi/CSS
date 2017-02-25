@@ -4,11 +4,13 @@ from django.contrib import messages
 from django.shortcuts import render, render_to_response
 from django.views.generic import TemplateView
 from django.http import HttpResponse, HttpResponseRedirect
+from django.core import serializers
 import MySQLdb
 from django.db import IntegrityError
 from .models import *
 from .forms import *
 from settings import DEPARTMENT_SETTINGS
+import json
 import MySQLdb
 import json
 
@@ -77,17 +79,6 @@ def HomeView(request):
 def AvailabilityView(request):
     return render(request, 'availability.html')
 
-def SchedulingView(request):
-    res = HttpResponse()
-    if request.method == "GET":
-        return render(request, 'scheduling.html', {
-                     })
-    elif request.method == "POST":
-        res.status_code = 400
-        res.reason_phrase = "NYI"
-    else:
-        res.status_code = 400
-
 def LandingView(request):
     return render(request,'landing.html')
 
@@ -122,7 +113,6 @@ def SettingsView(request):
             res.reason_phrase = "Invalid form entry"
     elif request.method == "POST" and "delete-section-type" in request.POST:
         section = SectionType.get_section_type(name=request.POST['section-type-name'])
-        print section
         if section is not None:
             section.delete()
             return HttpResponseRedirect('/department/settings')
@@ -191,7 +181,7 @@ def RoomsView(request):
         if form.is_valid():
             try:
                 form.save();
-                return HttpResponseRedirect("/home/rooms")
+                return HttpResponseRedirect("/resources/rooms")
             except ValidationError as e:
                 res.status_code = 400
                 res.reason_phrase = "Invalid form entry"
@@ -210,7 +200,7 @@ def RoomsView(request):
         if form.is_valid():
             form.save()
             res.status_code = 200
-            return HttpResponseRedirect('/home/rooms')
+            return HttpResponseRedirect('/resources/rooms')
         else:
             res.status_code = 400
     elif request.method == "POST" and 'delete-form' in request.POST:
@@ -218,7 +208,7 @@ def RoomsView(request):
         if form.is_valid():
             form.deleteRoom()
             res.status_code = 200
-            return HttpResponseRedirect('/home/rooms')
+            return HttpResponseRedirect('/resources/rooms')
         else:
             res.status_code = 400
     else:
@@ -243,12 +233,10 @@ def CoursesView(request):
             });
     elif request.method == "POST" and 'add-course-form' in request.POST:
         form = AddCourseForm(request.POST);
-        print form.is_valid()
         if form.is_valid():
             try:
-                print "add form view"
                 form.save();
-                return HttpResponseRedirect("/home/courses")
+                return HttpResponseRedirect("/resources/courses")
             except ValidationError as e:
                 res.status_code = 400
                 res.reason_phrase = "Invalid form entry"
@@ -267,19 +255,17 @@ def CoursesView(request):
         if form.is_valid():
             form.save()
             res.status_code = 200
-            return HttpResponseRedirect('/home/courses')
+            return HttpResponseRedirect('/resources/courses')
         else:
             res.status_code = 400
             res.reason_phrase = "Invalid form entry"
     elif request.method == "POST" and 'delete-course-form' in request.POST:
         form = DeleteCourseForm(request.POST)
-        print("delete view")
         if form.is_valid():
             form.save()
             res.status_code = 200
-            return HttpResponseRedirect('/home/courses')
+            return HttpResponseRedirect('/resources/courses')
         else:
-            #form.save()
             res.status_code = 400
             res.reason_phrase = "Invalid form entry"
 
@@ -390,6 +376,7 @@ def FacultyView(request):
         return render(request, 'faculty.html', {
                 'faculty_list': CUser.objects.filter(user_type='faculty'),
                 'invite_user_form': InviteUserForm(),
+                'edit_user_form': EditUserForm(auto_id='edit_user_%s'),
                 'delete_user_form': DeleteUserForm()
             });
     elif request.method == "POST" and 'invite-form' in request.POST:
@@ -400,13 +387,18 @@ def FacultyView(request):
         else:
             res.status_code = 400
     elif request.method == "POST" and 'edit-form' in request.POST:
-        res.status_code = 400
-        res.reason_phrase = "NYI"
+        form = EditUserForm(request.POST)
+        if form.is_valid():
+            form.save()
+            res.status_code = 200
+            return HttpResponseRedirect('/resources/faculty')
+        else:
+            res.status_code = 400
+            res.reason_phrase = "Invalid form entry"
     elif request.method == "POST" and 'delete-form' in request.POST:
         form = DeleteUserForm(request.POST)
         if form.is_valid():
             try:
-                print("delete user view")
                 form.delete_user()
                 res.status_code = 200
             except ObjectDoesNotExist:
@@ -420,7 +412,58 @@ def FacultyView(request):
         res.status_code = 400
     return res
 
+# Primary scheduling page view
+def SchedulingView(request):
+    res = HttpResponse()
+    if request.method == "GET":
+        return render(request, 'scheduling.html', {
+                      'new_section_form':AddSectionForm()})
+    elif request.method == "POST":
+        res.status_code = 400
+        res.reason_phrase = "NYI"
+    else:
+        res.status_code = 400
+
+
+# Used to retrieve options when new filter type is selected
+def OptionsView(request):
+    res = HttpResponse()
+    if request.method == "GET":
+        option_type = request.GET.get('type') 
+        if option_type is None:
+            res.status_code = 400
+            res.reason_phrase = "Missing option type"
+        else:
+            res.content_type = "application/json"
+            if option_type == "Course":
+                data = json.dumps({"options": [x.to_json() for x in Course.get_all_courses().all()] })
+                res.write(data)
+                res.status_code = 200
+            elif option_type == "Faculty":
+                data = json.dumps({"options": [x.to_json() for x in CUser.get_all_faculty().all()] })
+                res.write(data)
+                res.status_code = 200
+            elif option_type == "Room":
+                data = json.dumps({"options": [x.to_json() for x in Room.get_all_rooms().all()] })
+                res.write(data)
+                res.status_code = 200
+            elif option_type == "Time":
+                res.status_code = 400
+                res.reason_phrase = "NYI"
+            else:
+                res.status_code = 400
+                res.reason_phrase = "Missing option type"
+    else:
+        res.status_code = 400 
+    return res
+
+        
+
+
+
+
 #  FAQ View
+# -- Low Priority --
 # @descr FAQ view that shows all current FAQ items
 # @TODO Create FAQ model and use to populate view
 # @Note These FAQ objects could be done without the database
@@ -434,6 +477,7 @@ def FAQView(request):
     else:
        res.status_code = 400;
     return res
+
 
 
 # ---------------------------
