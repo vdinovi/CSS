@@ -57,13 +57,14 @@ function selectFilter(element) {
                 var optionFormatString =
                     "<div id=\"option-{0}\" class=\"input-group\">\n" +
                     "  <span class=\"input-group-addon\">\n" +
-                    "    <input id=\"option-checkbox\" type=\"checkbox\">\n" +
+                    "    <input id=\"option-checkbox\" type=\"checkbox\" onclick=\"selectOption(this)\">\n" +
                     "  </span>\n" +
                     "  <p class=\"form-control\">{0}</p>\n" +
                     "</div>\n";
                 optionFrame = $("#option-frame");
                 optionFrame.empty();
                 for (var i in data.options) {
+                    //@TODO if option is selected in filter window -> auto check
                     optionFrame.append(optionFormatString.format(data.options[i].name));
                 }
             },
@@ -72,19 +73,41 @@ function selectFilter(element) {
             }
         });
     }
-    else {
-        element.value = "inactive";
-        element.className = "noselect filter-type";
-    }
 }
 
-
 // OnClick function for an option checkbox
-//  - Populates section window with all sections for selected option
-//  - Checks all sections in section window 
-function selectItem(element) {
-    //@TODO everything :( 
-    return true;
+// * If a new option is checked
+//    - Populates filter window with option under its respetive type
+// * If a an option is unchecked
+//    - Removes option from filter window
+//
+// @TODO In order to determine the active filter type, it iterates through all
+//       filter type and checks if active. 
+//       This is not a very elegant way of doing this.
+function selectOption(element) {
+    var filterType;
+    if ($("#course-filter-btn")[0].value == "active") 
+        filterType = $("#course-options");
+    else if ($("#faculty-filter-btn")[0].value == "active") 
+        filterType = $("#faculty-options");
+    else if ($("#room-filter-btn")[0].value == "active") 
+        filterType = $("#room-options");
+    else
+        filterType = $("#time-options");
+ 
+    // Add option to selected option list
+    if (element.checked) {
+        var optionFormatString = "<li id=\"{0}\" class=\"filter-options\">{1}</li>"
+        var text = element.parentNode.parentNode.innerText;
+        filterType.append(optionFormatString.format(text, "- "+text));
+    }
+    // Remove option to selected option list
+    else {
+        filterType.children("li").each(function(index, value) {
+            if (value.id == element.parentNode.parentNode.innerText)
+                value.remove();
+        });
+    }
 }
 
 // OnClick function for a section checkbox
