@@ -29,7 +29,7 @@ class InviteUserForm(forms.Form):
         last_name = self.cleaned_data['last_name']
         name = first_name + ' ' + last_name
         email = self.cleaned_data['email']
-        link = 'http://localhost:8000/register?first='+first_name + '&last=' + last_name +'&type='+usertype
+        link = 'http://localhost:8000/register?first_name='+first_name + '&last_name=' + last_name +'&user_type='+usertype
         send_mail('Invite to register for CSS',
                   name + """, you have been invited to register for CSS.
                   Please register using the following link: """ + link,
@@ -49,15 +49,16 @@ class RegisterUserForm(forms.Form):
     password1 = forms.CharField(label='Password', widget=forms.PasswordInput)
     password2 = forms.CharField(label='Confirm Password', widget=forms.PasswordInput)
 
-    def __init__(self,*args,**kwargs):
-        self.first_name = kwargs.pop('first')
-        self.last_name = kwargs.pop('last')
-        self.user_type = kwargs.pop('type')
-
-        self.declared_fields['first_name'].initial = self.first_name
-        self.declared_fields['last_name'].initial = self.last_name
-        self.declared_fields['user_type'].initial = self.user_type
-        self.declared_fields['user_type'].disabled = True
+    def __init__(self, *args, **kwargs):
+        print(kwargs)
+        if kwargs.pop('request') is "GET":
+            self.first_name = kwargs.pop('first_name')
+            self.last_name = kwargs.pop('last_name')
+            self.user_type = kwargs.pop('user_type')
+            self.declared_fields['first_name'].initial = self.first_name
+            self.declared_fields['last_name'].initial = self.last_name
+            self.declared_fields['user_type'].initial = self.user_type
+            self.declared_fields['user_type'].disabled = True
         super(RegisterUserForm, self).__init__(*args,**kwargs)
 
     def save(self):
