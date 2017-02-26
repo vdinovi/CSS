@@ -81,6 +81,11 @@
     color: black;
 }
 
+.invis-btn {
+    background: white;
+    
+}
+
 /* Enlarged text box */
 body input[type=checkbox] {
   transform: scale(2);
@@ -95,6 +100,11 @@ body input[type=checkbox] {
     /*margin-top: 13px;*/
     height:100%;
     vertical-align: middle;
+}
+
+.active-schedule {
+    background-color: #b5cadc;
+    border-radius:2px;
 }
 
 /* **************************** */

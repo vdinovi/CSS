@@ -39,6 +39,7 @@ function getSchedules() {
             data = JSON.parse(response);
             list = $("#view-term-modal-body").children("div");
             var scheduleFormatString = "<button class=\"list-group-item\" onclick=\"addSchedule('{0}')\">{0}</button>\n";
+            list.empty();
             for (var i = 0; i < data.active.length; ++i) {
                 list.append(scheduleFormatString.format(data.active[i].academic_term));
             }
@@ -52,25 +53,61 @@ function getSchedules() {
 // OnClick function function for adding a schedule 
 // * Adds selected schedule to term bar
 function addSchedule(name) {
+    // Id field to use for dropdown button (for easy querying). Replaces all ' ' with '-'.
+    var scheduleId = name.replace(/ /g, '-');
     var scheduleFormatString = 
         "<li class=\"dropdown\">\n" +
-        "  <a class=\"dropdown-toggle\" data-toggle=\"dropdown\" href=\"#\">"+name+"<b class=\"caret\"></b></a>\n" +
+        "  <a id=\"{0}\" class=\"dropdown-toggle\" data-toggle=\"dropdown\" href=\"#\">{1}<b class=\"caret\"></b></a>\n" +
         "  <ul class=\"dropdown-menu\">\n" +
-        "    <li><a href=\"#\" class=\"dropdown-toggle\" data-toggle=\"tab\">Approve Schedule</a></li>\n" +
-        "    <li><a href=\"#\" class=\"dropdown-toggle\" data-toggle=\"tab\">Close Tab</a></li>\n" +
+        "    <li><a href=\"#\" onclick=\"selectSchedule('{0}')\">Select Schedule</a></li>\n" +
+        "    <li><a href=\"#\" onclick=\"approveSchedule('{0}')\">Approve Schedule</a></li>\n" +
+        "    <li><a href=\"#\" onclick=\"closeSchedule('{0}')\">Close Tab</a></li>\n" +
         "  </ul>\n" +
         "</li>\n";
     var alreadyPresent = false;
-    $("#open-terms").children("li").each(function (index, value) {
-        console.log(value);
-        /*if (name == value.childNodes[0].innerText) {
+    // Check if tab is already open
+    $("#open-terms").children("li").children("a").each(function (index, value) {
+        if (name == value.innerText) {
             alreadyPresent = true;
-        }*/
+        }
     });
-    if (alreadyPresent == false)
-        $("#open-terms").prepend(scheduleFormatString.format(name)); 
+    if (!alreadyPresent) {
+        // If not already in list, add to front
+        $("#open-terms").prepend(scheduleFormatString.format(scheduleId, name)); 
+        // Activate dropdown
+        $("#"+scheduleId).dropdown();
+    }
+}
 
-    //$("#term-frame").children("ul").children("li").children("a").dropdown() 
+// Select a schedule from tab
+function selectSchedule(name) {
+    // De-select existing active schedule
+    $("#open-terms").children("li").each(function (index, value) {
+        value.className = "";
+    });
+    $("#"+name).parent().addClass("active-schedule");
+}
+
+// Gets the currently selected term. If none, returns false
+function getSelectedSchedule() {
+    terms = $("#open-terms").children("li");
+    for (var i = 0; i < terms.length; ++i) {
+        if (terms[i].className.includes("active-schedule")) {
+            return terms[i].childNodes[1].innerText;
+        }
+    }
+    return false;
+}
+
+// Close a schedule
+function closeSchedule(name) {
+    $("#"+name).parent().empty();
+}
+
+// Approve a schedule
+function approveSchedule(name) {
+    //@TODO
+    console.log("approveSchedule<NYI>");
 }
 
 /* *** FILTER / OPTIONS *** */ 
