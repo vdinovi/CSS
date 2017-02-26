@@ -28,7 +28,9 @@ function switchFrame(firstFrame, secondFrame) {
 }
 
 /* *** TERM *** */
-// When clicked, modal pops up and shows all existing schedules not currently selected
+// OnClick function for view term
+// * When clicked
+//    - modal pops up and shows all existing schedules not currently selected
 function getSchedules() {
     $.ajax({
         type: "GET",
@@ -36,11 +38,10 @@ function getSchedules() {
         success: function(response) {
             data = JSON.parse(response);
             list = $("#view-term-modal-body").children("div");
-            /*var scheduleFormatString = "<button class=\"list-group-item\" onclick=\"addSchedule(\"{0}\")\">{0}</button>\n";
-            console.log(data.active[0].academic_term);
+            var scheduleFormatString = "<button class=\"list-group-item\" onclick=\"addSchedule('{0}')\">{0}</button>\n";
             for (var i = 0; i < data.active.length; ++i) {
                 list.append(scheduleFormatString.format(data.active[i].academic_term));
-            }*/
+            }
         },
         error: function(err) {
             console.log(err);
@@ -48,9 +49,10 @@ function getSchedules() {
     });
 }
 
-/*
+// OnClick function function for adding a schedule 
+// * Adds selected schedule to term bar
 function addSchedule(name) {
-    /*var scheduleFormatString = 
+    var scheduleFormatString = 
         "<li class=\"dropdown\">\n" +
         "  <a class=\"dropdown-toggle\" data-toggle=\"dropdown\" href=\"#\">"+name+"<b class=\"caret\"></b></a>\n" +
         "  <ul class=\"dropdown-menu\">\n" +
@@ -58,9 +60,18 @@ function addSchedule(name) {
         "    <li><a href=\"#\" class=\"dropdown-toggle\" data-toggle=\"tab\">Close Tab</a></li>\n" +
         "  </ul>\n" +
         "</li>\n";
-    console.log($("#term-frame").children("ul"));
-    //$("#term-frame").children("ul")[0].append(scheduleFormatString.format(name)); 
-}*/
+    var alreadyPresent = false;
+    $("#open-terms").children("li").each(function (index, value) {
+        console.log(value);
+        /*if (name == value.childNodes[0].innerText) {
+            alreadyPresent = true;
+        }*/
+    });
+    if (alreadyPresent == false)
+        $("#open-terms").prepend(scheduleFormatString.format(name)); 
+
+    //$("#term-frame").children("ul").children("li").children("a").dropdown() 
+}
 
 /* *** FILTER / OPTIONS *** */ 
 
