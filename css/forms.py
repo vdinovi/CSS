@@ -1,6 +1,6 @@
 from django import forms
 from django.core.mail import send_mail
-from css.models import CUser, Room, Course, SectionType, Schedule, Section
+from css.models import CUser, Room, Course, SectionType, Schedule, Section, Availability
 from django.http import HttpResponseRedirect
 from settings import DEPARTMENT_SETTINGS
 import re
@@ -211,10 +211,7 @@ class AddSectionForm(forms.Form):
     faculty = FacultyModelChoiceField(label='Faculty', queryset=CUser.objects.filter(user_type='faculty'))
     room = forms.ModelChoiceField(label='Room', queryset=Room.objects.values_list('name', flat=True), empty_label="                   ")
     capacity = forms.IntegerField()
-
-
     section_type = forms.ModelChoiceField(label='Section Type', queryset=SectionType.objects.values_list('name', flat=True), empty_label="                   ")
-
 
     def save(self):
         section = Section.create (schedule = Schedule.objects.get(academic_term=self.cleaned_data['academic_term']),
@@ -233,3 +230,19 @@ class AddSectionForm(forms.Form):
                                   fault_reason = null)
         section.save()
         return
+
+class AddAvailabilityForm(forms.Form):
+	DAYS = ('Monday', 'Monday',),('Tuesday','Tuesday'),('Wednesday','Wednesday'), ('Thursday','Thursday',), ('Friday', 'Friday')
+	day = forms.ChoiceField(label='Day', choices=DAYS)
+	start_time = forms.TimeField(label='Start Time', input_formats=('%I:%M %p'))
+	end_time = forms.TimeField(label='End Time', input_formats=('%I:%M %p'))
+	level = forms.ChoiceField(label='Type', choices=[('Preferred', 'Preferred'), ('Unavailable','Unavailable')])
+
+	# def save(self,email): 
+	# 	availability = Availability.create(email = email,
+	# 										day = self.cleaned_data['day'], 
+	# 										start_time = self.cleaned_data['start_time'],
+	# 										end_time = self.cleaned_data['end_time'],
+	# 										level = self.cleaned_data['level'])
+	# 	availability.save()
+
