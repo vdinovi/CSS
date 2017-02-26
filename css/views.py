@@ -4,12 +4,15 @@ from django.contrib import messages
 from django.shortcuts import render, render_to_response
 from django.views.generic import TemplateView
 from django.http import HttpResponse, HttpResponseRedirect
+from django.core import serializers
 import MySQLdb
 from django.db import IntegrityError
 from .models import *
 from .forms import *
 from settings import DEPARTMENT_SETTINGS
+import json
 import MySQLdb
+import json
 
 # ---------------------------
 # --  Method-Based Views   --
@@ -17,9 +20,14 @@ import MySQLdb
 def RegistrationView(request):
     res = HttpResponse()
     #pass these credentials to the RegisterUserForm
+ 
     first_name = request.GET.get('first')
     last_name = request.GET.get('last')
     user_type = request.GET.get('type')
+    if first_name is None or last_name is None or user_type is None:
+        res.status_code = 400
+        res.reason_phrase = "Bad query string"
+        return res
 
     if request.method == "GET":
         storage = messages.get_messages(request)
@@ -74,17 +82,29 @@ def HomeView(request):
     return render(request, 'home.html')
 
 def AvailabilityView(request):
-    return render(request, 'availability.html')
+	res = HttpResponse()
+	if request.method == "GET":
+		return render(request,'availability.html', {'add_availability_form': AddAvailabilityForm()})
+	# elif request.method == "POST":
+	# 	form = AddAvailabilityForm(request.POST)
+ #        if form.is_valid():
+ #        	faculty = request.session.email
+ #        	day = form.cleaned_data['day']
+ #        	start_time = form.cleaned_data['start_time']
+ #        	end_time = form.cleaned_data['end_time']
+ #        	level = form.cleaned_data['level']
 
 def SchedulingView(request):
     res = HttpResponse()
     if request.method == "GET":
         return render(request, 'scheduling.html', {
-                     })
+                      'new_section_form':AddSectionForm()})
     elif request.method == "POST":
-        res.status_code = 400
-        res.reason_phrase = "NYI"
+        form = AddSectionForm(request.POST)
+        form.save()
+        return render(request, 'scheduling.html')
     else:
+        print 'in outer else'
         res.status_code = 400
 
 def LandingView(request):
@@ -100,7 +120,7 @@ def SettingsView(request):
             });
     elif request.method == "POST" and "submit-settings" in request.POST:
         try:
-            DEPARTMENT_SETTINGS.new_settings(chair=request.POST['chair'], 
+            DEPARTMENT_SETTINGS.new_settings(chair=request.POST['chair'],
                                              name=request.POST['name'],
                                              start_time=request.POST['start_time'],
                                              end_time=request.POST['end_time'])
@@ -118,7 +138,7 @@ def SettingsView(request):
             return HttpResponseRedirect('/department/settings')
         else:
             res.status_code = 200
-            res.reason_phrase = "Invalid form entry" 
+            res.reason_phrase = "Invalid form entry"
     elif request.method == "POST" and "delete-section-type" in request.POST:
         section = SectionType.get_section_type(name=request.POST['section-type-name'])
         if section is not None:
@@ -230,12 +250,14 @@ from .models import Course
 from .forms import AddCourseForm
 def CoursesView(request):
     res = HttpResponse()
+    print request.body
     if request.method == "GET":
         return render(request, 'courses.html', {
                 'course_list': Course.objects.filter(),
                 'add_course_form': AddCourseForm(auto_id='add_course_%s'),
                 'edit_course_form': EditCourseForm(auto_id='edit_course_%s'),
-                'delete_course_form': DeleteCourseForm()
+                'delete_course_form': DeleteCourseForm(),
+                'add_course_section_type_form': AddCourseSectionTypeForm()
             });
     elif request.method == "POST" and 'add-course-form' in request.POST:
         form = AddCourseForm(request.POST);
@@ -275,7 +297,62 @@ def CoursesView(request):
             res.status_code = 400
             res.reason_phrase = "Invalid form entry"
 
+    elif request.method == "POST" and request.POST['request-name'] == 'course-section-request':
+        print("section request")
+        print request.body
+
+        courseName = request.POST.__getitem__('course')
+        print("course: " + courseName);
+        #courseSet = Course.objects.filter(name=courseName)
+        course = Course.get_course(courseName)
+
+        #print(courseSet.count())
+        #course = courseSet.get()
+
+        res.content = course.get_all_section_types_JSON()
+        print res.content
+
+    elif request.method == "POST" and request.POST['request-name'] == 'delete-section-type-request':
+        print("remove section request")
+        print request.body
+
+        courseName = request.POST.__getitem__('course')
+        sectionTypeName = request.POST.__getitem__('section_type_name')
+
+        print("course: " + courseName);
+        print("sectionTYpe: " + sectionTypeName)
+
+        course = Course.get_course(courseName)
+        #courseSet = Course.objects.filter(name=courseName)
+
+        #print(courseSet.count())
+        #course = courseSet.get()
+        course.remove_section_type(sectionTypeName)
+
+
+        res.content = course.get_all_section_types_JSON()
+        print res.content
+    elif request.method == "POST" and request.POST['request-name'] == 'save-section-request':
+            print("save section request")
+            print request.body
+
+            #SectionType.create("Lecture1000")
+
+            courseName = request.POST.__getitem__('course')
+
+            course = Course.get_course(courseName)
+
+            name = request.POST.__getitem__('id_name')
+            work_units = request.POST.__getitem__('id_work_units')
+            work_hours = request.POST.__getitem__('id_work_hours')
+
+            course.add_section_type(name, work_units, work_hours)
+
+            res.content = course.get_all_section_types_JSON()
+            print res.content
+
     else:
+        print res.content
         res.status_code = 400
     return res
 
@@ -363,7 +440,20 @@ def FacultyView(request):
         res.status_code = 400
     return res
 
+# Primary scheduling page view
+def SchedulingView(request):
+    res = HttpResponse()
+    if request.method == "GET":
+        return render(request, 'scheduling.html', {
+                      'new_section_form':AddSectionForm()})
+    elif request.method == "POST":
+        res.status_code = 400
+        res.reason_phrase = "NYI"
+    else:
+        res.status_code = 400
+
 #  FAQ View
+# -- Low Priority --
 # @descr FAQ view that shows all current FAQ items
 # @TODO Create FAQ model and use to populate view
 # @Note These FAQ objects could be done without the database
@@ -377,6 +467,7 @@ def FAQView(request):
     else:
        res.status_code = 400;
     return res
+
 
 
 # ---------------------------
