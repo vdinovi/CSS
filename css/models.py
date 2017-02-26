@@ -287,23 +287,28 @@ class Course(models.Model):
         courseSectionTypes = self.get_all_section_types()
         print("Found " + str(courseSectionTypes.count()) + " course section types")
         sectionTypesDictionary = {}
+        i = 0
         for sectionType in courseSectionTypes:
+            print("for1")
             print type(sectionType)
             print type(sectionType.section_type)
-            sectionTypesDictionary[sectionType.section_type.name] = {
+            sectionTypesDictionary[i] = {
                 'course_name': sectionType.course.name,
                 'section_type_name': sectionType.section_type.name,
                 'work_units': sectionType.work_units,
                 'work_hours': sectionType.work_hours
             }
+            i+=1
         sectionTypes = SectionType.get_all_section_types()
         print("Found " + str(sectionTypes.count()) + "general section types")
         for sectionType in sectionTypes:
-            print sectionType.section_type.name
-            sectionTypesDictionary[sectionType.section_type.name] = {
+            print("for2")
+            sectionTypesDictionary[i] = {
                 'course_name': '',
-                'section_type_name': sectionType.section_type.name,
+                'section_type_name': sectionType.name,
             }
+            i+=1
+            print(sectionTypesDictionary)
         return JsonResponse(sectionTypesDictionary)
 
 

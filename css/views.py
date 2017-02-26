@@ -324,6 +324,7 @@ def CoursesView(request):
             #SectionType.create("Lecture1000")
 
             courseName = request.POST.__getitem__('course')
+            print("courseName: " + courseName)
 
             course = Course.get_course(courseName)
 
