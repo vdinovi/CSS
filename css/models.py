@@ -11,6 +11,7 @@ from settings import DEPARTMENT_SETTINGS
 import json
 import operator
 from django.db.models import Q
+from django.http import JsonResponse
 
 
 # System User class,
@@ -18,9 +19,9 @@ from django.db.models import Q
 class CUser(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     user_type = models.CharField(max_length=16)
-    
+
     @staticmethod
-    def validate_email(email): 
+    def validate_email(email):
         if re.match(r'^[A-Za-z0-9\._%+\-]+@[A-Za-z0-9\.\-]+\.[A-Za-z]{2,}$', email) is None:
             raise ValidationError("Attempted CUser creation"+"with invalid email address")
         return email
@@ -52,9 +53,19 @@ class CUser(models.Model):
         return last_name
 
     @classmethod
+    def validate_name(cls, first_name, last_name):
+        if first_name and len(first_name) > 30:
+            raise ValidationError("Attempted CUser creation with a first_name longer than 30 characters")
+        if last_name and len(last_name) > 30:
+            raise ValidationError("Attempted CUser creation with a last_name longer than 30 characters")
+        if CUser.objects.filter(user__first_name=first_name, user__last_name=last_name).exists():
+            raise ValidationError("Attempted CUser creation with duplicate full name.")
+
+    @classmethod
     def create(cls, email, password, user_type, first_name, last_name):
         try:
-            user = cls(user=User.objects.create_user(username=cls.validate_email(email), 
+            cls.validate_name(first_name, last_name)
+            user = cls(user=User.objects.create_user(username=cls.validate_email(email),
                                                      email=cls.validate_email(email),
                                                      password=cls.validate_password(password),
                                                      first_name=cls.validate_first_name(first_name),
@@ -72,13 +83,20 @@ class CUser(models.Model):
     @classmethod
     def get_user(cls, email): # Throws ObjectDoesNotExist
         return cls.objects.get(user__username=email)
+    # Return cuser by full name
+    def get_cuser_by_full_name(cls, full_name):
+        first_name = full_name.split()[0]
+        last_name = full_name.split()[1]
+        print first_name + last_name
+        return cls.objects.get(user__first_name=first_name,
+                               user__last_name=last_name)
     # Return faculty cuser by email
     @classmethod
     def get_faculty(cls, email): # Throws ObjectDoesNotExist
         return cls.objects.get(user__username=email, user_type='faculty')
     # Return all faculty cusers
     @classmethod
-    def get_all_faculty(cls): 
+    def get_all_faculty(cls):
         return cls.objects.filter(user_type='faculty')
     # Return faculty full name
     @classmethod
@@ -88,7 +106,6 @@ class CUser(models.Model):
         for faculty in faculty_list:
             names_list.append('{0} {1}'.format(faculty.user.first_name, faculty.user.last_name))
         return names_list
-
     # Return scheduler cuser by email
     @classmethod
     def get_scheduler(cls, email): # Throws ObjectDoesNotExist
@@ -130,7 +147,7 @@ class FacultyDetails(models.Model):
     faculty = models.OneToOneField(CUser, on_delete=models.CASCADE)
     target_work_units = models.IntegerField(default=0, null=True) # in units
     target_work_hours = models.IntegerField(default=0, null=True) # in hours
-    changed_preferences = models.CharField(max_length=1) # 'y' or 'n' 
+    changed_preferences = models.CharField(max_length=1) # 'y' or 'n'
 
     @classmethod
     def create(cls, faculty, target_work_units, target_work_hours):
@@ -144,7 +161,7 @@ class FacultyDetails(models.Model):
             self.target_work_units = new_work_units
         if new_work_hours:
             self.target_work_hours = new_work_hours
-        self.changed_preferences = 'y' 
+        self.changed_preferences = 'y'
 
     # @TODO Function to yes changed_preferences to 'n'? Also consider naming it something
     #       more indicative -> preferences_have_changed? has_changed_preferences? etc.
@@ -157,7 +174,7 @@ class Room(models.Model):
     capacity = models.IntegerField(default=0)
     notes = models.CharField(max_length=1024, null=True)
     equipment = models.CharField(max_length=1024, null=True)
-    
+
     @classmethod
     def create(cls, name, description, capacity, notes, equipment):
         if name is None:
@@ -171,10 +188,10 @@ class Room(models.Model):
         elif equipment and len(equipment) > 256:
             raise ValidationError("Room equipment is longer than 1024 characters")
         else:
-            room = cls(name=name, 
-                       description=description, 
+            room = cls(name=name,
+                       description=description,
                        capacity=capacity,
-                       notes=notes, 
+                       notes=notes,
                        equipment=equipment)
             room.save()
             return room
@@ -209,8 +226,8 @@ class Course(models.Model):
             raise ValidationError("Description is longer than 2048 characters, making it invalid.")
         if len(description) > 2048:
             raise ValidationError("Description is longer than 2048 characters, making it invalid.")
-        course = cls(name=name, 
-                         equipment_req=equipment_req, 
+        course = cls(name=name,
+                         equipment_req=equipment_req,
                          description=description)
         course.save()
         return course
@@ -225,7 +242,7 @@ class Course(models.Model):
     @classmethod
     def get_course(cls, name):
         return cls.objects.get(name=name)
-    
+
     def to_json(self):
         return dict(id = self.id,
                     name = self.name,
@@ -244,17 +261,46 @@ class Course(models.Model):
 
     # Get all section types associated with this course
     def get_all_section_types(self):
-        return WorkInfo.filter(course=self)
+        return WorkInfo.objects.filter(course=self)
 
     # Get a specific section type associated with this course
     def get_section_type(self, section_type_name): # Throws ObjectDoesNotExist, MultipleObjectsReturned
         section_type = SectionType.get_section_type(section_type_name)
-        WorkInfo.objects.get(course=self, section_type=section_type)
+        return WorkInfo.objects.get(course=self, section_type=section_type)
 
     # Associate a new section type with this course
     def add_section_type(self, section_type_name, work_units, work_hours): # Throws ObjectDoesNotExist
         section_type = SectionType.get_section_type(section_type_name)
         WorkInfo.create(self, section_type, work_units, work_hours)
+
+    # Remove association between section type and course
+    def remove_section_type(self, section_type_name): # Throws ObjectDoesNotExist
+        #section_type = SectionType.get_section_type(section_type_name)
+        self.get_section_type(section_type_name).delete()
+        #WorkInfo.create(self, section_type, work_units, work_hours)
+
+    def get_all_section_types_JSON(self):
+        courseSectionTypes = self.get_all_section_types()
+        print("Found " + str(courseSectionTypes.count()) + " course section types")
+        sectionTypesDictionary = {}
+        for sectionType in courseSectionTypes:
+            print type(sectionType)
+            print type(sectionType.section_type)
+            sectionTypesDictionary[sectionType.section_type.name] = {
+                'course_name': sectionType.course.name,
+                'section_type_name': sectionType.section_type.name,
+                'work_units': sectionType.work_units,
+                'work_hours': sectionType.work_hours
+            }
+        sectionTypes = SectionType.get_all_section_types()
+        print("Found " + str(sectionTypes.count()) + "general section types")
+        for sectionType in sectionTypes:
+            print sectionType.section_type.name
+            sectionTypesDictionary[sectionType.section_type.name] = {
+                'course_name': '',
+                'section_type_name': sectionType.section_type.name,
+            }
+        return JsonResponse(sectionTypesDictionary)
 
 
 class SectionType(models.Model):
@@ -265,24 +311,36 @@ class SectionType(models.Model):
         if len(name) > 32:
             raise ValidationError("Section Type name exceeds 32 characters.")
         section_type = cls(name=name)
-        section_type.save()     
+        section_type.save()
         return section_type
 
     @classmethod
     def get_section_type(cls, name):
         return cls.objects.get(name=name)
 
-
+    @classmethod
+    def get_all_section_types(cls):
+        return SectionType.objects.all()
 
 # WorkInfo contains the user defined information for specific Course-SectionType pairs
 # Each pair has an associated work units and work hours defined by the department
-class WorkInfo(models.Model): 
+class WorkInfo(models.Model):
     class Meta:
         unique_together = (("course", "section_type"),)
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
     section_type = models.ForeignKey(SectionType, on_delete=models.CASCADE)
     work_units = models.IntegerField(default=0)
     work_hours = models.IntegerField(default=0)
+
+    #classmethod?
+    def getJSON(self):
+        return JsonResponse({
+            'course_name': self.course.name,
+            'section_type_name': self.section_type.name,
+            'work_units': self.work_units,
+            'work_hours': self.work_hours
+        })
+
 
     @classmethod
     def create(cls, course, section_type, work_units, work_hours):
@@ -311,7 +369,7 @@ class Availability(models.Model):
         elif (end is None):
             raise ValidationError("Need to input end time")
         elif (level is None) or (level != "available" and level != "preferred" and level != "unavailable"):
-            raise ValidationError("Need to input level of availability: preferred, available, or unavailable")  
+            raise ValidationError("Need to input level of availability: preferred, available, or unavailable")
         else:
             availability = cls(faculty=faculty, day_of_week=day, start_time=start, end_time=end,level=level)
             availability.save()
@@ -321,7 +379,7 @@ class Availability(models.Model):
 # Schedule is a container for scheduled sections and correponds to exactly 1 academic term
 class Schedule(models.Model):
     academic_term = models.CharField(max_length=16, unique=True) # eg. "Fall 2016"
-    state = models.CharField(max_length=16, default="active") # eg. active or finalized 
+    state = models.CharField(max_length=16, default="active") # eg. active or finalized
 
     def finalize_schedule(self):
         self.state = "finalized"
@@ -349,7 +407,7 @@ class Schedule(models.Model):
     def to_json(self):
         return dict(
                 academic_term = self.academic_term)
-                
+
 
 
 # Section is our systems primary scheduled object
@@ -374,7 +432,7 @@ class Section(models.Model):
     @classmethod
     def create(
         cls, term_name, course_name, section_type, start_time, end_time, days, faculty_email, room_name,
-        capacity, students_enrolled, students_waitlisted, conflict, 
+        capacity, students_enrolled, students_waitlisted, conflict,
         conflict_reason, fault, fault_reason):
         # these objects will actually be passed into the Section because of the ForeignKey
         schedule = Schedule.get_schedule(term_name)
@@ -403,20 +461,20 @@ class Section(models.Model):
         if fault == 'y' and fault_reason != "faculty" and fault_reason != "room":
             raise ValidationError("Invalid fault reason.")
         section = cls(
-                  schedule=schedule, 
-                  course=course, 
+                  schedule=schedule,
+                  course=course,
                   section_type=section_type,
-                  start_time=start_time, 
-                  end_time=end_time, 
-                  days=days, 
-                  faculty=faculty, 
+                  start_time=start_time,
+                  end_time=end_time,
+                  days=days,
+                  faculty=faculty,
                   room=room,
-                  capacity=capacity, 
-                  students_enrolled=students_enrolled, 
-                  students_waitlisted=students_waitlisted, 
+                  capacity=capacity,
+                  students_enrolled=students_enrolled,
+                  students_waitlisted=students_waitlisted,
                   conflict=conflict,
-                  conflict_reason=conflict_reason, 
-                  fault=fault, 
+                  conflict_reason=conflict_reason,
+                  fault=fault,
                   fault_reason=fault_reason)
         section.save()
         return section
@@ -440,11 +498,11 @@ class Section(models.Model):
     #### there can also be chunks of time, so there are multiple start and end times
     # for any other filter, we will pass on the keyword and array argument as it is to the filter.
 
-    @classmethod 
+    @classmethod
     def filter_json(cls, json_string):
         return cls.filter(json.loads(json_string))
 
-    @classmethod 
+    @classmethod
     def filter(cls, filter_dict):
         andList = []
         ands = False
@@ -458,7 +516,7 @@ class Section(models.Model):
         orQuery = ''
         timeQuery = ''
         finalQuery = ''
-        
+
         for key,tags in filter_dict.iteritems():
             if 'logic' not in tags or 'filters' not in tags:
                 raise ValidationError("JSON not set up correctly. 'logic' and 'filters' are required keys in each filter type.")
@@ -500,7 +558,7 @@ class Section(models.Model):
                 andQuery = reduce(operator.and_, [andQuery, timeQuery])
             finalQuery = andQuery
         if ors is True:
-            orQuery = reduce(operator.and_, orList)     
+            orQuery = reduce(operator.and_, orList)
             if (timeQuery is not None) and ('or' in timeLogic):
                 orQuery = reduce(operator.or_, [orQuery, timeQuery])
             if finalQuery != '':
@@ -509,7 +567,7 @@ class Section(models.Model):
                 finalQuery = orQuery
         if finalQuery == '':
             finalQuery = timeQuery
-        
+
         return Section.objects.filter(finalQuery)
 
 class FacultyCoursePreferences(models.Model):
