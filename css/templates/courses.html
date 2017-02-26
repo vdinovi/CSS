@@ -127,7 +127,6 @@
     <script src="{% static "js/resources.js" %}"></script>
     <script>
     var currentCourse;
-    var availableSectionTypes = new Array();
 
       function addSectionType() {
         console.log("addSectionType: display: " + $('#add-section-type-area').display);
@@ -144,17 +143,33 @@
             "csrfmiddlewaretoken": "{{ csrf_token }}",
             "request-name":'save_section_request',
             "course": currentCourse,
-            "id_name": $('#id_name').val(),
+            "id_name": $('#id_name_0').val(),
             "id_work_units": $('#id_work_units').val(),
             "id_work_hours": $('#id_work_hours').val()
         });
 
+        var checkBoxes = $("input[name='name']");
+        console.log("chexboxes length " + checkBoxes.length);
+
+        for (var i = 0; i < checkBoxes.length; i++)
+        {
+          console.log(checkBoxes[i].type);
+          console.log(checkBoxes[i]);
+          if(checkBoxes[i].checked)
+          {
+            var selectedSectionType = checkBoxes[i].value;
+            console.log("selected " + selectedSectionType);
+
+            break;
+          }
+
+        }
         $.post("/resources/courses/",
               {
                   "csrfmiddlewaretoken": "{{ csrf_token }}",
                   "request-name":'save-section-request',
                   "course": currentCourse,
-                  "id_name": $('#id_name').val(),
+                  "id_name": selectedSectionType,
                   "id_work_units": $('#id_work_units').val(),
                   "id_work_hours": $('#id_work_hours').val()
               },
@@ -201,18 +216,10 @@
             $('#ajax-area').empty();
 
            for(var sectionType in sectionTypes) {
-             if(sectionTypes[sectionType].course_name != '')
-             {
-               console.log("update: " + sectionTypes[sectionType]);
-               $('#ajax-area').append("<p><button onclick=\"deleteSectionType('" + sectionTypes[sectionType].section_type_name + "', '" + sectionTypes[sectionType].course_name + "')\"style=\"font-size: .7em;\" type=\"button\" class=\"btn btn-info btn-xs\" data-toggle=\"modal\" data-target=\"#add-section-type\"><span class=\"glyphicon glyphicon-minus\"></button> " + sectionTypes[sectionType].section_type_name + " Work Units: " + sectionTypes[sectionType].work_units + " Work Hours: " + sectionTypes[sectionType].work_hours + "</p>");
-               console.log("test" + sectionTypes[sectionType]);
-             }
-             else
-              availableSectionTypes.push(sectionTypes[sectionType].section_type_name)
+             console.log("update: " + sectionTypes[sectionType]);
+             $('#ajax-area').append("<p><button onclick=\"deleteSectionType('" + sectionTypes[sectionType].section_type_name + "', '" + sectionTypes[sectionType].course_name + "')\"style=\"font-size: .7em;\" type=\"button\" class=\"btn btn-info btn-xs\" data-toggle=\"modal\" data-target=\"#add-section-type\"><span class=\"glyphicon glyphicon-minus\"></button> " + sectionTypes[sectionType].section_type_name + " Work Units: " + sectionTypes[sectionType].work_units + " Work Hours: " + sectionTypes[sectionType].work_hours + "</p>");
+             console.log("test" + sectionTypes[sectionType]);
           }
-          console.log("Avaialable courses");
-          console.log(availableSectionTypes);
-
       }
     </script>
   </body>

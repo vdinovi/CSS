@@ -289,9 +289,7 @@ class Course(models.Model):
         sectionTypesDictionary = {}
         i = 0
         for sectionType in courseSectionTypes:
-            print("for1")
-            print type(sectionType)
-            print type(sectionType.section_type)
+            print(sectionType.section_type.name)
             sectionTypesDictionary[i] = {
                 'course_name': sectionType.course.name,
                 'section_type_name': sectionType.section_type.name,
@@ -299,16 +297,6 @@ class Course(models.Model):
                 'work_hours': sectionType.work_hours
             }
             i+=1
-        sectionTypes = SectionType.get_all_section_types()
-        print("Found " + str(sectionTypes.count()) + "general section types")
-        for sectionType in sectionTypes:
-            print("for2")
-            sectionTypesDictionary[i] = {
-                'course_name': '',
-                'section_type_name': sectionType.name,
-            }
-            i+=1
-            print(sectionTypesDictionary)
         return JsonResponse(sectionTypesDictionary)
 
 
@@ -325,11 +313,21 @@ class SectionType(models.Model):
 
     @classmethod
     def get_section_type(cls, name):
-        return cls.objects.get(name=name)
+        print("CHECK")
+        return cls.objects.filter(name=name)[0]
+
+        #return cls.objects.get(name=name)
 
     @classmethod
     def get_all_section_types(cls):
         return SectionType.objects.all()
+
+    @classmethod
+    def get_all_section_types_list(cls):
+        list = []
+        for sectionType in SectionType.objects.all():
+            list.append((sectionType.name, sectionType.name))
+        return tuple(list)
 
 # WorkInfo contains the user defined information for specific Course-SectionType pairs
 # Each pair has an associated work units and work hours defined by the department

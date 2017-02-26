@@ -143,18 +143,13 @@ class EditCourseSectionTypeForm(forms.Form):
 
 class AddCourseSectionTypeForm(forms.Form):
     course = forms.CharField(widget=forms.HiddenInput(), initial='defaultCourse')
-    name = forms.CharField()
+    name = forms. MultipleChoiceField(
+        required = True,
+        widget = forms.CheckboxSelectMultiple,
+        choices = SectionType.get_all_section_types_list
+    )
     work_units = forms.IntegerField()
     work_hours = forms.IntegerField()
-    def save(self):
-        courseName = self['course']
-        print("courseName:")
-        print(courseName)
-        courseObj = Course.get_course(courseName)
-        name = self['name']
-        work_units = self['work_units']
-        work_hours = self['work_hours']
-        courseObj.add_section_type(name, work_units, work_hours)
 
 class AddCourseForm(forms.Form):
     course_name = forms.CharField()
