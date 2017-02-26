@@ -37,11 +37,6 @@ class FacultyCoursePreferencesTestCase(TestCase):
     	FacultyCoursePreferences.create(faculty, course1, None, 2)
     	FacultyCoursePreferences.create(faculty, course2, None, 1)
 
-  #faculty email 
-  #   def test_get_faculty_email(self):
-  #   	faculty_pref = FacultyCoursePreferences.objects.get(course='CPE 309')
-  #   	self.assertEquals(faculty_pref.faculty.user.email, 'makennajohnstone@gmail.com')
-
 	#enter a faculty member and return a list of the course objects and their ranks
     def test_get_faculty_ranks(self):
     	faculty = CUser.get_faculty('makennajohnstone@gmail.com')
@@ -49,6 +44,7 @@ class FacultyCoursePreferencesTestCase(TestCase):
     	self.assertEquals(len(faculty_pref_list), 2)
     	self.assertEquals(faculty_pref_list[0][1], 'CPE 309')
 
+    #deletes a faculty course preference model 
     def test_delete_preference(self):
     	course = Course.objects.get(name='CPE 309')
     	faculty = CUser.get_faculty('makennajohnstone@gmail.com')
