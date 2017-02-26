@@ -1,6 +1,6 @@
 from django import forms
 from django.core.mail import send_mail
-from css.models import CUser, Room, Course, SectionType
+from css.models import CUser, Room, Course, SectionType, Availability
 from django.http import HttpResponseRedirect
 from settings import DEPARTMENT_SETTINGS
 import re
@@ -181,4 +181,20 @@ class AddSectionForm(forms.Form):
 
     # def save(self):
     #     section = Section.create()
+
+class AddAvailabilityForm(forms.Form):
+	DAYS = ('Monday', 'Monday',),('Tuesday','Tuesday'),('Wednesday','Wednesday'), ('Thursday','Thursday',), ('Friday', 'Friday')
+	day = forms.ChoiceField(label='Day', choices=DAYS)
+	start_time = forms.TimeField(label='Start Time', input_formats=('%I:%M %p'))
+	end_time = forms.TimeField(label='End Time', input_formats=('%I:%M %p'))
+	level = forms.ChoiceField(label='Type', choices=[('Preferred', 'Preferred'), ('Unavailable','Unavailable')])
+
+	# def save(self,email): 
+	# 	availability = Availability.create(email = email,
+	# 										day = self.cleaned_data['day'], 
+	# 										start_time = self.cleaned_data['start_time'],
+	# 										end_time = self.cleaned_data['end_time'],
+	# 										level = self.cleaned_data['level'])
+	# 	availability.save()
+		
 

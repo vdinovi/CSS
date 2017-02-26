@@ -76,7 +76,17 @@ def HomeView(request):
     return render(request, 'home.html')
 
 def AvailabilityView(request):
-    return render(request, 'availability.html')
+	res = HttpResponse()
+	if request.method == "GET":
+		return render(request,'availability.html', {'add_availability_form': AddAvailabilityForm()})
+	# elif request.method == "POST":
+	# 	form = AddAvailabilityForm(request.POST)
+ #        if form.is_valid():
+ #        	faculty = request.session.email
+ #        	day = form.cleaned_data['day']
+ #        	start_time = form.cleaned_data['start_time']
+ #        	end_time = form.cleaned_data['end_time']
+ #        	level = form.cleaned_data['level']
 
 def LandingView(request):
     return render(request,'landing.html')
