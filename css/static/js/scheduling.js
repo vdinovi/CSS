@@ -28,8 +28,37 @@ function switchFrame(firstFrame, secondFrame) {
     $("#"+secondFrame).show();
 }
 
+// Populate 'view-term' modal with all terms
+$('#view-term-modal').on('show.bs.modal', function () {
+    getSchedules();
+});
+$('#delete-term-modal').on('show.bs.modal', function (e) {
+    var academicTerm = $(e.relatedTarget).data('name');
+    $("#delete-term-modal-body").find("form").children("h3").remove();
+    $("#delete-term-modal-body").find("form").children("button").remove();
+    $("#delete-term-modal-body").find("form").append(
+        "<h3>Are you sure you want to delete the schedule for " + academicTerm + "?</h3>\n" +
+        "<input type=\"hidden\" name=\"academic-term\" value=\""+ academicTerm + "\"></input>" +
+        "<button type=\"submit\" name=\"delete-schedule\" class=\"btn\">\n" +
+        "Yes I want to delete this schedule!</button>"
+    );
+}); 
+$('#approve-term-modal').on('show.bs.modal', function (e) {
+    var academicTerm = $(e.relatedTarget).data('name');
+    $("#approve-term-modal-body").find("form").children("h3").remove();
+    $("#approve-term-modal-body").find("form").children("button").remove();
+    $("#approve-term-modal-body").find("form").append(
+        "<h3>Are you sure you want to approve the schedule for " + academicTerm + "?</h3>\n" +
+        "<input type=\"hidden\" name=\"academic-term\" value=\""+ academicTerm + "\"></input>" +
+        "<button type=\"submit\" name=\"approve-schedule\" class=\"btn\">\n" +
+        "Yes I want to approve this schedule!</button>"
+    );
+}); 
+
 /* *** TERM *** */
-// When clicked, modal pops up and shows all existing schedules not currently selected
+// OnClick function for view term
+// * When clicked
+//    - modal pops up and shows all existing schedules not currently selected
 function getSchedules() {
     $.ajax({
         type: "GET",
@@ -37,11 +66,11 @@ function getSchedules() {
         success: function(response) {
             data = JSON.parse(response);
             list = $("#view-term-modal-body").children("div");
-            /*var scheduleFormatString = "<button class=\"list-group-item\" onclick=\"addSchedule(\"{0}\")\">{0}</button>\n";
-            console.log(data.active[0].academic_term);
+            var scheduleFormatString = "<button class=\"list-group-item\" onclick=\"addSchedule('{0}')\">{0}</button>\n";
+            list.empty();
             for (var i = 0; i < data.active.length; ++i) {
                 list.append(scheduleFormatString.format(data.active[i].academic_term));
-            }*/
+            }
         },
         error: function(err) {
             console.log(err);
@@ -49,19 +78,66 @@ function getSchedules() {
     });
 }
 
-/*
+// OnClick function function for adding a schedule 
+// * Adds selected schedule to term bar
 function addSchedule(name) {
-    /*var scheduleFormatString = 
+    // Id field to use for dropdown button (for easy querying). Replaces all ' ' with '-'.
+    var scheduleId = name.replace(/ /g, '-');
+    var scheduleFormatString = 
         "<li class=\"dropdown\">\n" +
-        "  <a class=\"dropdown-toggle\" data-toggle=\"dropdown\" href=\"#\">"+name+"<b class=\"caret\"></b></a>\n" +
+        "  <a id=\"{0}\" class=\"dropdown-toggle\" data-toggle=\"dropdown\" href=\"#\">{1}<b class=\"caret\"></b></a>\n" +
         "  <ul class=\"dropdown-menu\">\n" +
-        "    <li><a href=\"#\" class=\"dropdown-toggle\" data-toggle=\"tab\">Approve Schedule</a></li>\n" +
-        "    <li><a href=\"#\" class=\"dropdown-toggle\" data-toggle=\"tab\">Close Tab</a></li>\n" +
+        "    <li><a href=\"#\" onclick=\"selectSchedule('{0}')\">Select Schedule</a></li>\n" +
+        "    <li><a href=\"#\" data-toggle=\"modal\" data-name=\"{1}\" data-target=\"#approve-term-modal\">Approve Schedule</a></li>\n" +
+        "    <li><a href=\"#\" onclick=\"closeSchedule('{0}')\">Close Tab</a></li>\n" +
+        "    <li><a href=\"#\" data-toggle=\"modal\" data-name=\"{1}\" data-target=\"#delete-term-modal\">Delete Schedule</a></li>\n" +
         "  </ul>\n" +
         "</li>\n";
-    console.log($("#term-frame").children("ul"));
-    //$("#term-frame").children("ul")[0].append(scheduleFormatString.format(name)); 
-}*/
+    var alreadyPresent = false;
+    // Check if tab is already open
+    $("#open-terms").children("li").children("a").each(function (index, value) {
+        if (name == value.innerText) {
+            alreadyPresent = true;
+        }
+    });
+    if (!alreadyPresent) {
+        // If not already in list, add to front
+        $("#open-terms").prepend(scheduleFormatString.format(scheduleId, name)); 
+        // Activate dropdown
+        $("#"+scheduleId).dropdown();
+    }
+}
+
+// Select a schedule from tab
+function selectSchedule(name) {
+    // De-select existing active schedule
+    $("#open-terms").children("li").each(function (index, value) {
+        value.className = "";
+    });
+    $("#"+name).parent().addClass("active-schedule");
+}
+
+// Gets the currently selected term. If none, returns false
+function getSelectedSchedule() {
+    terms = $("#open-terms").children("li");
+    for (var i = 0; i < terms.length; ++i) {
+        if (terms[i].className.includes("active-schedule")) {
+            return terms[i].childNodes[1].innerText;
+        }
+    }
+    return false;
+}
+
+// Close a schedule
+function closeSchedule(name) {
+    $("#"+name).parent().empty();
+}
+
+// Approve a schedule
+function approveSchedule(name) {
+    //@TODO
+    console.log("approveSchedule<NYI>");
+}
 
 /* *** FILTER / OPTIONS *** */ 
 
@@ -206,42 +282,6 @@ function selectSection(element) {
     return true;
 }
 
-// OnClick function for a filter logic checkbox
-// - Makes the and/or radio button enabled
-function updateLogic() {
-    selectedFilters = getSelectedFilters();
-    console.log(selectedFilters);
-    numSelected = 0;
-    numUnselected = 0;
-    $('.logic-checkbox').each(function (index, value) {
-        if (value.checked == true && ++numSelected < selectedFilters.length) {
-            console.log("can use " + value.id);
-            $("#"+value.id).parent().next().removeProp("disabled");    
-        } else {
-            console.log(value.id + " is disabled");
-            $("#"+value.id).parent().next().prop("disabled", true);
-        }
-    }); 
-}
-
-// OnClick function that adds the logic for this filter
-function addLogic(element) {
-
-}
-
-/* *** HELPER FUNCTIONS FOR LOGIC *** */
-// Retrieves sections
-function applyFilterLogic() {
-    updateFilters();
-}
-
-// Updates the filters JSON object to have correct logic for filter_type
-function updateFilterLogic(element) {
-    filterType = element.id.split("-")[0];
-    filters[filterType]['logic'] = element.options[element.selectedIndex].value;
-    console.log(element.options[element.selectedIndex].value + " chosen for " + filterType);
-}
-
 // Get the filters JSON object with correct filters to apply using getSelectedOptions
 function updateFilters() {
     filtersToApply = getSelectedOptions();  
@@ -249,7 +289,7 @@ function updateFilters() {
     timeTRarr = []
     otherArr = []
     $('.logic-checkbox').each(function (index, value) {
-        filterType = value.id;
+        filterType = value.id; 
         if (value.checked == true) {
             timeMWFarr = filtersToApply[filterType]['MWF']
             timeTRarr = filtersToApply[filterType]['TR']
@@ -267,6 +307,75 @@ function updateFilters() {
     }); 
 }
 
+// OnClick function for a filter logic checkbox
+// - Makes the and/or radio button enabled
+function updateFilterLogic() {
+    selectedFilters = getSelectedFilters();
+    numSelected = 0;
+    // always set first selected filter to have 'and'
+    filters[selectedFilters[0]]['logic'] = "and";
+    // for each filter type that is checked, either disable or enable the AND/OR box accordingly
+    $('.logic-checkbox').each(function (index, value) {
+        if (value.checked == true && ++numSelected < selectedFilters.length) {
+            // console.log("can use " + value.id);
+            $("#"+value.id).parent().next().removeProp("disabled");    
+        } else {
+            // console.log(value.id + " is disabled");
+            $("#"+value.id).parent().next().prop("disabled", true);
+        }
+    }); 
+}
+
+// OnClick function that adds the logic for this filter
+function addLogic(element) {
+
+}
+
+/* *** HELPER FUNCTIONS FOR LOGIC *** */
+function csrfSafeMethod(method) {
+    // these HTTP methods do not require CSRF protection
+    return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+}
+
+// Retrieves sections
+function getFilteredSections() {
+    updateFilters(); 
+    var csrftoken = jQuery("[name=csrfmiddlewaretoken]").val();
+    console.log(JSON.stringify(filters));
+    $.ajax({
+        type: "POST",
+        url: "sections",
+        beforeSend: function(xhr, settings) {
+            if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+                xhr.setRequestHeader("X-CSRFToken", csrftoken);
+            }
+        },
+        dataType: "json",
+        contentType: "application/jsonl charset=utf-8",
+        data: JSON.stringify(filters),
+        success: function(response) {
+            console.log(response);             
+        },
+        error: function(err) {
+            console.log(err);
+            console.log("<p>HELLO</p>");   
+        }
+    });
+}
+
+// Updates the filters JSON object to have correct logic for filter_type
+function setLogic(element) {
+    selectedFilters = getSelectedFilters(); // get selected filter types
+    filterType = element.id.split("-")[0]; // get the filter type of checked element (course, faculty, room or time)
+    // iterate through selected filters - 1 and set the chosen logic AND/OR for next item that is selected
+    for (var i=0;i<selectedFilters.length-1;i++) {
+        if (selectedFilters[i] == filterType) {
+            filters[selectedFilters[i+1]]['logic'] = element.options[element.selectedIndex].value;
+            // console.log(element.options[element.selectedIndex].value + " chosen for " + selectedFilters[i+1]);
+        }
+    }
+}
+
 // gets all the currently selected filter types to be applied with logic
 function getSelectedFilters() {
     var selectedFilters = [];
@@ -276,3 +385,8 @@ function getSelectedFilters() {
     return selectedFilters;
 }
 
+// OnClick function to set the days for a new section
+function setDays(element, form) {
+    form.days=element.id;
+    form.save();
+}
