@@ -418,6 +418,7 @@ function selectSection(element) {
 // Get the filters JSON object with correct filters to apply using getSelectedOptions
 function updateFilters() {
     filtersToApply = getSelectedOptions();  
+    scheduleToApply = getSelectedSchedule();
     timeMWFarr = []
     timeTRarr = []
     otherArr = []
@@ -470,28 +471,36 @@ function csrfSafeMethod(method) {
     return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
 }
 
+function getCookie(name) {
+    var cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        var cookies = document.cookie.split(';');
+        for (var i = 0; i < cookies.length; i++) {
+            var cookie = jQuery.trim(cookies[i]);
+            // Does this cookie string begin with the name we want?
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
 // Retrieves sections
-function getFilteredSections() {
+function getFilteredSections(e) {
     updateFilters(); 
-    var csrftoken = jQuery("[name=csrfmiddlewaretoken]").val();
-    console.log(JSON.stringify(filters));
     $.ajax({
         type: "POST",
         url: "sections",
-        beforeSend: function(xhr, settings) {
-            if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
-                xhr.setRequestHeader("X-CSRFToken", csrftoken);
-            }
-        },
         dataType: "json",
-        contentType: "application/jsonl charset=utf-8",
+        contentType: "application/json; charset=utf-8;",
         data: JSON.stringify(filters),
         success: function(response) {
-            console.log(response);             
+            console.log(response);
         },
         error: function(err) {
             console.log(err);
-            console.log("<p>HELLO</p>");   
         }
     });
 }
