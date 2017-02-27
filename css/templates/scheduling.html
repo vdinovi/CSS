@@ -194,6 +194,21 @@
       </div>
     </div>
 
+    <div id="approve-term-modal" class="modal fade" role="dialog">
+      <div class="modal-dialog">
+        <!-- Modal content-->
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+          </div>
+          <div id="approve-term-modal-body" class="modal-body">
+            <form method="POST" action="schedules"> {% csrf_token %}
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div id="new-term-modal" class="modal fade" role="dialog">
       <div class="modal-dialog">
         <!-- Modal content-->
@@ -233,23 +248,7 @@
         /*$.ajaxSetup({
             data: {csrfmiddlewaretoken: '{% csrf_token %}' },
         });*/
-        // Populate 'view-term' modal with all terms
-        $('#view-term-modal').on('show.bs.modal', function () {
-            getSchedules();
-        });
-        $('#delete-term-modal').on('show.bs.modal', function (e) {
-            var academicTerm = $(e.relatedTarget).data('name');
-            //$("#delete-term-modal-body").find("form").empty();
-            $("#delete-term-modal-body").find("form").children("h3").remove();
-            $("#delete-term-modal-body").find("form").children("button").remove();
-            $("#delete-term-modal-body").find("form").append(
-                "<h3>Are you sure you want to delete the schedule for " + academicTerm + "?</h3>\n" +
-                "<input type=\"hidden\" name=\"academic-term\" value=\""+ academicTerm + "\"></input>" +
-                "<button type=\"submit\" name=\"delete-schedule\" class=\"btn\">\n" +
-                "Yes I want to delete this schedule!</button>"
-            );
-        }); 
-        // Fixes Dropdown bug.
+       // Fixes Dropdown bug.
         $(document).ready(function () {
             $('.dropdown-toggle').dropdown();
         });
