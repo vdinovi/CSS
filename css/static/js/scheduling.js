@@ -22,12 +22,12 @@ String.prototype.format = function()
 // Compare two time strings
 // Returns 0 if equal, -1 if A < B, and 1 if A > B
 function compareTime(timeA, timeB) {
-    startTimeParse = timeA.split(":");
-    endTimeParse = timeB.split(":");
-    firstHour = parseInt(startTimeParse[0]);
-    firstMinute = parseInt(startTimeParse[1]);
-    secondHour = parseInt(endTimeParse[0]);
-    secondMinute = parseInt(endTimeParse[1]);
+    var startTimeParse = timeA.split(":");
+    var endTimeParse = timeB.split(":");
+    var firstHour = parseInt(startTimeParse[0]);
+    var firstMinute = parseInt(startTimeParse[1]);
+    var secondHour = parseInt(endTimeParse[0]);
+    var secondMinute = parseInt(endTimeParse[1]);
     if (firstHour == secondHour) {
         if (firstMinute == secondMinute)
             return 0;
@@ -45,6 +45,26 @@ function compareTime(timeA, timeB) {
 // Convert Military formatted time to standard
 function toStandardTime(time) {
     //@TODO convert from military to standard
+    // -- Buggy, fix this
+    var timeParse = timeA.split(":");
+    var hour = parseInt(startTimeParse[0]);
+    var minute = parseInt(startTimeParse[1]);
+    var half;
+    if (hour >= 12)
+        half = "PM";
+    else {
+        half = "AM";
+        if (hour == 0)
+            hour = 12
+    }
+    var paddedHour;
+    var paddedMinute;
+    if (hour < 10)
+        paddedHour = "0"+hour;
+    if (minute < 10)
+        paddedMinute = "0"+minute
+    var stdTime = "{0}:{1} {2}";
+    return stdTime.format(paddedHour, paddedMinute, half);
 }
 
 // Convert Standard formmated time to military 
@@ -199,14 +219,33 @@ function selectFilter(element, filterType) {
             data: {type: element.innerHTML},
             success: function(response) {
                 data = JSON.parse(response)
+                optionFrame = $("#option-frame");
+                optionFrame.empty();
                 // Filter Type is time
                 if (filterType == "time-options") {
-                    //@NOTE Currently gets start and end time correctly as miliatry time
-                    console.log("StartTime: "+data.start_time);
-                    console.log("EndTime: "+data.end_time);
-                    //@TODO Time Option Window
-                    var optionFormatString =
-                        "";
+                    var optionFormatString = 
+                        "<div id=\"time-option-window\" class=\"time-option-window\">\n" +
+                        "  <div class=\"btn-group\" role=\"group\" aria-label=\"...\">\n" +
+                        "    <div class=\"col-xs-12\"style=\"margin-top:30px;\">\n" +
+                        "      <button id=\"mwf-btn\" type=\"button\" class=\"btn btn-primary\" value=\"active\" onclick=\"selectDay('mwf')\" style=\"display:inline-block;\">MWF</button>\n" +
+                        "      <button id=\"th-btn\" type=\"button\" class=\"btn btn-default\" value=\"inactive\" onclick=\"selectDay('th')\" style=\"display:inline-block;\">TH</button>\n" +
+                        "    </div>\n" +
+                        "    <div class=\"col-xs-12\" style=\"margin-top:30px;\">\n" +
+                        "      <label for=\"start-time\">Start Time:</label>\n" +
+                        "      <input id=\"start-time\" type=\"time\" name=\"start-time\"></input>\n" +
+                        "    </div>\n" +
+                        "    <div class=\"col-xs-12\" style=\"margin-top:30px;\">\n" +
+                        "      <label for=\"end-time\">End Time:</label>\n" +
+                        "      <input id=\"end-time\" type=\"time\" name=\"end-time\"></input>\n" +
+                        "    </div> \n" +
+                        "    <div class=\"col-xs-12\" style=\"text-align:center; margin-top:30px;\">\n" +
+                        "      <button class=\"btn btn-primary\" onclick=\"selectTime('{0}', '{1}')\">Save</button>\n" +
+                        "    </div>\n" +
+                        "  </div>\n" + 
+                        "</div>";
+                    //@NOTE Currently gets start and end time as miliatry time
+                    //optionFrame.append(optionFormatString.format(toStandardTime(data.start_time), toStandardTime(data.end_time)));
+                    optionFrame.append(optionFormatString.format(data.start_time, data.end_time));
                 }
                 // Filter Type is course, faculty, or room
                 else {
@@ -217,8 +256,6 @@ function selectFilter(element, filterType) {
                         "  </span>\n" +
                         "  <p class=\"form-control\">{0}</p>\n" +
                         "</div>\n";
-                    optionFrame = $("#option-frame");
-                    optionFrame.empty();
                     for (var i in data.options) {
                         // Add to option window 
                         optionFrame.append(optionFormatString.format(data.options[i].name));
