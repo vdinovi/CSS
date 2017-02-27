@@ -379,17 +379,17 @@ class Availability(models.Model):
 # Schedule is a container for scheduled sections and correponds to exactly 1 academic term
 class Schedule(models.Model):
     academic_term = models.CharField(max_length=16, unique=True) # eg. "Fall 2016"
-    state = models.CharField(max_length=16, default="active") # eg. active or finalized
+    state = models.CharField(max_length=16, default="active") # eg. active or approved
 
-    def finalize_schedule(self):
-        self.state = "finalized"
+    def approve(self):
+        self.state = "approved"
 
     def return_to_active(self):
         self.state = "active"
 
     @classmethod
     def create(cls, academic_term, state):
-        if state != "finalized" and state != "active":
+        if state != "approved" and state != "active":
             raise ValidationError("Invalid schedule state.")
         else:
             schedule = cls(academic_term=academic_term, state=state)
@@ -403,6 +403,14 @@ class Schedule(models.Model):
     @classmethod
     def get_all_schedules(cls):
         return cls.objects.filter();
+
+    @classmethod
+    def get_active_schedules(cls):
+        return cls.objects.filter(state="active")
+
+    @classmethod
+    def get_approved_schedules(cls):
+        return cls.objects.filter(state="approved")
 
     def to_json(self):
         return dict(

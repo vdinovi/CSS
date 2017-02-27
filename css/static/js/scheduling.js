@@ -27,6 +27,33 @@ function switchFrame(firstFrame, secondFrame) {
     $("#"+secondFrame).show();
 }
 
+// Populate 'view-term' modal with all terms
+$('#view-term-modal').on('show.bs.modal', function () {
+    getSchedules();
+});
+$('#delete-term-modal').on('show.bs.modal', function (e) {
+    var academicTerm = $(e.relatedTarget).data('name');
+    $("#delete-term-modal-body").find("form").children("h3").remove();
+    $("#delete-term-modal-body").find("form").children("button").remove();
+    $("#delete-term-modal-body").find("form").append(
+        "<h3>Are you sure you want to delete the schedule for " + academicTerm + "?</h3>\n" +
+        "<input type=\"hidden\" name=\"academic-term\" value=\""+ academicTerm + "\"></input>" +
+        "<button type=\"submit\" name=\"delete-schedule\" class=\"btn\">\n" +
+        "Yes I want to delete this schedule!</button>"
+    );
+}); 
+$('#approve-term-modal').on('show.bs.modal', function (e) {
+    var academicTerm = $(e.relatedTarget).data('name');
+    $("#approve-term-modal-body").find("form").children("h3").remove();
+    $("#approve-term-modal-body").find("form").children("button").remove();
+    $("#approve-term-modal-body").find("form").append(
+        "<h3>Are you sure you want to approve the schedule for " + academicTerm + "?</h3>\n" +
+        "<input type=\"hidden\" name=\"academic-term\" value=\""+ academicTerm + "\"></input>" +
+        "<button type=\"submit\" name=\"approve-schedule\" class=\"btn\">\n" +
+        "Yes I want to approve this schedule!</button>"
+    );
+}); 
+
 /* *** TERM *** */
 // OnClick function for view term
 // * When clicked
@@ -60,8 +87,9 @@ function addSchedule(name) {
         "  <a id=\"{0}\" class=\"dropdown-toggle\" data-toggle=\"dropdown\" href=\"#\">{1}<b class=\"caret\"></b></a>\n" +
         "  <ul class=\"dropdown-menu\">\n" +
         "    <li><a href=\"#\" onclick=\"selectSchedule('{0}')\">Select Schedule</a></li>\n" +
-        "    <li><a href=\"#\" onclick=\"approveSchedule('{0}')\">Approve Schedule</a></li>\n" +
+        "    <li><a href=\"#\" data-toggle=\"modal\" data-name=\"{1}\" data-target=\"#approve-term-modal\">Approve Schedule</a></li>\n" +
         "    <li><a href=\"#\" onclick=\"closeSchedule('{0}')\">Close Tab</a></li>\n" +
+        "    <li><a href=\"#\" data-toggle=\"modal\" data-name=\"{1}\" data-target=\"#delete-term-modal\">Delete Schedule</a></li>\n" +
         "  </ul>\n" +
         "</li>\n";
     var alreadyPresent = false;
