@@ -1,6 +1,9 @@
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseRedirect
 from .models import Course, CUser, Room, Schedule
+from .forms import AddScheduleForm
 import json
+from django.db import IntegrityError
+from django.core.exceptions import ValidationError, ObjectDoesNotExist
 
 # Used to retrieve options when new filter type is selected
 # @NOTE 'Options' refers to specific Courses, Faculty, Rooms, or Time periods
@@ -54,6 +57,46 @@ def Schedules(request):
         data = json.dumps({"active": [x.to_json() for x in Schedule.get_all_schedules().all()] })     
         res.write(data)
         res.status_code = 200
+    elif request.method == "POST" and "approve-schedule" in request.POST:
+        try:
+            academic_term = request.POST.get('academic-term') 
+            Schedule.get_schedule(term_name=academic_term).approve()
+            return HttpResponseRedirect('/scheduling')
+        except IntegrityError as e:
+            if not e[0] == 1062:
+                res.status_code = 500
+                res.reason_phrase = "db error:" + e[0]
+            else:
+                res.status_code = 400
+                res.reason_phrase = "Duplicate entry"
+        except:
+            res.status_code = 400
+    elif request.method == "POST" and "add-schedule" in request.POST:
+        form = AddScheduleForm(request.POST)
+        if form.is_valid():
+            try:
+                form.save()
+                return HttpResponseRedirect('/scheduling')
+            except ObjectDoesNotExist:
+                res.status_code = 404
+                res.reason_phrase = "Schedule not found"
+            except IntegrityError as e:
+                res.status_code = 500
+                res.reason_phrase = e[0]
+        else:
+            res.status_code = 400
+            res.reason_phrase = "Invalid form entry" 
+    elif request.method == "POST" and "delete-schedule" in request.POST:
+        try:
+            academic_term = request.POST.get('academic-term') 
+            Schedule.get_schedule(term_name=academic_term).delete()
+            return HttpResponseRedirect('/scheduling')
+        except ObjectDoesNotExist:
+            res.status_code = 404
+            res.reason_phrase = "Schedule not found"
+        except:
+            res.status_code = 400
+            res.reason_phrase = "Invalid form entry" 
     else:
         res.status_code = 400 
     return res

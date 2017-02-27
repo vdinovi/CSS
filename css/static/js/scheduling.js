@@ -27,8 +27,37 @@ function switchFrame(firstFrame, secondFrame) {
     $("#"+secondFrame).show();
 }
 
+// Populate 'view-term' modal with all terms
+$('#view-term-modal').on('show.bs.modal', function () {
+    getSchedules();
+});
+$('#delete-term-modal').on('show.bs.modal', function (e) {
+    var academicTerm = $(e.relatedTarget).data('name');
+    $("#delete-term-modal-body").find("form").children("h3").remove();
+    $("#delete-term-modal-body").find("form").children("button").remove();
+    $("#delete-term-modal-body").find("form").append(
+        "<h3>Are you sure you want to delete the schedule for " + academicTerm + "?</h3>\n" +
+        "<input type=\"hidden\" name=\"academic-term\" value=\""+ academicTerm + "\"></input>" +
+        "<button type=\"submit\" name=\"delete-schedule\" class=\"btn\">\n" +
+        "Yes I want to delete this schedule!</button>"
+    );
+}); 
+$('#approve-term-modal').on('show.bs.modal', function (e) {
+    var academicTerm = $(e.relatedTarget).data('name');
+    $("#approve-term-modal-body").find("form").children("h3").remove();
+    $("#approve-term-modal-body").find("form").children("button").remove();
+    $("#approve-term-modal-body").find("form").append(
+        "<h3>Are you sure you want to approve the schedule for " + academicTerm + "?</h3>\n" +
+        "<input type=\"hidden\" name=\"academic-term\" value=\""+ academicTerm + "\"></input>" +
+        "<button type=\"submit\" name=\"approve-schedule\" class=\"btn\">\n" +
+        "Yes I want to approve this schedule!</button>"
+    );
+}); 
+
 /* *** TERM *** */
-// When clicked, modal pops up and shows all existing schedules not currently selected
+// OnClick function for view term
+// * When clicked
+//    - modal pops up and shows all existing schedules not currently selected
 function getSchedules() {
     $.ajax({
         type: "GET",
@@ -36,11 +65,11 @@ function getSchedules() {
         success: function(response) {
             data = JSON.parse(response);
             list = $("#view-term-modal-body").children("div");
-            /*var scheduleFormatString = "<button class=\"list-group-item\" onclick=\"addSchedule(\"{0}\")\">{0}</button>\n";
-            console.log(data.active[0].academic_term);
+            var scheduleFormatString = "<button class=\"list-group-item\" onclick=\"addSchedule('{0}')\">{0}</button>\n";
+            list.empty();
             for (var i = 0; i < data.active.length; ++i) {
                 list.append(scheduleFormatString.format(data.active[i].academic_term));
-            }*/
+            }
         },
         error: function(err) {
             console.log(err);
@@ -48,19 +77,66 @@ function getSchedules() {
     });
 }
 
-/*
+// OnClick function function for adding a schedule 
+// * Adds selected schedule to term bar
 function addSchedule(name) {
-    /*var scheduleFormatString = 
+    // Id field to use for dropdown button (for easy querying). Replaces all ' ' with '-'.
+    var scheduleId = name.replace(/ /g, '-');
+    var scheduleFormatString = 
         "<li class=\"dropdown\">\n" +
-        "  <a class=\"dropdown-toggle\" data-toggle=\"dropdown\" href=\"#\">"+name+"<b class=\"caret\"></b></a>\n" +
+        "  <a id=\"{0}\" class=\"dropdown-toggle\" data-toggle=\"dropdown\" href=\"#\">{1}<b class=\"caret\"></b></a>\n" +
         "  <ul class=\"dropdown-menu\">\n" +
-        "    <li><a href=\"#\" class=\"dropdown-toggle\" data-toggle=\"tab\">Approve Schedule</a></li>\n" +
-        "    <li><a href=\"#\" class=\"dropdown-toggle\" data-toggle=\"tab\">Close Tab</a></li>\n" +
+        "    <li><a href=\"#\" onclick=\"selectSchedule('{0}')\">Select Schedule</a></li>\n" +
+        "    <li><a href=\"#\" data-toggle=\"modal\" data-name=\"{1}\" data-target=\"#approve-term-modal\">Approve Schedule</a></li>\n" +
+        "    <li><a href=\"#\" onclick=\"closeSchedule('{0}')\">Close Tab</a></li>\n" +
+        "    <li><a href=\"#\" data-toggle=\"modal\" data-name=\"{1}\" data-target=\"#delete-term-modal\">Delete Schedule</a></li>\n" +
         "  </ul>\n" +
         "</li>\n";
-    console.log($("#term-frame").children("ul"));
-    //$("#term-frame").children("ul")[0].append(scheduleFormatString.format(name)); 
-}*/
+    var alreadyPresent = false;
+    // Check if tab is already open
+    $("#open-terms").children("li").children("a").each(function (index, value) {
+        if (name == value.innerText) {
+            alreadyPresent = true;
+        }
+    });
+    if (!alreadyPresent) {
+        // If not already in list, add to front
+        $("#open-terms").prepend(scheduleFormatString.format(scheduleId, name)); 
+        // Activate dropdown
+        $("#"+scheduleId).dropdown();
+    }
+}
+
+// Select a schedule from tab
+function selectSchedule(name) {
+    // De-select existing active schedule
+    $("#open-terms").children("li").each(function (index, value) {
+        value.className = "";
+    });
+    $("#"+name).parent().addClass("active-schedule");
+}
+
+// Gets the currently selected term. If none, returns false
+function getSelectedSchedule() {
+    terms = $("#open-terms").children("li");
+    for (var i = 0; i < terms.length; ++i) {
+        if (terms[i].className.includes("active-schedule")) {
+            return terms[i].childNodes[1].innerText;
+        }
+    }
+    return false;
+}
+
+// Close a schedule
+function closeSchedule(name) {
+    $("#"+name).parent().empty();
+}
+
+// Approve a schedule
+function approveSchedule(name) {
+    //@TODO
+    console.log("approveSchedule<NYI>");
+}
 
 /* *** FILTER / OPTIONS *** */ 
 

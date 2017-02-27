@@ -30,79 +30,23 @@
     <div id="scheduling-container" class="container scheduling-container">
       <div class="row">
         <div id="term-frame" class="col-xs-10 term-frame">
-          <ul class="nav nav-tabs">
-            <li class="dropdown">
-              <a class="dropdown-toggle" data-toggle="dropdown" href="#">Fall 2016<b class="caret"></b></a>
-              <ul class="dropdown-menu">
-                <li><a href="#" class="dropdown-toggle" data-toggle="tab">Approve Schedule</a></li>
-                <li><a href="#" class="dropdown-toggle" data-toggle="tab">Close Tab</a></li>
-              </ul>
-            </li>
+          <ul id="open-terms" class="nav nav-tabs">
             <li><a href="#" data-toggle="modal" data-target="#view-term-modal" >View Term</a></li>
           </ul>
         </div>
         <div class="col-xs-2">
-          <div id="create-new-term-btn" class="btn">Create New Term</div>
+          <button type="button" class="btn btn-info" data-toggle="modal" data-target="#new-term-modal">Create New Term</button>
         </div>
         <!-- New Section Frame -->
         <div id="new-section-frame" class="col-xs-12 new-section-frame" style="display:none;">
           <div class="row" style="padding-top:20px">
             <button id="filter-frame-btn" class="btn switch-frame-btn col-xs-4 col-xs-offset-4" onclick='switchFrame("new-section-frame", "filter-frame")'>Filter Sections</button>
           </div>
-          <form method="POST" action="#" class="form-horizontal" role="form"> 
-              {% csrf_token %}
-              <div class="form-group col-xs-6">
-                <!-- <label for="course" class="row control-label">Course</label> -->
-                <div  class="row new-section-inputs">
-                  {{ new_section_form.academic_term.label }}
-                  {{ new_section_form.academic_term }}
-                </div>
-                <div class="row new-section-inputs">
-                  {{ new_section_form.course.label }}
-                  {{ new_section_form.course }}
-                </div>
-                <div class="row new-section-inputs">
-                  {{ new_section_form.section_type.label }}
-                  {{ new_section_form.section_type }}
-                </div>
-                <div class="row new-section-inputs">
-                  {{ new_section_form.faculty.label }}
-                  {{ new_section_form.faculty }}
-                </div>
-                <div class="row new-section-inputs">
-                  {{ new_section_form.room.label }}
-                  {{ new_section_form.room }}
-                </div>
-                <div class="row new-section-inputs">
-                  {{ new_section_form.capacity.label }}
-                  {{ new_section_form.capacity }}
-                </div>
-                <button type="submit" class="btn btn-primary">Create Section</button>
-              </div>
-              <div class="form-group col-xs-6">
-                <!-- <div class="btn-group row" data-toggle="buttons">
-                  <label class="btn btn-primary active">
-                    <input type="radio" name="days" id="MWF" autocomplete="off" checked onclick="setDays(this, new_section_form)"> MWF
-                  </label>
-                  <label class="btn btn-primary active">
-                    <input type="radio" name="days" id="TR" autocomplete="off" onclick="setDays(this, new_section_form)"> TR
-                  </label>
-
-                </div> -->
-                <div class="row">
-                  {{ new_section_form.days.label }}
-                  {{ new_section_form.days }}
-                </div>
-                <div class="row">
-                  {{ new_section_form.start_time.label }}
-                  {{ new_section_form.start_time }}
-                </div>
-                <div class="row">
-                  {{ new_section_form.end_time.label }}
-                  {{ new_section_form.end_time }}
-                </div>
-              </div>
+          <div class="col-xs-4 outer-frame">
+            <form method="POST"> {% csrf_token %}
+              {{ add_section_form.as_p }}
             </form>
+          </div>
         </div>
         <!-- Filter Window -->
         <div id="filter-frame" class="col-xs-12 filter-frame">
@@ -250,15 +194,61 @@
       </div>
     </div>
 
+    <div id="approve-term-modal" class="modal fade" role="dialog">
+      <div class="modal-dialog">
+        <!-- Modal content-->
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+          </div>
+          <div id="approve-term-modal-body" class="modal-body">
+            <form method="POST" action="schedules"> {% csrf_token %}
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="new-term-modal" class="modal fade" role="dialog">
+      <div class="modal-dialog">
+        <!-- Modal content-->
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+          </div>
+          <div id="new-term-modal-body" class="modal-body">
+            <form id="add-schedule-form" method="POST" action="schedules"> {% csrf_token %}
+              {{ add_schedule_form.as_p }}
+              <button type="submit" name="add-schedule" class="save btn btn-default">Submit</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="delete-term-modal" class="modal fade" role="dialog">
+      <div class="modal-dialog">
+        <!-- Modal content-->
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+          </div>
+          <div id="delete-term-modal-body" class="modal-body">
+            <form method="POST" action="schedules"> {% csrf_token %}
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
 
     <!-- Custom JS -->
     <script src="{% static "js/scheduling.js" %}"></script>
     <script language="javascript">
-        // Populate 'view-term' modal with all terms
-        $('#view-term-modal').on('show.bs.modal', function () {
-            getSchedules();
-        });
-        // Fixes Dropdown bug.
+        // Setup csrf for ajax calls
+        /*$.ajaxSetup({
+            data: {csrfmiddlewaretoken: '{% csrf_token %}' },
+        });*/
+       // Fixes Dropdown bug.
         $(document).ready(function () {
             $('.dropdown-toggle').dropdown();
         });
