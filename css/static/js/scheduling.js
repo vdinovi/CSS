@@ -1,5 +1,6 @@
 /* *** GLOBALS *** */
-const filters = ["course", "faculty", "room", "time"];
+const filter_types = ["course", "faculty", "room", "time"];
+filters = {"course":{"logic":"and", "filters":[]}, "faculty":{"logic":"and", "filters":[]}, "room":{"logic":"and", "filters":[]}, "time":{"logic": "and", "filters":{"MWF":[], "TR":[]}}}
 
 /* *** UTILITY *** */
 // String format function. 
@@ -76,8 +77,8 @@ function selectFilter(element, filterType) {
         element.value = "active";
         element.className = "noselect filter-type-active";
         // Unselect other filter types
-        for (var i = 0; i < filters.length; ++i) {
-            var btnName = filters[i] + "-filter-btn";
+        for (var i = 0; i < filter_types.length; ++i) {
+            var btnName = filter_types[i] + "-filter-btn";
             if (element.id != btnName) {
                 $("#"+btnName)[0].value = "inactive" 
                 $("#"+btnName)[0].className = "noselect filter-type"; 
@@ -126,9 +127,9 @@ function selectFilter(element, filterType) {
 function selectOption(element) {
     var filterType;
     // Get correct filter type (where to put selected option)
-    for (var i = 0; i < filters.length; ++i) {
-        if ($("#"+filters[i]+"-filter-btn")[0].value == "active") {
-            filterType = $("#"+filters[i]+"-options");
+    for (var i = 0; i < filter_types.length; ++i) {
+        if ($("#"+filter_types[i]+"-filter-btn")[0].value == "active") {
+            filterType = $("#"+filter_types[i]+"-options");
             break;
         }
     }
@@ -153,8 +154,8 @@ function selectOption(element) {
 
 // Unselect all selected options
 function unselectAllSelectedOptions() {
-    for (var i = 0; i < filters.length; ++i) {
-        $("#"+filters[i]+"-options").children("div").each(function(index, value) {
+    for (var i = 0; i < filter_types.length; ++i) {
+        $("#"+filter_types[i]+"-options").children("div").each(function(index, value) {
             unselectSelectedOption(value.id);
         });
     }
@@ -184,17 +185,16 @@ function getSelectedOptions() {
     var selectedOptions = {};
     // Iterate over each filter types option list
     var f = 0;
-    $("#filter-type-window").children("span").each(function (index, value) {
+    $("#filter-type-window").children("div").each(function (index, value) {
         var arr = [];
         // Iterate over each selected option type
         for (var i = 0; i < value.children.length; ++i) {
             arr.push(value.children[i].id); 
         }
-        var name = filters[f++];
+        var name = filter_types[f++];
         selectedOptions[name] = arr;
     });
     return selectedOptions;
- 
 }
 
 /* *** FILTER LOGIC / SECTIONS *** */
@@ -208,12 +208,71 @@ function selectSection(element) {
 
 // OnClick function for a filter logic checkbox
 // - Makes the and/or radio button enabled
-function enableLogic(element) {
-
+function updateLogic() {
+    selectedFilters = getSelectedFilters();
+    console.log(selectedFilters);
+    numSelected = 0;
+    numUnselected = 0;
+    $('.logic-checkbox').each(function (index, value) {
+        if (value.checked == true && ++numSelected < selectedFilters.length) {
+            console.log("can use " + value.id);
+            $("#"+value.id).parent().next().removeProp("disabled");    
+        } else {
+            console.log(value.id + " is disabled");
+            $("#"+value.id).parent().next().prop("disabled", true);
+        }
+    }); 
 }
 
 // OnClick function that adds the logic for this filter
 function addLogic(element) {
 
+}
+
+/* *** HELPER FUNCTIONS FOR LOGIC *** */
+// Retrieves sections
+function applyFilterLogic() {
+    updateFilters();
+}
+
+// Updates the filters JSON object to have correct logic for filter_type
+function updateFilterLogic(element) {
+    filterType = element.id.split("-")[0];
+    filters[filterType]['logic'] = element.options[element.selectedIndex].value;
+    console.log(element.options[element.selectedIndex].value + " chosen for " + filterType);
+}
+
+// Get the filters JSON object with correct filters to apply using getSelectedOptions
+function updateFilters() {
+    filtersToApply = getSelectedOptions();  
+    timeMWFarr = []
+    timeTRarr = []
+    otherArr = []
+    $('.logic-checkbox').each(function (index, value) {
+        filterType = value.id;
+        if (value.checked == true) {
+            timeMWFarr = filtersToApply[filterType]['MWF']
+            timeTRarr = filtersToApply[filterType]['TR']
+            otherArr = filtersToApply[filterType]       
+            $('#'+filterType).parent('label').addClass("checked");
+        } else {      
+            $('#'+filterType).parent('label').removeClass("checked");
+        }
+        if (filterType == "time") {
+            filters[filterType]['filters']['MWF'] = timeMWFarr
+            filters[filterType]['filters']['TR'] = timeTRarr
+        } else {
+            filters[filterType]['filters'] = otherArr
+        }
+    }); 
+}
+
+// gets all the currently selected filter types to be applied with logic
+function getSelectedFilters() {
+    var selectedFilters = [];
+    $('.logic-checkbox').each(function (index, value) {
+        if (value.checked == true) { selectedFilters.push(value.id); }
+    });
+    return selectedFilters;
 }
 

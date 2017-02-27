@@ -58,6 +58,42 @@ def Schedules(request):
         res.status_code = 400 
     return res
 
+# Used to retrieve sections when apply button is selected
+# @NOTE 'Sections' refers to the sections that match the filters set in  
+# Responds with a JSON object of the following form:
+# {
+#   "sections": [...]
+# }
+def Sections(request):
+    res = HttpResponse()
+    if request.method == "POST":
+        if option_type is None:
+            res.status_code = 400
+            res.reason_phrase = "Missing section"
+        else:
+            res.content_type = "application/json"
+            if option_type == "Course":
+                data = json.dumps({"options": [x.to_json() for x in Course.get_all_courses().all()] })
+                res.write(data)
+                res.status_code = 200
+            elif option_type == "Faculty":
+                data = json.dumps({"options": [x.to_json() for x in CUser.get_all_faculty().all()] })
+                res.write(data)
+                res.status_code = 200
+            elif option_type == "Room":
+                data = json.dumps({"options": [x.to_json() for x in Room.get_all_rooms().all()] })
+                res.write(data)
+                res.status_code = 200
+            elif option_type == "Time":
+                res.status_code = 400
+                res.reason_phrase = "NYI"
+            else:
+                res.status_code = 400
+                res.reason_phrase = "Missing option type"
+    else:
+        res.status_code = 400 
+    return res
+
 
 
 
