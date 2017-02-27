@@ -1,6 +1,6 @@
 /* *** GLOBALS *** */
 const filter_types = ["course", "faculty", "room", "time"];
-filters = {"course":{"logic":"and", "filters":[]}, "faculty":{"logic":"and", "filters":[]}, "room":{"logic":"and", "filters":[]}, "time":{"logic": "and", "filters":{"MWF":[], "TR":[]}}}
+var filters = {"course":{"logic":"and", "filters":[]}, "faculty":{"logic":"and", "filters":[]}, "room":{"logic":"and", "filters":[]}, "time":{"logic": "and", "filters":{"MWF":[], "TR":[]}}}
 
 /* *** UTILITY *** */
 // String format function. 
@@ -321,11 +321,22 @@ function selectTime(minTime, maxTime) {
         sweetAlert("Invalid End Time", "Department Hours: "+minTime+" - "+maxTime);
         return false;
     }
-
     //@TODO Verify start comes before end
     time.startTime = startTime;
     time.endTime = endTime;
-    return time;
+    //@TODO conver tto standard time
+    var optionId = (time.day+"-"+time.startTime+"-"+time.endTime).replace(/:/g, '-');
+    var optionText = time.day+": "+time.startTime+" - "+time.endTime;
+    var timeOptionFormatString = 
+        "<div id=\"{0}\"class=\"selected-option\">\n" +
+        "  <button onclick=\"unselectSelectedTime('{0}')\">x</button>\n" +
+        "  <li class=\"filter-options\">{1}</li>\n" +
+        "</div>"; 
+    $("#time-options").append(timeOptionFormatString.format(optionId, optionText));
+}
+
+function unselectSelectedTime(id) {
+    $("#"+id).remove();
 }
 
 // OnClick function for an option checkbox
