@@ -102,5 +102,23 @@ def Schedules(request):
     return res
 
 
+# A function to detect conflicts when creating a new section.
+#
+# Function is called when creation of a new section is requested.
+#
+# Updates sections with conflicts to a 'y' in conflicts and updates
+# the conflict reason.
+
+# def Conflicts(request, section):
+#     start_time = section.start_time
+#     end_time = section.end_time
+
+#     # Find all sections that are between start_time and end_time of the new section
+
+
+#     # Create 
+
+
+
 
 
