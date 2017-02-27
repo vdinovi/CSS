@@ -19,6 +19,39 @@ String.prototype.format = function()
     return content;
 };
 
+// Compare two time strings
+// Returns 0 if equal, -1 if A < B, and 1 if A > B
+function compareTime(timeA, timeB) {
+    startTimeParse = timeA.split(":");
+    endTimeParse = timeB.split(":");
+    firstHour = parseInt(startTimeParse[0]);
+    firstMinute = parseInt(startTimeParse[1]);
+    secondHour = parseInt(endTimeParse[0]);
+    secondMinute = parseInt(endTimeParse[1]);
+    if (firstHour == secondHour) {
+        if (firstMinute == secondMinute)
+            return 0;
+        if (firstMinute < secondMinute)
+            return -1
+        return 1
+    }
+    else {
+        if (firstHour < secondHour)
+            return -1
+        return 1
+    }
+}
+
+// Convert Military formatted time to standard
+function toStandardTime(time) {
+    //@TODO convert from military to standard
+}
+
+// Convert Standard formmated time to military 
+function toStandardTime(time) {
+    //@TODO convert from standard to military
+}
+
 /* *** FRAME *** */
 // OnClick function for new section frame
 // - Toggles between new section frame and filter frame
@@ -204,6 +237,57 @@ function selectFilter(element, filterType) {
             }
         });
     }
+}
+
+// OnClick for day group buttons in time option window
+function selectDay(dayGroup) {
+    // Check if button is already selected
+    if ($("#"+dayGroup+"-btn")[0].value == "active") {
+        // Button is already selected
+        return false;
+    }
+    if (dayGroup == "mwf") {
+        $("#th-btn")[0].value = "inactive"; 
+        $("#th-btn")[0].className = "noselect btn btn-default";
+        $("#mwf-btn")[0].className = "noselect btn btn-primary";
+    }
+    else {
+        $("#mwf-btn")[0].value = "inactive"; 
+        $("#mwf-btn")[0].className = "noselect btn btn-default";
+        $("#th-btn")[0].className = "noselect btn btn-primary"; 
+    }
+}
+
+// Validate and Get the time from the time option window
+// returned time object of form:
+// {
+//   "day": "mwf",
+//   "startTime": "8:00:00",
+//   "endTime": "20:00:00"
+// }
+function selectTime(minTime, maxTime) {
+    var time = {};
+    if ($("#mwf-btn")[0].value == "active")
+        time.day = "mwf";
+    else
+        time.day = "th";
+    var startTime = $("#start-time").val();
+    var endTime = $("#end-time").val();
+    if ((compareTime(startTime, minTime)) < 1 || (compareTime(startTime, maxTime) > 0)) {
+        //@TODO implement and use toStandardTime
+        sweetAlert("Invalid Start Time", "Department Hours: "+minTime+" - "+maxTime);
+        return false;
+    }
+    if ((compareTime(endTime, minTime) < 1) || (compareTime(endTime, maxTime) > 0)) {
+        //@TODO implement and use toStandardTime
+        sweetAlert("Invalid End Time", "Department Hours: "+minTime+" - "+maxTime);
+        return false;
+    }
+
+    //@TODO Verify start comes before end
+    time.startTime = startTime;
+    time.endTime = endTime;
+    return time;
 }
 
 // OnClick function for an option checkbox

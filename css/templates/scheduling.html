@@ -16,6 +16,10 @@
     <!-- Nice looking checkbox, would like to use to fill box where existing checkboxes are 
       Has some bugs to work out. Taken from: http://bootsnipp.com/snippets/featured/checkboxradio-css-only -->
       <link href="{% static "css/checkbox.css" %}" rel="stylesheet"> 
+    <link href="{% static "css/sweetalert.css" %}" rel="stylesheet">
+    <script src="{% static "js/sweetalert.min.js" %}"></script>
+
+
 
       <!-- #e0e0e0HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
       <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -129,6 +133,26 @@
           <div class="col-xs-3 outer-frame">
             <h2 style="text-align:center;">Options</h2>
             <div id="option-frame" class="inner-frame">
+            <!-- Options get inserted here -->
+              <div id="time-option-window" class="time-option-window">
+                <div class="btn-group" role="group" aria-label="...">
+                  <div class="col-xs-12"style="margin-top:30px;">
+                    <button id="mwf-btn" type="button" class="btn btn-primary" value="active" onclick="selectDay('mwf')" style="display:inline-block;">MWF</button>
+                    <button id="th-btn" type="button" class="btn btn-default" value="inactive" onclick="selectDay('th')" style="display:inline-block;">TH</button>
+                  </div>
+                  <div class="col-xs-12" style="margin-top:30px;">
+                    <label for="start-time">Start Time:</label>
+                    <input id="start-time" type="time" name="start-time"></input>
+                  </div>
+                  <div class="col-xs-12" style="margin-top:30px;">
+                    <label for="end-time">End Time:</label>
+                    <input id="end-time" type="time" name="end-time"></input>
+                  </div> 
+                  <div class="col-xs-12" style="text-align:center; margin-top:30px;">
+                    <button class="btn btn-primary" onclick="selectTime('8:00:00', '20:00:00')">Save</button>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
           <!-- Filter Logic Window -->
@@ -143,7 +167,7 @@
                       <a href="#" class="list-group-item logic active">OR</a>
                       <a href="#" class="list-group-item logic">AND</a>
                     </div>
-                  </div>
+                 </div>
                 </div>
                 <div id="faculty-filter-logic" class="filter-logic">
                   <div class="col-xs-8 col-xs-offset-2" style="height:100%;">
@@ -301,6 +325,7 @@
             $('.dropdown-toggle').dropdown();
         });
     </script>
+
     <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
     <!-- Include all compiled plugins (below), or include individual files as needed -->
