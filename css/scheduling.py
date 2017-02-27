@@ -116,11 +116,9 @@ from django.views.decorators.csrf import csrf_exempt
 def Sections(request):
     res = HttpResponse()
     if request.method == "POST":  
-        print request.POST
         res.content_type = 'application/json'
         sections = Section.filter_json(json.dumps(request.body, sort_keys=True,
                   indent=4, separators=(',', ': ')))
-        print sections
         res.write(sections) # serializers.serialize("json", sections)
         res.status_code = 200
     else:
