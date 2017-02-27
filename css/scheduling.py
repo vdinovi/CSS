@@ -4,6 +4,8 @@ from .forms import AddScheduleForm
 import json
 from django.db import IntegrityError
 from django.core.exceptions import ValidationError, ObjectDoesNotExist
+from django.core import serializers
+from .settings import DEPARTMENT_SETTINGS
 
 # Used to retrieve options when new filter type is selected
 # @NOTE 'Options' refers to specific Courses, Faculty, Rooms, or Time periods
@@ -33,8 +35,10 @@ def Options(request):
                 res.write(data)
                 res.status_code = 200
             elif option_type == "Time":
-                res.status_code = 400
-                res.reason_phrase = "NYI"
+                data = json.dumps({'start_time': DEPARTMENT_SETTINGS.start_time, 
+                                  'end_time': DEPARTMENT_SETTINGS.end_time});
+                res.write(data)
+                res.status_code = 200
             else:
                 res.status_code = 400
                 res.reason_phrase = "Missing option type"
@@ -101,6 +105,24 @@ def Schedules(request):
         res.status_code = 400 
     return res
 
+# Used to retrieve sections when apply button is selected
+# @NOTE 'Sections' refers to the sections that match the filters set in  
+# Responds with a JSON object of the following form:
+# {
+#   "sections": [...]
+# }
+def Sections(request):
+    res = HttpResponse()
+    if request.method == "POST":  
+        res.content_type = 'application/json'
+        sections = Section.filter_json(json.dumps(request.body, sort_keys=True,
+                  indent=4, separators=(',', ': ')))
+        res.content = sections # serializers.serialize("json", sections)
+        res.status_code = 200
+    else:
+        res.status_code = 400 
+    return res
+
 
 # A function to detect conflicts when creating a new section.
 #
@@ -128,6 +150,7 @@ def Conflicts(request, section, academic_term):
             s.conflict = 'y'
             s.conflict_reason = 'faculty'
             s.save()
+
 
 
 

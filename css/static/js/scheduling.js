@@ -1,5 +1,6 @@
 /* *** GLOBALS *** */
-const filters = ["course", "faculty", "room", "time"];
+const filter_types = ["course", "faculty", "room", "time"];
+filters = {"course":{"logic":"and", "filters":[]}, "faculty":{"logic":"and", "filters":[]}, "room":{"logic":"and", "filters":[]}, "time":{"logic": "and", "filters":{"MWF":[], "TR":[]}}}
 
 /* *** UTILITY *** */
 // String format function. 
@@ -18,6 +19,59 @@ String.prototype.format = function()
     }
     return content;
 };
+
+// Compare two time strings
+// Returns 0 if equal, -1 if A < B, and 1 if A > B
+function compareTime(timeA, timeB) {
+    var startTimeParse = timeA.split(":");
+    var endTimeParse = timeB.split(":");
+    var firstHour = parseInt(startTimeParse[0]);
+    var firstMinute = parseInt(startTimeParse[1]);
+    var secondHour = parseInt(endTimeParse[0]);
+    var secondMinute = parseInt(endTimeParse[1]);
+    if (firstHour == secondHour) {
+        if (firstMinute == secondMinute)
+            return 0;
+        if (firstMinute < secondMinute)
+            return -1
+        return 1
+    }
+    else {
+        if (firstHour < secondHour)
+            return -1
+        return 1
+    }
+}
+
+// Convert Military formatted time to standard
+function toStandardTime(time) {
+    //@TODO convert from military to standard
+    // -- Buggy, fix this
+    var timeParse = timeA.split(":");
+    var hour = parseInt(startTimeParse[0]);
+    var minute = parseInt(startTimeParse[1]);
+    var half;
+    if (hour >= 12)
+        half = "PM";
+    else {
+        half = "AM";
+        if (hour == 0)
+            hour = 12
+    }
+    var paddedHour;
+    var paddedMinute;
+    if (hour < 10)
+        paddedHour = "0"+hour;
+    if (minute < 10)
+        paddedMinute = "0"+minute
+    var stdTime = "{0}:{1} {2}";
+    return stdTime.format(paddedHour, paddedMinute, half);
+}
+
+// Convert Standard formmated time to military 
+function toStandardTime(time) {
+    //@TODO convert from standard to military
+}
 
 /* *** FRAME *** */
 // OnClick function for new section frame
@@ -152,13 +206,13 @@ function selectFilter(element, filterType) {
         element.value = "active";
         element.className = "noselect filter-type-active";
         // Unselect other filter types
-        for (var i = 0; i < filters.length; ++i) {
-            var btnName = filters[i] + "-filter-btn";
+        for (var i = 0; i < filter_types.length; ++i) {
+            var btnName = filter_types[i] + "-filter-btn";
             if (element.id != btnName) {
                 $("#"+btnName)[0].value = "inactive" 
                 $("#"+btnName)[0].className = "noselect filter-type"; 
             }
-       }
+        }
         // Get options for this filter type
         $.ajax({
             type: "GET",
@@ -166,25 +220,54 @@ function selectFilter(element, filterType) {
             data: {type: element.innerHTML},
             success: function(response) {
                 data = JSON.parse(response)
-                var optionFormatString =
-                    "<div id=\"option-{0}\" class=\"input-group\">\n" +
-                    "  <span class=\"input-group-addon\">\n" +
-                    "    <input id=\"option-checkbox\" type=\"checkbox\" onclick=\"selectOption(this)\">\n" +
-                    "  </span>\n" +
-                    "  <p class=\"form-control\">{0}</p>\n" +
-                    "</div>\n";
                 optionFrame = $("#option-frame");
                 optionFrame.empty();
-                for (var i in data.options) {
-                    // Add to option window 
-                    optionFrame.append(optionFormatString.format(data.options[i].name));
-                    // Check if already in selected
-                    $("#"+filterType).children("div").each(function(index, value) {
-                        if (value.id == data.options[i].name) {
-                            $("#option-"+data.options[i].name).children("span").children("input").prop("checked", true);
-                        }
+                // Filter Type is time
+                if (filterType == "time-options") {
+                    var optionFormatString = 
+                        "<div id=\"time-option-window\" class=\"time-option-window\">\n" +
+                        "  <div class=\"btn-group\" role=\"group\" aria-label=\"...\">\n" +
+                        "    <div class=\"col-xs-12\"style=\"margin-top:30px;\">\n" +
+                        "      <button id=\"mwf-btn\" type=\"button\" class=\"btn btn-primary\" value=\"active\" onclick=\"selectDay('mwf')\" style=\"display:inline-block;\">MWF</button>\n" +
+                        "      <button id=\"th-btn\" type=\"button\" class=\"btn btn-default\" value=\"inactive\" onclick=\"selectDay('th')\" style=\"display:inline-block;\">TH</button>\n" +
+                        "    </div>\n" +
+                        "    <div class=\"col-xs-12\" style=\"margin-top:30px;\">\n" +
+                        "      <label for=\"start-time\">Start Time:</label>\n" +
+                        "      <input id=\"start-time\" type=\"time\" name=\"start-time\"></input>\n" +
+                        "    </div>\n" +
+                        "    <div class=\"col-xs-12\" style=\"margin-top:30px;\">\n" +
+                        "      <label for=\"end-time\">End Time:</label>\n" +
+                        "      <input id=\"end-time\" type=\"time\" name=\"end-time\"></input>\n" +
+                        "    </div> \n" +
+                        "    <div class=\"col-xs-12\" style=\"text-align:center; margin-top:30px;\">\n" +
+                        "      <button class=\"btn btn-primary\" onclick=\"selectTime('{0}', '{1}')\">Save</button>\n" +
+                        "    </div>\n" +
+                        "  </div>\n" + 
+                        "</div>";
+                    //@NOTE Currently gets start and end time as miliatry time
+                    //optionFrame.append(optionFormatString.format(toStandardTime(data.start_time), toStandardTime(data.end_time)));
+                    optionFrame.append(optionFormatString.format(data.start_time, data.end_time));
+                }
+                // Filter Type is course, faculty, or room
+                else {
+                    var optionFormatString =
+                        "<div id=\"option-{0}\" class=\"input-group\">\n" +
+                        "  <span class=\"input-group-addon\">\n" +
+                        "    <input id=\"option-checkbox\" type=\"checkbox\" onclick=\"selectOption(this)\">\n" +
+                        "  </span>\n" +
+                        "  <p class=\"form-control\">{0}</p>\n" +
+                        "</div>\n";
+                    for (var i in data.options) {
+                        // Add to option window 
+                        optionFrame.append(optionFormatString.format(data.options[i].name));
+                        // Check if already in selected
+                        $("#"+filterType).children("div").each(function(index, value) {
+                            if (value.id == data.options[i].name) {
+                                $("#option-"+data.options[i].name).children("span").children("input").prop("checked", true);
+                            }
 
-                    });
+                        });
+                    }
                 }
             },
             error: function(err) {
@@ -192,6 +275,57 @@ function selectFilter(element, filterType) {
             }
         });
     }
+}
+
+// OnClick for day group buttons in time option window
+function selectDay(dayGroup) {
+    // Check if button is already selected
+    if ($("#"+dayGroup+"-btn")[0].value == "active") {
+        // Button is already selected
+        return false;
+    }
+    if (dayGroup == "mwf") {
+        $("#th-btn")[0].value = "inactive"; 
+        $("#th-btn")[0].className = "noselect btn btn-default";
+        $("#mwf-btn")[0].className = "noselect btn btn-primary";
+    }
+    else {
+        $("#mwf-btn")[0].value = "inactive"; 
+        $("#mwf-btn")[0].className = "noselect btn btn-default";
+        $("#th-btn")[0].className = "noselect btn btn-primary"; 
+    }
+}
+
+// Validate and Get the time from the time option window
+// returned time object of form:
+// {
+//   "day": "mwf",
+//   "startTime": "8:00:00",
+//   "endTime": "20:00:00"
+// }
+function selectTime(minTime, maxTime) {
+    var time = {};
+    if ($("#mwf-btn")[0].value == "active")
+        time.day = "mwf";
+    else
+        time.day = "th";
+    var startTime = $("#start-time").val();
+    var endTime = $("#end-time").val();
+    if ((compareTime(startTime, minTime)) < 1 || (compareTime(startTime, maxTime) > 0)) {
+        //@TODO implement and use toStandardTime
+        sweetAlert("Invalid Start Time", "Department Hours: "+minTime+" - "+maxTime);
+        return false;
+    }
+    if ((compareTime(endTime, minTime) < 1) || (compareTime(endTime, maxTime) > 0)) {
+        //@TODO implement and use toStandardTime
+        sweetAlert("Invalid End Time", "Department Hours: "+minTime+" - "+maxTime);
+        return false;
+    }
+
+    //@TODO Verify start comes before end
+    time.startTime = startTime;
+    time.endTime = endTime;
+    return time;
 }
 
 // OnClick function for an option checkbox
@@ -202,9 +336,9 @@ function selectFilter(element, filterType) {
 function selectOption(element) {
     var filterType;
     // Get correct filter type (where to put selected option)
-    for (var i = 0; i < filters.length; ++i) {
-        if ($("#"+filters[i]+"-filter-btn")[0].value == "active") {
-            filterType = $("#"+filters[i]+"-options");
+    for (var i = 0; i < filter_types.length; ++i) {
+        if ($("#"+filter_types[i]+"-filter-btn")[0].value == "active") {
+            filterType = $("#"+filter_types[i]+"-options");
             break;
         }
     }
@@ -229,8 +363,8 @@ function selectOption(element) {
 
 // Unselect all selected options
 function unselectAllSelectedOptions() {
-    for (var i = 0; i < filters.length; ++i) {
-        $("#"+filters[i]+"-options").children("div").each(function(index, value) {
+    for (var i = 0; i < filter_types.length; ++i) {
+        $("#"+filter_types[i]+"-options").children("div").each(function(index, value) {
             unselectSelectedOption(value.id);
         });
     }
@@ -260,17 +394,16 @@ function getSelectedOptions() {
     var selectedOptions = {};
     // Iterate over each filter types option list
     var f = 0;
-    $("#filter-type-window").children("span").each(function (index, value) {
+    $("#filter-type-window").children("div").each(function (index, value) {
         var arr = [];
         // Iterate over each selected option type
         for (var i = 0; i < value.children.length; ++i) {
             arr.push(value.children[i].id); 
         }
-        var name = filters[f++];
+        var name = filter_types[f++];
         selectedOptions[name] = arr;
     });
     return selectedOptions;
- 
 }
 
 /* *** FILTER LOGIC / SECTIONS *** */
@@ -282,10 +415,48 @@ function selectSection(element) {
     return true;
 }
 
+// Get the filters JSON object with correct filters to apply using getSelectedOptions
+function updateFilters() {
+    filtersToApply = getSelectedOptions();  
+    timeMWFarr = []
+    timeTRarr = []
+    otherArr = []
+    $('.logic-checkbox').each(function (index, value) {
+        filterType = value.id; 
+        if (value.checked == true) {
+            timeMWFarr = filtersToApply[filterType]['MWF']
+            timeTRarr = filtersToApply[filterType]['TR']
+            otherArr = filtersToApply[filterType]       
+            $('#'+filterType).parent('label').addClass("checked");
+        } else {      
+            $('#'+filterType).parent('label').removeClass("checked");
+        }
+        if (filterType == "time") {
+            filters[filterType]['filters']['MWF'] = timeMWFarr
+            filters[filterType]['filters']['TR'] = timeTRarr
+        } else {
+            filters[filterType]['filters'] = otherArr
+        }
+    }); 
+}
+
 // OnClick function for a filter logic checkbox
 // - Makes the and/or radio button enabled
-function enableLogic(element) {
-
+function updateFilterLogic() {
+    selectedFilters = getSelectedFilters();
+    numSelected = 0;
+    // always set first selected filter to have 'and'
+    filters[selectedFilters[0]]['logic'] = "and";
+    // for each filter type that is checked, either disable or enable the AND/OR box accordingly
+    $('.logic-checkbox').each(function (index, value) {
+        if (value.checked == true && ++numSelected < selectedFilters.length) {
+            // console.log("can use " + value.id);
+            $("#"+value.id).parent().next().removeProp("disabled");    
+        } else {
+            // console.log(value.id + " is disabled");
+            $("#"+value.id).parent().next().prop("disabled", true);
+        }
+    }); 
 }
 
 // OnClick function that adds the logic for this filter
@@ -293,6 +464,59 @@ function addLogic(element) {
 
 }
 
+/* *** HELPER FUNCTIONS FOR LOGIC *** */
+function csrfSafeMethod(method) {
+    // these HTTP methods do not require CSRF protection
+    return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+}
+
+// Retrieves sections
+function getFilteredSections() {
+    updateFilters(); 
+    var csrftoken = jQuery("[name=csrfmiddlewaretoken]").val();
+    console.log(JSON.stringify(filters));
+    $.ajax({
+        type: "POST",
+        url: "sections",
+        beforeSend: function(xhr, settings) {
+            if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+                xhr.setRequestHeader("X-CSRFToken", csrftoken);
+            }
+        },
+        dataType: "json",
+        contentType: "application/jsonl charset=utf-8",
+        data: JSON.stringify(filters),
+        success: function(response) {
+            console.log(response);             
+        },
+        error: function(err) {
+            console.log(err);
+            console.log("<p>HELLO</p>");   
+        }
+    });
+}
+
+// Updates the filters JSON object to have correct logic for filter_type
+function setLogic(element) {
+    selectedFilters = getSelectedFilters(); // get selected filter types
+    filterType = element.id.split("-")[0]; // get the filter type of checked element (course, faculty, room or time)
+    // iterate through selected filters - 1 and set the chosen logic AND/OR for next item that is selected
+    for (var i=0;i<selectedFilters.length-1;i++) {
+        if (selectedFilters[i] == filterType) {
+            filters[selectedFilters[i+1]]['logic'] = element.options[element.selectedIndex].value;
+            // console.log(element.options[element.selectedIndex].value + " chosen for " + selectedFilters[i+1]);
+        }
+    }
+}
+
+// gets all the currently selected filter types to be applied with logic
+function getSelectedFilters() {
+    var selectedFilters = [];
+    $('.logic-checkbox').each(function (index, value) {
+        if (value.checked == true) { selectedFilters.push(value.id); }
+    });
+    return selectedFilters;
+}
 
 // OnClick function to set the days for a new section
 function setDays(element, form) {
