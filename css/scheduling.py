@@ -109,4 +109,16 @@ def Schedules(request):
 # Updates sections with conflicts to a 'y' in conflicts and updates
 # the conflict reason.
 
-# def Conflicts(request):
+# def Conflicts(request, section):
+#     start_time = section.start_time
+#     end_time = section.end_time
+
+#     # Find all sections that are between start_time and end_time of the new section
+
+
+#     # Create 
+
+
+
+
+
