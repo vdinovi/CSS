@@ -98,14 +98,12 @@ def SchedulingView(request):
     res = HttpResponse()
     if request.method == "GET":
         return render(request, 'scheduling.html', {
-                      'new_section_form':AddSectionForm()})
-    elif request.method == "POST":
-        form = AddSectionForm(request.POST)
-        form.save()
-        return render(request, 'scheduling.html')
+                      'add_section_form': AddSectionForm(),
+                      'add_schedule_form': AddScheduleForm()
+                      })
     else:
-        print 'in outer else'
         res.status_code = 400
+    return res
 
 def LandingView(request):
     return render(request,'landing.html')
@@ -439,18 +437,6 @@ def FacultyView(request):
     else:
         res.status_code = 400
     return res
-
-# Primary scheduling page view
-def SchedulingView(request):
-    res = HttpResponse()
-    if request.method == "GET":
-        return render(request, 'scheduling.html', {
-                      'new_section_form':AddSectionForm()})
-    elif request.method == "POST":
-        res.status_code = 400
-        res.reason_phrase = "NYI"
-    else:
-        res.status_code = 400
 
 #  FAQ View
 # -- Low Priority --

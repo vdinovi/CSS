@@ -62,6 +62,7 @@ function addSchedule(name) {
         "    <li><a href=\"#\" onclick=\"selectSchedule('{0}')\">Select Schedule</a></li>\n" +
         "    <li><a href=\"#\" onclick=\"approveSchedule('{0}')\">Approve Schedule</a></li>\n" +
         "    <li><a href=\"#\" onclick=\"closeSchedule('{0}')\">Close Tab</a></li>\n" +
+        "    <li><a href=\"#\" data-toggle=\"modal\" data-name=\"{1}\" data-target=\"#delete-term-modal\">Delete Schedule</a></li>\n" +
         "  </ul>\n" +
         "</li>\n";
     var alreadyPresent = false;

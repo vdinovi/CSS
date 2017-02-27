@@ -247,3 +247,11 @@ class AddAvailabilityForm(forms.Form):
 	# 										level = self.cleaned_data['level'])
 	# 	availability.save()
 
+class AddScheduleForm(forms.Form):
+    academic_term = forms.CharField(max_length=16)
+
+    def save(self):
+        Schedule.create(academic_term=self.cleaned_data['academic_term'],
+                        state="active").save()
+
+

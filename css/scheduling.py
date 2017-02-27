@@ -1,5 +1,6 @@
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseRedirect
 from .models import Course, CUser, Room, Schedule
+from .forms import AddScheduleForm
 import json
 
 # Used to retrieve options when new filter type is selected
@@ -54,6 +55,22 @@ def Schedules(request):
         data = json.dumps({"active": [x.to_json() for x in Schedule.get_all_schedules().all()] })     
         res.write(data)
         res.status_code = 200
+    elif request.method == "POST" and "add-schedule" in request.POST:
+        form = AddScheduleForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return HttpResponseRedirect('/scheduling')
+        else:
+            res.status_code = 400
+            res.reason_phrase = "Invalid form entry" 
+    elif request.method == "POST" and "delete-schedule" in request.POST:
+        try:
+            academic_term = request.POST.get('academic-term') 
+            Schedule.get_schedule(term_name=academic_term).delete()
+            return HttpResponseRedirect('/scheduling')
+        except:
+            res.status_code = 400
+            res.reason_phrase = "Invalid form entry" 
     else:
         res.status_code = 400 
     return res
