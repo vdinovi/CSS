@@ -81,6 +81,10 @@
     color: black;
 }
 
+.btn.active .btn:active {
+    background-color: #94bdbd;
+}
+
 .invis-btn {
     background: white;
     
@@ -159,6 +163,8 @@ body input[type=checkbox] {
     border-bottom: 0px;
 }
 
+/* selected-option is for options that have been checked 
+ * and show up in filter window */
 .selected-option {
     display: inline-block;
     float: left;
@@ -177,6 +183,20 @@ body input[type=checkbox] {
     float: right;
     width: 80%;
     height:25px;
+}
+
+/* Window for the time option */
+.time-option-window {
+    width: 100%;
+    height: 100%;
+    background-color: white;
+    border-radius: 5px;
+    text-align: center;
+}
+
+.day-btn:active {
+    display:inline-block;
+    background-color: #94bdbd;
 }
 
 

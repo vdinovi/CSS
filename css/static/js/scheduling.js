@@ -20,6 +20,59 @@ String.prototype.format = function()
     return content;
 };
 
+// Compare two time strings
+// Returns 0 if equal, -1 if A < B, and 1 if A > B
+function compareTime(timeA, timeB) {
+    var startTimeParse = timeA.split(":");
+    var endTimeParse = timeB.split(":");
+    var firstHour = parseInt(startTimeParse[0]);
+    var firstMinute = parseInt(startTimeParse[1]);
+    var secondHour = parseInt(endTimeParse[0]);
+    var secondMinute = parseInt(endTimeParse[1]);
+    if (firstHour == secondHour) {
+        if (firstMinute == secondMinute)
+            return 0;
+        if (firstMinute < secondMinute)
+            return -1
+        return 1
+    }
+    else {
+        if (firstHour < secondHour)
+            return -1
+        return 1
+    }
+}
+
+// Convert Military formatted time to standard
+function toStandardTime(time) {
+    //@TODO convert from military to standard
+    // -- Buggy, fix this
+    var timeParse = timeA.split(":");
+    var hour = parseInt(startTimeParse[0]);
+    var minute = parseInt(startTimeParse[1]);
+    var half;
+    if (hour >= 12)
+        half = "PM";
+    else {
+        half = "AM";
+        if (hour == 0)
+            hour = 12
+    }
+    var paddedHour;
+    var paddedMinute;
+    if (hour < 10)
+        paddedHour = "0"+hour;
+    if (minute < 10)
+        paddedMinute = "0"+minute
+    var stdTime = "{0}:{1} {2}";
+    return stdTime.format(paddedHour, paddedMinute, half);
+}
+
+// Convert Standard formmated time to military 
+function toStandardTime(time) {
+    //@TODO convert from standard to military
+}
+
 /* *** FRAME *** */
 // OnClick function for new section frame
 // - Toggles between new section frame and filter frame
@@ -159,7 +212,7 @@ function selectFilter(element, filterType) {
                 $("#"+btnName)[0].value = "inactive" 
                 $("#"+btnName)[0].className = "noselect filter-type"; 
             }
-       }
+        }
         // Get options for this filter type
         $.ajax({
             type: "GET",
@@ -167,25 +220,54 @@ function selectFilter(element, filterType) {
             data: {type: element.innerHTML},
             success: function(response) {
                 data = JSON.parse(response)
-                var optionFormatString =
-                    "<div id=\"option-{0}\" class=\"input-group\">\n" +
-                    "  <span class=\"input-group-addon\">\n" +
-                    "    <input id=\"option-checkbox\" type=\"checkbox\" onclick=\"selectOption(this)\">\n" +
-                    "  </span>\n" +
-                    "  <p class=\"form-control\">{0}</p>\n" +
-                    "</div>\n";
                 optionFrame = $("#option-frame");
                 optionFrame.empty();
-                for (var i in data.options) {
-                    // Add to option window 
-                    optionFrame.append(optionFormatString.format(data.options[i].name));
-                    // Check if already in selected
-                    $("#"+filterType).children("div").each(function(index, value) {
-                        if (value.id == data.options[i].name) {
-                            $("#option-"+data.options[i].name).children("span").children("input").prop("checked", true);
-                        }
+                // Filter Type is time
+                if (filterType == "time-options") {
+                    var optionFormatString = 
+                        "<div id=\"time-option-window\" class=\"time-option-window\">\n" +
+                        "  <div class=\"btn-group\" role=\"group\" aria-label=\"...\">\n" +
+                        "    <div class=\"col-xs-12\"style=\"margin-top:30px;\">\n" +
+                        "      <button id=\"mwf-btn\" type=\"button\" class=\"btn btn-primary\" value=\"active\" onclick=\"selectDay('mwf')\" style=\"display:inline-block;\">MWF</button>\n" +
+                        "      <button id=\"th-btn\" type=\"button\" class=\"btn btn-default\" value=\"inactive\" onclick=\"selectDay('th')\" style=\"display:inline-block;\">TH</button>\n" +
+                        "    </div>\n" +
+                        "    <div class=\"col-xs-12\" style=\"margin-top:30px;\">\n" +
+                        "      <label for=\"start-time\">Start Time:</label>\n" +
+                        "      <input id=\"start-time\" type=\"time\" name=\"start-time\"></input>\n" +
+                        "    </div>\n" +
+                        "    <div class=\"col-xs-12\" style=\"margin-top:30px;\">\n" +
+                        "      <label for=\"end-time\">End Time:</label>\n" +
+                        "      <input id=\"end-time\" type=\"time\" name=\"end-time\"></input>\n" +
+                        "    </div> \n" +
+                        "    <div class=\"col-xs-12\" style=\"text-align:center; margin-top:30px;\">\n" +
+                        "      <button class=\"btn btn-primary\" onclick=\"selectTime('{0}', '{1}')\">Save</button>\n" +
+                        "    </div>\n" +
+                        "  </div>\n" + 
+                        "</div>";
+                    //@NOTE Currently gets start and end time as miliatry time
+                    //optionFrame.append(optionFormatString.format(toStandardTime(data.start_time), toStandardTime(data.end_time)));
+                    optionFrame.append(optionFormatString.format(data.start_time, data.end_time));
+                }
+                // Filter Type is course, faculty, or room
+                else {
+                    var optionFormatString =
+                        "<div id=\"option-{0}\" class=\"input-group\">\n" +
+                        "  <span class=\"input-group-addon\">\n" +
+                        "    <input id=\"option-checkbox\" type=\"checkbox\" onclick=\"selectOption(this)\">\n" +
+                        "  </span>\n" +
+                        "  <p class=\"form-control\">{0}</p>\n" +
+                        "</div>\n";
+                    for (var i in data.options) {
+                        // Add to option window 
+                        optionFrame.append(optionFormatString.format(data.options[i].name));
+                        // Check if already in selected
+                        $("#"+filterType).children("div").each(function(index, value) {
+                            if (value.id == data.options[i].name) {
+                                $("#option-"+data.options[i].name).children("span").children("input").prop("checked", true);
+                            }
 
-                    });
+                        });
+                    }
                 }
             },
             error: function(err) {
@@ -193,6 +275,57 @@ function selectFilter(element, filterType) {
             }
         });
     }
+}
+
+// OnClick for day group buttons in time option window
+function selectDay(dayGroup) {
+    // Check if button is already selected
+    if ($("#"+dayGroup+"-btn")[0].value == "active") {
+        // Button is already selected
+        return false;
+    }
+    if (dayGroup == "mwf") {
+        $("#th-btn")[0].value = "inactive"; 
+        $("#th-btn")[0].className = "noselect btn btn-default";
+        $("#mwf-btn")[0].className = "noselect btn btn-primary";
+    }
+    else {
+        $("#mwf-btn")[0].value = "inactive"; 
+        $("#mwf-btn")[0].className = "noselect btn btn-default";
+        $("#th-btn")[0].className = "noselect btn btn-primary"; 
+    }
+}
+
+// Validate and Get the time from the time option window
+// returned time object of form:
+// {
+//   "day": "mwf",
+//   "startTime": "8:00:00",
+//   "endTime": "20:00:00"
+// }
+function selectTime(minTime, maxTime) {
+    var time = {};
+    if ($("#mwf-btn")[0].value == "active")
+        time.day = "mwf";
+    else
+        time.day = "th";
+    var startTime = $("#start-time").val();
+    var endTime = $("#end-time").val();
+    if ((compareTime(startTime, minTime)) < 1 || (compareTime(startTime, maxTime) > 0)) {
+        //@TODO implement and use toStandardTime
+        sweetAlert("Invalid Start Time", "Department Hours: "+minTime+" - "+maxTime);
+        return false;
+    }
+    if ((compareTime(endTime, minTime) < 1) || (compareTime(endTime, maxTime) > 0)) {
+        //@TODO implement and use toStandardTime
+        sweetAlert("Invalid End Time", "Department Hours: "+minTime+" - "+maxTime);
+        return false;
+    }
+
+    //@TODO Verify start comes before end
+    time.startTime = startTime;
+    time.endTime = endTime;
+    return time;
 }
 
 // OnClick function for an option checkbox
