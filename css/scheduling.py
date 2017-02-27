@@ -4,6 +4,7 @@ from .forms import AddScheduleForm
 import json
 from django.db import IntegrityError
 from django.core.exceptions import ValidationError, ObjectDoesNotExist
+from .settings import DEPARTMENT_SETTINGS
 
 # Used to retrieve options when new filter type is selected
 # @NOTE 'Options' refers to specific Courses, Faculty, Rooms, or Time periods
@@ -33,8 +34,10 @@ def Options(request):
                 res.write(data)
                 res.status_code = 200
             elif option_type == "Time":
-                res.status_code = 400
-                res.reason_phrase = "NYI"
+                data = json.dumps({'start_time': DEPARTMENT_SETTINGS.start_time, 
+                                  'end_time': DEPARTMENT_SETTINGS.end_time});
+                res.write(data)
+                res.status_code = 200
             else:
                 res.status_code = 400
                 res.reason_phrase = "Missing option type"
@@ -117,6 +120,7 @@ def Schedules(request):
 
 
 #     # Create 
+
 
 
 

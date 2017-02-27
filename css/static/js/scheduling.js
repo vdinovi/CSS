@@ -158,7 +158,7 @@ function selectFilter(element, filterType) {
                 $("#"+btnName)[0].value = "inactive" 
                 $("#"+btnName)[0].className = "noselect filter-type"; 
             }
-       }
+        }
         // Get options for this filter type
         $.ajax({
             type: "GET",
@@ -166,25 +166,37 @@ function selectFilter(element, filterType) {
             data: {type: element.innerHTML},
             success: function(response) {
                 data = JSON.parse(response)
-                var optionFormatString =
-                    "<div id=\"option-{0}\" class=\"input-group\">\n" +
-                    "  <span class=\"input-group-addon\">\n" +
-                    "    <input id=\"option-checkbox\" type=\"checkbox\" onclick=\"selectOption(this)\">\n" +
-                    "  </span>\n" +
-                    "  <p class=\"form-control\">{0}</p>\n" +
-                    "</div>\n";
-                optionFrame = $("#option-frame");
-                optionFrame.empty();
-                for (var i in data.options) {
-                    // Add to option window 
-                    optionFrame.append(optionFormatString.format(data.options[i].name));
-                    // Check if already in selected
-                    $("#"+filterType).children("div").each(function(index, value) {
-                        if (value.id == data.options[i].name) {
-                            $("#option-"+data.options[i].name).children("span").children("input").prop("checked", true);
-                        }
+                // Filter Type is time
+                if (filterType == "time-options") {
+                    //@NOTE Currently gets start and end time correctly as miliatry time
+                    console.log("StartTime: "+data.start_time);
+                    console.log("EndTime: "+data.end_time);
+                    //@TODO Time Option Window
+                    var optionFormatString =
+                        "";
+                }
+                // Filter Type is course, faculty, or room
+                else {
+                    var optionFormatString =
+                        "<div id=\"option-{0}\" class=\"input-group\">\n" +
+                        "  <span class=\"input-group-addon\">\n" +
+                        "    <input id=\"option-checkbox\" type=\"checkbox\" onclick=\"selectOption(this)\">\n" +
+                        "  </span>\n" +
+                        "  <p class=\"form-control\">{0}</p>\n" +
+                        "</div>\n";
+                    optionFrame = $("#option-frame");
+                    optionFrame.empty();
+                    for (var i in data.options) {
+                        // Add to option window 
+                        optionFrame.append(optionFormatString.format(data.options[i].name));
+                        // Check if already in selected
+                        $("#"+filterType).children("div").each(function(index, value) {
+                            if (value.id == data.options[i].name) {
+                                $("#option-"+data.options[i].name).children("span").children("input").prop("checked", true);
+                            }
 
-                    });
+                        });
+                    }
                 }
             },
             error: function(err) {

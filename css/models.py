@@ -332,7 +332,6 @@ class WorkInfo(models.Model):
     work_units = models.IntegerField(default=0)
     work_hours = models.IntegerField(default=0)
 
-    #classmethod?
     def getJSON(self):
         return JsonResponse({
             'course_name': self.course.name,
@@ -414,7 +413,8 @@ class Schedule(models.Model):
 
     def to_json(self):
         return dict(
-                academic_term = self.academic_term)
+                academic_term = self.academic_term,
+                state = self.state)
 
 
 
