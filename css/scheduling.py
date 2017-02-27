@@ -1,5 +1,5 @@
 from django.http import HttpResponse, HttpResponseRedirect
-from .models import Course, CUser, Room, Schedule
+from .models import Course, CUser, Room, Schedule, Section
 from .forms import AddScheduleForm
 import json
 from django.db import IntegrityError
@@ -109,14 +109,25 @@ def Schedules(request):
 # Updates sections with conflicts to a 'y' in conflicts and updates
 # the conflict reason.
 
-# def Conflicts(request, section):
-#     start_time = section.start_time
-#     end_time = section.end_time
+def Conflicts(request, section, academic_term):
+    start_time = section.start_time
+    end_time = section.end_time
+    room = section.room
+    faculty = section.faculty
 
-#     # Find all sections that are between start_time and end_time of the new section
+    # Find all sections that are between start_time and end_time of the new section
+    sections = Section.filter(academic_term=academic_term).start_time__range(start_time, end_time).end_time__range(start_time, end_time)
 
-
-#     # Create 
+    # Check if rooms or faculty overlap
+    for s in sections:
+        if s.room == room:
+            s.conflict = 'y'
+            s.conflict_reason = 'room'
+            s.save()
+        if s.faculty == faculty:
+            s.conflict = 'y'
+            s.conflict_reason = 'faculty'
+            s.save()
 
 
 
