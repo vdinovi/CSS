@@ -139,41 +139,46 @@
           <!-- Filter Logic Window -->
           <div class="col-xs-3 outer-frame">
             <h2 style="text-align:center;">Filter Logic</h2>
-            <form class="form-horizontal" role="form">
+            <form class="form-horizontal" role="form" method="POST" action="sections">{% csrf_token %}
               <div id="filter-logic-frame" class="inner-frame" style="padding-top: 5%">
+                <!-- COURSE LOGIC FILTER -->
                 <div id="course-filter-logic" class="filter-logic">
                   <div class="col-xs-8 col-xs-offset-2" style="height:100%;">
-                    <label class="checkbox-inline"><input type="checkbox" value="">Course</label>
-                    <div class="list-group"> 
-                      <a href="#" class="list-group-item logic active">OR</a>
-                      <a href="#" class="list-group-item logic">AND</a>
-                    </div>
-                 </div>
+                    <label class="checkbox-inline"><input type="checkbox" id="course" class="logic-checkbox" onclick="updateFilters();updateFilterLogic();" value="">Course</label>
+                    <select id="course-logic" onchange="setLogic(this)" disabled>
+                      <option value="and">AND</option>
+                      <option value="or">OR</option>
+                    </select>
+                  </div>
                 </div>
+                <!-- FACULTY LOGIC FILTER -->
                 <div id="faculty-filter-logic" class="filter-logic">
                   <div class="col-xs-8 col-xs-offset-2" style="height:100%;">
-                    <label class="checkbox-inline"><input type="checkbox" value="">Faculty</label>
-                    <div class="list-group"> 
-                      <a href="#" class="list-group-item logic active">OR</a>
-                      <a href="#" class="list-group-item logic">AND</a>
-                    </div>
+                    <label class="checkbox-inline"><input type="checkbox" id="faculty" class="logic-checkbox" onclick="updateFilters();updateFilterLogic();" value="">Faculty</label>
+                    <select id="faculty-logic" onchange="setLogic(this)" disabled>
+                      <option value="and">AND</option>
+                      <option value="or">OR</option>
+                    </select>
                   </div>
                 </div>
+                <!-- ROOM LOGIC FILTER -->
                 <div id="room-filter-logic" class="filter-logic">
                   <div class="col-xs-8 col-xs-offset-2" style="height:100%;">
-                    <label class="checkbox-inline"><input type="checkbox" value="">Room</label>
-                    <div class="list-group"> 
-                      <a href="#" class="list-group-item logic active">OR</a>
-                      <a href="#" class="list-group-item logic">AND</a>
-                    </div>
+                    <label class="checkbox-inline"><input type="checkbox" id="room" class="logic-checkbox" onclick="updateFilters();updateFilterLogic();" value="">Room</label>
+                    <select id="room-logic" onchange="setLogic(this)" disabled>
+                      <option value="and">AND</option>
+                      <option value="or">OR</option>
+                    </select>
                   </div>
                 </div>
+                <!-- TIME LOGIC FILTER -->
                 <div id="time-filter-logic" class="filter-logic">
                   <div class="col-xs-8 col-xs-offset-2" style="height:100%;">
-                    <label class="checkbox-inline"><input type="checkbox" value="">Time</label>
+                    <label class="checkbox-inline"><input type="checkbox" id="time" class="logic-checkbox" onclick="updateFilters();updateFilterLogic();" value="">Time</label>
                   </div>
                 </div>
               </div>
+            <button id="apply-filter-btn" class="btn" style="margin-top:5px;width:100%;" onclick="getFilteredSections()">Apply</button>
             </form>
           </div>
           <!-- @TODO Fill with real entries -->

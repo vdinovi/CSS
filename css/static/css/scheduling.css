@@ -270,6 +270,25 @@ body input[type=checkbox] {
     padding-top:0;
 }
 
+/* drop down AND/OR style */
+div#filter-logic-frame > div > div > select {
+    margin-left: 20px;
+    padding: 0 15px;
+    margin-top: 5px;
+    border: solid #94bdbd;
+}
+div#filter-logic-frame > div > div > select[disabled] {
+    display: none;
+}
+/* Filter Type in Logic Window style */
+label.checkbox-inline {
+    color:gray;
+    padding-top: 15px!important;
+}
+label.checkbox-inline.checked {
+    color:#333;
+    padding-top: 15px;
+}
 
 /* New Section Form */
 .new_section_inputs {

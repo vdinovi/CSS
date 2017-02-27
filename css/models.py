@@ -12,6 +12,7 @@ import json
 import operator
 from django.db.models import Q
 from django.http import JsonResponse
+from django.core import serializers
 
 
 # System User class,
@@ -508,7 +509,9 @@ class Section(models.Model):
 
     @classmethod
     def filter_json(cls, json_string):
-        return cls.filter(json.loads(json_string))
+        json_stuff = json.loads(json_string)
+        return json_stuff
+        #return cls.filter(json.loads(json_string))
 
     @classmethod
     def filter(cls, filter_dict):
@@ -576,7 +579,7 @@ class Section(models.Model):
         if finalQuery == '':
             finalQuery = timeQuery
 
-        return Section.objects.filter(finalQuery)
+        return serializers.serialize("json", Section.objects.filter(finalQuery))
 
 class FacultyCoursePreferences(models.Model):
     faculty = models.ForeignKey(CUser, on_delete = models.CASCADE)

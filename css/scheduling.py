@@ -1,9 +1,10 @@
 from django.http import HttpResponse, HttpResponseRedirect
-from .models import Course, CUser, Room, Schedule
+from .models import Course, CUser, Room, Schedule, Section
 from .forms import AddScheduleForm
 import json
 from django.db import IntegrityError
 from django.core.exceptions import ValidationError, ObjectDoesNotExist
+from django.core import serializers
 from .settings import DEPARTMENT_SETTINGS
 
 # Used to retrieve options when new filter type is selected
@@ -100,6 +101,24 @@ def Schedules(request):
         except:
             res.status_code = 400
             res.reason_phrase = "Invalid form entry" 
+    else:
+        res.status_code = 400 
+    return res
+
+# Used to retrieve sections when apply button is selected
+# @NOTE 'Sections' refers to the sections that match the filters set in  
+# Responds with a JSON object of the following form:
+# {
+#   "sections": [...]
+# }
+def Sections(request):
+    res = HttpResponse()
+    if request.method == "POST":  
+        res.content_type = 'application/json'
+        sections = Section.filter_json(json.dumps(request.body, sort_keys=True,
+                  indent=4, separators=(',', ': ')))
+        res.content = sections # serializers.serialize("json", sections)
+        res.status_code = 200
     else:
         res.status_code = 400 
     return res
