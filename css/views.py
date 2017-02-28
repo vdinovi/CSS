@@ -188,7 +188,7 @@ def LoginView(request):
 
 def LogoutView(request):
     logout(request)
-    return HttpResponseRedirect('/landing')
+    return HttpResponseRedirect('/login')
 
 #  Rooms View
 # @descr
