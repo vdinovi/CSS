@@ -13,6 +13,7 @@ import operator
 from django.db.models import Q
 from django.http import JsonResponse
 from django.core import serializers
+from datetime import datetime
 
 
 # System User class,
@@ -91,6 +92,14 @@ class CUser(models.Model):
         print first_name + last_name
         return cls.objects.get(user__first_name=first_name,
                                user__last_name=last_name)
+    @classmethod
+    # Return cuser by full name
+    def get_faculty_by_full_name(cls, full_name):
+        first_name = full_name.split()[0]
+        last_name = full_name.split()[1]
+        print first_name + last_name
+        return cls.objects.get(user_type='faculty', user__first_name=first_name,
+                               user__last_name=last_name)
     # Return faculty cuser by email
     @classmethod
     def get_faculty(cls, email): # Throws ObjectDoesNotExist
@@ -137,7 +146,7 @@ class CUser(models.Model):
 
     def to_json(self):
         return dict(id = self.id,
-                    name = self.user.first_name + self.user.last_name,
+                    name = self.user.first_name + " " + self.user.last_name,
                     email = self.user.email)
 
 
@@ -538,18 +547,18 @@ class Section(models.Model):
                     if k == "MWF" or k == "TR":
                         for times in range(len(v)):
                             timeList += [reduce(operator.and_, [Q(days=k), Q(start_time__gte=v[times][0]), Q(end_time__lte=v[times][1])])]
-                        if timeList:
+                        if len(timeList) != 0:
                             timeQuery = reduce(operator.or_, timeList)
             else:
                 queryLoop = Q()
                 for index in range(len(filters)):
-                    if key == "course" and len(filters) != 0:
+                    if key == "course":
                         filterObject = Course.get_course(filters[index])
                         queryLoop = reduce(operator.or_, [queryLoop, Q(course=filterObject)])
-                    elif key == "faculty" and len(filters) != 0:
+                    elif key == "faculty":
                         filterObject = CUser.get_faculty_by_full_name(filters[index])
                         queryLoop = reduce(operator.or_, [queryLoop, Q(faculty=filterObject)])
-                    elif key == "room" and len(filters) != 0:
+                    elif key == "room":
                         filterObject = Room.get_room(filters[index])
                         queryLoop = reduce(operator.or_, [queryLoop, Q(room=filterObject)])
                     else:
@@ -575,12 +584,22 @@ class Section(models.Model):
                 finalQuery = reduce(operator.or_, [finalQuery, orQuery])
             else:
                 finalQuery = orQuery
+
         if finalQuery == '':
             finalQuery = timeQuery
 
-        print "finalQuery" 
-        print finalQuery
         return cls.objects.filter(finalQuery)
+
+    def to_json(self):
+        return dict(id = str(self.id),
+                    name = self.course.name + "-" + str(self.id),
+                    course = self.course.name, 
+                    type = self.section_type.name,
+                    faculty = self.faculty.user.first_name + " " + self.faculty.user.last_name, 
+                    room = self.room.name, 
+                    days = self.days, 
+                    time = self.start_time.strftime("%H:%M%p") + " - " + self.end_time.strftime("%H:%M%p"))
+                    
 
 class FacultyCoursePreferences(models.Model):
     faculty = models.ForeignKey(CUser, on_delete = models.CASCADE)

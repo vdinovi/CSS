@@ -437,8 +437,13 @@ function updateFilters() {
         filterType = value.id; 
         if (value.checked == true) {
             console.log(filterType + " isChecked");
-            timeMWFarr = filtersToApply[filterType]['MWF']
-            timeTRarr = filtersToApply[filterType]['TR']
+            for (var t=0;t<filtersToApply[filterType].length;t++) {
+                timeArr = filtersToApply[filterType][t].split("-");
+                startTime = timeArr[1] + ":" + timeArr[2];
+                endTime = timeArr[3] + ":" + timeArr[4];
+                if (filtersToApply[filterType][t].includes('mwf') == true) { timeMWFarr.push(new Array(startTime, endTime)); }
+                else if (filtersToApply[filterType][t].includes('tr') == true) { timeTRarr.push(new Array(startTime, endTime)); }
+            } 
             otherArr = filtersToApply[filterType]       
             $('#'+filterType).parent('label').addClass("checked");
         } else {      
@@ -507,10 +512,31 @@ function getFilteredSections(e) {
     $.ajax({
         type: "POST",
         url: "sections",
-        // contentType: "application/json; charset=utf-16;",
         data: JSON.stringify(filters),
+        dataType: "json",
         success: function(response) {
-            console.log(response);
+            console.log(response.sections);
+            data = response.sections;
+            sectionFrame = $("#section-frame");
+            sectionFrame.empty();
+            var sectionFormatString =
+                "<div id=\"section-{0}\" class=\"input-group\">\n" +
+                "  <span class=\"input-group-addon\">\n" +
+                "    <input id=\"option-checkbox\" type=\"checkbox\">\n" +
+                "  </span>\n" +
+                "  <p class=\"form-control\">{0}</p>\n" +
+                "</div>\n";
+            for (var i in data) {
+                // Add to section window 
+                sectionFrame.append(sectionFormatString.format(data[i].name));
+                // Check if already in selected
+                // $("#"+filterType).children("div").each(function(index, value) {
+                //     if (value.id == data.sections[i].name) {
+                //         $("#option-"+data.sections[i].name).children("span").children("input").prop("checked", true);
+                //     }
+
+                // });
+            }
         },
         error: function(err) {
             console.log(err);
