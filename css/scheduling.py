@@ -111,6 +111,8 @@ def Schedules(request):
 # {
 #   "sections": [...]
 # }
+from django.views.decorators.csrf import csrf_exempt
+@csrf_exempt
 def Sections(request):
     res = HttpResponse()
     print "HERE"

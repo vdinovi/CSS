@@ -1,6 +1,6 @@
 /* *** GLOBALS *** */
 const filter_types = ["course", "faculty", "room", "time"];
-filters = {"course":{"logic":"and", "filters":[]}, "faculty":{"logic":"and", "filters":[]}, "room":{"logic":"and", "filters":[]}, "time":{"logic": "and", "filters":{"MWF":[], "TR":[]}}}
+var filters = {"course":{"logic":"and", "filters":[]}, "faculty":{"logic":"and", "filters":[]}, "room":{"logic":"and", "filters":[]}, "time":{"logic": "and", "filters":{"MWF":[], "TR":[]}}}
 
 /* *** UTILITY *** */
 // String format function. 
@@ -321,11 +321,22 @@ function selectTime(minTime, maxTime) {
         sweetAlert("Invalid End Time", "Department Hours: "+minTime+" - "+maxTime);
         return false;
     }
-
     //@TODO Verify start comes before end
     time.startTime = startTime;
     time.endTime = endTime;
-    return time;
+    //@TODO conver tto standard time
+    var optionId = (time.day+"-"+time.startTime+"-"+time.endTime).replace(/:/g, '-');
+    var optionText = time.day+": "+time.startTime+" - "+time.endTime;
+    var timeOptionFormatString = 
+        "<div id=\"{0}\"class=\"selected-option\">\n" +
+        "  <button onclick=\"unselectSelectedTime('{0}')\">x</button>\n" +
+        "  <li class=\"filter-options\">{1}</li>\n" +
+        "</div>"; 
+    $("#time-options").append(timeOptionFormatString.format(optionId, optionText));
+}
+
+function unselectSelectedTime(id) {
+    $("#"+id).remove();
 }
 
 // OnClick function for an option checkbox
@@ -418,6 +429,7 @@ function selectSection(element) {
 // Get the filters JSON object with correct filters to apply using getSelectedOptions
 function updateFilters() {
     filtersToApply = getSelectedOptions();  
+    scheduleToApply = getSelectedSchedule();
     timeMWFarr = []
     timeTRarr = []
     otherArr = []
@@ -470,28 +482,36 @@ function csrfSafeMethod(method) {
     return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
 }
 
+function getCookie(name) {
+    var cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        var cookies = document.cookie.split(';');
+        for (var i = 0; i < cookies.length; i++) {
+            var cookie = jQuery.trim(cookies[i]);
+            // Does this cookie string begin with the name we want?
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
 // Retrieves sections
-function getFilteredSections() {
+function getFilteredSections(e) {
     updateFilters(); 
-    var csrftoken = jQuery("[name=csrfmiddlewaretoken]").val();
-    // console.log(JSON.stringify(filters));
     $.ajax({
         type: "POST",
         url: "sections",
-        beforeSend: function(xhr, settings) {
-            if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
-                xhr.setRequestHeader("X-CSRFToken", csrftoken);
-            }
-        },
-        contentType: "application/json; charset=utf-16",
-        data: filters,
+        dataType: "json",
+        contentType: "application/json; charset=utf-8;",
+        data: JSON.stringify(filters),
         success: function(response) {
-            console.log(response);  
-            console.log("SUCCESS!")           
+            console.log(response);
         },
         error: function(err) {
-            console.log(err); 
-            console.log("ERROR");  
+            console.log(err);
         }
     });
 }
