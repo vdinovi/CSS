@@ -430,12 +430,13 @@ function selectSection(element) {
 function updateFilters() {
     filtersToApply = getSelectedOptions();  
     scheduleToApply = getSelectedSchedule();
-    timeMWFarr = []
-    timeTRarr = []
-    otherArr = []
-    $('.logic-checkbox').each(function (index, value) {
+    $('.logic-checkbox').each(function (index, value) {        
+        timeMWFarr = []
+        timeTRarr = []
+        otherArr = []
         filterType = value.id; 
         if (value.checked == true) {
+            console.log(filterType + " isChecked");
             timeMWFarr = filtersToApply[filterType]['MWF']
             timeTRarr = filtersToApply[filterType]['TR']
             otherArr = filtersToApply[filterType]       
@@ -458,7 +459,9 @@ function updateFilterLogic() {
     selectedFilters = getSelectedFilters();
     numSelected = 0;
     // always set first selected filter to have 'and'
-    filters[selectedFilters[0]]['logic'] = "and";
+    if (selectedFilters.length != 0) {
+        filters[selectedFilters[0]]['logic'] = "and";
+    }
     // for each filter type that is checked, either disable or enable the AND/OR box accordingly
     $('.logic-checkbox').each(function (index, value) {
         if (value.checked == true && ++numSelected < selectedFilters.length) {
@@ -504,8 +507,7 @@ function getFilteredSections(e) {
     $.ajax({
         type: "POST",
         url: "sections",
-        dataType: "json",
-        contentType: "application/json; charset=utf-8;",
+        // contentType: "application/json; charset=utf-16;",
         data: JSON.stringify(filters),
         success: function(response) {
             console.log(response);

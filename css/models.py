@@ -510,8 +510,7 @@ class Section(models.Model):
     @classmethod
     def filter_json(cls, json_string):
         json_stuff = json.loads(json_string)
-        return json_stuff
-        #return cls.filter(json.loads(json_string))
+        return cls.filter(json_stuff)
 
     @classmethod
     def filter(cls, filter_dict):
@@ -544,13 +543,13 @@ class Section(models.Model):
             else:
                 queryLoop = Q()
                 for index in range(len(filters)):
-                    if key == "course":
+                    if key == "course" and len(filters) != 0:
                         filterObject = Course.get_course(filters[index])
                         queryLoop = reduce(operator.or_, [queryLoop, Q(course=filterObject)])
-                    elif key == "faculty":
-                        filterObject = CUser.get_faculty(filters[index])
+                    elif key == "faculty" and len(filters) != 0:
+                        filterObject = CUser.get_faculty_by_full_name(filters[index])
                         queryLoop = reduce(operator.or_, [queryLoop, Q(faculty=filterObject)])
-                    elif key == "room":
+                    elif key == "room" and len(filters) != 0:
                         filterObject = Room.get_room(filters[index])
                         queryLoop = reduce(operator.or_, [queryLoop, Q(room=filterObject)])
                     else:
@@ -565,12 +564,12 @@ class Section(models.Model):
 
         if ands is True:
             andQuery = reduce(operator.and_, andList)
-            if (timeQuery is not None) and ('and' in timeLogic):
+            if (timeQuery != '') and ('and' in timeLogic):
                 andQuery = reduce(operator.and_, [andQuery, timeQuery])
             finalQuery = andQuery
         if ors is True:
             orQuery = reduce(operator.and_, orList)
-            if (timeQuery is not None) and ('or' in timeLogic):
+            if (timeQuery != '') and ('or' in timeLogic):
                 orQuery = reduce(operator.or_, [orQuery, timeQuery])
             if finalQuery != '':
                 finalQuery = reduce(operator.or_, [finalQuery, orQuery])
@@ -579,7 +578,9 @@ class Section(models.Model):
         if finalQuery == '':
             finalQuery = timeQuery
 
-        return serializers.serialize("json", Section.objects.filter(finalQuery))
+        print "finalQuery" 
+        print finalQuery
+        return cls.objects.filter(finalQuery)
 
 class FacultyCoursePreferences(models.Model):
     faculty = models.ForeignKey(CUser, on_delete = models.CASCADE)

@@ -115,11 +115,12 @@ from django.views.decorators.csrf import csrf_exempt
 @csrf_exempt
 def Sections(request):
     res = HttpResponse()
-    print "HERE"
     if request.method == "POST":  
-        print json.dumps(request.body, separators=(',',':')) # returns a JSON object
-        #res.dataType = "json"
-        res.content = json.dumps(request.body)
+        #print request.body
+        #print "IN SCHEDULING.PY"
+        res.dataType = "json"
+        sections = Section.filter_json(request.body) # '{"course": {"logic":"and", "filters":[]}, "room": {"logic":"and", "filters":[]}}'
+        res.content = serializers.serialize("json", sections)
         res.status_code = 200
     else:
         res.status_code = 400 

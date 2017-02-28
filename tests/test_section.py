@@ -7,7 +7,7 @@ from datetime import datetime
 class SectionTestCase(TestCase): 
     def setUp(self):
         schedule1 = Schedule.create("Spring 2017", "active")
-        schedule2 = Schedule.create("Winter 2017", "finalized")
+        schedule2 = Schedule.create("Winter 2017", "approved")
         type1 = SectionType.create("Lecture")
         type2 = SectionType.create("Lab")
         course101 = Course.create("CPE101", "computers", "Fundamentals of Computer Science I")
@@ -125,11 +125,11 @@ class SectionTestCase(TestCase):
 
         #--------------- Filter Tests ----------------#
 
-    # def test_section_filter_course_one(self):
-    #     """ A section matches the name of one course we filter by. """
-    #     course_filter = '{"course": {"logic":"and", "filters":["CPE101"]}, "room": {"logic":"and", "filters":[]}}'
-    #     res_sections = Section.filter_json(course_filter)
-    #     self.assertEquals(len(res_sections), 1)
+    def test_section_filter_course_one(self):
+        """ A section matches the name of one course we filter by. """
+        course_filter = '{"course": {"logic":"and", "filters":["CPE101"]}, "room": {"logic":"and", "filters":[]}}'
+        res_sections = Section.filter_json(course_filter)
+        self.assertEquals(len(res_sections), 1)
 
     # def test_section_filter_course_none(self):
     #     """ One section matches the name of the one course we filter by. """
