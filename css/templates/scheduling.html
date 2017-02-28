@@ -137,7 +137,6 @@
           <!-- Filter Logic Window -->
           <div class="col-xs-3 outer-frame">
             <h2 style="text-align:center;">Filter Logic</h2>
-            <form class="form-horizontal" role="form" method="POST" action="sections">{% csrf_token %}
               <div id="filter-logic-frame" class="inner-frame" style="padding-top: 5%">
                 <!-- COURSE LOGIC FILTER -->
                 <div id="course-filter-logic" class="filter-logic">
@@ -176,8 +175,7 @@
                   </div>
                 </div>
               </div>
-            <button id="apply-filter-btn" class="btn" style="margin-top:5px;width:100%;" onclick="getFilteredSections()">Apply</button>
-            </form>
+            <button id="apply-filter-btn" class="btn" style="margin-top:5px;width:100%;" onclick="getFilteredSections(this)">Apply</button>
           </div>
           <!-- @TODO Fill with real entries -->
           <div class="col-xs-3 outer-frame">
@@ -300,10 +298,6 @@
     <!-- Custom JS -->
     <script src="{% static "js/scheduling.js" %}"></script>
     <script language="javascript">
-        // Setup csrf for ajax calls
-        /*$.ajaxSetup({
-            data: {csrfmiddlewaretoken: '{% csrf_token %}' },
-        });*/
        // Fixes Dropdown bug.
         $(document).ready(function () {
             $('.dropdown-toggle').dropdown();

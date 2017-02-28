@@ -111,13 +111,15 @@ def Schedules(request):
 # {
 #   "sections": [...]
 # }
+from django.views.decorators.csrf import csrf_exempt
+@csrf_exempt
 def Sections(request):
     res = HttpResponse()
     if request.method == "POST":  
         res.content_type = 'application/json'
         sections = Section.filter_json(json.dumps(request.body, sort_keys=True,
                   indent=4, separators=(',', ': ')))
-        res.content = sections # serializers.serialize("json", sections)
+        res.write(sections) # serializers.serialize("json", sections)
         res.status_code = 200
     else:
         res.status_code = 400 
