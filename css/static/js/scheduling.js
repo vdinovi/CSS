@@ -474,7 +474,7 @@ function csrfSafeMethod(method) {
 function getFilteredSections() {
     updateFilters(); 
     var csrftoken = jQuery("[name=csrfmiddlewaretoken]").val();
-    console.log(JSON.stringify(filters));
+    // console.log(JSON.stringify(filters));
     $.ajax({
         type: "POST",
         url: "sections",
@@ -483,15 +483,15 @@ function getFilteredSections() {
                 xhr.setRequestHeader("X-CSRFToken", csrftoken);
             }
         },
-        dataType: "json",
-        contentType: "application/jsonl charset=utf-8",
-        data: JSON.stringify(filters),
+        contentType: "application/json; charset=utf-16",
+        data: filters,
         success: function(response) {
-            console.log(response);             
+            console.log(response);  
+            console.log("SUCCESS!")           
         },
         error: function(err) {
-            console.log(err);
-            console.log("<p>HELLO</p>");   
+            console.log(err); 
+            console.log("ERROR");  
         }
     });
 }

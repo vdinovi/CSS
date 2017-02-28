@@ -113,11 +113,11 @@ def Schedules(request):
 # }
 def Sections(request):
     res = HttpResponse()
+    print "HERE"
     if request.method == "POST":  
-        res.content_type = 'application/json'
-        sections = Section.filter_json(json.dumps(request.body, sort_keys=True,
-                  indent=4, separators=(',', ': ')))
-        res.content = sections # serializers.serialize("json", sections)
+        print json.dumps(request.body, separators=(',',':')) # returns a JSON object
+        #res.dataType = "json"
+        res.content = json.dumps(request.body)
         res.status_code = 200
     else:
         res.status_code = 400 
