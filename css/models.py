@@ -639,33 +639,25 @@ class CohortData(models.Model):
     @classmethod
     def create(cls, schedule, course, major, **kwargs):
         cohort_entry = cls(schedule=schedule, course=course, major=major)
-        if kwargs['freshman'] is not None:
+        if 'freshman' in kwargs:
             cohort_entry.freshman = kwargs['freshman']
-        if kwargs['sophmore'] is not None:
+        if 'sophmore' in kwargs:
             cohort_entry.sophmore = kwargs['sophmore']
-        if kwargs['junior'] is not None:
+        if 'junior' in kwargs:
             cohort_entry.junior = kwargs['junior']
-        if kwargs['senior'] is not None:
+        if 'senior' in kwargs:
             cohort_entry.senior = kwargs['senior']
         cohort_entry.save()
         return cohort_entry
 
     @classmethod 
     def get_cohort_data(cls, schedule, course, major):
-        return cls.objects.filter(schedule=schedule, course=course, major=major)
+        return cls.objects.get(schedule=schedule, course=course, major=major)
               
-    @staticmethod
-    def get_cohort_total(schedule, major):
-        return CohortTotal.objects.filter(schedule=schedule, major=major)
-
     @classmethod
     def import_cohort_data(cls, file):
         #@TODO
         pass
-
-
-
-                                           
 
 
 # Contains totals for 
@@ -681,10 +673,24 @@ class CohortTotal(models.Model):
     senior = models.IntegerField(default=0)
 
     @classmethod
-    def create(cls, freshman, sophmore, junior, senior):
-        cohort_totals = cls(freshman=freshman, sophmore=sophmore, junior=junior, senior=senior)
-        cohort_totals.save()
-        return cohort_totals
+    def create(cls, schedule, major, **kwargs):
+        cohort_total = cls(schedule=schedule, major=major)
+        if 'freshman' in kwargs:
+            cohort_total.freshman = kwargs['freshman']
+        if 'sophmore' in kwargs:
+            cohort_total.sophmore = kwargs['sophmore']
+        if 'junior' in kwargs:
+            cohort_total.junior = kwargs['junior']
+        if 'senior' in kwargs:
+            cohort_total.senior = kwargs['senior'] 
+        cohort_total.save()
+        return cohort_total
+
+    @classmethod
+    def get_cohort_total(cls, schedule, major):
+        return cls.objects.get(schedule=schedule, major=major)
+
+
 
 
 
