@@ -398,9 +398,11 @@ class Schedule(models.Model):
 
     @classmethod
     def create(cls, academic_term, state):
-        if state != "approved" and state != "active":
+        if state != "approved" and state != "active" and state != None:
             raise ValidationError("Invalid schedule state.")
         else:
+            if state == None:
+                state = "active"
             schedule = cls(academic_term=academic_term, state=state)
             schedule.save()
             return schedule
@@ -639,4 +641,77 @@ class FacultyCoursePreferences(models.Model):
     	# 		c.update(rank = c.rank + 1) 
     	self.delete()
     	#return course_list
+
+# Cohort Data as imported from file
+class CohortData(models.Model):
+    # Composite primary key: [schedule + course + major]
+    class Meta:
+        unique_together = (("schedule", "course", "major"),) 
+    schedule = models.ForeignKey(Schedule, on_delete=models.CASCADE)
+    course = models.ForeignKey(Course, on_delete=models.CASCADE)
+    major = models.CharField(max_length=8) # Major(CSC, CPE, SE, ...) or TOTAL
+
+    freshman = models.IntegerField(default=0)
+    sophmore = models.IntegerField(default=0)
+    junior = models.IntegerField(default=0)
+    senior = models.IntegerField(default=0)
+
+    @classmethod
+    def create(cls, schedule, course, major, **kwargs):
+        cohort_entry = cls(schedule=schedule, course=course, major=major)
+        if 'freshman' in kwargs:
+            cohort_entry.freshman = kwargs['freshman']
+        if 'sophmore' in kwargs:
+            cohort_entry.sophmore = kwargs['sophmore']
+        if 'junior' in kwargs:
+            cohort_entry.junior = kwargs['junior']
+        if 'senior' in kwargs:
+            cohort_entry.senior = kwargs['senior']
+        cohort_entry.save()
+        return cohort_entry
+
+    @classmethod 
+    def get_cohort_data(cls, schedule, course, major):
+        return cls.objects.get(schedule=schedule, course=course, major=major)
+              
+    @classmethod
+    def import_cohort_data(cls, file):
+        #@TODO
+        pass
+
+
+# Contains totals for 
+class CohortTotal(models.Model):
+    class Meta:
+        unique_together =(("schedule", "major"),)
+    schedule = models.ForeignKey(Schedule, on_delete=models.CASCADE)
+    major = models.CharField(max_length=8) # Major(CSC, CPE, SE, ...) 
+
+    freshman = models.IntegerField(default=0)
+    sophmore = models.IntegerField(default=0)
+    junior = models.IntegerField(default=0)
+    senior = models.IntegerField(default=0)
+
+    @classmethod
+    def create(cls, schedule, major, **kwargs):
+        cohort_total = cls(schedule=schedule, major=major)
+        if 'freshman' in kwargs:
+            cohort_total.freshman = kwargs['freshman']
+        if 'sophmore' in kwargs:
+            cohort_total.sophmore = kwargs['sophmore']
+        if 'junior' in kwargs:
+            cohort_total.junior = kwargs['junior']
+        if 'senior' in kwargs:
+            cohort_total.senior = kwargs['senior'] 
+        cohort_total.save()
+        return cohort_total
+
+    @classmethod
+    def get_cohort_total(cls, schedule, major):
+        return cls.objects.get(schedule=schedule, major=major)
+
+
+
+
+
 
