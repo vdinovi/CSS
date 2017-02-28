@@ -674,10 +674,15 @@ class CohortData(models.Model):
     def get_cohort_data(cls, schedule, course, major):
         return cls.objects.get(schedule=schedule, course=course, major=major)
               
+    # Handles an uploaded cohort data file and commits it to the system
     @classmethod
-    def import_cohort_data(cls, file):
-        #@TODO
-        pass
+    def import_cohort_file(cls, file):
+        chunks = []
+        for s in file.chunks():
+            chunks.append(s)
+        data = ''.join(chunks)
+        print data
+        # @TODO handle file
 
 
 # Contains totals for 
@@ -711,7 +716,10 @@ class CohortTotal(models.Model):
         return cls.objects.get(schedule=schedule, major=major)
 
 
-
+# Student Plan Data. File of form:
+# Term, College, CourseID(X), Subject Code, Course Nbr, Description, Component,   
+# @TODO Complete Student Plan Data model and import mechanism
+#class 
 
 
 

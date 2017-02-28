@@ -255,3 +255,6 @@ class AddScheduleForm(forms.Form):
                         state="active").save()
 
 
+class UploadForm(forms.Form):
+    file = forms.FileField()
+

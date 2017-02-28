@@ -5,14 +5,12 @@ from django.shortcuts import render, render_to_response
 from django.views.generic import TemplateView
 from django.http import HttpResponse, HttpResponseRedirect
 from django.core import serializers
-import MySQLdb
+from MySQLdb import *
 from django.db import IntegrityError
 from .models import *
 from .forms import *
 from settings import DEPARTMENT_SETTINGS
-import json
-import MySQLdb
-import json
+from json import *
 
 # ---------------------------
 # --  Method-Based Views   --
@@ -115,6 +113,7 @@ def SettingsView(request):
                 'settings': DEPARTMENT_SETTINGS,
                 'section_type_list': SectionType.objects.filter().all(),
                 'add_section_type_form': AddSectionTypeForm(),
+                'cohort_data_form': UploadForm(),
             });
     elif request.method == "POST" and "submit-settings" in request.POST:
         try:
@@ -145,6 +144,18 @@ def SettingsView(request):
         else:
             res.status_code = 400
             res.reason_phrase = "SectionType " + request.POST['section-type-name'] + " does not exist"
+    elif request.method == "POST" and 'cohort-data' in request.POST:
+        form = UploadForm(request.POST, request.FILES)
+        if form.is_valid():
+            try:
+                CohortData.import_cohort_file(request.FILES['file']) 
+                return HttpResponseRedirect("/department/settings")
+            except:
+                raise
+            res.status_code = 500
+        else:
+            res.status_code = 400
+            res.reason_phrase = "Invalid form entry" 
     else:
         res.status_code = 400
     return res
