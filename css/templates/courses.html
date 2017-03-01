@@ -82,7 +82,7 @@
             <h4 class="modal-title">Edit Course</h4>
           </div>
           <div class="modal-body">
-            <form method="POST" action="?">{% csrf_token %}
+            <form id="edit-course-form-form" novalidate method="POST" action="?">{% csrf_token %}
               <h4>Course Info</h4>
               {{ edit_course_form.as_p }}
               <h4>Section Types</h4>
@@ -94,7 +94,7 @@
                 <button id="add-section-type-button" style="font-size: .7em;" type="button" class="btn btn-info btn-xs"  onclick="addSectionType()"><span class="glyphicon glyphicon-plus"></button>
                 <button id="save-section-type-button" style="font-size: .7em; display: none;" type="button" class="btn btn-info btn-xs"  onclick="submitSectionType()"><span class="glyphicon glyphicon-ok"></button>
               </div>
-              <button type="submit" name="edit-course-form" class="save btn btn-default">submit</button>
+              <button type="submit" name="edit-course-form" onclick="submitEditForm()" class="save btn btn-default">submit</button>
             </form>
             <div>
             </div>
@@ -220,6 +220,12 @@
              $('#ajax-area').append("<p><button onclick=\"deleteSectionType('" + sectionTypes[sectionType].section_type_name + "', '" + sectionTypes[sectionType].course_name + "')\"style=\"font-size: .7em;\" type=\"button\" class=\"btn btn-info btn-xs\" data-toggle=\"modal\" data-target=\"#add-section-type\"><span class=\"glyphicon glyphicon-minus\"></button> " + sectionTypes[sectionType].section_type_name + " Work Units: " + sectionTypes[sectionType].work_units + " Work Hours: " + sectionTypes[sectionType].work_hours + "</p>");
              console.log("test" + sectionTypes[sectionType]);
           }
+      }
+
+      function submitEditForm() {
+        console.log("edit_course_course_name.value: " + document.getElementById("edit_course_course_name").value)
+
+        $('#edit-course-form-form').submit();
       }
     </script>
   </body>
