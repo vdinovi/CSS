@@ -5,24 +5,24 @@ function setDeleteFormItem(string, resourceType){
 }
 function setEditFormFields(name, resourceType){
 
-  var table = document.getElementById("table");
+  var table = $("#table")[0];
   for (var i = 0, row; row = table.rows[i]; i++) {
 
     if(row.cells[1].innerHTML == name)
     {
       if(resourceType == 'room')
       {
-        document.getElementById("edit_room_name").value = name;
-        document.getElementById("edit_room_description").value = row.cells[2].innerHTML;
-        document.getElementById("edit_room_capacity").value = row.cells[3].innerHTML;
-        document.getElementById("edit_room_notes").value = row.cells[4].innerHTML;
-        document.getElementById("edit_room_equipment").value = row.cells[5].innerHTML;
+        $("#edit_room_name").val(name);
+        $("#edit_room_description").val(row.cells[2].innerHTML);
+        $("#edit_room_capacity").val(row.cells[3].innerHTML);
+        $("#edit_room_notes").val(row.cells[4].innerHTML);
+        $("#edit_room_equipment").val(row.cells[5].innerHTML);
       }
       else if(resourceType == 'course')
       {
-        document.getElementById("edit_course_course_name").value = name;
-        document.getElementById("edit_course_equipment_req").value = row.cells[2].innerHTML;
-        document.getElementById("edit_course_description").value = row.cells[3].innerHTML;
+        $("#edit_course_course_name").val(name);)
+        $("#edit_course_equipment_req").val(row.cells[2].innerHTML);
+        $("#edit_course_description").val(row.cells[3].innerHTML);
       }
     }
   }
