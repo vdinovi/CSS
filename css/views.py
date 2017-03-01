@@ -18,7 +18,7 @@ from json import *
 def RegistrationView(request):
     res = HttpResponse()
     #pass these credentials to the RegisterUserForm
- 
+
     if request.method == "GET":
         first_name = request.GET.get('first_name')
         last_name = request.GET.get('last_name')
@@ -148,14 +148,14 @@ def SettingsView(request):
         form = UploadForm(request.POST, request.FILES)
         if form.is_valid():
             try:
-                CohortData.import_cohort_file(request.FILES['file']) 
+                CohortData.import_cohort_file(request.FILES['file'])
                 return HttpResponseRedirect("/department/settings")
             except:
                 raise
             res.status_code = 500
         else:
             res.status_code = 400
-            res.reason_phrase = "Invalid form entry" 
+            res.reason_phrase = "Invalid form entry"
     else:
         res.status_code = 400
     return res
@@ -259,6 +259,7 @@ from .models import Course
 from .forms import AddCourseForm
 def CoursesView(request):
     res = HttpResponse()
+    print("REQUEST:")
     print request.body
     if request.method == "GET":
         return render(request, 'courses.html', {
