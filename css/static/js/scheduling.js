@@ -255,16 +255,17 @@ function selectFilter(element, filterType) {
                         "  <span class=\"input-group-addon\">\n" +
                         "    <input id=\"option-checkbox\" type=\"checkbox\" onclick=\"selectOption(this)\">\n" +
                         "  </span>\n" +
-                        "  <p class=\"form-control\">{0}</p>\n" +
+                        "  <p class=\"form-control\" style=\"max-width: 100%; white-space: nowrap\">{1}</p>\n" +
                         "</div>\n";
                     for (var i in data.options) {
                         // Add to option window 
-                        optionFrame.append(optionFormatString.format(data.options[i].name));
+                        var name = data.options[i].name
+                        optionFrame.append(optionFormatString.format(name.replace(/ /g, '-'), name));
                         // Check if already in selected
                         $("#"+filterType).children("div").each(function(index, value) {
                             //console.log(value.id + " == " + data.options[i].name.replace(/ /g, '-'))
                             if (value.id == data.options[i].name.replace(/ /g, '-')) {
-                                console.log($("#option-"data.options[i].name));
+                                console.log($("#option-"+data.options[i].name.replace(/ /g,'-')));
                                 $("#option-"+data.options[i].name.replace(/ /g, '-')).children("span").children("input").prop("checked", true);
                             }
                         });
@@ -366,7 +367,9 @@ function selectOption(element) {
     }
     // Remove option from selected option list
     else {
+        console.log(filterType);
         filterType.children("div").each(function(index, value) {
+            console.log($(value));
             if (value.id == element.parentNode.parentNode.innerText)
                 value.remove();
         });
@@ -388,8 +391,8 @@ function unselectAllSelectedOptions() {
 //    - Unselect option from options window
 function unselectSelectedOption(name) {
     $("#option-frame").children("div").each(function(index, value) {
-        if (name == value.children[1].innerHTML) {
-            value.children[0].children[0].checked = false;
+        if (name.replace(/-/g, ' ') == $(value).children("p").text()) {
+            $(value).children("span").children("input").prop("checked", false);
         }
     });
     $("#"+name).remove();
