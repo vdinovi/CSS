@@ -391,6 +391,7 @@ def FacultyView(request):
         if form.is_valid():
             form.send_invite('faculty', request)
             res.status_code = 200
+            return HttpResponseRedirect('/resources/faculty')
         else:
             res.status_code = 400
     elif request.method == "POST" and 'edit-form' in request.POST:

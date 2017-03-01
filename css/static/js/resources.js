@@ -1,6 +1,6 @@
 function setDeleteFormItem(string, resourceType){
 
-  document.getElementById(resourceType).value = string;
+  $('#' + resourceType).val(string);
 
 }
 function setEditFormFields(name, resourceType){
@@ -20,7 +20,7 @@ function setEditFormFields(name, resourceType){
       }
       else if(resourceType == 'course')
       {
-        $("#edit_course_course_name").val(name);)
+        $("#edit_course_course_name").val(name);
         $("#edit_course_equipment_req").val(row.cells[2].innerHTML);
         $("#edit_course_description").val(row.cells[3].innerHTML);
       }
