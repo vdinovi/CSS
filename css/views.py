@@ -18,7 +18,7 @@ from json import *
 def RegistrationView(request):
     res = HttpResponse()
     #pass these credentials to the RegisterUserForm
- 
+
     if request.method == "GET":
         first_name = request.GET.get('first_name')
         last_name = request.GET.get('last_name')
@@ -148,14 +148,14 @@ def SettingsView(request):
         form = UploadForm(request.POST, request.FILES)
         if form.is_valid():
             try:
-                CohortData.import_cohort_file(request.FILES['file']) 
+                CohortData.import_cohort_file(request.FILES['file'])
                 return HttpResponseRedirect("/department/settings")
             except:
                 raise
             res.status_code = 500
         else:
             res.status_code = 400
-            res.reason_phrase = "Invalid form entry" 
+            res.reason_phrase = "Invalid form entry"
     else:
         res.status_code = 400
     return res
@@ -259,7 +259,6 @@ from .models import Course
 from .forms import AddCourseForm
 def CoursesView(request):
     res = HttpResponse()
-    print request.body
     if request.method == "GET":
         return render(request, 'courses.html', {
                 'course_list': Course.objects.filter(),
@@ -307,46 +306,19 @@ def CoursesView(request):
             res.reason_phrase = "Invalid form entry"
 
     elif request.method == "POST" and request.POST['request-name'] == 'course-section-request':
-        print("section request")
-        print request.body
-
         courseName = request.POST.__getitem__('course')
-        print("course: " + courseName);
-        #courseSet = Course.objects.filter(name=courseName)
         course = Course.get_course(courseName)
-
-        #print(courseSet.count())
-        #course = courseSet.get()
-
         res.content = course.get_all_section_types_JSON()
-        print res.content
 
     elif request.method == "POST" and request.POST['request-name'] == 'delete-section-type-request':
-        print("remove section request")
-        print request.body
-
         courseName = request.POST.__getitem__('course')
         sectionTypeName = request.POST.__getitem__('section_type_name')
-
-        print("course: " + courseName);
-        print("sectionTYpe: " + sectionTypeName)
-
         course = Course.get_course(courseName)
-        #courseSet = Course.objects.filter(name=courseName)
-
-        #print(courseSet.count())
-        #course = courseSet.get()
         course.remove_section_type(sectionTypeName)
 
-
         res.content = course.get_all_section_types_JSON()
-        print res.content
+
     elif request.method == "POST" and request.POST['request-name'] == 'save-section-request':
-            print("save section request")
-            print request.body
-
-            #SectionType.create("Lecture1000")
-
             courseName = request.POST.__getitem__('course')
 
             course = Course.get_course(courseName)
@@ -358,8 +330,6 @@ def CoursesView(request):
             course.add_section_type(name, work_units, work_hours)
 
             res.content = course.get_all_section_types_JSON()
-            print res.content
-
     else:
         print res.content
         res.status_code = 400
