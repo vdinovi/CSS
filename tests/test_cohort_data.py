@@ -108,6 +108,13 @@ class CohortDataTestCase(TestCase):
         self.assertEqual(cohort_data.junior, exp_cohort_data.junior)
         self.assertEqual(cohort_data.senior, exp_cohort_data.senior)
  
+    def test_delete_cohort_total(self):
+        schedule = Schedule.get_schedule(term_name="Fall 2017")
+        course = Course.get_course(name="CPE101")
+        cohort_total = CohortData.create(schedule=schedule, course=course, major="CPE",
+                                         freshman=1, senior=1)
+        cohort_total.delete()
+        self.assertRaises(ObjectDoesNotExist, CohortData.get_cohort_data(term=schedule, major="CPE")) 
 
     def test_new_cohort_total_1(self):
         schedule = Schedule.get_schedule(term_name="Fall 2017")
@@ -151,6 +158,14 @@ class CohortDataTestCase(TestCase):
         self.assertEqual(cohort_total.sophmore, exp_cohort_total.sophmore)
         self.assertEqual(cohort_total.junior, exp_cohort_total.junior)
         self.assertEqual(cohort_total.senior, exp_cohort_total.senior)
+
+    def test_delete_cohort_total(self):
+        schedule = Schedule.get_schedule(term_name="Fall 2017")
+        cohort_total = CohortTotal.create(schedule=schedule, major="CPE",
+                                         freshman=1, senior=1)
+        cohort_total.delete()
+        self.assertRaises(ObjectDoesNotExist, CohortTotal.get_cohort_total, schedule=schedule, major="CPE")
+ 
  
 
 

@@ -262,10 +262,11 @@ function selectFilter(element, filterType) {
                         optionFrame.append(optionFormatString.format(data.options[i].name));
                         // Check if already in selected
                         $("#"+filterType).children("div").each(function(index, value) {
-                            if (value.id == data.options[i].name) {
-                                $("#option-"+data.options[i].name).children("span").children("input").prop("checked", true);
+                            //console.log(value.id + " == " + data.options[i].name.replace(/ /g, '-'))
+                            if (value.id == data.options[i].name.replace(/ /g, '-')) {
+                                console.log($("#option-"data.options[i].name));
+                                $("#option-"+data.options[i].name.replace(/ /g, '-')).children("span").children("input").prop("checked", true);
                             }
-
                         });
                     }
                 }
@@ -358,10 +359,10 @@ function selectOption(element) {
         var optionFormatString = 
                     "<div id=\"{0}\"class=\"selected-option\">\n" +
                     "  <button onclick=\"unselectSelectedOption('{0}')\">x</button>\n" +
-                    "  <li class=\"filter-options\">{0}</li>\n" +
+                    "  <li class=\"filter-options\">{1}</li>\n" +
                     "</div>"; 
         var text = element.parentNode.parentNode.innerText;
-        filterType.append(optionFormatString.format(text));
+        filterType.append(optionFormatString.format(text.replace(/ /g, '-'), text));
     }
     // Remove option from selected option list
     else {
