@@ -264,8 +264,8 @@ function selectFilter(element, filterType) {
                         $("#"+filterType).children("div").each(function(index, value) {
                             //console.log(value.id + " == " + data.options[i].name.replace(/ /g, '-'))
                             if (value.id == data.options[i].name.replace(/ /g, '-')) {
-                                console.log($("#option-"data.options[i].name));
-                                $("#option-"+data.options[i].name.replace(/ /g, '-')).children("span").children("input").prop("checked", true);
+                                //console.log($("#option-"data.options[i].name));
+                                //$("#option-"+data.options[i].name.replace(/ /g, '-')).children("span").children("input").prop("checked", true);
                             }
                         });
                     }
@@ -530,6 +530,7 @@ function getFilteredSections(e) {
             for (var i in data) {
                 // Add to section window 
                 sectionFrame.append(sectionFormatString.format(data[i].name));
+                // @TODO fix
                 // Check if already in selected
                 // $("#"+filterType).children("div").each(function(index, value) {
                 //     if (value.id == data.sections[i].name) {
