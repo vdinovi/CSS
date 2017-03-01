@@ -12,6 +12,8 @@ import json
 import operator
 from django.db.models import Q
 from django.http import JsonResponse
+from django.core import serializers
+from datetime import datetime
 
 
 # System User class,
@@ -90,6 +92,14 @@ class CUser(models.Model):
         print first_name + last_name
         return cls.objects.get(user__first_name=first_name,
                                user__last_name=last_name)
+    @classmethod
+    # Return cuser by full name
+    def get_faculty_by_full_name(cls, full_name):
+        first_name = full_name.split()[0]
+        last_name = full_name.split()[1]
+        print first_name + last_name
+        return cls.objects.get(user_type='faculty', user__first_name=first_name,
+                               user__last_name=last_name)
     # Return faculty cuser by email
     @classmethod
     def get_faculty(cls, email): # Throws ObjectDoesNotExist
@@ -136,7 +146,7 @@ class CUser(models.Model):
 
     def to_json(self):
         return dict(id = self.id,
-                    name = self.user.first_name + self.user.last_name,
+                    name = self.user.first_name + " " + self.user.last_name,
                     email = self.user.email)
 
 
@@ -211,10 +221,6 @@ class Room(models.Model):
                     capacity = self.capacity,
                     notes = self.notes,
                     equipment = self.equipment)
-
-
-
-
 
 # Course represents a department course offering
 class Course(models.Model):
@@ -340,7 +346,6 @@ class WorkInfo(models.Model):
     work_units = models.IntegerField(default=0)
     work_hours = models.IntegerField(default=0)
 
-    #classmethod?
     def getJSON(self):
         return JsonResponse({
             'course_name': self.course.name,
@@ -359,33 +364,27 @@ class WorkInfo(models.Model):
 
 
 class Availability(models.Model):
-    class Meta:
-        unique_together = (("faculty", "days_of_week", "start_time"),)
-    faculty = models.OneToOneField(CUser, on_delete=models.CASCADE, null=True)
-    days_of_week = models.CharField(max_length=16) # MWF or TR
+    class Meta: 
+        unique_together = (("faculty", "day_of_week", "start_time"),)
+    faculty = models.OneToOneField(CUser, on_delete=models.CASCADE, null=True) 
+    day_of_week = models.CharField(max_length=16) # MWF or TR
     start_time = models.TimeField()
-    start_type = models.CharField(max_length=2, default="AM")
     end_time = models.TimeField()
-    end_type = models.CharField(max_length=2, default="AM")
     level = models.CharField(max_length=16) # available, preferred, unavailable
 
     @classmethod
-    def create(cls, email, days, start, s_type, end, e_type, level):
+    def create(cls, email, day, start, end, level):
         faculty = CUser.get_faculty(email=email)
-        if days is None or len(days) > 16 or (days != "MWF" and days != "TR"):
+        if (days is None): 
             raise ValidationError("Invalid days of week input")
         elif (start is None):
-            raise ValidationError("Need to input start time")
-        elif (s_type is None):
-            raise ValidationError("Need to input start type")
+            raise ValidationError("Need to input start time")  
         elif (end is None):
             raise ValidationError("Need to input end time")
-        elif (e_type is None):
-            raise ValidationError("Need to input end type")
         elif (level is None) or (level != "available" and level != "preferred" and level != "unavailable"):
             raise ValidationError("Need to input level of availability: preferred, available, or unavailable")
         else:
-            availability = cls(faculty=faculty, days_of_week=days, start_time=start, start_type=s_type, end_time=end, end_type=e_type, level=level)
+            availability = cls(faculty=faculty, day_of_week=day, start_time=start, end_time=end,level=level)
             availability.save()
             return availability
 
@@ -393,19 +392,21 @@ class Availability(models.Model):
 # Schedule is a container for scheduled sections and correponds to exactly 1 academic term
 class Schedule(models.Model):
     academic_term = models.CharField(max_length=16, unique=True) # eg. "Fall 2016"
-    state = models.CharField(max_length=16, default="active") # eg. active or finalized
+    state = models.CharField(max_length=16, default="active") # eg. active or approved
 
-    def finalize_schedule(self):
-        self.state = "finalized"
+    def approve(self):
+        self.state = "approved"
 
     def return_to_active(self):
         self.state = "active"
 
     @classmethod
     def create(cls, academic_term, state):
-        if state != "finalized" and state != "active":
+        if state != "approved" and state != "active" and state != None:
             raise ValidationError("Invalid schedule state.")
         else:
+            if state == None:
+                state = "active"
             schedule = cls(academic_term=academic_term, state=state)
             schedule.save()
             return schedule
@@ -418,9 +419,18 @@ class Schedule(models.Model):
     def get_all_schedules(cls):
         return cls.objects.filter();
 
+    @classmethod
+    def get_active_schedules(cls):
+        return cls.objects.filter(state="active")
+
+    @classmethod
+    def get_approved_schedules(cls):
+        return cls.objects.filter(state="approved")
+
     def to_json(self):
         return dict(
-                academic_term = self.academic_term)
+                academic_term = self.academic_term,
+                state = self.state)
 
 
 
@@ -514,7 +524,8 @@ class Section(models.Model):
 
     @classmethod
     def filter_json(cls, json_string):
-        return cls.filter(json.loads(json_string))
+        json_stuff = json.loads(json_string)
+        return cls.filter(json_stuff)
 
     @classmethod
     def filter(cls, filter_dict):
@@ -542,7 +553,7 @@ class Section(models.Model):
                     if k == "MWF" or k == "TR":
                         for times in range(len(v)):
                             timeList += [reduce(operator.and_, [Q(days=k), Q(start_time__gte=v[times][0]), Q(end_time__lte=v[times][1])])]
-                        if timeList:
+                        if len(timeList) != 0:
                             timeQuery = reduce(operator.or_, timeList)
             else:
                 queryLoop = Q()
@@ -551,7 +562,7 @@ class Section(models.Model):
                         filterObject = Course.get_course(filters[index])
                         queryLoop = reduce(operator.or_, [queryLoop, Q(course=filterObject)])
                     elif key == "faculty":
-                        filterObject = CUser.get_faculty(filters[index])
+                        filterObject = CUser.get_faculty_by_full_name(filters[index])
                         queryLoop = reduce(operator.or_, [queryLoop, Q(faculty=filterObject)])
                     elif key == "room":
                         filterObject = Room.get_room(filters[index])
@@ -568,21 +579,33 @@ class Section(models.Model):
 
         if ands is True:
             andQuery = reduce(operator.and_, andList)
-            if (timeQuery is not None) and ('and' in timeLogic):
+            if (timeQuery != '') and ('and' in timeLogic):
                 andQuery = reduce(operator.and_, [andQuery, timeQuery])
             finalQuery = andQuery
         if ors is True:
             orQuery = reduce(operator.and_, orList)
-            if (timeQuery is not None) and ('or' in timeLogic):
+            if (timeQuery != '') and ('or' in timeLogic):
                 orQuery = reduce(operator.or_, [orQuery, timeQuery])
             if finalQuery != '':
                 finalQuery = reduce(operator.or_, [finalQuery, orQuery])
             else:
                 finalQuery = orQuery
+
         if finalQuery == '':
             finalQuery = timeQuery
 
-        return Section.objects.filter(finalQuery)
+        return cls.objects.filter(finalQuery)
+
+    def to_json(self):
+        return dict(id = str(self.id),
+                    name = self.course.name + "-" + str(self.id),
+                    course = self.course.name, 
+                    type = self.section_type.name,
+                    faculty = self.faculty.user.first_name + " " + self.faculty.user.last_name, 
+                    room = self.room.name, 
+                    days = self.days, 
+                    time = self.start_time.strftime("%H:%M%p") + " - " + self.end_time.strftime("%H:%M%p"))
+                    
 
 class FacultyCoursePreferences(models.Model):
     faculty = models.ForeignKey(CUser, on_delete = models.CASCADE)
@@ -614,3 +637,93 @@ class FacultyCoursePreferences(models.Model):
             course_arr += [(entry.rank, entry.course.name, entry.course.description, entry.comments)]
         course_arr.sort(key=lambda tup:tup[0]) # sort courses by rank (first spot in tuple)
         return course_arr
+
+    def remove(self):
+    	# course_list = self.get_course_list(faculty=self.faculty)
+    	# for c in course_list:
+    	# 	if c.rank > self.rank:
+    	# 		c.update(rank = c.rank + 1) 
+    	self.delete()
+    	#return course_list
+
+# Cohort Data as imported from file
+class CohortData(models.Model):
+    # Composite primary key: [schedule + course + major]
+    class Meta:
+        unique_together = (("schedule", "course", "major"),) 
+    schedule = models.ForeignKey(Schedule, on_delete=models.CASCADE)
+    course = models.ForeignKey(Course, on_delete=models.CASCADE)
+    major = models.CharField(max_length=8) # Major(CSC, CPE, SE, ...) or TOTAL
+
+    freshman = models.IntegerField(default=0)
+    sophmore = models.IntegerField(default=0)
+    junior = models.IntegerField(default=0)
+    senior = models.IntegerField(default=0)
+
+    @classmethod
+    def create(cls, schedule, course, major, **kwargs):
+        cohort_entry = cls(schedule=schedule, course=course, major=major)
+        if 'freshman' in kwargs:
+            cohort_entry.freshman = kwargs['freshman']
+        if 'sophmore' in kwargs:
+            cohort_entry.sophmore = kwargs['sophmore']
+        if 'junior' in kwargs:
+            cohort_entry.junior = kwargs['junior']
+        if 'senior' in kwargs:
+            cohort_entry.senior = kwargs['senior']
+        cohort_entry.save()
+        return cohort_entry
+
+    @classmethod 
+    def get_cohort_data(cls, schedule, course, major):
+        return cls.objects.get(schedule=schedule, course=course, major=major)
+              
+    # Handles an uploaded cohort data file and commits it to the system
+    @classmethod
+    def import_cohort_file(cls, file):
+        chunks = []
+        for s in file.chunks():
+            chunks.append(s)
+        data = ''.join(chunks)
+        print data
+        # @TODO handle file
+
+
+# Contains totals for 
+class CohortTotal(models.Model):
+    class Meta:
+        unique_together =(("schedule", "major"),)
+    schedule = models.ForeignKey(Schedule, on_delete=models.CASCADE)
+    major = models.CharField(max_length=8) # Major(CSC, CPE, SE, ...) 
+
+    freshman = models.IntegerField(default=0)
+    sophmore = models.IntegerField(default=0)
+    junior = models.IntegerField(default=0)
+    senior = models.IntegerField(default=0)
+
+    @classmethod
+    def create(cls, schedule, major, **kwargs):
+        cohort_total = cls(schedule=schedule, major=major)
+        if 'freshman' in kwargs:
+            cohort_total.freshman = kwargs['freshman']
+        if 'sophmore' in kwargs:
+            cohort_total.sophmore = kwargs['sophmore']
+        if 'junior' in kwargs:
+            cohort_total.junior = kwargs['junior']
+        if 'senior' in kwargs:
+            cohort_total.senior = kwargs['senior'] 
+        cohort_total.save()
+        return cohort_total
+
+    @classmethod
+    def get_cohort_total(cls, schedule, major):
+        return cls.objects.get(schedule=schedule, major=major)
+
+
+# Student Plan Data. File of form:
+# Term, College, CourseID(X), Subject Code, Course Nbr, Description, Component,   
+# @TODO Complete Student Plan Data model and import mechanism
+#class 
+
+
+
