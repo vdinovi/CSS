@@ -146,7 +146,7 @@ class AddCourseSectionTypeForm(forms.Form):
     course = forms.CharField(widget=forms.HiddenInput(), initial='defaultCourse')
     name = forms. MultipleChoiceField(
         required = True,
-        widget = forms.CheckboxSelectMultiple,
+        widget = forms.RadioSelect,
         choices = SectionType.get_all_section_types_list
     )
     work_units = forms.IntegerField()
@@ -236,9 +236,9 @@ class AddAvailabilityForm(forms.Form):
 	end_time = forms.TimeField(label='End Time', input_formats=('%I:%M %p'))
 	level = forms.ChoiceField(label='Type', choices=[('Preferred', 'Preferred'), ('Unavailable','Unavailable')])
 
-	# def save(self,email): 
+	# def save(self,email):
 	# 	availability = Availability.create(email = email,
-	# 										day = self.cleaned_data['day'], 
+	# 										day = self.cleaned_data['day'],
 	# 										start_time = self.cleaned_data['start_time'],
 	# 										end_time = self.cleaned_data['end_time'],
 	# 										level = self.cleaned_data['level'])
@@ -254,4 +254,3 @@ class AddScheduleForm(forms.Form):
 
 class UploadForm(forms.Form):
     file = forms.FileField()
-
