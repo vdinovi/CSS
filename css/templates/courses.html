@@ -12,6 +12,7 @@
     <!-- Custom -->
     {% load static %}
     <link href="{% static "css/table.css" %}" rel="stylesheet">
+    <p id="csrf-token">{{ csrf_token }}</p>
 
   </head>
   <body>
@@ -39,7 +40,7 @@
               <tr>
                 <td>
                   <button type="button" class="btn btn-info btn-xs" data-toggle="modal" data-target="#delete-course" onclick="setDeleteFormItem('{{ course.name }}', 'id_course_name')"><span class="glyphicon glyphicon-minus"></span>&nbsp;</button>
-                  <button type="button" class="btn btn-info btn-xs" data-toggle="modal" data-target="#edit-course" onclick="setEditFormFields('{{ course.name }}', 'course'), getCourseInfo('{{ course.name }}')"><span class="glyphicon glyphicon-edit"></span>&nbsp;</button>
+                  <button type="button" class="btn btn-info btn-xs" data-toggle="modal" data-target="#edit-course" onclick="setEditFormFields('{{ course.name }}', 'course'), getCourseInfo('{{ course.name }}', '{{ csrf_token }}')"><span class="glyphicon glyphicon-edit"></span>&nbsp;</button>
                 </td>
                 <td name="courseName">{{ course.name }}</td>
                 <td name="description">{{ course.description }}</td>
@@ -125,108 +126,6 @@
 
     {% load static %}
     <script src="{% static "js/resources.js" %}"></script>
-    <script>
-    var currentCourse;
 
-      function addSectionType() {
-        console.log("addSectionType: display: " + $('#add-section-type-area').display);
-        $('#add-section-type-area').show();
-        $('#save-section-type-button').show();
-        $('#add-section-type-button').hide()
-
-
-      }
-      function submitSectionType() {
-        console.log("submit");
-        console.log(
-          {
-            "csrfmiddlewaretoken": "{{ csrf_token }}",
-            "request-name":'save_section_request',
-            "course": currentCourse,
-            "id_name": $('#id_name_0').val(),
-            "id_work_units": $('#id_work_units').val(),
-            "id_work_hours": $('#id_work_hours').val()
-        });
-
-        var checkBoxes = $("input[name='name']");
-        console.log("chexboxes length " + checkBoxes.length);
-
-        for (var i = 0; i < checkBoxes.length; i++)
-        {
-          console.log(checkBoxes[i].type);
-          console.log(checkBoxes[i]);
-          if(checkBoxes[i].checked)
-          {
-            var selectedSectionType = checkBoxes[i].value;
-            console.log("selected " + selectedSectionType);
-
-            break;
-          }
-
-        }
-        $.post("/resources/courses/",
-              {
-                  "csrfmiddlewaretoken": "{{ csrf_token }}",
-                  "request-name":'save-section-request',
-                  "course": currentCourse,
-                  "id_name": selectedSectionType,
-                  "id_work_units": $('#id_work_units').val(),
-                  "id_work_hours": $('#id_work_hours').val()
-              },
-
-              updateSectionTypesView
-        );
-        $('#add-section-type-area').hide();
-        $('#save-section-type-button').hide();
-        $('#add-section-type-button').show()
-      }
-
-      function getCourseInfo(course) {
-        console.log('');
-        currentCourse = course;
-        $.post("/resources/courses/",
-              {
-                  "csrfmiddlewaretoken": "{{ csrf_token }}",
-                  "request-name": "course-section-request",
-                  "course": course
-              },
-
-              updateSectionTypesView
-        );
-      }
-      function deleteSectionType(sectionTypeName, courseName) {
-        console.log('courseName: ' + courseName);
-        console.log('sectionTypeName: ' + sectionTypeName);
-
-        $.post("/resources/courses/",
-              {
-                  "csrfmiddlewaretoken": "{{ csrf_token }}",
-                  "request-name": "delete-section-type-request",
-                  "course": courseName,
-                  "section_type_name": sectionTypeName
-              },
-
-              updateSectionTypesView
-        );
-      }
-      function updateSectionTypesView(data, status){
-
-           var sectionTypes = JSON.parse(data);
-           console.log("update: \n" + data);
-            $('#ajax-area').empty();
-
-           for(var sectionType in sectionTypes) {
-             console.log("update: " + sectionTypes[sectionType]);
-             $('#ajax-area').append("<p><button onclick=\"deleteSectionType('" + sectionTypes[sectionType].section_type_name + "', '" + sectionTypes[sectionType].course_name + "')\"style=\"font-size: .7em;\" type=\"button\" class=\"btn btn-info btn-xs\" data-toggle=\"modal\" data-target=\"#add-section-type\"><span class=\"glyphicon glyphicon-minus\"></button> " + sectionTypes[sectionType].section_type_name + " Work Units: " + sectionTypes[sectionType].work_units + " Work Hours: " + sectionTypes[sectionType].work_hours + "</p>");
-             console.log("test" + sectionTypes[sectionType]);
-          }
-      }
-
-      function submitEditForm() {
-        console.log("edit_course_course_name.value: " + document.getElementById("edit_course_course_name").value)
-
-        $('#edit-course-form-form').submit();
-      }
-    </script>
   </body>
 </html>
