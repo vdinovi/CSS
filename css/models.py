@@ -283,6 +283,7 @@ class Course(models.Model):
         self.get_section_type(section_type_name).delete()
         #WorkInfo.create(self, section_type, work_units, work_hours)
 
+    # Retrieve all section types for this course and format them as JSON
     def get_all_section_types_JSON(self):
         courseSectionTypes = self.get_all_section_types()
         print("Found " + str(courseSectionTypes.count()) + " course section types")

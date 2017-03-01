@@ -170,7 +170,9 @@ class DeleteCourseForm(forms.Form):
 
     def save(self):
         print("delete " + self.cleaned_data['course_name'])
-        Course.get_course(name=self.cleaned_data['course_name']).delete()
+        course = Course.get_course(name=self.cleaned_data['course_name'])
+        print course.name
+        course.delete()
         return
 
 # @TODO Fix naming -> EditCourseForm
