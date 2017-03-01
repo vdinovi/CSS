@@ -367,10 +367,8 @@ function selectOption(element) {
     }
     // Remove option from selected option list
     else {
-        console.log(filterType);
         filterType.children("div").each(function(index, value) {
-            console.log($(value));
-            if (value.id == element.parentNode.parentNode.innerText)
+            if (value.id.replace(/-/g, ' ') == element.parentNode.parentNode.innerText)
                 value.remove();
         });
     }
@@ -416,6 +414,7 @@ function getSelectedOptions() {
             arr.push(value.children[i].id); 
         }
         var name = filter_types[f++];
+        console.log(name)
         selectedOptions[name] = arr;
     });
     return selectedOptions;
