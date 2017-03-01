@@ -255,17 +255,19 @@ function selectFilter(element, filterType) {
                         "  <span class=\"input-group-addon\">\n" +
                         "    <input id=\"option-checkbox\" type=\"checkbox\" onclick=\"selectOption(this)\">\n" +
                         "  </span>\n" +
-                        "  <p class=\"form-control\">{0}</p>\n" +
+                        "  <p class=\"form-control\" style=\"max-width: 100%; white-space: nowrap\">{1}</p>\n" +
                         "</div>\n";
                     for (var i in data.options) {
                         // Add to option window 
-                        optionFrame.append(optionFormatString.format(data.options[i].name));
+                        var name = data.options[i].name
+                        optionFrame.append(optionFormatString.format(name.replace(/ /g, '-'), name));
                         // Check if already in selected
                         $("#"+filterType).children("div").each(function(index, value) {
-                            if (value.id == data.options[i].name) {
-                                $("#option-"+data.options[i].name).children("span").children("input").prop("checked", true);
+                            //console.log(value.id + " == " + data.options[i].name.replace(/ /g, '-'))
+                            if (value.id == data.options[i].name.replace(/ /g, '-')) {
+                                console.log($("#option-"+data.options[i].name.replace(/ /g,'-')));
+                                $("#option-"+data.options[i].name.replace(/ /g, '-')).children("span").children("input").prop("checked", true);
                             }
-
                         });
                     }
                 }
@@ -358,15 +360,15 @@ function selectOption(element) {
         var optionFormatString = 
                     "<div id=\"{0}\"class=\"selected-option\">\n" +
                     "  <button onclick=\"unselectSelectedOption('{0}')\">x</button>\n" +
-                    "  <li class=\"filter-options\">{0}</li>\n" +
+                    "  <li class=\"filter-options\">{1}</li>\n" +
                     "</div>"; 
         var text = element.parentNode.parentNode.innerText;
-        filterType.append(optionFormatString.format(text));
+        filterType.append(optionFormatString.format(text.replace(/ /g, '-'), text));
     }
     // Remove option from selected option list
     else {
         filterType.children("div").each(function(index, value) {
-            if (value.id == element.parentNode.parentNode.innerText)
+            if (value.id.replace(/-/g, ' ') == element.parentNode.parentNode.innerText)
                 value.remove();
         });
     }
@@ -387,8 +389,8 @@ function unselectAllSelectedOptions() {
 //    - Unselect option from options window
 function unselectSelectedOption(name) {
     $("#option-frame").children("div").each(function(index, value) {
-        if (name == value.children[1].innerHTML) {
-            value.children[0].children[0].checked = false;
+        if (name.replace(/-/g, ' ') == $(value).children("p").text()) {
+            $(value).children("span").children("input").prop("checked", false);
         }
     });
     $("#"+name).remove();
@@ -412,6 +414,7 @@ function getSelectedOptions() {
             arr.push(value.children[i].id); 
         }
         var name = filter_types[f++];
+        console.log(name)
         selectedOptions[name] = arr;
     });
     return selectedOptions;
