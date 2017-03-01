@@ -90,7 +90,6 @@ class DeleteUserForm(forms.Form):
 
     def delete_user(self):
         email = self.cleaned_data['email']
-        print("emails match")
         CUser.get_user(user__username=self.cleaned_data['email']).delete()
 
 class AddRoomForm(forms.Form):
@@ -101,8 +100,6 @@ class AddRoomForm(forms.Form):
     equipment = forms.CharField()
 
     def save(self):
-        nameString = self.cleaned_data['name']
-        resultRooms = Room.objects.filter(name=nameString)
         room = Room.objects.create(name=self.cleaned_data['name'], description=self.cleaned_data['description'], capacity=self.cleaned_data['capacity'], notes=self.cleaned_data['notes'], equipment=self.cleaned_data['equipment'])
         room.save()
         return room
@@ -116,8 +113,7 @@ class EditRoomForm(forms.Form):
 
     def save(self):
         nameString = self.cleaned_data['name']
-        resultRooms = Room.objects.filter(name=nameString)
-        room = resultRooms[0]
+        room = Room.get_room(nameString)
         room.name = self.cleaned_data['name']
         room.description = self.cleaned_data['description']
         room.capacity = self.cleaned_data['capacity']
@@ -158,21 +154,16 @@ class AddCourseForm(forms.Form):
     equipment_req = forms.CharField()
 
     def save(self):
-        print "save course"
         course = Course(name = self.cleaned_data['course_name'],
                       description = self.cleaned_data['description'],
                       equipment_req = self.cleaned_data['equipment_req'])
-        name = self.cleaned_data['course_name']
-        print name
         course.save();
 
 class DeleteCourseForm(forms.Form):
     course_name = forms.CharField(widget=forms.HiddenInput(), initial='defaultCourse')
 
     def save(self):
-        print("delete " + self.cleaned_data['course_name'])
         course = Course.get_course(name=self.cleaned_data['course_name'])
-        print course.name
         course.delete()
         return
 
