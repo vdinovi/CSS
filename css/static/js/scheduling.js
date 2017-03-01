@@ -1,6 +1,6 @@
 /* *** GLOBALS *** */
 const filter_types = ["course", "faculty", "room", "time"];
-filters = {"course":{"logic":"and", "filters":[]}, "faculty":{"logic":"and", "filters":[]}, "room":{"logic":"and", "filters":[]}, "time":{"logic": "and", "filters":{"MWF":[], "TR":[]}}}
+var filters = {"course":{"logic":"and", "filters":[]}, "faculty":{"logic":"and", "filters":[]}, "room":{"logic":"and", "filters":[]}, "time":{"logic": "and", "filters":{"MWF":[], "TR":[]}}}
 
 /* *** UTILITY *** */
 // String format function. 
@@ -262,10 +262,11 @@ function selectFilter(element, filterType) {
                         optionFrame.append(optionFormatString.format(data.options[i].name));
                         // Check if already in selected
                         $("#"+filterType).children("div").each(function(index, value) {
-                            if (value.id == data.options[i].name) {
-                                $("#option-"+data.options[i].name).children("span").children("input").prop("checked", true);
+                            //console.log(value.id + " == " + data.options[i].name.replace(/ /g, '-'))
+                            if (value.id == data.options[i].name.replace(/ /g, '-')) {
+                                console.log($("#option-"data.options[i].name));
+                                $("#option-"+data.options[i].name.replace(/ /g, '-')).children("span").children("input").prop("checked", true);
                             }
-
                         });
                     }
                 }
@@ -321,11 +322,22 @@ function selectTime(minTime, maxTime) {
         sweetAlert("Invalid End Time", "Department Hours: "+minTime+" - "+maxTime);
         return false;
     }
-
     //@TODO Verify start comes before end
     time.startTime = startTime;
     time.endTime = endTime;
-    return time;
+    //@TODO conver tto standard time
+    var optionId = (time.day+"-"+time.startTime+"-"+time.endTime).replace(/:/g, '-');
+    var optionText = time.day+": "+time.startTime+" - "+time.endTime;
+    var timeOptionFormatString = 
+        "<div id=\"{0}\"class=\"selected-option\">\n" +
+        "  <button onclick=\"unselectSelectedTime('{0}')\">x</button>\n" +
+        "  <li class=\"filter-options\">{1}</li>\n" +
+        "</div>"; 
+    $("#time-options").append(timeOptionFormatString.format(optionId, optionText));
+}
+
+function unselectSelectedTime(id) {
+    $("#"+id).remove();
 }
 
 // OnClick function for an option checkbox
@@ -347,10 +359,10 @@ function selectOption(element) {
         var optionFormatString = 
                     "<div id=\"{0}\"class=\"selected-option\">\n" +
                     "  <button onclick=\"unselectSelectedOption('{0}')\">x</button>\n" +
-                    "  <li class=\"filter-options\">{0}</li>\n" +
+                    "  <li class=\"filter-options\">{1}</li>\n" +
                     "</div>"; 
         var text = element.parentNode.parentNode.innerText;
-        filterType.append(optionFormatString.format(text));
+        filterType.append(optionFormatString.format(text.replace(/ /g, '-'), text));
     }
     // Remove option from selected option list
     else {
@@ -418,14 +430,21 @@ function selectSection(element) {
 // Get the filters JSON object with correct filters to apply using getSelectedOptions
 function updateFilters() {
     filtersToApply = getSelectedOptions();  
-    timeMWFarr = []
-    timeTRarr = []
-    otherArr = []
-    $('.logic-checkbox').each(function (index, value) {
+    scheduleToApply = getSelectedSchedule();
+    $('.logic-checkbox').each(function (index, value) {        
+        timeMWFarr = []
+        timeTRarr = []
+        otherArr = []
         filterType = value.id; 
         if (value.checked == true) {
-            timeMWFarr = filtersToApply[filterType]['MWF']
-            timeTRarr = filtersToApply[filterType]['TR']
+            console.log(filterType + " isChecked");
+            for (var t=0;t<filtersToApply[filterType].length;t++) {
+                timeArr = filtersToApply[filterType][t].split("-");
+                startTime = timeArr[1] + ":" + timeArr[2];
+                endTime = timeArr[3] + ":" + timeArr[4];
+                if (filtersToApply[filterType][t].includes('mwf') == true) { timeMWFarr.push(new Array(startTime, endTime)); }
+                else if (filtersToApply[filterType][t].includes('tr') == true) { timeTRarr.push(new Array(startTime, endTime)); }
+            } 
             otherArr = filtersToApply[filterType]       
             $('#'+filterType).parent('label').addClass("checked");
         } else {      
@@ -446,7 +465,9 @@ function updateFilterLogic() {
     selectedFilters = getSelectedFilters();
     numSelected = 0;
     // always set first selected filter to have 'and'
-    filters[selectedFilters[0]]['logic'] = "and";
+    if (selectedFilters.length != 0) {
+        filters[selectedFilters[0]]['logic'] = "and";
+    }
     // for each filter type that is checked, either disable or enable the AND/OR box accordingly
     $('.logic-checkbox').each(function (index, value) {
         if (value.checked == true && ++numSelected < selectedFilters.length) {
@@ -470,28 +491,56 @@ function csrfSafeMethod(method) {
     return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
 }
 
+function getCookie(name) {
+    var cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        var cookies = document.cookie.split(';');
+        for (var i = 0; i < cookies.length; i++) {
+            var cookie = jQuery.trim(cookies[i]);
+            // Does this cookie string begin with the name we want?
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
 // Retrieves sections
-function getFilteredSections() {
+function getFilteredSections(e) {
     updateFilters(); 
-    var csrftoken = jQuery("[name=csrfmiddlewaretoken]").val();
-    console.log(JSON.stringify(filters));
     $.ajax({
         type: "POST",
         url: "sections",
-        beforeSend: function(xhr, settings) {
-            if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
-                xhr.setRequestHeader("X-CSRFToken", csrftoken);
-            }
-        },
-        dataType: "json",
-        contentType: "application/jsonl charset=utf-8",
         data: JSON.stringify(filters),
+        dataType: "json",
         success: function(response) {
-            console.log(response);             
+            console.log(response.sections);
+            data = response.sections;
+            sectionFrame = $("#section-frame");
+            sectionFrame.empty();
+            var sectionFormatString =
+                "<div id=\"section-{0}\" class=\"input-group\">\n" +
+                "  <span class=\"input-group-addon\">\n" +
+                "    <input id=\"option-checkbox\" type=\"checkbox\">\n" +
+                "  </span>\n" +
+                "  <p class=\"form-control\">{0}</p>\n" +
+                "</div>\n";
+            for (var i in data) {
+                // Add to section window 
+                sectionFrame.append(sectionFormatString.format(data[i].name));
+                // Check if already in selected
+                // $("#"+filterType).children("div").each(function(index, value) {
+                //     if (value.id == data.sections[i].name) {
+                //         $("#option-"+data.sections[i].name).children("span").children("input").prop("checked", true);
+                //     }
+
+                // });
+            }
         },
         error: function(err) {
             console.log(err);
-            console.log("<p>HELLO</p>");   
         }
     });
 }

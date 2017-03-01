@@ -90,7 +90,6 @@ class DeleteUserForm(forms.Form):
 
     def delete_user(self):
         email = self.cleaned_data['email']
-        print("emails match")
         CUser.get_user(user__username=self.cleaned_data['email']).delete()
 
 class AddRoomForm(forms.Form):
@@ -101,8 +100,6 @@ class AddRoomForm(forms.Form):
     equipment = forms.CharField()
 
     def save(self):
-        nameString = self.cleaned_data['name']
-        resultRooms = Room.objects.filter(name=nameString)
         room = Room.objects.create(name=self.cleaned_data['name'], description=self.cleaned_data['description'], capacity=self.cleaned_data['capacity'], notes=self.cleaned_data['notes'], equipment=self.cleaned_data['equipment'])
         room.save()
         return room
@@ -116,8 +113,7 @@ class EditRoomForm(forms.Form):
 
     def save(self):
         nameString = self.cleaned_data['name']
-        resultRooms = Room.objects.filter(name=nameString)
-        room = resultRooms[0]
+        room = Room.get_room(nameString)
         room.name = self.cleaned_data['name']
         room.description = self.cleaned_data['description']
         room.capacity = self.cleaned_data['capacity']
@@ -144,18 +140,13 @@ class EditCourseSectionTypeForm(forms.Form):
 
 class AddCourseSectionTypeForm(forms.Form):
     course = forms.CharField(widget=forms.HiddenInput(), initial='defaultCourse')
-    name = forms.CharField()
+    name = forms. MultipleChoiceField(
+        required = True,
+        widget = forms.RadioSelect,
+        choices = SectionType.get_all_section_types_list
+    )
     work_units = forms.IntegerField()
     work_hours = forms.IntegerField()
-    def save(self):
-        courseName = self['course']
-        print("courseName:")
-        print(courseName)
-        courseObj = Course.get_course(courseName)
-        name = self['name']
-        work_units = self['work_units']
-        work_hours = self['work_hours']
-        courseObj.add_section_type(name, work_units, work_hours)
 
 class AddCourseForm(forms.Form):
     course_name = forms.CharField()
@@ -163,20 +154,17 @@ class AddCourseForm(forms.Form):
     equipment_req = forms.CharField()
 
     def save(self):
-        print "save course"
         course = Course(name = self.cleaned_data['course_name'],
                       description = self.cleaned_data['description'],
                       equipment_req = self.cleaned_data['equipment_req'])
-        name = self.cleaned_data['course_name']
-        print name
         course.save();
 
 class DeleteCourseForm(forms.Form):
     course_name = forms.CharField(widget=forms.HiddenInput(), initial='defaultCourse')
 
     def save(self):
-        print("delete " + self.cleaned_data['course_name'])
-        Course.get_course(name=self.cleaned_data['course_name']).delete()
+        course = Course.get_course(name=self.cleaned_data['course_name'])
+        course.delete()
         return
 
 # @TODO Fix naming -> EditCourseForm
@@ -239,9 +227,9 @@ class AddAvailabilityForm(forms.Form):
 	end_time = forms.TimeField(label='End Time', input_formats=('%I:%M %p'))
 	level = forms.ChoiceField(label='Type', choices=[('Preferred', 'Preferred'), ('Unavailable','Unavailable')])
 
-	# def save(self,email): 
+	# def save(self,email):
 	# 	availability = Availability.create(email = email,
-	# 										day = self.cleaned_data['day'], 
+	# 										day = self.cleaned_data['day'],
 	# 										start_time = self.cleaned_data['start_time'],
 	# 										end_time = self.cleaned_data['end_time'],
 	# 										level = self.cleaned_data['level'])
@@ -255,3 +243,5 @@ class AddScheduleForm(forms.Form):
                         state="active").save()
 
 
+class UploadForm(forms.Form):
+    file = forms.FileField()
