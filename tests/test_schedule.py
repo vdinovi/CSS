@@ -6,11 +6,11 @@ class ScheduleTestCase(TestCase):
         Schedule.objects.create(academic_term="Fall 2017", state="active")
         Schedule.objects.create(academic_term="Winter 2017")
 
-    def test_finalize_schedule(self):
-        """ Changes an active schedule to finalized. """
+    def test_approve_schedule(self):
+        """ Changes an active schedule to approved. """
         schedule = Schedule.objects.get(academic_term="Fall 2017")
-        schedule.finalize_schedule()
-        self.assertEqual(schedule.state, "finalized")
+        schedule.approve()
+        self.assertEqual(schedule.state, "approved")
 
     def test_default_active_schedule(self):
         """ Creates a schedule with no state. Checking state defaults to active."""
@@ -18,10 +18,10 @@ class ScheduleTestCase(TestCase):
         self.assertEqual(schedule.state, "active")
 
     def test_return_to_active_schedule(self):
-        """ Changes an active schedule to finalized and returns it to active. """
+        """ Changes an active schedule to approved and returns it to active. """
         schedule = Schedule.objects.get(academic_term="Winter 2017")
-        schedule.finalize_schedule()
-        self.assertEqual(schedule.state, "finalized")
+        schedule.approve()
+        self.assertEqual(schedule.state, "approved")
         schedule.return_to_active()
         self.assertEqual(schedule.state, "active")
 

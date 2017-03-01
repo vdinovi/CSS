@@ -5,14 +5,12 @@ from django.shortcuts import render, render_to_response
 from django.views.generic import TemplateView
 from django.http import HttpResponse, HttpResponseRedirect
 from django.core import serializers
-import MySQLdb
+from MySQLdb import *
 from django.db import IntegrityError
 from .models import *
 from .forms import *
 from settings import DEPARTMENT_SETTINGS
-import json
-import MySQLdb
-import json
+from json import *
 
 # ---------------------------
 # --  Method-Based Views   --
@@ -20,24 +18,29 @@ import json
 def RegistrationView(request):
     res = HttpResponse()
     #pass these credentials to the RegisterUserForm
-    first_name = request.GET.get('first')
-    last_name = request.GET.get('last')
-    user_type = request.GET.get('type')
-
+ 
     if request.method == "GET":
-        storage = messages.get_messages(request)
-        for msg in storage:
-            pass
-        return render(request, 'registration.html', {
-                          'registration_form': RegisterUserForm(first=first_name,last=last_name,type=user_type)
-                      })
+        first_name = request.GET.get('first_name')
+        last_name = request.GET.get('last_name')
+        user_type = request.GET.get('user_type')
+        if first_name is None or last_name is None or user_type is None:
+            res.status_code = 400
+            res.reason_phrase = "Bad query string"
+        else:
+            storage = messages.get_messages(request)
+            for msg in storage:
+                pass
+            return render(request, 'registration.html', {
+                                   'registration_form': RegisterUserForm(request="GET",
+                                                                         first_name=first_name,
+                                                                         last_name=last_name,
+                                                                         user_type=user_type)
+                         });
     elif request.method == "POST":
-        form = RegisterUserForm(request.POST)
+        form = RegisterUserForm(request.POST, request="POST")
         if form.is_valid():
             try:
                 user = form.save()
-                #res.status_code = 200
-                #return render(request, 'home.html')
                 return HttpResponseRedirect("/home")
             except ValidationError as e:
                 res.status_code = 400
@@ -77,20 +80,28 @@ def HomeView(request):
     return render(request, 'home.html')
 
 def AvailabilityView(request):
-    return render(request, 'availability.html')
+	res = HttpResponse()
+	if request.method == "GET":
+		return render(request,'availability.html', {'add_availability_form': AddAvailabilityForm()})
+	# elif request.method == "POST":
+	# 	form = AddAvailabilityForm(request.POST)
+ #        if form.is_valid():
+ #        	faculty = request.session.email
+ #        	day = form.cleaned_data['day']
+ #        	start_time = form.cleaned_data['start_time']
+ #        	end_time = form.cleaned_data['end_time']
+ #        	level = form.cleaned_data['level']
 
 def SchedulingView(request):
     res = HttpResponse()
     if request.method == "GET":
         return render(request, 'scheduling.html', {
-                      'new_section_form':AddSectionForm()})
-    elif request.method == "POST":
-        form = AddSectionForm(request.POST)
-        form.save()
-        return render(request, 'scheduling.html')
+                      'add_section_form': AddSectionForm(),
+                      'add_schedule_form': AddScheduleForm()
+                      })
     else:
-        print 'in outer else'
         res.status_code = 400
+    return res
 
 def LandingView(request):
     return render(request,'landing.html')
@@ -102,6 +113,7 @@ def SettingsView(request):
                 'settings': DEPARTMENT_SETTINGS,
                 'section_type_list': SectionType.objects.filter().all(),
                 'add_section_type_form': AddSectionTypeForm(),
+                'cohort_data_form': UploadForm(),
             });
     elif request.method == "POST" and "submit-settings" in request.POST:
         try:
@@ -132,6 +144,18 @@ def SettingsView(request):
         else:
             res.status_code = 400
             res.reason_phrase = "SectionType " + request.POST['section-type-name'] + " does not exist"
+    elif request.method == "POST" and 'cohort-data' in request.POST:
+        form = UploadForm(request.POST, request.FILES)
+        if form.is_valid():
+            try:
+                CohortData.import_cohort_file(request.FILES['file']) 
+                return HttpResponseRedirect("/department/settings")
+            except:
+                raise
+            res.status_code = 500
+        else:
+            res.status_code = 400
+            res.reason_phrase = "Invalid form entry" 
     else:
         res.status_code = 400
     return res
@@ -175,7 +199,7 @@ def LoginView(request):
 
 def LogoutView(request):
     logout(request)
-    return HttpResponseRedirect('/landing')
+    return HttpResponseRedirect('/login')
 
 #  Rooms View
 # @descr
@@ -425,18 +449,6 @@ def FacultyView(request):
     else:
         res.status_code = 400
     return res
-
-# Primary scheduling page view
-def SchedulingView(request):
-    res = HttpResponse()
-    if request.method == "GET":
-        return render(request, 'scheduling.html', {
-                      'new_section_form':AddSectionForm()})
-    elif request.method == "POST":
-        res.status_code = 400
-        res.reason_phrase = "NYI"
-    else:
-        res.status_code = 400
 
 #  FAQ View
 # -- Low Priority --

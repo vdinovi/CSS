@@ -81,6 +81,15 @@
     color: black;
 }
 
+.btn.active .btn:active {
+    background-color: #94bdbd;
+}
+
+.invis-btn {
+    background: white;
+    
+}
+
 /* Enlarged text box */
 body input[type=checkbox] {
   transform: scale(2);
@@ -95,6 +104,11 @@ body input[type=checkbox] {
     /*margin-top: 13px;*/
     height:100%;
     vertical-align: middle;
+}
+
+.active-schedule {
+    background-color: #b5cadc;
+    border-radius:2px;
 }
 
 /* **************************** */
@@ -149,6 +163,8 @@ body input[type=checkbox] {
     border-bottom: 0px;
 }
 
+/* selected-option is for options that have been checked 
+ * and show up in filter window */
 .selected-option {
     display: inline-block;
     float: left;
@@ -167,6 +183,20 @@ body input[type=checkbox] {
     float: right;
     width: 80%;
     height:25px;
+}
+
+/* Window for the time option */
+.time-option-window {
+    width: 100%;
+    height: 100%;
+    background-color: white;
+    border-radius: 5px;
+    text-align: center;
+}
+
+.day-btn:active {
+    display:inline-block;
+    background-color: #94bdbd;
 }
 
 
@@ -240,6 +270,25 @@ body input[type=checkbox] {
     padding-top:0;
 }
 
+/* drop down AND/OR style */
+div#filter-logic-frame > div > div > select {
+    margin-left: 20px;
+    padding: 0 15px;
+    margin-top: 5px;
+    border: solid #94bdbd;
+}
+div#filter-logic-frame > div > div > select[disabled] {
+    display: none;
+}
+/* Filter Type in Logic Window style */
+label.checkbox-inline {
+    color:gray;
+    padding-top: 15px!important;
+}
+label.checkbox-inline.checked {
+    color:#333;
+    padding-top: 15px;
+}
 
 /* New Section Form */
 .new_section_inputs {
