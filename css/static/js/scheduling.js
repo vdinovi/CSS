@@ -363,7 +363,13 @@ function selectOption(element) {
                     "  <li class=\"filter-options\">{1}</li>\n" +
                     "</div>"; 
         var text = element.parentNode.parentNode.innerText;
-        filterType.append(optionFormatString.format(text.replace(/ /g, '-'), text));
+        var optionAlreadySelected = false;
+        filterType.children("div").each( function(index, value) {
+            if ($(value).prop('id').replace(/-/g, ' ') == text)
+                optionAlreadySelected = true;
+        });
+        if (!optionAlreadySelected)
+            filterType.append(optionFormatString.format(text.replace(/ /g, '-'), text));
     }
     // Remove option from selected option list
     else {
@@ -422,15 +428,9 @@ function getSelectedOptions() {
 // Selects all sections in filtered Section window
 function selectAllOptions() {
     $("#option-frame").children("div").each(function(index, value) { 
-        // @TODO BUG: Currently, selecting all options will add all options including
-        // those that have already been selected, this leads to doubling up on options.
-/*        $("#filter-type-window").children("div").each( function(i, v) {
-            if (v.prop('id').replace(/-/g, ' ') == $(value).children("p").text()) {
-                $("#"+value.id+"-checkbox").prop("checked", true);
-                selectOption($("#"+value.id+"-checkbox")[0]);
-            }
-        });*/
-   });
+        $("#"+value.id+"-checkbox").prop("checked", true);
+        selectOption($("#"+value.id+"-checkbox")[0]);
+    });
 }
 
 // Unselects all sections in filtered Section window
