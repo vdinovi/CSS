@@ -648,7 +648,7 @@ function updateSectionDetails(resort) {
 // removes the section row from Section Details (does not delete)
 function removeSectionFromDetails(element) {
     // remove element from sectionDetails
-    index = inArrayByName($(element).parent().next("tr").text(), sectionDetails);
+    index = inArrayByName($(element).parent().next("td").text(), sectionDetails);
     if (index !== -1) { sectionDetails.splice(index, 1); }
     // gets to <tr> parent element
     $(element).parent().parent().remove();
