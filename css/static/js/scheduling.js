@@ -5,11 +5,9 @@ var filters = {"course":{"logic":"and", "filters":[]}, "faculty":{"logic":"and",
 /* *** UTILITY *** */
 // String format function. 
 // Replaces {n} in format string with n-th positional arg.
-String.prototype.format = function()
-{
+String.prototype.format = function() {
     var content = this;
-    for (var i=0; i < arguments.length; i++)
-    {
+    for (var i=0; i < arguments.length; i++) {
         var replacement = '{' + i + '}';
         var x;
         // Can't wrap var 'replacement' with regex in order to do global replace.
@@ -85,6 +83,7 @@ function switchFrame(firstFrame, secondFrame) {
 $('#view-term-modal').on('show.bs.modal', function () {
     getSchedules();
 });
+
 $('#delete-term-modal').on('show.bs.modal', function (e) {
     var academicTerm = $(e.relatedTarget).data('name');
     $("#delete-term-modal-body").find("form").children("h3").remove();
@@ -96,6 +95,7 @@ $('#delete-term-modal').on('show.bs.modal', function (e) {
         "Yes I want to delete this schedule!</button>"
     );
 }); 
+
 $('#approve-term-modal').on('show.bs.modal', function (e) {
     var academicTerm = $(e.relatedTarget).data('name');
     $("#approve-term-modal-body").find("form").children("h3").remove();
