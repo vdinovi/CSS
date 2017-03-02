@@ -14,7 +14,8 @@ class LoginForm(forms.Form):
     #@TODO validate pass?
     @staticmethod
     def validate_password(password):
-        pass
+        if re.match(r'^(?=.*\d)(?=.*[A-Za-z])(?=.*[-._!@#$%^&*?+])[A-Za-z0-9-._!@#$%^&*?+]{8,32}$', password) is None:
+            raise ValidationError("Attempted CUser creation with invalid password") 
 
 #  Invite Form
 class InviteUserForm(forms.Form):
@@ -29,7 +30,7 @@ class InviteUserForm(forms.Form):
         last_name = self.cleaned_data['last_name']
         name = first_name + ' ' + last_name
         email = self.cleaned_data['email']
-        link = 'http://localhost:8000/register?first_name='+ first_name + '&last_name=' + last_name +'&user_type='+ usertype + '&email=' + email
+        link = HOSTNAME + '/register?first_name=' + first_name +'&last_name=' + last_name +'&user_type='+ usertype + '&email=' + email
         send_mail('Invite to register for CSS', name + """, you have been invited to register for CSS. Please register using the following link: """ 
         + link, 'registration@inviso-css', [self.cleaned_data['email']])
         print("sent email to " + self.cleaned_data['email'])

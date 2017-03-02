@@ -1,6 +1,8 @@
 /* *** GLOBALS *** */
 const filter_types = ["course", "faculty", "room", "time"];
-var filters = {"course":{"logic":"and", "filters":[]}, "faculty":{"logic":"and", "filters":[]}, "room":{"logic":"and", "filters":[]}, "time":{"logic": "and", "filters":{"MWF":[], "TR":[]}}}
+var filters = {"course":{"logic":"and", "filters":[]}, "faculty":{"logic":"and", "filters":[]}, "room":{"logic":"and", "filters":[]}, "time":{"logic": "and", "filters":{"MWF":[], "TR":[]}}};
+var filteredSections = [];
+var sectionDetails = [];
 
 /* *** UTILITY *** */
 // String format function. 
@@ -255,16 +257,17 @@ function selectFilter(element, filterType) {
                         "  <span class=\"input-group-addon\">\n" +
                         "    <input id=\"option-checkbox\" type=\"checkbox\" onclick=\"selectOption(this)\">\n" +
                         "  </span>\n" +
-                        "  <p class=\"form-control\">{0}</p>\n" +
+                        "  <p class=\"form-control\" style=\"max-width: 100%; white-space: nowrap\">{1}</p>\n" +
                         "</div>\n";
                     for (var i in data.options) {
                         // Add to option window 
-                        optionFrame.append(optionFormatString.format(data.options[i].name));
+                        var name = data.options[i].name
+                        optionFrame.append(optionFormatString.format(name.replace(/ /g, '-'), name));
                         // Check if already in selected
                         $("#"+filterType).children("div").each(function(index, value) {
                             //console.log(value.id + " == " + data.options[i].name.replace(/ /g, '-'))
                             if (value.id == data.options[i].name.replace(/ /g, '-')) {
-                                console.log($("#option-"data.options[i].name));
+                                console.log($("#option-"+data.options[i].name.replace(/ /g,'-')));
                                 $("#option-"+data.options[i].name.replace(/ /g, '-')).children("span").children("input").prop("checked", true);
                             }
                         });
@@ -367,7 +370,7 @@ function selectOption(element) {
     // Remove option from selected option list
     else {
         filterType.children("div").each(function(index, value) {
-            if (value.id == element.parentNode.parentNode.innerText)
+            if (value.id.replace(/-/g, ' ') == element.parentNode.parentNode.innerText)
                 value.remove();
         });
     }
@@ -388,8 +391,8 @@ function unselectAllSelectedOptions() {
 //    - Unselect option from options window
 function unselectSelectedOption(name) {
     $("#option-frame").children("div").each(function(index, value) {
-        if (name == value.children[1].innerHTML) {
-            value.children[0].children[0].checked = false;
+        if (name.replace(/-/g, ' ') == $(value).children("p").text()) {
+            $(value).children("span").children("input").prop("checked", false);
         }
     });
     $("#"+name).remove();
@@ -413,6 +416,7 @@ function getSelectedOptions() {
             arr.push(value.children[i].id); 
         }
         var name = filter_types[f++];
+        console.log(name)
         selectedOptions[name] = arr;
     });
     return selectedOptions;
@@ -423,7 +427,10 @@ function getSelectedOptions() {
 // OnClick function for a section checkbox
 //  - Adds the section to the section detail
 function selectSection(element) {
-    //@TODO everything :(
+    if (element.checked == true) {
+        console.log("I BEEN CLICKED");
+        //updateSectionDetails(element);
+    }
     return true;
 }
 
@@ -516,33 +523,81 @@ function getFilteredSections(e) {
         data: JSON.stringify(filters),
         dataType: "json",
         success: function(response) {
-            console.log(response.sections);
+            // console.log(response.sections);
             data = response.sections;
+            //filteredSections.push(response.sections);
             sectionFrame = $("#section-frame");
             sectionFrame.empty();
             var sectionFormatString =
                 "<div id=\"section-{0}\" class=\"input-group\">\n" +
                 "  <span class=\"input-group-addon\">\n" +
-                "    <input id=\"option-checkbox\" type=\"checkbox\">\n" +
+                "    <input id=\"section-{0}-checkbox\" type=\"checkbox\" onclick=\"selectSection(this)\">\n" +
                 "  </span>\n" +
                 "  <p class=\"form-control\">{0}</p>\n" +
                 "</div>\n";
             for (var i in data) {
+                if ($.inArray(data[i], filteredSections) == -1) {
+                    filteredSections.push(data[i]);
+                }
                 // Add to section window 
                 sectionFrame.append(sectionFormatString.format(data[i].name));
-                // Check if already in selected
-                // $("#"+filterType).children("div").each(function(index, value) {
-                //     if (value.id == data.sections[i].name) {
-                //         $("#option-"+data.sections[i].name).children("span").children("input").prop("checked", true);
-                //     }
-
-                // });
             }
         },
         error: function(err) {
             console.log(err);
         }
     });
+}
+
+function inArrayByName(value, array) {
+    for (var i=0;i<array.length;i++) {
+        if (array[i].name === value) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+// returns true if new item is added
+function getSelectedSections() {
+    newSectionSelected = false;
+    $("#section-frame").children("div").each(function(index, value) { 
+        $("#"+value.id+"-checkbox").each(function(ind, val) { 
+            if (val.checked == true) { 
+                if (inArrayByName(value.id.split("section-")[1], sectionDetails) === -1) {
+                    console.log("pushing...");
+                    console.log(filteredSections[inArrayByName(value.id.split("section-")[1], filteredSections)]);
+                    sectionDetails.push(filteredSections[inArrayByName(value.id.split("section-")[1], filteredSections)]);
+                    newSectionSelected = true;
+                }
+            }
+        });
+    });
+    return newSectionSelected;
+}
+
+
+function updateSectionDetails() {
+    var sectionDetailsFormatString = 
+        "<tr id=\"{1}-detail\">\n" + 
+        "<td>{0}</td>\n" + 
+        "<td>{1}</td>\n" + 
+        "<td>{2}</td>\n" + 
+        "<td>{3}</td>\n" + 
+        "<td>{4}</td>\n" + 
+        "<td>{5}</td>\n" + 
+        "<td>{6}</td>\n" + 
+        "<td>{7}</td>\n" + 
+        "<td>{8}</td>\n" + 
+        "</tr>\n";
+    var detailFrame = $("#section-detail-rows");
+    if (getSelectedSections() == true) {
+        detailFrame.empty();
+        for (var i in sectionDetails) {  
+            detailFrame.append(sectionDetailsFormatString.format(sectionDetails[i].name, sectionDetails[i].term, sectionDetails[i].course, sectionDetails[i].type, sectionDetails[i].faculty, sectionDetails[i].room, sectionDetails[i].days, sectionDetails[i].start_time, 
+            sectionDetails[i].end_time));
+        }
+    }
 }
 
 // Updates the filters JSON object to have correct logic for filter_type

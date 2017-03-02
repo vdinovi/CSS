@@ -177,33 +177,14 @@
                   </div>
                 </div>
               </div>
-            <button id="apply-filter-btn" class="btn" style="margin-top:5px;width:100%;" onclick="getFilteredSections(this)">Apply</button>
+            <button id="apply-filter-btn" class="btn" style="margin-top:5px;width:100%;" onclick="getFilteredSections(this);">Apply</button>
           </div>
-          <!-- @TODO Fill with real entries -->
           <div class="col-xs-3 outer-frame">
             <h2 style="text-align:center;">Sections</h2>
             <div id="section-frame" class="inner-frame">
-              <ul class="list-group">
-                <div id="section-cpe101-01" class="input-group">
-                  <span class="input-group-addon">
-                    <input id="section-checkbox" type="checkbox">
-                  </span>
-                  <p class="form-control">CPE101-01</p>
-                </div>
-                <div id="section-cpe101-02" class="input-group">
-                  <span class="input-group-addon">
-                    <input id="option-checkbox" type="checkbox">
-                  </span>
-                  <p class="form-control">CPE101-02</p>
-                </div>
-                <div id="section-cpe101-03" class="input-group">
-                  <span class="input-group-addon">
-                    <input id="option-checkbox" type="checkbox">
-                  </span>
-                  <p class="form-control">CPE101-03</p>
-                </div>
-              </ul>
+             <!-- Filtered Section Results get inserted here when updateSectionDetails() gets called -->
             </div> 
+            <button id="details-filter-btn" class="btn" style="margin-top:5px;width:100%;" onclick="updateSectionDetails();">Add to Details</button>
           </div>
         </div>
       </div>
@@ -216,19 +197,30 @@
           <table class="table table-striped table-hover table-bordered">
             <thead>
               <tr class="top">
-                <th>Term</th>
                 <th>Section</th>
+                <th>Term</th>
                 <th>Course</th>
                 <th>Type</th>
+                <th>Faculty</th>
+                <th>Room</th>
                 <th>Days</th>
                 <th>Start Time</th>
                 <th>End Time</th>
-                <th>Faculty</th>
-                <th>Room</th>
               </tr>
             </thead>
             <!-- @TODO Fill with real entries -->
-            <tbody>
+            <tbody id="section-detail-rows">
+              <tr>
+                <td>Fall 2016</td>
+                <td>cpe101-01</td>
+                <td>cpe101</td>
+                <td>lecture</td>
+                <td>mwf</td>
+                <td>10:00AM</td>
+                <td>12:00PM</td>
+                <td>Kearns</td>
+                <td>14-256</td>
+              </tr>
             </tbody>
           </table>
         </div>

@@ -143,6 +143,13 @@ STATICFILES_DIRS = [
         os.path.join(PROJECT_ROOT, 'static')
 ]
 
+
+import socket
+try:
+    HOSTNAME = socket.gethostname()
+except:
+    HOSTNAME = 'localhost:8000'
+
 # EMAIL
 EMAIL_HOST='smtp.gmail.com'
 EMAIL_PORT=587
