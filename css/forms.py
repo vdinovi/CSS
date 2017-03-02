@@ -29,12 +29,9 @@ class InviteUserForm(forms.Form):
         last_name = self.cleaned_data['last_name']
         name = first_name + ' ' + last_name
         email = self.cleaned_data['email']
-        link = 'http://localhost:8000/register?first_name='+first_name + '&last_name=' + last_name +'&user_type='+usertype
-        send_mail('Invite to register for CSS',
-                  name + """, you have been invited to register for CSS.
-                  Please register using the following link: """ + link,
-                  'registration@inviso-css',
-                  [self.cleaned_data['email']])
+        link = 'http://localhost:8000/register?first_name='+ first_name + '&last_name=' + last_name +'&user_type='+ usertype + '&email=' + email
+        send_mail('Invite to register for CSS', name + """, you have been invited to register for CSS. Please register using the following link: """ 
+        + link, 'registration@inviso-css', [self.cleaned_data['email']])
         print("sent email to " + self.cleaned_data['email'])
 
 # Registration Form
@@ -45,7 +42,6 @@ class RegisterUserForm(forms.Form):
     last_name = forms.CharField()
     email = forms.EmailField()
     user_type = forms.CharField()
-    user_type = forms.ChoiceField(label='Role', choices=[('faculty', 'faculty'), ('scheduler', 'scheduler')])
     password1 = forms.CharField(label='Password', widget=forms.PasswordInput)
     password2 = forms.CharField(label='Confirm Password', widget=forms.PasswordInput)
 
@@ -55,10 +51,13 @@ class RegisterUserForm(forms.Form):
             self.first_name = kwargs.pop('first_name')
             self.last_name = kwargs.pop('last_name')
             self.user_type = kwargs.pop('user_type')
+            self.email = kwargs.pop('email')
             self.declared_fields['first_name'].initial = self.first_name
             self.declared_fields['last_name'].initial = self.last_name
+            self.declared_fields['email'].initial = self.email
             self.declared_fields['user_type'].initial = self.user_type
             self.declared_fields['user_type'].disabled = True
+
         super(RegisterUserForm, self).__init__(*args,**kwargs)
 
     def save(self):
@@ -122,7 +121,6 @@ class EditRoomForm(forms.Form):
         room.save()
 
 class DeleteRoomForm(forms.Form):
-
     roomName = forms.CharField(widget=forms.HiddenInput(), initial='defaultRoom')
 
     def deleteRoom(self):
@@ -223,17 +221,19 @@ class AddSectionForm(forms.Form):
 class AddAvailabilityForm(forms.Form):
 	DAYS = ('Monday', 'Monday',),('Tuesday','Tuesday'),('Wednesday','Wednesday'), ('Thursday','Thursday',), ('Friday', 'Friday')
 	day = forms.ChoiceField(label='Day', choices=DAYS)
-	start_time = forms.TimeField(label='Start Time', input_formats=('%I:%M %p'))
-	end_time = forms.TimeField(label='End Time', input_formats=('%I:%M %p'))
+	start_time = forms.IntegerField(label='Start Time')
+		#input_formats=('%I:%M %p'))
+	end_time = forms.IntegerField(label='End Time')
+	#input_formats=('%I:%M %p'))
 	level = forms.ChoiceField(label='Type', choices=[('Preferred', 'Preferred'), ('Unavailable','Unavailable')])
 
-	# def save(self,email):
-	# 	availability = Availability.create(email = email,
-	# 										day = self.cleaned_data['day'],
-	# 										start_time = self.cleaned_data['start_time'],
-	# 										end_time = self.cleaned_data['end_time'],
-	# 										level = self.cleaned_data['level'])
-	# 	availability.save()
+	def save(self,email):
+		availability = Availability.create(email = email,
+											day = self.cleaned_data['day'],
+											start_time = self.cleaned_data['start_time'],
+											end_time = self.cleaned_data['end_time'],
+											level = self.cleaned_data['level'])
+		availability.save()
 
 class AddScheduleForm(forms.Form):
     academic_term = forms.CharField(max_length=16)

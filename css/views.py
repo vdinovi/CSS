@@ -23,7 +23,8 @@ def RegistrationView(request):
         first_name = request.GET.get('first_name')
         last_name = request.GET.get('last_name')
         user_type = request.GET.get('user_type')
-        if first_name is None or last_name is None or user_type is None:
+        email = request.GET.get('email')
+        if first_name is None or last_name is None or user_type is None or email is None:
             res.status_code = 400
             res.reason_phrase = "Bad query string"
         else:
@@ -34,7 +35,8 @@ def RegistrationView(request):
                                    'registration_form': RegisterUserForm(request="GET",
                                                                          first_name=first_name,
                                                                          last_name=last_name,
-                                                                         user_type=user_type)
+                                                                         user_type=user_type,
+                                                                         email=email)
                          });
     elif request.method == "POST":
         form = RegisterUserForm(request.POST, request="POST")
@@ -80,17 +82,34 @@ def HomeView(request):
     return render(request, 'home.html')
 
 def AvailabilityView(request):
-	res = HttpResponse()
-	if request.method == "GET":
-		return render(request,'availability.html', {'add_availability_form': AddAvailabilityForm()})
-	# elif request.method == "POST":
-	# 	form = AddAvailabilityForm(request.POST)
- #        if form.is_valid():
- #        	faculty = request.session.email
- #        	day = form.cleaned_data['day']
- #        	start_time = form.cleaned_data['start_time']
- #        	end_time = form.cleaned_data['end_time']
- #        	level = form.cleaned_data['level']
+    res = HttpResponse()
+    if request.method == "GET":
+        return render(request,'availability.html', {'add_availability_form': AddAvailabilityForm()})
+    elif request.method == "POST" and 'add_availability_form' in request.POST: 
+        form = AddAvailabilityForm(request.POST)
+        print(form.errors.as_data())
+        if form.is_valid(): 
+            try:
+                faculty = request.session.email
+                day = form.cleaned_data['day']
+                start_time = form.cleaned_data['start_time']
+                end_time = form.cleaned_data['end_time']
+                level = form.cleaned_data['level']
+                form.save(faculty)
+                return HttpResponseRedirect('/availability')
+            except ValidationError as e:
+                res.status_code = 400
+                res.reason_phrase = "Invalid form entry"
+                return res  
+        else:
+            res.status_code = 400
+            res.reason_phrase = "Invalid form entry"
+            return res
+    
+    else:
+        res.status_code = 400
+    return res
+            
 
 def SchedulingView(request):
     res = HttpResponse()
