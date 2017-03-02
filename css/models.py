@@ -585,12 +585,14 @@ class Section(models.Model):
     def to_json(self):
         return dict(id = str(self.id),
                     name = self.course.name + "-" + str(self.id),
+                    term = self.schedule.academic_term,
                     course = self.course.name,
                     type = self.section_type.name,
                     faculty = self.faculty.user.first_name + " " + self.faculty.user.last_name,
                     room = self.room.name,
                     days = self.days,
-                    time = self.start_time.strftime("%H:%M%p") + " - " + self.end_time.strftime("%H:%M%p"))
+                    start_time = self.start_time.strftime("%H:%M%p"),
+                    end_time = self.end_time.strftime("%H:%M%p"))
 
 
 class FacultyCoursePreferences(models.Model):
