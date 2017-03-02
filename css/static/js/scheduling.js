@@ -532,6 +532,7 @@ function getFilteredSections(e) {
             for (var i in data) {
                 // Add to section window 
                 sectionFrame.append(sectionFormatString.format(data[i].name));
+                // @TODO fix
                 // Check if already in selected
                 // $("#"+filterType).children("div").each(function(index, value) {
                 //     if (value.id == data.sections[i].name) {
