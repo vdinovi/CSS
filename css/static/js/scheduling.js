@@ -255,7 +255,7 @@ function selectFilter(element, filterType) {
                     var optionFormatString =
                         "<div id=\"option-{0}\" class=\"input-group\">\n" +
                         "  <span class=\"input-group-addon\">\n" +
-                        "    <input id=\"option-checkbox\" type=\"checkbox\" onclick=\"selectOption(this)\">\n" +
+                        "    <input id=\"option-{0}-checkbox\" type=\"checkbox\" onclick=\"selectOption(this)\">\n" +
                         "  </span>\n" +
                         "  <p class=\"form-control\" style=\"max-width: 100%; white-space: nowrap\">{1}</p>\n" +
                         "</div>\n";
@@ -416,23 +416,28 @@ function getSelectedOptions() {
             arr.push(value.children[i].id); 
         }
         var name = filter_types[f++];
-        console.log(name)
         selectedOptions[name] = arr;
     });
     return selectedOptions;
 }
 
-/* *** FILTER LOGIC / SECTIONS *** */
-
-// OnClick function for a section checkbox
-//  - Adds the section to the section detail
-function selectSection(element) {
-    if (element.checked == true) {
-        console.log("I BEEN CLICKED");
-        //updateSectionDetails(element);
-    }
-    return true;
+// Selects all sections in filtered Section window
+function selectAllOptions() {
+    $("#option-frame").children("div").each(function(index, value) { 
+        $("#"+value.id+"-checkbox").prop("checked", true);
+        selectOption($("#"+value.id+"-checkbox")[0]);
+    });
 }
+
+// Unselects all sections in filtered Section window
+function unselectAllOptions() {
+    $("#option-frame").children("div").each(function(index, value) { 
+        $("#"+value.id+"-checkbox").prop("checked", false);
+        selectOption($("#"+value.id+"-checkbox")[0]);
+    });
+}
+
+/* *** FILTER LOGIC / SECTIONS *** */
 
 // Get the filters JSON object with correct filters to apply using getSelectedOptions
 function updateFilters() {
@@ -443,14 +448,13 @@ function updateFilters() {
         timeTRarr = []
         otherArr = []
         filterType = value.id; 
-        if (value.checked == true) {
-            console.log(filterType + " isChecked");
+        if (value.checked) {
             for (var t=0;t<filtersToApply[filterType].length;t++) {
                 timeArr = filtersToApply[filterType][t].split("-");
                 startTime = timeArr[1] + ":" + timeArr[2];
                 endTime = timeArr[3] + ":" + timeArr[4];
-                if (filtersToApply[filterType][t].includes('mwf') == true) { timeMWFarr.push(new Array(startTime, endTime)); }
-                else if (filtersToApply[filterType][t].includes('tr') == true) { timeTRarr.push(new Array(startTime, endTime)); }
+                if (filtersToApply[filterType][t].includes('mwf')) { timeMWFarr.push(new Array(startTime, endTime)); }
+                else if (filtersToApply[filterType][t].includes('tr')) { timeTRarr.push(new Array(startTime, endTime)); }
             } 
             otherArr = filtersToApply[filterType]       
             $('#'+filterType).parent('label').addClass("checked");
@@ -477,7 +481,7 @@ function updateFilterLogic() {
     }
     // for each filter type that is checked, either disable or enable the AND/OR box accordingly
     $('.logic-checkbox').each(function (index, value) {
-        if (value.checked == true && ++numSelected < selectedFilters.length) {
+        if (value.checked && ++numSelected < selectedFilters.length) {
             // console.log("can use " + value.id);
             $("#"+value.id).parent().next().removeProp("disabled");    
         } else {
@@ -515,7 +519,7 @@ function getCookie(name) {
 }
 
 // Retrieves sections
-function getFilteredSections(e) {
+function getFilteredSections() {
     updateFilters(); 
     $.ajax({
         type: "POST",
@@ -549,55 +553,44 @@ function getFilteredSections(e) {
     });
 }
 
-function inArrayByName(value, array) {
+// Helper function that returns -1 if value by [name] is not found in array, else index of value
+function inArrayByName(name, array) {
     for (var i=0;i<array.length;i++) {
-        if (array[i].name === value) {
+        if (array[i].name.includes(name)) {
             return i;
         }
     }
     return -1;
 }
 
-// returns true if new item is added
+// returns true if a section not already in Section Details has been selected (and needs to be added to Section Details)
 function getSelectedSections() {
     newSectionSelected = false;
     $("#section-frame").children("div").each(function(index, value) { 
-        $("#"+value.id+"-checkbox").each(function(ind, val) { 
-            if (val.checked == true) { 
-                if (inArrayByName(value.id.split("section-")[1], sectionDetails) === -1) {
-                    console.log("pushing...");
-                    console.log(filteredSections[inArrayByName(value.id.split("section-")[1], filteredSections)]);
-                    sectionDetails.push(filteredSections[inArrayByName(value.id.split("section-")[1], filteredSections)]);
-                    newSectionSelected = true;
-                }
+        if ($("#"+value.id+"-checkbox").prop('checked')) { 
+            if (inArrayByName(value.id.split("section-")[1], sectionDetails) === -1) {
+                console.log("pushing...");
+                console.log(filteredSections[inArrayByName(value.id.split("section-")[1], filteredSections)]);
+                sectionDetails.push(filteredSections[inArrayByName(value.id.split("section-")[1], filteredSections)]);
+                newSectionSelected = true;
             }
-        });
+        }
     });
     return newSectionSelected;
 }
 
+// Selects all sections in filtered Section window
+function selectAllSections() {
+    $("#section-frame").children("div").each(function(index, value) { 
+        $("#"+value.id+"-checkbox").prop("checked", true);
+    });
+}
 
-function updateSectionDetails() {
-    var sectionDetailsFormatString = 
-        "<tr id=\"{1}-detail\">\n" + 
-        "<td>{0}</td>\n" + 
-        "<td>{1}</td>\n" + 
-        "<td>{2}</td>\n" + 
-        "<td>{3}</td>\n" + 
-        "<td>{4}</td>\n" + 
-        "<td>{5}</td>\n" + 
-        "<td>{6}</td>\n" + 
-        "<td>{7}</td>\n" + 
-        "<td>{8}</td>\n" + 
-        "</tr>\n";
-    var detailFrame = $("#section-detail-rows");
-    if (getSelectedSections() == true) {
-        detailFrame.empty();
-        for (var i in sectionDetails) {  
-            detailFrame.append(sectionDetailsFormatString.format(sectionDetails[i].name, sectionDetails[i].term, sectionDetails[i].course, sectionDetails[i].type, sectionDetails[i].faculty, sectionDetails[i].room, sectionDetails[i].days, sectionDetails[i].start_time, 
-            sectionDetails[i].end_time));
-        }
-    }
+// Unselects all sections in filtered Section window
+function unselectAllSections() {
+    $("#section-frame").children("div").each(function(index, value) { 
+        $("#"+value.id+"-checkbox").prop("checked", false);
+    });
 }
 
 // Updates the filters JSON object to have correct logic for filter_type
@@ -617,10 +610,55 @@ function setLogic(element) {
 function getSelectedFilters() {
     var selectedFilters = [];
     $('.logic-checkbox').each(function (index, value) {
-        if (value.checked == true) { selectedFilters.push(value.id); }
+        if (value.checked) { selectedFilters.push(value.id); }
     });
     return selectedFilters;
 }
+
+/* Section Details Functions */
+
+function updateSectionDetails() {
+    var sectionDetailsFormatString = 
+        "<tr id=\"{1}-detail\">\n" + 
+            "<td>\n" +
+                "<button type=\"button\" class=\"btn btn-info btn-xs\" data-toggle=\"modal\" data-target=\"#deselect-section\" onclick=\"removeSectionFromDetails(this)\"><span class=\"glyphicon glyphicon-minus\"></span>&nbsp;</button>\n" +
+                "<button type=\"button\" class=\"btn btn-info btn-xs\" data-toggle=\"modal\" data-target=\"#edit-section\"><span class=\"glyphicon glyphicon-edit\"></span>&nbsp;</button>\n" +
+                "<button type=\"button\" class=\"btn btn-info btn-xs\" data-toggle=\"modal\" data-target=\"#delete-section\"><span class=\"glyphicon glyphicon-trash\"></span>&nbsp;</button>\n" +
+            "</td>\n" +
+            "<td>{0}</td>\n" + 
+            "<td>{1}</td>\n" + 
+            "<td>{2}</td>\n" + 
+            "<td>{3}</td>\n" + 
+            "<td>{4}</td>\n" + 
+            "<td>{5}</td>\n" + 
+            "<td>{6}</td>\n" + 
+            "<td>{7}</td>\n" + 
+            "<td>{8}</td>\n" + 
+        "</tr>\n";
+    var detailFrame = $("#section-detail-rows");
+    if (getSelectedSections()) {
+        detailFrame.empty();
+        for (var i in sectionDetails) {  
+            detailFrame.append(sectionDetailsFormatString.format(sectionDetails[i].name, sectionDetails[i].term, sectionDetails[i].course, sectionDetails[i].type, sectionDetails[i].faculty, sectionDetails[i].room, sectionDetails[i].days, sectionDetails[i].start_time, 
+            sectionDetails[i].end_time));
+        }
+    }
+}
+
+// removes the section row from Section Details (does not delete)
+function removeSectionFromDetails(element) {
+    // remove element from sectionDetails
+    index = inArrayByName($(element).parent().next("tr").text(), sectionDetails);
+    console.log($(element).parent().next("td").text());
+
+    if (index !== -1) {
+        console.log("REMOVING");
+        sectionDetails.splice(index, 1);
+    }
+    // gets to <tr> parent element
+    $(element).parent().parent().remove();
+}
+
 
 // OnClick function to set the days for a new section
 function setDays(element, form) {

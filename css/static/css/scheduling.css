@@ -214,7 +214,7 @@ body input[type=checkbox] {
 .filter-logic {
     background-color: #ccccc9;
     width: 100%;
-    height: 25%;
+    height: 23%;
     bottom:0;
     vertical-align: middle;
     display: inline-block;
@@ -274,12 +274,32 @@ body input[type=checkbox] {
 div#filter-logic-frame > div > div > select {
     margin-left: 20px;
     padding: 0 15px;
-    margin-top: 5px;
     border: solid #94bdbd;
 }
 div#filter-logic-frame > div > div > select[disabled] {
     display: none;
 }
+
+/* filter logic frame custom style from other frames */
+h4.filter-logic {
+    background-color: #e5e5e5;
+    text-align: center;
+    padding-top: 50px;
+}
+div#filter-logic-frame {
+    margin-top: 10px;
+    margin-left: 12%;
+    padding-right: 32%;
+    width: 80%;
+    height: 250px;
+}
+button#apply-filter-btn {
+    margin-left: 12%;
+    width: 80%;
+    margin-top: 5px;
+    padding-right: 10%;
+}
+
 /* Filter Type in Logic Window style */
 label.checkbox-inline {
     color:gray;
