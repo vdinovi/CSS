@@ -6,7 +6,7 @@ import MySQLdb
 import re
 from django.db import IntegrityError
 from django.core.exceptions import ValidationError, ObjectDoesNotExist
-from util import DepartmentSettings
+from util import *
 from settings import DEPARTMENT_SETTINGS
 import json
 import operator
@@ -289,27 +289,19 @@ class Course(models.Model):
         self.get_section_type(section_type_name).delete()
         #WorkInfo.create(self, section_type, work_units, work_hours)
 
+    # Retrieve all section types for this course and format them as JSON
     def get_all_section_types_JSON(self):
         courseSectionTypes = self.get_all_section_types()
-        print("Found " + str(courseSectionTypes.count()) + " course section types")
         sectionTypesDictionary = {}
+        i = 0
         for sectionType in courseSectionTypes:
-            print type(sectionType)
-            print type(sectionType.section_type)
-            sectionTypesDictionary[sectionType.section_type.name] = {
+            sectionTypesDictionary[i] = {
                 'course_name': sectionType.course.name,
                 'section_type_name': sectionType.section_type.name,
                 'work_units': sectionType.work_units,
                 'work_hours': sectionType.work_hours
             }
-        sectionTypes = SectionType.get_all_section_types()
-        print("Found " + str(sectionTypes.count()) + "general section types")
-        for sectionType in sectionTypes:
-            print sectionType.section_type.name
-            sectionTypesDictionary[sectionType.section_type.name] = {
-                'course_name': '',
-                'section_type_name': sectionType.section_type.name,
-            }
+            i+=1
         return JsonResponse(sectionTypesDictionary)
 
 
@@ -332,6 +324,13 @@ class SectionType(models.Model):
     def get_all_section_types(cls):
         return SectionType.objects.all()
 
+    @classmethod
+    def get_all_section_types_list(cls):
+        list = []
+        for sectionType in SectionType.objects.all():
+            list.append((sectionType.name, sectionType.name))
+        return tuple(list)
+
 # WorkInfo contains the user defined information for specific Course-SectionType pairs
 # Each pair has an associated work units and work hours defined by the department
 class WorkInfo(models.Model):
@@ -342,15 +341,6 @@ class WorkInfo(models.Model):
     work_units = models.IntegerField(default=0)
     work_hours = models.IntegerField(default=0)
 
-    def getJSON(self):
-        return JsonResponse({
-            'course_name': self.course.name,
-            'section_type_name': self.section_type.name,
-            'work_units': self.work_units,
-            'work_hours': self.work_hours
-        })
-
-
     @classmethod
     def create(cls, course, section_type, work_units, work_hours):
         work_info = cls(course=course, section_type=section_type,
@@ -360,9 +350,9 @@ class WorkInfo(models.Model):
 
 
 class Availability(models.Model):
-    class Meta: 
+    class Meta:
         unique_together = (("faculty", "day_of_week", "start_time"),)
-    faculty = models.OneToOneField(CUser, on_delete=models.CASCADE, null=True) 
+    faculty = models.OneToOneField(CUser, on_delete=models.CASCADE, null=True)
     day_of_week = models.CharField(max_length=16) # MWF or TR
     start_time = models.TimeField()
     end_time = models.TimeField()
@@ -371,10 +361,10 @@ class Availability(models.Model):
     @classmethod
     def create(cls, email, day, start, end, level):
         faculty = CUser.get_faculty(email=email)
-        if (days is None): 
+        if (days is None):
             raise ValidationError("Invalid days of week input")
         elif (start is None):
-            raise ValidationError("Need to input start time")  
+            raise ValidationError("Need to input start time")
         elif (end is None):
             raise ValidationError("Need to input end time")
         elif (level is None) or (level != "available" and level != "preferred" and level != "unavailable"):
@@ -595,13 +585,13 @@ class Section(models.Model):
     def to_json(self):
         return dict(id = str(self.id),
                     name = self.course.name + "-" + str(self.id),
-                    course = self.course.name, 
+                    course = self.course.name,
                     type = self.section_type.name,
-                    faculty = self.faculty.user.first_name + " " + self.faculty.user.last_name, 
-                    room = self.room.name, 
-                    days = self.days, 
+                    faculty = self.faculty.user.first_name + " " + self.faculty.user.last_name,
+                    room = self.room.name,
+                    days = self.days,
                     time = self.start_time.strftime("%H:%M%p") + " - " + self.end_time.strftime("%H:%M%p"))
-                    
+
 
 class FacultyCoursePreferences(models.Model):
     faculty = models.ForeignKey(CUser, on_delete = models.CASCADE)
@@ -638,7 +628,7 @@ class FacultyCoursePreferences(models.Model):
     	# course_list = self.get_course_list(faculty=self.faculty)
     	# for c in course_list:
     	# 	if c.rank > self.rank:
-    	# 		c.update(rank = c.rank + 1) 
+    	# 		c.update(rank = c.rank + 1)
     	self.delete()
     	#return course_list
 
@@ -646,13 +636,13 @@ class FacultyCoursePreferences(models.Model):
 class CohortData(models.Model):
     # Composite primary key: [schedule + course + major]
     class Meta:
-        unique_together = (("schedule", "course", "major"),) 
+        unique_together = (("schedule", "course", "major"),)
     schedule = models.ForeignKey(Schedule, on_delete=models.CASCADE)
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
     major = models.CharField(max_length=8) # Major(CSC, CPE, SE, ...) or TOTAL
 
     freshman = models.IntegerField(default=0)
-    sophmore = models.IntegerField(default=0)
+    sophomore = models.IntegerField(default=0)
     junior = models.IntegerField(default=0)
     senior = models.IntegerField(default=0)
 
@@ -661,8 +651,8 @@ class CohortData(models.Model):
         cohort_entry = cls(schedule=schedule, course=course, major=major)
         if 'freshman' in kwargs:
             cohort_entry.freshman = kwargs['freshman']
-        if 'sophmore' in kwargs:
-            cohort_entry.sophmore = kwargs['sophmore']
+        if 'sophomore' in kwargs:
+            cohort_entry.sophomore = kwargs['sophomore']
         if 'junior' in kwargs:
             cohort_entry.junior = kwargs['junior']
         if 'senior' in kwargs:
@@ -670,25 +660,96 @@ class CohortData(models.Model):
         cohort_entry.save()
         return cohort_entry
 
-    @classmethod 
+    @classmethod
     def get_cohort_data(cls, schedule, course, major):
         return cls.objects.get(schedule=schedule, course=course, major=major)
-              
+
+    # Handles an uploaded cohort data file and commits it to the system
     @classmethod
-    def import_cohort_data(cls, file):
-        #@TODO
-        pass
+    def import_cohort_file(cls, file): # throws FileParserError
+        chunks = []
+        for s in file.chunks():
+            chunks.append(s)
+        data = ''.join(chunks)
+        lines = data.split('\n')
+        # Read schedule
+        term = ''
+        for w in lines[0].split():
+            term += w + ' '
+        term.strip()
+        # Get Schedule
+        try:
+            schedule = Schedule.get_schedule(term_name = term)
+        except ObjectDoesNotExist:
+            raise FileParserError("Term '%s' not found on line %d" % (term, i))
+        # Begin parsing data 
+        courses = None
+        i = 1
+        while i < len(lines):
+            # Skip lines until non-empty line or end
+            # @TODO Change the re check to look for lines without [A-Za-z0-9]+  (safer)
+            while (i < len(lines) and not lines[i].strip()):
+                i += 1
+            # If done, end
+            if i >= len(lines):
+                break
+            # Else, Process cohort data
+            words = lines[i].split()
+            major = words[0] # Get major
+            # If line continues, create new course array ['Total', 'CPE 101', ... ]
+            if len(words) > 1:
+                courses = []
+                if words[1] != "Total":
+                    raise FileParserError("Missing 'Total' index on line  %d" % (i,))
+                for j in range(2, len(words), 2):
+                    name = words[j] + ' ' + words[j+1]
+                    #if not Course.objects.filter(name=name).exists():
+                    #    raise FileParserError("Could not find course '%s' on line %d" % (name, i))
+                    #else:
+                    courses.append(name)
+            i += 1
+            freshman = lines[i].split()
+            sophomore = lines[i+1].split()
+            junior = lines[i+2].split()
+            senior = lines[i+3].split()
+            if (freshman[0] != "Freshman"):
+                raise FileParserError("Unexpected keyword '%s', expected 'Freshman' on line %d" % (freshman[0], i))
+            if (sophomore[0] != "Sophomore"):
+                raise FileParserError("Unexpected keyword '%s', expected 'Sophomore' on line %d" % (sophomore[0], i+1))
+            if (junior[0] != "Junior"):
+                raise FileParserError("Unexpected keyword '%s', expected 'Freshman' on line %d" % (junior[0], i+2))
+            if (senior[0] != "Senior"):
+                raise FileParserError("Unexpected keyword '%s', expected 'Freshman' on line %d" % (senior[0], i+3))
+            # Create cohort total
+            for j  in range (1, len(courses)):
+                try:
+                    if (courses[j] == "Total"):
+                        #CohortTotal.create(schedule=schedule, major=major, 
+                        #                   freshman=int(freshman[j+1]), sophomore=int(sophomore[j+1]),
+                        #                   junior=int(junior[j+1]), senior=int(senior[j+1]))
+                        pass
+                    else: 
+                        #course = Course.get_course(name=courses[j])
+                        #CohortData.create(schedule=schedule, course=course, major=major,
+                        #                  freshman=int(freshman[j+1]), sophomore=int(sophomore[j+1]),
+                        #                  junior=int(junior[j+1]), senior=int(senior[j+1]))
+                        pass
+                except IndexError:
+                    raise FileParserError("Not enough data entries on lines %d through %d" % (i, i+3)) 
+            i += 4
 
 
-# Contains totals for 
+
+
+# Contains totals for
 class CohortTotal(models.Model):
     class Meta:
         unique_together =(("schedule", "major"),)
     schedule = models.ForeignKey(Schedule, on_delete=models.CASCADE)
-    major = models.CharField(max_length=8) # Major(CSC, CPE, SE, ...) 
+    major = models.CharField(max_length=8) # Major(CSC, CPE, SE, ...)
 
     freshman = models.IntegerField(default=0)
-    sophmore = models.IntegerField(default=0)
+    sophomore = models.IntegerField(default=0)
     junior = models.IntegerField(default=0)
     senior = models.IntegerField(default=0)
 
@@ -697,12 +758,12 @@ class CohortTotal(models.Model):
         cohort_total = cls(schedule=schedule, major=major)
         if 'freshman' in kwargs:
             cohort_total.freshman = kwargs['freshman']
-        if 'sophmore' in kwargs:
-            cohort_total.sophmore = kwargs['sophmore']
+        if 'sophomore' in kwargs:
+            cohort_total.sophomore = kwargs['sophomore']
         if 'junior' in kwargs:
             cohort_total.junior = kwargs['junior']
         if 'senior' in kwargs:
-            cohort_total.senior = kwargs['senior'] 
+            cohort_total.senior = kwargs['senior']
         cohort_total.save()
         return cohort_total
 
@@ -711,7 +772,7 @@ class CohortTotal(models.Model):
         return cls.objects.get(schedule=schedule, major=major)
 
 
-
-
-
-
+# Student Plan Data. File of form:
+# Term, College, CourseID(X), Subject Code, Course Nbr, Description, Component,
+# @TODO Complete Student Plan Data model and import mechanism
+#class

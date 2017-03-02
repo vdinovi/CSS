@@ -39,7 +39,7 @@
               <tr>
                 <td>
                   <button type="button" class="btn btn-info btn-xs" data-toggle="modal" data-target="#delete-course" onclick="setDeleteFormItem('{{ course.name }}', 'id_course_name')"><span class="glyphicon glyphicon-minus"></span>&nbsp;</button>
-                  <button type="button" class="btn btn-info btn-xs" data-toggle="modal" data-target="#edit-course" onclick="setEditFormFields('{{ course.name }}', 'course'), getCourseInfo('{{ course.name }}')"><span class="glyphicon glyphicon-edit"></span>&nbsp;</button>
+                  <button type="button" class="btn btn-info btn-xs" data-toggle="modal" data-target="#edit-course" onclick="setEditFormFields('{{ course.name }}', 'course'), getCourseInfo('{{ course.name }}', '{{ csrf_token }}')"><span class="glyphicon glyphicon-edit"></span>&nbsp;</button>
                 </td>
                 <td name="courseName">{{ course.name }}</td>
                 <td name="description">{{ course.description }}</td>
@@ -91,9 +91,11 @@
             <h4 class="modal-title">Edit Course</h4>
           </div>
           <div class="modal-body">
-            <form method="POST" action="?">{% csrf_token %}
+            <form id="edit-course-form-form" novalidate method="POST" action="?">{% csrf_token %}
               <h4>Course Info</h4>
               {{ edit_course_form.as_p }}
+              <button type="submit" name="edit-course-form" class="save btn btn-default">save</button>
+                </form>
               <h4>Section Types</h4>
               <p id="ajax-area"></p>
               <div id="add-section-type-area" style="display: none;">
@@ -103,8 +105,7 @@
                 <button id="add-section-type-button" style="font-size: .7em;" type="button" class="btn btn-info btn-xs"  onclick="addSectionType()"><span class="glyphicon glyphicon-plus"></button>
                 <button id="save-section-type-button" style="font-size: .7em; display: none;" type="button" class="btn btn-info btn-xs"  onclick="submitSectionType()"><span class="glyphicon glyphicon-ok"></button>
               </div>
-              <button type="submit" name="edit-course-form" class="save btn btn-default">submit</button>
-            </form>
+
             <div>
             </div>
           </div>
@@ -134,87 +135,6 @@
 
     {% load static %}
     <script src="{% static "js/resources.js" %}"></script>
-    <script>
-    var currentCourse;
 
-      function addSectionType() {
-        console.log("addSectionType: display: " + $('#add-section-type-area').display);
-        $('#add-section-type-area').show();
-        $('#save-section-type-button').show();
-        $('#add-section-type-button').hide()
-
-
-      }
-      function submitSectionType() {
-        console.log("submit");
-        console.log(
-          {
-            "csrfmiddlewaretoken": "{{ csrf_token }}",
-            "request-name":'save_section_request',
-            "course": currentCourse,
-            "id_name": $('#id_name').val(),
-            "id_work_units": $('#id_work_units').val(),
-            "id_work_hours": $('#id_work_hours').val()
-        });
-
-        $.post("/resources/courses/",
-              {
-                  "csrfmiddlewaretoken": "{{ csrf_token }}",
-                  "request-name":'save-section-request',
-                  "course": currentCourse,
-                  "id_name": $('#id_name').val(),
-                  "id_work_units": $('#id_work_units').val(),
-                  "id_work_hours": $('#id_work_hours').val()
-              },
-
-              updateSectionTypesView
-        );
-        $('#add-section-type-area').hide();
-        $('#save-section-type-button').hide();
-        $('#add-section-type-button').show()
-      }
-
-      function getCourseInfo(course) {
-        console.log('');
-        currentCourse = course;
-        $.post("/resources/courses/",
-              {
-                  "csrfmiddlewaretoken": "{{ csrf_token }}",
-                  "request-name": "course-section-request",
-                  "course": course
-              },
-
-              updateSectionTypesView
-        );
-      }
-      function deleteSectionType(sectionTypeName, courseName) {
-        console.log('courseName: ' + courseName);
-        console.log('sectionTypeName: ' + sectionTypeName);
-
-        $.post("/resources/courses/",
-              {
-                  "csrfmiddlewaretoken": "{{ csrf_token }}",
-                  "request-name": "delete-section-type-request",
-                  "course": courseName,
-                  "section_type_name": sectionTypeName
-              },
-
-              updateSectionTypesView
-        );
-      }
-      function updateSectionTypesView(data, status){
-
-           var sectionTypes = JSON.parse(data);
-           console.log("update: \n" + data);
-            $('#ajax-area').empty();
-
-           for(var sectionType in sectionTypes) {
-             if(sectionTypes[sectionType].course_name != '')
-               console.log("update: " + sectionTypes[sectionType]);
-               $('#ajax-area').append("<p><button onclick=\"deleteSectionType('" + sectionType +"', '" + sectionTypes[sectionType].course_name + "')\"style=\"font-size: .7em;\" type=\"button\" class=\"btn btn-info btn-xs\" data-toggle=\"modal\" data-target=\"#add-section-type\"><span class=\"glyphicon glyphicon-minus\"></button> " + sectionType + " Work Units: " + sectionTypes[sectionType].work_units + " Work Hours: " + sectionTypes[sectionType].work_hours + "</p>");
-               console.log("test" + sectionTypes[sectionType]);
-        }
-      }
-    </script>
   </body>
 </html>

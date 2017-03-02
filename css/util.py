@@ -49,3 +49,10 @@ class DepartmentSettings():
                 self.end_time = end_time
         self.save_settings()
         
+
+# Custom FileContent error. Used when parsing inavlid data within file
+class FileParserError(Exception):
+    """ Raise for problems parsing input files """
+    pass
+
+
