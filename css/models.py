@@ -95,8 +95,8 @@ class CUser(models.Model):
     @classmethod
     # Return cuser by full name
     def get_faculty_by_full_name(cls, full_name):
-        first_name = full_name.split()[0]
-        last_name = full_name.split()[1]
+        first_name = full_name.split("-")[0]
+        last_name = full_name.split("-")[1]
         print first_name + last_name
         return cls.objects.get(user_type='faculty', user__first_name=first_name,
                                user__last_name=last_name)
@@ -580,7 +580,11 @@ class Section(models.Model):
         if finalQuery == '':
             finalQuery = timeQuery
 
-        return cls.objects.filter(finalQuery)
+        try:
+            sections = cls.objects.filter(finalQuery)
+        except:
+            sections = []
+        return sections
 
     def to_json(self):
         return dict(id = str(self.id),
