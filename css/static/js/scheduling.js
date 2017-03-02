@@ -570,8 +570,15 @@ function getSelectedFilters() {
     return selectedFilters;
 }
 
-// OnClick function to set the days for a new section
-function setDays(element, form) {
-    form.days=element.id;
-    form.save();
+function NewSection(request) {
+    // Gather information from the form
+    
+    // ajax request
 }
+
+
+
+
+
+
+

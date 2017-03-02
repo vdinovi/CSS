@@ -1,5 +1,5 @@
 from django.http import HttpResponse, HttpResponseRedirect
-from .models import Course, CUser, Room, Schedule, Section
+from .models import Course, CUser, Room, Schedule, Section, SectionConflict
 from .forms import AddScheduleForm
 import json
 from django.db import IntegrityError
@@ -125,6 +125,16 @@ def Sections(request):
         res.status_code = 400 
     return res
 
+# Creating a new section.
+# @csrf_exempt
+# def NewSection(request):
+#     res = HttpResponse()
+#     if request.method == "POST":
+#         return
+#     else:
+#         res.status_code = 400
+#     return res
+
 
 # A function to detect conflicts when creating a new section.
 #
@@ -150,10 +160,14 @@ def Conflicts(section):
             s.conflict = 'y'
             s.conflict_reason = 'room'
             s.save()
+            if s.id != section.id:
+                SectionConflict.create(section, s, 'room')
         if s.faculty == faculty:
             s.conflict = 'y'
             s.conflict_reason = 'faculty'
             s.save()
+            if s.id != section.id:
+                SectionConflict.create(section, s, 'faculty')
 
 
 

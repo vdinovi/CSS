@@ -33,20 +33,14 @@ class ConflictsTestCase(TestCase):
         sections = Section.objects.all()
         print "------------BEFORE------------:"
         for section in sections:
-            print section.schedule.academic_term
-            print section.course.name
-            print section.conflict
-            print section.conflict_reason
+            print section.schedule.academic_term + " " + section.course.name + " " + section.conflict + " " + str(section.conflict_reason)
         print '-------------------------------'
         Conflicts(new_section)
         existing_section = Section.get_section(course="CPE101")
         sections = Section.objects.all()
         print "------------AFTER------------:"
         for section in sections:
-            print section.schedule.academic_term
-            print section.course.name
-            print section.conflict
-            print section.conflict_reason
+            print section.schedule.academic_term + " " + section.course.name + " " + section.conflict + " " + str(section.conflict_reason)
         self.assertEquals(str(existing_section.conflict), 'y')
         self.assertEquals(str(existing_section.conflict_reason), "faculty")
 
@@ -59,6 +53,7 @@ class ConflictsTestCase(TestCase):
         existing_section = Section.get_section(course="CPE101")
         self.assertEquals(str(existing_section.conflict), 'y')
         self.assertEquals(str(existing_section.conflict_reason), "room")
+        self.assertEquals(1, len(SectionConflict.objects.all()))
 
 
 

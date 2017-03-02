@@ -779,5 +779,23 @@ class CohortTotal(models.Model):
 
 
 # Section Conflicts Model
-class SectionConflicts(models.Model):
-    
+class SectionConflict(models.Model):
+    section1 = models.ForeignKey(Section, related_name="first_section", on_delete=models.CASCADE)
+    section2 = models.ForeignKey(Section, related_name="second_section", on_delete=models.CASCADE)
+    conflict_reason = models.CharField(max_length=8) # Faculty or Room
+
+    @classmethod
+    def create(cls, section1, section2, conflict_reason):
+        if section1 == section2:
+            raise ValidationError("Section does not conflict with itself.")
+        if conflict_reason != "faculty" and conflict_reason != "room":
+            raise ValidationError("Invalid conflict reason.")
+        conflict = cls(
+                    section1=section1, 
+                    section2=section2, 
+                    conflict_reason=conflict_reason)
+        conflict.save()
+        return conflict
+
+
+
