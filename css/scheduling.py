@@ -6,6 +6,8 @@ from django.db import IntegrityError
 from django.core.exceptions import ValidationError, ObjectDoesNotExist
 from django.core import serializers
 from .settings import DEPARTMENT_SETTINGS
+from django.db.models import Q
+from datetime import datetime, time
 
 # Used to retrieve options when new filter type is selected
 # @NOTE 'Options' refers to specific Courses, Faculty, Rooms, or Time periods
@@ -131,14 +133,16 @@ def Sections(request):
 # Updates sections with conflicts to a 'y' in conflicts and updates
 # the conflict reason.
 
-def Conflicts(request, section, academic_term):
-    start_time = section.start_time
-    end_time = section.end_time
+def Conflicts(section):
+    start_time = datetime.strptime(section.start_time, '%H:%M').time()
+    end_time = datetime.strptime(section.end_time, '%H:%M').time()
     room = section.room
     faculty = section.faculty
+    academic_term = section.schedule
 
     # Find all sections that are between start_time and end_time of the new section
-    sections = Section.filter(academic_term=academic_term).start_time__range(start_time, end_time).end_time__range(start_time, end_time)
+    # sections = Section.objects.filter(schedule=academic_term).filter(start_time__range=[start_time, end_time]).filter(end_time__range=[start_time, end_time])
+    sections = Section.objects.filter(schedule=academic_term).filter(Q(start_time__range=[start_time, end_time]) | Q(end_time__range=[time(start_time.hour, start_time.minute + 1), end_time]))
 
     # Check if rooms or faculty overlap
     for s in sections:
@@ -150,9 +154,6 @@ def Conflicts(request, section, academic_term):
             s.conflict = 'y'
             s.conflict_reason = 'faculty'
             s.save()
-
-
-
 
 
 

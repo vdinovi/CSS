@@ -710,3 +710,8 @@ class CohortTotal(models.Model):
 # Term, College, CourseID(X), Subject Code, Course Nbr, Description, Component,
 # @TODO Complete Student Plan Data model and import mechanism
 #class
+
+
+# Section Conflicts Model
+class SectionConflicts(models.Model):
+    
