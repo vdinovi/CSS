@@ -207,24 +207,24 @@
             <thead>
               <tr class="top">
                 <th><!--blank for edit buttons--></th>
-                <th>Section</th>
-                <th>Term</th>
-                <th>Course</th>
-                <th>Type</th>
-                <th>Faculty</th>
-                <th>Room</th>
-                <th>Days</th>
-                <th>Start Time</th>
-                <th>End Time</th>
+                <th onclick="sortSectionDetailsBy(this, 'name')" class="">Section &#x25BC;</th>
+                <th onclick="sortSectionDetailsBy(this, 'term')" class="">Term &#x25BC;</th>
+                <th onclick="sortSectionDetailsBy(this, 'course')" class="">Course &#x25BC;</th>
+                <th onclick="sortSectionDetailsBy(this, 'type')" class="">Type &#x25BC;</th>
+                <th onclick="sortSectionDetailsBy(this, 'faculty')" class="">Faculty &#x25BC;</th>
+                <th onclick="sortSectionDetailsBy(this, 'room')" class="">Room &#x25BC;</th>
+                <th onclick="sortSectionDetailsBy(this, 'days')" class="">Days &#x25BC;</th>
+                <th onclick="sortSectionDetailsBy(this, 'start_time')" class="">Start Time &#x25BC;</th>
+                <th onclick="sortSectionDetailsBy(this, 'end_time')" class="">End Time &#x25BC;</th>
               </tr>
             </thead>
             <tbody id="section-detail-rows">
             <!-- Selected filtered Section Results get inserted here when updateSectionDetails() gets called -->
               <tr>
                 <td>
-                  <button type="button" class="btn btn-info btn-xs" data-toggle="modal" data-target="#deselect-section" onclick="removeSectionFromDetails(this)"><span class="glyphicon glyphicon-minus"></span>&nbsp;</button>
-                  <button type="button" class="btn btn-info btn-xs" data-toggle="modal" data-target="#edit-section"><span class="glyphicon glyphicon-edit"></span>&nbsp;</button>
-                  <button type="button" class="btn btn-info btn-xs" data-toggle="modal" data-target="#delete-section"><span class="glyphicon glyphicon-trash"></span>&nbsp;</button>
+                  <button type="button" class="btn btn-info btn-xs" data-toggle="modal" data-target="#deselect-section" onclick="removeSectionFromDetails(this)"><span class="glyphicon glyphicon-minus" title="Remove section from details"></span>&nbsp;</button>
+                  <button type="button" class="btn btn-info btn-xs" data-toggle="modal" data-target="#edit-section"><span class="glyphicon glyphicon-edit" title="Edit section"></span>&nbsp;</button>
+                  <button type="button" class="btn btn-info btn-xs" data-toggle="modal" data-target="#delete-section"><span class="glyphicon glyphicon-trash" title="Delete section"></span>&nbsp;</button>
                 </td>
                 <td>cpe101-01</td>
                 <td>Fall 2016</td>
