@@ -265,9 +265,7 @@ function selectFilter(element, filterType) {
                         optionFrame.append(optionFormatString.format(name.replace(/ /g, '-'), name));
                         // Check if already in selected
                         $("#"+filterType).children("div").each(function(index, value) {
-                            //console.log(value.id + " == " + data.options[i].name.replace(/ /g, '-'))
                             if (value.id == data.options[i].name.replace(/ /g, '-')) {
-                                console.log($("#option-"+data.options[i].name.replace(/ /g,'-')));
                                 $("#option-"+data.options[i].name.replace(/ /g, '-')).children("span").children("input").prop("checked", true);
                             }
                         });
@@ -413,7 +411,7 @@ function getSelectedOptions() {
         var arr = [];
         // Iterate over each selected option type
         for (var i = 0; i < value.children.length; ++i) {
-            arr.push(value.children[i].id); 
+            arr.push(value.children[i].id.replace(/-/g, ' ')); 
         }
         var name = filter_types[f++];
         selectedOptions[name] = arr;
@@ -424,9 +422,15 @@ function getSelectedOptions() {
 // Selects all sections in filtered Section window
 function selectAllOptions() {
     $("#option-frame").children("div").each(function(index, value) { 
-        $("#"+value.id+"-checkbox").prop("checked", true);
-        selectOption($("#"+value.id+"-checkbox")[0]);
-    });
+        // @TODO BUG: Currently, selecting all options will add all options including
+        // those that have already been selected, this leads to doubling up on options.
+/*        $("#filter-type-window").children("div").each( function(i, v) {
+            if (v.prop('id').replace(/-/g, ' ') == $(value).children("p").text()) {
+                $("#"+value.id+"-checkbox").prop("checked", true);
+                selectOption($("#"+value.id+"-checkbox")[0]);
+            }
+        });*/
+   });
 }
 
 // Unselects all sections in filtered Section window
@@ -482,10 +486,8 @@ function updateFilterLogic() {
     // for each filter type that is checked, either disable or enable the AND/OR box accordingly
     $('.logic-checkbox').each(function (index, value) {
         if (value.checked && ++numSelected < selectedFilters.length) {
-            // console.log("can use " + value.id);
             $("#"+value.id).parent().next().removeProp("disabled");    
         } else {
-            // console.log(value.id + " is disabled");
             $("#"+value.id).parent().next().prop("disabled", true);
         }
     }); 
@@ -527,7 +529,6 @@ function getFilteredSections() {
         data: JSON.stringify(filters),
         dataType: "json",
         success: function(response) {
-            // console.log(response.sections);
             data = response.sections;
             //filteredSections.push(response.sections);
             sectionFrame = $("#section-frame");
@@ -601,7 +602,6 @@ function setLogic(element) {
     for (var i=0;i<selectedFilters.length-1;i++) {
         if (selectedFilters[i] == filterType) {
             filters[selectedFilters[i+1]]['logic'] = element.options[element.selectedIndex].value;
-            // console.log(element.options[element.selectedIndex].value + " chosen for " + selectedFilters[i+1]);
         }
     }
 }

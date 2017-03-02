@@ -307,6 +307,8 @@
     <!-- Custom JS -->
     <script src="{% static "js/scheduling.js" %}"></script>
     <script language="javascript">
+        var target = document.registerElement('x-target');
+        document.body.appendChild(new target());
        // Fixes Dropdown bug.
         $(document).ready(function () {
             $('.dropdown-toggle').dropdown();
