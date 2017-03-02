@@ -740,10 +740,6 @@ class CohortData(models.Model):
                     raise FileParserError("Not enough data entries on lines %d through %d" % (i, i+3)) 
             i += 4
 
-
-
-
-# Contains totals for
 class CohortTotal(models.Model):
     class Meta:
         unique_together =(("schedule", "major"),)
@@ -774,7 +770,53 @@ class CohortTotal(models.Model):
         return cls.objects.get(schedule=schedule, major=major)
 
 
-# Student Plan Data. File of form:
-# Term, College, CourseID(X), Subject Code, Course Nbr, Description, Component,
-# @TODO Complete Student Plan Data model and import mechanism
-#class
+# Student Plan Data.
+class StudentPlanData(models.Model):
+    class Meta:
+        unique_together = (("schedule", "course", "section_type"),)
+    schedule = models.ForeignKey(Schedule, on_delete=models.CASCADE)
+    course = models.ForeignKey(Course, on_delete=models.CASCADE)
+    section_type = models.ForeignKey(SectionType, on_delete=models.CASCADE)
+
+    seat_demand = models.IntegerField(default=0)
+    sections_offered = models.IntegerField(default=0)
+    enrollment_capacity = models.IntegerField(default=0)
+    unmet_seat_demand = models.IntegerField(default=0)
+    percent_unmet_seat_demand = models.FloatField(default=0)
+    
+    @classmethod
+    def create(cls, schedule, course, section_type, **kwargs):
+        plan_data = cls(schedule=schedule, course=course, section_type=section_type)
+        if 'seat_demand' in kwargs:
+            plan_data.seat_demand = kwargs['seat_demand']
+        if 'sections_offered' in kwargs:
+            plan_data.sections_offered = kwargs['sections_offered']
+        if 'enrollment_capacity' in kwargs:
+            plan_data.enrollment_capacity = kwargs['enrollment_capacity']
+        if 'unmet_seat_demand' in kwargs:
+            plan_data.unmet_seat_demand = kwargs['unmet_seat_demand']
+        if 'percent_unmet_seat_demand' in kwargs:
+            plan_data.percent_unmet_seat_demand = kwargs['percent_unmet_seat_demand']
+        plan_data.save()
+        return plan_data
+
+    @classmethod
+    def get_student_plan_data(cls, schedule, course=None, section_type=None):
+        if course == None:
+            return cls.objects.filter(schedule=schedule)
+        if sectionType == None:
+            return cls.objects.filter(schedule=schedule, course=course)
+        return cls.objects.get(schedule=schedule, course=course, section_type=section_type)
+
+    # Handles an uploaded student plan data file and commits it to the system
+    @classmethod
+    def import_student_plan_file(cls, file): # throws FileParserError
+        pass
+ 
+
+
+
+    
+
+
+
