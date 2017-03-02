@@ -617,13 +617,13 @@ function getSelectedFilters() {
 
 /* Section Details Functions */
 
-function updateSectionDetails() {
+function updateSectionDetails(resort) {
     var sectionDetailsFormatString = 
         "<tr id=\"{1}-detail\">\n" + 
             "<td>\n" +
-                "<button type=\"button\" class=\"btn btn-info btn-xs\" data-toggle=\"modal\" data-target=\"#deselect-section\" onclick=\"removeSectionFromDetails(this)\"><span class=\"glyphicon glyphicon-minus\"></span>&nbsp;</button>\n" +
-                "<button type=\"button\" class=\"btn btn-info btn-xs\" data-toggle=\"modal\" data-target=\"#edit-section\"><span class=\"glyphicon glyphicon-edit\"></span>&nbsp;</button>\n" +
-                "<button type=\"button\" class=\"btn btn-info btn-xs\" data-toggle=\"modal\" data-target=\"#delete-section\"><span class=\"glyphicon glyphicon-trash\"></span>&nbsp;</button>\n" +
+                "<button type=\"button\" class=\"btn btn-info btn-xs\" data-toggle=\"modal\" data-target=\"#deselect-section\" onclick=\"removeSectionFromDetails(this)\"><span class=\"glyphicon glyphicon-minus\" title=\"Remove section from details\"></span>&nbsp;</button>\n" +
+                "<button type=\"button\" class=\"btn btn-info btn-xs\" data-toggle=\"modal\" data-target=\"#edit-section\"><span class=\"glyphicon glyphicon-edit\" title=\"Edit section\"></span>&nbsp;</button>\n" +
+                "<button type=\"button\" class=\"btn btn-info btn-xs\" data-toggle=\"modal\" data-target=\"#delete-section\"><span class=\"glyphicon glyphicon-trash\" title=\"Delete section\"></span>&nbsp;</button>\n" +
             "</td>\n" +
             "<td>{0}</td>\n" + 
             "<td>{1}</td>\n" + 
@@ -636,7 +636,7 @@ function updateSectionDetails() {
             "<td>{8}</td>\n" + 
         "</tr>\n";
     var detailFrame = $("#section-detail-rows");
-    if (getSelectedSections()) {
+    if (getSelectedSections() || resort) {
         detailFrame.empty();
         for (var i in sectionDetails) {  
             detailFrame.append(sectionDetailsFormatString.format(sectionDetails[i].name, sectionDetails[i].term, sectionDetails[i].course, sectionDetails[i].type, sectionDetails[i].faculty, sectionDetails[i].room, sectionDetails[i].days, sectionDetails[i].start_time, 
@@ -649,16 +649,20 @@ function updateSectionDetails() {
 function removeSectionFromDetails(element) {
     // remove element from sectionDetails
     index = inArrayByName($(element).parent().next("tr").text(), sectionDetails);
-    console.log($(element).parent().next("td").text());
-
-    if (index !== -1) {
-        console.log("REMOVING");
-        sectionDetails.splice(index, 1);
-    }
+    if (index !== -1) { sectionDetails.splice(index, 1); }
     // gets to <tr> parent element
     $(element).parent().parent().remove();
 }
 
+// sort by given attribute in Section Details 
+function sortSectionDetailsBy(element, attribute) {
+    sectionDetails.sort(function(a,b) { return a[attribute].localeCompare(b[attribute]); });
+    updateSectionDetails(true);
+    $(element).parent().children("th").each(function(index,value) {
+        $(value).toggleClass("sorted", false);
+    });
+    $(element).toggleClass("sorted");
+}
 
 // OnClick function to set the days for a new section
 function setDays(element, form) {

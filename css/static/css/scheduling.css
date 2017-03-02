@@ -259,10 +259,9 @@ body input[type=checkbox] {
     white-space: nowrap;
 }
 
-.section-detail-table {
-
+.table > thead > tr.top > th.sorted {
+    background-color: #b3cccc;
 }
-
 
 
 .logic-buttons {
