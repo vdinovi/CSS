@@ -639,12 +639,12 @@ function getSelectedFilters() {
     return selectedFilters;
 }
 
-<<<<<<< HEAD
 function NewSection(request) {
     // Gather information from the form
     
     // ajax request
-=======
+
+
 /* Section Details Functions */
 
 function updateSectionDetails(resort) {
@@ -698,7 +698,6 @@ function sortSectionDetailsBy(element, attribute) {
 function setDays(element, form) {
     form.days=element.id;
     form.save();
->>>>>>> 736b9e42cf1ebab6bca7d1a2dfb17a8ff66b4e55
 }
 
 
