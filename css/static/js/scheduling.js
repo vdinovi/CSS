@@ -45,33 +45,53 @@ function compareTime(timeA, timeB) {
 
 // Convert Military formatted time to standard
 function toStandardTime(time) {
-    //@TODO convert from military to standard
-    // -- Buggy, fix this
-    var timeParse = timeA.split(":");
-    var hour = parseInt(startTimeParse[0]);
-    var minute = parseInt(startTimeParse[1]);
+    var timeParse = time.split(":");
+    var hour = parseInt(timeParse[0]);
+    var minute = parseInt(timeParse[1]);
     var half;
-    if (hour >= 12)
-        half = "PM";
+    if (hour > 12) {
+        if (hour == 24) {
+            half = "AM"
+            hour = 12
+        }
+        else {
+            half = "PM";
+            hour -= 12;
+        }
+    }
     else {
         half = "AM";
         if (hour == 0)
             hour = 12
     }
-    var paddedHour;
-    var paddedMinute;
     if (hour < 10)
-        paddedHour = "0"+hour;
+        hour = "0"+hour;
     if (minute < 10)
-        paddedMinute = "0"+minute
+        minute = "0"+minute
     var stdTime = "{0}:{1} {2}";
-    return stdTime.format(paddedHour, paddedMinute, half);
+    return stdTime.format(hour, minute, half);
 }
 
-// Convert Standard formmated time to military 
-function toStandardTime(time) {
-    //@TODO convert from standard to military
+// Convert Military formatted time to standard
+function toMilitaryTime(time) {
+    var timeParse = time.split(" ");
+    var half = timeParse[1]
+    var timeParse2 = timeParse[0].split(":");
+    var milTime = "{0}:{1}";
+    var hour = parseInt(timeParse2[0]);
+    if (hour >= 24)
+        hour = 0 
+    if (half == 'PM') {
+        if (hour != 12)
+            hour += 12  
+    }
+    else {
+        if (hour == 12)
+            hour = 0 
+    }
+    return milTime.format(hour, timeParse2[1])
 }
+ 
 
 /* *** FRAME *** */
 // OnClick function for new section frame
@@ -166,21 +186,24 @@ function addSchedule(name) {
 // Select a schedule from tab
 function selectSchedule(name) {
     // De-select existing active schedule
-    $("#open-terms").children("li").each(function (index, value) {
+    /*$("#open-terms").children("li").each(function (index, value) {
         value.className = "";
-    });
+    });*/
     $("#"+name).parent().addClass("active-schedule");
 }
 
 // Gets the currently selected term. If none, returns false
-function getSelectedSchedule() {
-    terms = $("#open-terms").children("li");
-    for (var i = 0; i < terms.length; ++i) {
-        if (terms[i].className.includes("active-schedule")) {
-            return terms[i].childNodes[1].innerText;
-        }
+function getSelectedSchedules() {
+    var arr = []
+    $("#open-terms").children("li").each( function(index, value) {
+        if ($(value).hasClass("active-schedule"))
+            arr.push($(value).children("a").text());
+    });
+    for (var i = 0; i < arr.length; ++i) {
+        if (arr[i] == "")
+            arr.splice(i, 1);
     }
-    return false;
+    return arr;
 }
 
 // Close a schedule
@@ -246,8 +269,6 @@ function selectFilter(element, filterType) {
                         "    </div>\n" +
                         "  </div>\n" + 
                         "</div>";
-                    //@NOTE Currently gets start and end time as miliatry time
-                    //optionFrame.append(optionFormatString.format(toStandardTime(data.start_time), toStandardTime(data.end_time)));
                     optionFrame.append(optionFormatString.format(data.start_time, data.end_time));
                 }
                 // Filter Type is course, faculty, or room
@@ -265,9 +286,7 @@ function selectFilter(element, filterType) {
                         optionFrame.append(optionFormatString.format(name.replace(/ /g, '-'), name));
                         // Check if already in selected
                         $("#"+filterType).children("div").each(function(index, value) {
-                            //console.log(value.id + " == " + data.options[i].name.replace(/ /g, '-'))
                             if (value.id == data.options[i].name.replace(/ /g, '-')) {
-                                console.log($("#option-"+data.options[i].name.replace(/ /g,'-')));
                                 $("#option-"+data.options[i].name.replace(/ /g, '-')).children("span").children("input").prop("checked", true);
                             }
                         });
@@ -316,27 +335,28 @@ function selectTime(minTime, maxTime) {
     var startTime = $("#start-time").val();
     var endTime = $("#end-time").val();
     if ((compareTime(startTime, minTime)) < 1 || (compareTime(startTime, maxTime) > 0)) {
-        //@TODO implement and use toStandardTime
-        sweetAlert("Invalid Start Time", "Department Hours: "+minTime+" - "+maxTime);
+        sweetAlert("Invalid Start Time", "Department Hours: "+toStandardTime(minTime)+" - "+toStandardTime(maxTime));
         return false;
     }
     if ((compareTime(endTime, minTime) < 1) || (compareTime(endTime, maxTime) > 0)) {
-        //@TODO implement and use toStandardTime
-        sweetAlert("Invalid End Time", "Department Hours: "+minTime+" - "+maxTime);
+        sweetAlert("Invalid End Time", "Department Hours: "+toStandardTime(minTime)+" - "+toStandardTime(maxTime));
         return false;
     }
-    //@TODO Verify start comes before end
+    if (compareTime(startTime, endTime) >= 0) {
+        sweetAlert("Start time must come before end time");
+        return false; 
+    }
     time.startTime = startTime;
     time.endTime = endTime;
-    //@TODO conver tto standard time
-    var optionId = (time.day+"-"+time.startTime+"-"+time.endTime).replace(/:/g, '-');
-    var optionText = time.day+": "+time.startTime+" - "+time.endTime;
+    var optionId = (time.day+"-"+time.startTime+"-"+time.endTime).replace(/[: ]/g, '-');
+    var optionText = time.day+": "+toStandardTime(time.startTime)+" - "+toStandardTime(time.endTime);
     var timeOptionFormatString = 
         "<div id=\"{0}\"class=\"selected-option\">\n" +
         "  <button onclick=\"unselectSelectedTime('{0}')\">x</button>\n" +
         "  <li class=\"filter-options\">{1}</li>\n" +
         "</div>"; 
     $("#time-options").append(timeOptionFormatString.format(optionId, optionText));
+    $("#"+optionId).data("data", time);
 }
 
 function unselectSelectedTime(id) {
@@ -365,7 +385,16 @@ function selectOption(element) {
                     "  <li class=\"filter-options\">{1}</li>\n" +
                     "</div>"; 
         var text = element.parentNode.parentNode.innerText;
-        filterType.append(optionFormatString.format(text.replace(/ /g, '-'), text));
+        filterType.children("div").each( function(index, value) {
+            if ($(value).prop('id').replace(/-/g, ' ') == text)
+                optionAlreadySelected = true;
+        });
+        if (!optionAlreadySelected) {
+            // Add to option list
+            filterType.append(optionFormatString.format(text.replace(/ /g, '-'), text));
+            // Set data field
+            $("#"+text.replace(/ /g, '-')).data("data", text);
+        }
     }
     // Remove option from selected option list
     else {
@@ -409,12 +438,12 @@ function getSelectedOptions() {
     var selectedOptions = {};
     // Iterate over each filter types option list
     var f = 0;
+    selectedOptions["schedule"] = getSelectedSchedules(); 
     $("#filter-type-window").children("div").each(function (index, value) {
         var arr = [];
-        // Iterate over each selected option type
-        for (var i = 0; i < value.children.length; ++i) {
-            arr.push(value.children[i].id); 
-        }
+        $(value).children("div").each( function (i, v) {
+            arr.push($(v).data("data"));
+        });
         var name = filter_types[f++];
         selectedOptions[name] = arr;
     });
@@ -442,7 +471,6 @@ function unselectAllOptions() {
 // Get the filters JSON object with correct filters to apply using getSelectedOptions
 function updateFilters() {
     filtersToApply = getSelectedOptions();  
-    scheduleToApply = getSelectedSchedule();
     $('.logic-checkbox').each(function (index, value) {        
         timeMWFarr = []
         timeTRarr = []
@@ -482,10 +510,8 @@ function updateFilterLogic() {
     // for each filter type that is checked, either disable or enable the AND/OR box accordingly
     $('.logic-checkbox').each(function (index, value) {
         if (value.checked && ++numSelected < selectedFilters.length) {
-            // console.log("can use " + value.id);
             $("#"+value.id).parent().next().removeProp("disabled");    
         } else {
-            // console.log(value.id + " is disabled");
             $("#"+value.id).parent().next().prop("disabled", true);
         }
     }); 
@@ -527,7 +553,6 @@ function getFilteredSections() {
         data: JSON.stringify(filters),
         dataType: "json",
         success: function(response) {
-            // console.log(response.sections);
             data = response.sections;
             //filteredSections.push(response.sections);
             sectionFrame = $("#section-frame");
@@ -601,7 +626,6 @@ function setLogic(element) {
     for (var i=0;i<selectedFilters.length-1;i++) {
         if (selectedFilters[i] == filterType) {
             filters[selectedFilters[i+1]]['logic'] = element.options[element.selectedIndex].value;
-            // console.log(element.options[element.selectedIndex].value + " chosen for " + selectedFilters[i+1]);
         }
     }
 }
