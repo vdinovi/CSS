@@ -95,8 +95,8 @@ class CUser(models.Model):
     @classmethod
     # Return cuser by full name
     def get_faculty_by_full_name(cls, full_name):
-        first_name = full_name.split()[0]
-        last_name = full_name.split()[1]
+        first_name = full_name.split("-")[0]
+        last_name = full_name.split("-")[1]
         print first_name + last_name
         return cls.objects.get(user_type='faculty', user__first_name=first_name,
                                user__last_name=last_name)
@@ -150,7 +150,6 @@ class CUser(models.Model):
                     email = self.user.email)
 
 
-
 class FacultyDetails(models.Model):
     # The user_id uses the User ID as a primary key.
     # Whenever this User is deleted, this entry in the table will also be deleted
@@ -158,6 +157,7 @@ class FacultyDetails(models.Model):
     target_work_units = models.IntegerField(default=0, null=True) # in units
     target_work_hours = models.IntegerField(default=0, null=True) # in hours
     changed_preferences = models.CharField(max_length=1) # 'y' or 'n'
+    #availability = models.ForeignKey(Availability, on_delete=models.CASCADE)
 
     @classmethod
     def create(cls, faculty, target_work_units, target_work_hours):
@@ -172,6 +172,17 @@ class FacultyDetails(models.Model):
         if new_work_hours:
             self.target_work_hours = new_work_hours
         self.changed_preferences = 'y'
+
+    @classmethod
+    def get_availability_list(cls, faculty):
+        entries = cls.objects.filter(faculty=faculty)
+        # join the course ID to the course table
+        aval_arr = []
+        for entry in entries: # go through and make list of tuples (rank, course_name, course_description, comments)
+            aval_arr += [(entry.preferred)]
+        course_arr.sort(key=lambda tup:tup[0]) # sort courses by rank (first spot in tuple)
+        return course_arr
+
 
     # @TODO Function to yes changed_preferences to 'n'? Also consider naming it something
     #       more indicative -> preferences_have_changed? has_changed_preferences? etc.
@@ -348,29 +359,28 @@ class WorkInfo(models.Model):
         work_info.save()
         return work_info
 
-
 class Availability(models.Model):
     class Meta:
         unique_together = (("faculty", "day_of_week", "start_time"),)
     faculty = models.OneToOneField(CUser, on_delete=models.CASCADE, null=True)
     day_of_week = models.CharField(max_length=16) # MWF or TR
-    start_time = models.TimeField()
-    end_time = models.TimeField()
-    level = models.CharField(max_length=16) # available, preferred, unavailable
+    start_time = models.IntegerField()
+    end_time = models.IntegerField()
+    level = models.CharField(max_length=16) #preferred, unavailable
 
     @classmethod
-    def create(cls, email, day, start, end, level):
+    def create(cls, email, day, start_time, end_time, level):
         faculty = CUser.get_faculty(email=email)
-        if (days is None):
+        if (day is None):
             raise ValidationError("Invalid days of week input")
-        elif (start is None):
+        elif (start_time is None):
             raise ValidationError("Need to input start time")
-        elif (end is None):
+        elif (end_time is None):
             raise ValidationError("Need to input end time")
-        elif (level is None) or (level != "available" and level != "preferred" and level != "unavailable"):
-            raise ValidationError("Need to input level of availability: preferred, available, or unavailable")
+        elif (level is None) or (level != "preferred" and level != "unavailable"):
+            raise ValidationError("Need to input level of availability: preferred or unavailable")
         else:
-            availability = cls(faculty=faculty, day_of_week=day, start_time=start, end_time=end,level=level)
+            availability = cls(faculty=faculty,day_of_week=day, start_time=start_time, end_time=end_time, level=level)
             availability.save()
             return availability
 
@@ -580,7 +590,11 @@ class Section(models.Model):
         if finalQuery == '':
             finalQuery = timeQuery
 
-        return cls.objects.filter(finalQuery)
+        try:
+            sections = cls.objects.filter(finalQuery)
+        except:
+            sections = []
+        return sections
 
     def to_json(self):
         return dict(id = str(self.id),
@@ -740,10 +754,6 @@ class CohortData(models.Model):
                     raise FileParserError("Not enough data entries on lines %d through %d" % (i, i+3)) 
             i += 4
 
-
-
-
-# Contains totals for
 class CohortTotal(models.Model):
     class Meta:
         unique_together =(("schedule", "major"),)
@@ -773,13 +783,49 @@ class CohortTotal(models.Model):
     def get_cohort_total(cls, schedule, major):
         return cls.objects.get(schedule=schedule, major=major)
 
+# Student Plan Data.
+class StudentPlanData(models.Model):
+    class Meta:
+        unique_together = (("schedule", "course", "section_type"),)
+    schedule = models.ForeignKey(Schedule, on_delete=models.CASCADE)
+    course = models.ForeignKey(Course, on_delete=models.CASCADE)
+    section_type = models.ForeignKey(SectionType, on_delete=models.CASCADE)
 
-# Student Plan Data. File of form:
-# Term, College, CourseID(X), Subject Code, Course Nbr, Description, Component,
-# @TODO Complete Student Plan Data model and import mechanism
-#class
+    seat_demand = models.IntegerField(default=0)
+    sections_offered = models.IntegerField(default=0)
+    enrollment_capacity = models.IntegerField(default=0)
+    unmet_seat_demand = models.IntegerField(default=0)
+    percent_unmet_seat_demand = models.FloatField(default=0)
+    
+    @classmethod
+    def create(cls, schedule, course, section_type, **kwargs):
+        plan_data = cls(schedule=schedule, course=course, section_type=section_type)
+        if 'seat_demand' in kwargs:
+            plan_data.seat_demand = kwargs['seat_demand']
+        if 'sections_offered' in kwargs:
+            plan_data.sections_offered = kwargs['sections_offered']
+        if 'enrollment_capacity' in kwargs:
+            plan_data.enrollment_capacity = kwargs['enrollment_capacity']
+        if 'unmet_seat_demand' in kwargs:
+            plan_data.unmet_seat_demand = kwargs['unmet_seat_demand']
+        if 'percent_unmet_seat_demand' in kwargs:
+            plan_data.percent_unmet_seat_demand = kwargs['percent_unmet_seat_demand']
+        plan_data.save()
+        return plan_data
 
+    @classmethod
+    def get_student_plan_data(cls, schedule, course=None, section_type=None):
+        if course == None:
+            return cls.objects.filter(schedule=schedule)
+        if sectionType == None:
+            return cls.objects.filter(schedule=schedule, course=course)
+        return cls.objects.get(schedule=schedule, course=course, section_type=section_type)
 
+    # Handles an uploaded student plan data file and commits it to the system
+    @classmethod
+    def import_student_plan_file(cls, file): # throws FileParserError
+        pass
+ 
 # Section Conflicts Model
 class SectionConflict(models.Model):
     section1 = models.ForeignKey(Section, related_name="first_section", on_delete=models.CASCADE)
@@ -798,6 +844,3 @@ class SectionConflict(models.Model):
                     conflict_reason=conflict_reason)
         conflict.save()
         return conflict
-
-
-

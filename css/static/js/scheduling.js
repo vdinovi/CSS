@@ -7,11 +7,9 @@ var sectionDetails = [];
 /* *** UTILITY *** */
 // String format function. 
 // Replaces {n} in format string with n-th positional arg.
-String.prototype.format = function()
-{
+String.prototype.format = function() {
     var content = this;
-    for (var i=0; i < arguments.length; i++)
-    {
+    for (var i=0; i < arguments.length; i++) {
         var replacement = '{' + i + '}';
         var x;
         // Can't wrap var 'replacement' with regex in order to do global replace.
@@ -47,33 +45,53 @@ function compareTime(timeA, timeB) {
 
 // Convert Military formatted time to standard
 function toStandardTime(time) {
-    //@TODO convert from military to standard
-    // -- Buggy, fix this
-    var timeParse = timeA.split(":");
-    var hour = parseInt(startTimeParse[0]);
-    var minute = parseInt(startTimeParse[1]);
+    var timeParse = time.split(":");
+    var hour = parseInt(timeParse[0]);
+    var minute = parseInt(timeParse[1]);
     var half;
-    if (hour >= 12)
-        half = "PM";
+    if (hour > 12) {
+        if (hour == 24) {
+            half = "AM"
+            hour = 12
+        }
+        else {
+            half = "PM";
+            hour -= 12;
+        }
+    }
     else {
         half = "AM";
         if (hour == 0)
             hour = 12
     }
-    var paddedHour;
-    var paddedMinute;
     if (hour < 10)
-        paddedHour = "0"+hour;
+        hour = "0"+hour;
     if (minute < 10)
-        paddedMinute = "0"+minute
+        minute = "0"+minute
     var stdTime = "{0}:{1} {2}";
-    return stdTime.format(paddedHour, paddedMinute, half);
+    return stdTime.format(hour, minute, half);
 }
 
-// Convert Standard formmated time to military 
-function toStandardTime(time) {
-    //@TODO convert from standard to military
+// Convert Military formatted time to standard
+function toMilitaryTime(time) {
+    var timeParse = time.split(" ");
+    var half = timeParse[1]
+    var timeParse2 = timeParse[0].split(":");
+    var milTime = "{0}:{1}";
+    var hour = parseInt(timeParse2[0]);
+    if (hour >= 24)
+        hour = 0 
+    if (half == 'PM') {
+        if (hour != 12)
+            hour += 12  
+    }
+    else {
+        if (hour == 12)
+            hour = 0 
+    }
+    return milTime.format(hour, timeParse2[1])
 }
+ 
 
 /* *** FRAME *** */
 // OnClick function for new section frame
@@ -87,6 +105,7 @@ function switchFrame(firstFrame, secondFrame) {
 $('#view-term-modal').on('show.bs.modal', function () {
     getSchedules();
 });
+
 $('#delete-term-modal').on('show.bs.modal', function (e) {
     var academicTerm = $(e.relatedTarget).data('name');
     $("#delete-term-modal-body").find("form").children("h3").remove();
@@ -98,6 +117,7 @@ $('#delete-term-modal').on('show.bs.modal', function (e) {
         "Yes I want to delete this schedule!</button>"
     );
 }); 
+
 $('#approve-term-modal').on('show.bs.modal', function (e) {
     var academicTerm = $(e.relatedTarget).data('name');
     $("#approve-term-modal-body").find("form").children("h3").remove();
@@ -166,21 +186,24 @@ function addSchedule(name) {
 // Select a schedule from tab
 function selectSchedule(name) {
     // De-select existing active schedule
-    $("#open-terms").children("li").each(function (index, value) {
+    /*$("#open-terms").children("li").each(function (index, value) {
         value.className = "";
-    });
+    });*/
     $("#"+name).parent().addClass("active-schedule");
 }
 
 // Gets the currently selected term. If none, returns false
-function getSelectedSchedule() {
-    terms = $("#open-terms").children("li");
-    for (var i = 0; i < terms.length; ++i) {
-        if (terms[i].className.includes("active-schedule")) {
-            return terms[i].childNodes[1].innerText;
-        }
+function getSelectedSchedules() {
+    var arr = []
+    $("#open-terms").children("li").each( function(index, value) {
+        if ($(value).hasClass("active-schedule"))
+            arr.push($(value).children("a").text());
+    });
+    for (var i = 0; i < arr.length; ++i) {
+        if (arr[i] == "")
+            arr.splice(i, 1);
     }
-    return false;
+    return arr;
 }
 
 // Close a schedule
@@ -246,8 +269,6 @@ function selectFilter(element, filterType) {
                         "    </div>\n" +
                         "  </div>\n" + 
                         "</div>";
-                    //@NOTE Currently gets start and end time as miliatry time
-                    //optionFrame.append(optionFormatString.format(toStandardTime(data.start_time), toStandardTime(data.end_time)));
                     optionFrame.append(optionFormatString.format(data.start_time, data.end_time));
                 }
                 // Filter Type is course, faculty, or room
@@ -255,7 +276,7 @@ function selectFilter(element, filterType) {
                     var optionFormatString =
                         "<div id=\"option-{0}\" class=\"input-group\">\n" +
                         "  <span class=\"input-group-addon\">\n" +
-                        "    <input id=\"option-checkbox\" type=\"checkbox\" onclick=\"selectOption(this)\">\n" +
+                        "    <input id=\"option-{0}-checkbox\" type=\"checkbox\" onclick=\"selectOption(this)\">\n" +
                         "  </span>\n" +
                         "  <p class=\"form-control\" style=\"max-width: 100%; white-space: nowrap\">{1}</p>\n" +
                         "</div>\n";
@@ -265,9 +286,7 @@ function selectFilter(element, filterType) {
                         optionFrame.append(optionFormatString.format(name.replace(/ /g, '-'), name));
                         // Check if already in selected
                         $("#"+filterType).children("div").each(function(index, value) {
-                            //console.log(value.id + " == " + data.options[i].name.replace(/ /g, '-'))
                             if (value.id == data.options[i].name.replace(/ /g, '-')) {
-                                console.log($("#option-"+data.options[i].name.replace(/ /g,'-')));
                                 $("#option-"+data.options[i].name.replace(/ /g, '-')).children("span").children("input").prop("checked", true);
                             }
                         });
@@ -316,27 +335,28 @@ function selectTime(minTime, maxTime) {
     var startTime = $("#start-time").val();
     var endTime = $("#end-time").val();
     if ((compareTime(startTime, minTime)) < 1 || (compareTime(startTime, maxTime) > 0)) {
-        //@TODO implement and use toStandardTime
-        sweetAlert("Invalid Start Time", "Department Hours: "+minTime+" - "+maxTime);
+        sweetAlert("Invalid Start Time", "Department Hours: "+toStandardTime(minTime)+" - "+toStandardTime(maxTime));
         return false;
     }
     if ((compareTime(endTime, minTime) < 1) || (compareTime(endTime, maxTime) > 0)) {
-        //@TODO implement and use toStandardTime
-        sweetAlert("Invalid End Time", "Department Hours: "+minTime+" - "+maxTime);
+        sweetAlert("Invalid End Time", "Department Hours: "+toStandardTime(minTime)+" - "+toStandardTime(maxTime));
         return false;
     }
-    //@TODO Verify start comes before end
+    if (compareTime(startTime, endTime) >= 0) {
+        sweetAlert("Start time must come before end time");
+        return false; 
+    }
     time.startTime = startTime;
     time.endTime = endTime;
-    //@TODO conver tto standard time
-    var optionId = (time.day+"-"+time.startTime+"-"+time.endTime).replace(/:/g, '-');
-    var optionText = time.day+": "+time.startTime+" - "+time.endTime;
+    var optionId = (time.day+"-"+time.startTime+"-"+time.endTime).replace(/[: ]/g, '-');
+    var optionText = time.day+": "+toStandardTime(time.startTime)+" - "+toStandardTime(time.endTime);
     var timeOptionFormatString = 
         "<div id=\"{0}\"class=\"selected-option\">\n" +
         "  <button onclick=\"unselectSelectedTime('{0}')\">x</button>\n" +
         "  <li class=\"filter-options\">{1}</li>\n" +
         "</div>"; 
     $("#time-options").append(timeOptionFormatString.format(optionId, optionText));
+    $("#"+optionId).data("data", time);
 }
 
 function unselectSelectedTime(id) {
@@ -365,7 +385,16 @@ function selectOption(element) {
                     "  <li class=\"filter-options\">{1}</li>\n" +
                     "</div>"; 
         var text = element.parentNode.parentNode.innerText;
-        filterType.append(optionFormatString.format(text.replace(/ /g, '-'), text));
+        filterType.children("div").each( function(index, value) {
+            if ($(value).prop('id').replace(/-/g, ' ') == text)
+                optionAlreadySelected = true;
+        });
+        if (!optionAlreadySelected) {
+            // Add to option list
+            filterType.append(optionFormatString.format(text.replace(/ /g, '-'), text));
+            // Set data field
+            $("#"+text.replace(/ /g, '-')).data("data", text);
+        }
     }
     // Remove option from selected option list
     else {
@@ -409,48 +438,51 @@ function getSelectedOptions() {
     var selectedOptions = {};
     // Iterate over each filter types option list
     var f = 0;
+    selectedOptions["schedule"] = getSelectedSchedules(); 
     $("#filter-type-window").children("div").each(function (index, value) {
         var arr = [];
-        // Iterate over each selected option type
-        for (var i = 0; i < value.children.length; ++i) {
-            arr.push(value.children[i].id); 
-        }
+        $(value).children("div").each( function (i, v) {
+            arr.push($(v).data("data"));
+        });
         var name = filter_types[f++];
-        console.log(name)
         selectedOptions[name] = arr;
     });
     return selectedOptions;
 }
 
-/* *** FILTER LOGIC / SECTIONS *** */
-
-// OnClick function for a section checkbox
-//  - Adds the section to the section detail
-function selectSection(element) {
-    if (element.checked == true) {
-        console.log("I BEEN CLICKED");
-        //updateSectionDetails(element);
-    }
-    return true;
+// Selects all sections in filtered Section window
+function selectAllOptions() {
+    $("#option-frame").children("div").each(function(index, value) { 
+        $("#"+value.id+"-checkbox").prop("checked", true);
+        selectOption($("#"+value.id+"-checkbox")[0]);
+    });
 }
+
+// Unselects all sections in filtered Section window
+function unselectAllOptions() {
+    $("#option-frame").children("div").each(function(index, value) { 
+        $("#"+value.id+"-checkbox").prop("checked", false);
+        selectOption($("#"+value.id+"-checkbox")[0]);
+    });
+}
+
+/* *** FILTER LOGIC / SECTIONS *** */
 
 // Get the filters JSON object with correct filters to apply using getSelectedOptions
 function updateFilters() {
     filtersToApply = getSelectedOptions();  
-    scheduleToApply = getSelectedSchedule();
     $('.logic-checkbox').each(function (index, value) {        
         timeMWFarr = []
         timeTRarr = []
         otherArr = []
         filterType = value.id; 
-        if (value.checked == true) {
-            console.log(filterType + " isChecked");
+        if (value.checked) {
             for (var t=0;t<filtersToApply[filterType].length;t++) {
                 timeArr = filtersToApply[filterType][t].split("-");
                 startTime = timeArr[1] + ":" + timeArr[2];
                 endTime = timeArr[3] + ":" + timeArr[4];
-                if (filtersToApply[filterType][t].includes('mwf') == true) { timeMWFarr.push(new Array(startTime, endTime)); }
-                else if (filtersToApply[filterType][t].includes('tr') == true) { timeTRarr.push(new Array(startTime, endTime)); }
+                if (filtersToApply[filterType][t].includes('mwf')) { timeMWFarr.push(new Array(startTime, endTime)); }
+                else if (filtersToApply[filterType][t].includes('tr')) { timeTRarr.push(new Array(startTime, endTime)); }
             } 
             otherArr = filtersToApply[filterType]       
             $('#'+filterType).parent('label').addClass("checked");
@@ -477,11 +509,9 @@ function updateFilterLogic() {
     }
     // for each filter type that is checked, either disable or enable the AND/OR box accordingly
     $('.logic-checkbox').each(function (index, value) {
-        if (value.checked == true && ++numSelected < selectedFilters.length) {
-            // console.log("can use " + value.id);
+        if (value.checked && ++numSelected < selectedFilters.length) {
             $("#"+value.id).parent().next().removeProp("disabled");    
         } else {
-            // console.log(value.id + " is disabled");
             $("#"+value.id).parent().next().prop("disabled", true);
         }
     }); 
@@ -515,7 +545,7 @@ function getCookie(name) {
 }
 
 // Retrieves sections
-function getFilteredSections(e) {
+function getFilteredSections() {
     updateFilters(); 
     $.ajax({
         type: "POST",
@@ -523,7 +553,6 @@ function getFilteredSections(e) {
         data: JSON.stringify(filters),
         dataType: "json",
         success: function(response) {
-            // console.log(response.sections);
             data = response.sections;
             //filteredSections.push(response.sections);
             sectionFrame = $("#section-frame");
@@ -549,55 +578,44 @@ function getFilteredSections(e) {
     });
 }
 
-function inArrayByName(value, array) {
+// Helper function that returns -1 if value by [name] is not found in array, else index of value
+function inArrayByName(name, array) {
     for (var i=0;i<array.length;i++) {
-        if (array[i].name === value) {
+        if (array[i].name.includes(name)) {
             return i;
         }
     }
     return -1;
 }
 
-// returns true if new item is added
+// returns true if a section not already in Section Details has been selected (and needs to be added to Section Details)
 function getSelectedSections() {
     newSectionSelected = false;
     $("#section-frame").children("div").each(function(index, value) { 
-        $("#"+value.id+"-checkbox").each(function(ind, val) { 
-            if (val.checked == true) { 
-                if (inArrayByName(value.id.split("section-")[1], sectionDetails) === -1) {
-                    console.log("pushing...");
-                    console.log(filteredSections[inArrayByName(value.id.split("section-")[1], filteredSections)]);
-                    sectionDetails.push(filteredSections[inArrayByName(value.id.split("section-")[1], filteredSections)]);
-                    newSectionSelected = true;
-                }
+        if ($("#"+value.id+"-checkbox").prop('checked')) { 
+            if (inArrayByName(value.id.split("section-")[1], sectionDetails) === -1) {
+                console.log("pushing...");
+                console.log(filteredSections[inArrayByName(value.id.split("section-")[1], filteredSections)]);
+                sectionDetails.push(filteredSections[inArrayByName(value.id.split("section-")[1], filteredSections)]);
+                newSectionSelected = true;
             }
-        });
+        }
     });
     return newSectionSelected;
 }
 
+// Selects all sections in filtered Section window
+function selectAllSections() {
+    $("#section-frame").children("div").each(function(index, value) { 
+        $("#"+value.id+"-checkbox").prop("checked", true);
+    });
+}
 
-function updateSectionDetails() {
-    var sectionDetailsFormatString = 
-        "<tr id=\"{1}-detail\">\n" + 
-        "<td>{0}</td>\n" + 
-        "<td>{1}</td>\n" + 
-        "<td>{2}</td>\n" + 
-        "<td>{3}</td>\n" + 
-        "<td>{4}</td>\n" + 
-        "<td>{5}</td>\n" + 
-        "<td>{6}</td>\n" + 
-        "<td>{7}</td>\n" + 
-        "<td>{8}</td>\n" + 
-        "</tr>\n";
-    var detailFrame = $("#section-detail-rows");
-    if (getSelectedSections() == true) {
-        detailFrame.empty();
-        for (var i in sectionDetails) {  
-            detailFrame.append(sectionDetailsFormatString.format(sectionDetails[i].name, sectionDetails[i].term, sectionDetails[i].course, sectionDetails[i].type, sectionDetails[i].faculty, sectionDetails[i].room, sectionDetails[i].days, sectionDetails[i].start_time, 
-            sectionDetails[i].end_time));
-        }
-    }
+// Unselects all sections in filtered Section window
+function unselectAllSections() {
+    $("#section-frame").children("div").each(function(index, value) { 
+        $("#"+value.id+"-checkbox").prop("checked", false);
+    });
 }
 
 // Updates the filters JSON object to have correct logic for filter_type
@@ -608,7 +626,6 @@ function setLogic(element) {
     for (var i=0;i<selectedFilters.length-1;i++) {
         if (selectedFilters[i] == filterType) {
             filters[selectedFilters[i+1]]['logic'] = element.options[element.selectedIndex].value;
-            // console.log(element.options[element.selectedIndex].value + " chosen for " + selectedFilters[i+1]);
         }
     }
 }
@@ -617,15 +634,71 @@ function setLogic(element) {
 function getSelectedFilters() {
     var selectedFilters = [];
     $('.logic-checkbox').each(function (index, value) {
-        if (value.checked == true) { selectedFilters.push(value.id); }
+        if (value.checked) { selectedFilters.push(value.id); }
     });
     return selectedFilters;
 }
 
+<<<<<<< HEAD
 function NewSection(request) {
     // Gather information from the form
     
     // ajax request
+=======
+/* Section Details Functions */
+
+function updateSectionDetails(resort) {
+    var sectionDetailsFormatString = 
+        "<tr id=\"{1}-detail\">\n" + 
+            "<td>\n" +
+                "<button type=\"button\" class=\"btn btn-info btn-xs\" data-toggle=\"modal\" data-target=\"#deselect-section\" onclick=\"removeSectionFromDetails(this)\"><span class=\"glyphicon glyphicon-minus\" title=\"Remove section from details\"></span>&nbsp;</button>\n" +
+                "<button type=\"button\" class=\"btn btn-info btn-xs\" data-toggle=\"modal\" data-target=\"#edit-section\"><span class=\"glyphicon glyphicon-edit\" title=\"Edit section\"></span>&nbsp;</button>\n" +
+                "<button type=\"button\" class=\"btn btn-info btn-xs\" data-toggle=\"modal\" data-target=\"#delete-section\"><span class=\"glyphicon glyphicon-trash\" title=\"Delete section\"></span>&nbsp;</button>\n" +
+            "</td>\n" +
+            "<td>{0}</td>\n" + 
+            "<td>{1}</td>\n" + 
+            "<td>{2}</td>\n" + 
+            "<td>{3}</td>\n" + 
+            "<td>{4}</td>\n" + 
+            "<td>{5}</td>\n" + 
+            "<td>{6}</td>\n" + 
+            "<td>{7}</td>\n" + 
+            "<td>{8}</td>\n" + 
+        "</tr>\n";
+    var detailFrame = $("#section-detail-rows");
+    if (getSelectedSections() || resort) {
+        detailFrame.empty();
+        for (var i in sectionDetails) {  
+            detailFrame.append(sectionDetailsFormatString.format(sectionDetails[i].name, sectionDetails[i].term, sectionDetails[i].course, sectionDetails[i].type, sectionDetails[i].faculty, sectionDetails[i].room, sectionDetails[i].days, sectionDetails[i].start_time, 
+            sectionDetails[i].end_time));
+        }
+    }
+}
+
+// removes the section row from Section Details (does not delete)
+function removeSectionFromDetails(element) {
+    // remove element from sectionDetails
+    index = inArrayByName($(element).parent().next("td").text(), sectionDetails);
+    if (index !== -1) { sectionDetails.splice(index, 1); }
+    // gets to <tr> parent element
+    $(element).parent().parent().remove();
+}
+
+// sort by given attribute in Section Details 
+function sortSectionDetailsBy(element, attribute) {
+    sectionDetails.sort(function(a,b) { return a[attribute].localeCompare(b[attribute]); });
+    updateSectionDetails(true);
+    $(element).parent().children("th").each(function(index,value) {
+        $(value).toggleClass("sorted", false);
+    });
+    $(element).toggleClass("sorted");
+}
+
+// OnClick function to set the days for a new section
+function setDays(element, form) {
+    form.days=element.id;
+    form.save();
+>>>>>>> 736b9e42cf1ebab6bca7d1a2dfb17a8ff66b4e55
 }
 
 
