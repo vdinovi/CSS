@@ -115,12 +115,13 @@ def SchedulingView(request):
     if request.method == "GET":
         return render(request, 'scheduling.html', {
                       'academic_terms': Schedule.objects.filter().all(),
+                      'courses': Course.objects.filter().all(),
+                      'section_types': SectionType.objects.filter().all(),
+                      'faculty': CUser.get_all_faculty(),
+                      'rooms': Room.objects.filter().all(),
                       'add_section_form': AddSectionForm(),
                       'add_schedule_form': AddScheduleForm()
                       })
-    elif request.method == "POST":
-        form = AddSectionForm(request.POST)
-
     else:
         res.status_code = 400
     return res

@@ -126,14 +126,14 @@ def Sections(request):
     return res
 
 # Creating a new section.
-# @csrf_exempt
-# def NewSection(request):
-#     res = HttpResponse()
-#     if request.method == "POST":
-#         return
-#     else:
-#         res.status_code = 400
-#     return res
+@csrf_exempt
+def NewSection(request):
+    res = HttpResponse()
+    if request.method == "POST":
+        return
+    else:
+        res.status_code = 400
+    return res
 
 
 # A function to detect conflicts when creating a new section.

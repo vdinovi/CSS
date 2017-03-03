@@ -42,7 +42,8 @@
           <button type="button" class="btn btn-info" data-toggle="modal" data-target="#new-term-modal">Create New Term</button>
         </div>
         <!-- New Section Frame -->
-        <div id="new-section-frame" class="col-xs-12 new-section-frame" style="display:none;">
+        <!-- <div id="new-section-frame" class="col-xs-12 new-section-frame" style="display:none;"> -->
+        <div id="new-section-frame" class="col-xs-12 new-section-frame">
           <div class="row" style="padding-top:20px">
             <button id="filter-frame-btn" class="btn switch-frame-btn col-xs-4 col-xs-offset-4" onclick='switchFrame("new-section-frame", "filter-frame")'>Filter Sections</button>
           </div>
@@ -57,7 +58,7 @@
                   <select id="academic-term" class="form-control" type="text">
                     <option value="" disabled selected>Select a term</option>
                   {% for term in academic_terms %}
-                    <option>{{ term.academic_term }}</option>
+                    <option value={{ term.academic_term }}>{{ term.academic_term }}</option>
                   {% endfor %}
                   </select>
                 </div>
@@ -67,7 +68,12 @@
                   <label for="course">Course</label>
                 </div>
                 <div class="form-group col-xs-6 col-xs-offset-6">
-                  <input id="course" class="form-control" type="text">
+                  <select id="course" class="form-control" type="text">
+                    <option value="" disabled selected>Select a Course</option>
+                  {% for course in courses %}
+                    <option value={{course.name}}>{{ course.name }}</option>
+                  {% endfor %}
+                  </select>
                 </div>
               </div>
               <div class="row new-section-inputs">
@@ -75,7 +81,12 @@
                   <label for="section-type">Section Type</label>
                 </div>
                 <div class="form-group col-xs-6 col-xs-offset-6">
-                  <input id="section-type" class="form-control" type="text">
+                  <select id="section-type" class="form-control" type="text">
+                    <option value="" disabled selected>Select a type</option>
+                  {% for section_type in section_types %}
+                    <option value={{section_type.name}}>{{ section_type.name }}</option>
+                  {% endfor %}
+                  </select>
                 </div>
               </div>
               <div class="row new-section-inputs">
@@ -83,7 +94,12 @@
                   <label for="faculty">Faculty</label>
                 </div>
                 <div class="form-group col-xs-6 col-xs-offset-6">
-                  <input id="faculty" class="form-control" type="text">
+                  <select id="faculty" class="form-control" type="text">
+                    <option value="" disabled selected>Select faculty</option>
+                  {% for f in faculty %}
+                    <option value={{f.user.email}}>{{ f.user.first_name }} {{ f.user.last_name }}</option>
+                  {% endfor %}
+                  </select>
                 </div>
               </div>
               <div class="row new-section-inputs">
@@ -91,7 +107,12 @@
                   <label for="room">Room</label>
                 </div>
                 <div class="form-group col-xs-6 col-xs-offset-6">
-                  <input id="room" class="form-control" type="text">
+                  <select id="room" class="form-control" type="text">
+                    <option value="" disabled selected>Select a room</option>
+                  {% for room in rooms %}
+                    <option value={{room.name}}>{{ room.name }}</option>
+                  {% endfor %}
+                  </select>
                 </div>
               </div>
               <div class="row new-section-inputs">
@@ -99,7 +120,7 @@
                   <label for="capacity">Capacity</label>
                 </div>
                 <div class="form-group col-xs-6 col-xs-offset-6">
-                  <input id="capacity" class="form-control" type="text">
+                  <input id="capacity" class="form-control" type="integer">
                 </div>
               </div>
               <!-- <div class="btn-group row" data-toggle="buttons">
@@ -115,7 +136,11 @@
                   <label for="days">Days</label>
                 </div>
                 <div class="form-group col-xs-6 col-xs-offset-6">
-                  <input id="days" class="form-control" type="text">
+                  <select id="days" class="form-control" type="text">
+                    <option value="" disabled selected>Select Days</option>
+                    <option value="MWF">Mon/Wed/Fri</option>
+                    <option value="TR">Tue/Thu</option>
+                  </select>
                 </div>
               </div>
               <div class="row">
@@ -123,7 +148,7 @@
                   <label for="start-time">Start Time</label>
                 </div>
                 <div class="form-group col-xs-6 col-xs-offset-6">
-                  <input id="start-time" class="form-control" type="text">
+                  <input id="start-time" class="form-control" type="time">
                 </div>
               </div>
               <div class="row">
@@ -131,10 +156,10 @@
                   <label for="end-time">End Time</label>
                 </div>
                 <div class="form-group col-xs-6 col-xs-offset-6">
-                  <input id="end-time" class="form-control" type="text">
+                  <input id="end-time" class="form-control" type="time">
                 </div>
               </div>
-              <button type="submit" class="btn btn-primary">Create Section</button>
+              <button type="submit" class="btn btn-primary" onclick='NewSection();'>Create Section</button>
             </div>
           </form>
         </div>

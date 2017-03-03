@@ -44,6 +44,7 @@ class ConflictsTestCase(TestCase):
         self.assertEquals(str(existing_section.conflict), 'y')
         self.assertEquals(str(existing_section.conflict_reason), "faculty")
 
+
     def test_room_conflict(self):
         new_section = Section.create(
             "Spring 2017", "CPE102", "Lab", "10:00", "11:00", "MWF",
