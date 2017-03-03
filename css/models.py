@@ -581,6 +581,7 @@ class Section(models.Model):
             finalQuery = timeQuery
 
         try:
+            print "FILTERS APP"
             sections = cls.objects.filter(finalQuery)
         except:
             sections = []

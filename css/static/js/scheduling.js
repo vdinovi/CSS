@@ -424,16 +424,20 @@ function getSelectedOptions() {
 // Selects all sections in filtered Section window
 function selectAllOptions() {
     $("#option-frame").children("div").each(function(index, value) { 
-        $("#"+value.id+"-checkbox").prop("checked", true);
-        selectOption($("#"+value.id+"-checkbox")[0]);
+        if ($("#"+value.id+"-checkbox").prop("checked") == false) {
+            $("#"+value.id+"-checkbox").prop("checked", true);
+            selectOption($("#"+value.id+"-checkbox")[0]);
+        }
     });
 }
 
 // Unselects all sections in filtered Section window
 function unselectAllOptions() {
     $("#option-frame").children("div").each(function(index, value) { 
-        $("#"+value.id+"-checkbox").prop("checked", false);
-        selectOption($("#"+value.id+"-checkbox")[0]);
+        if ($("#"+value.id+"-checkbox").prop("checked") == true) {
+            $("#"+value.id+"-checkbox").prop("checked", false);
+            selectOption($("#"+value.id+"-checkbox")[0]);
+        }
     });
 }
 
@@ -527,7 +531,7 @@ function getFilteredSections() {
         data: JSON.stringify(filters),
         dataType: "json",
         success: function(response) {
-            // console.log(response.sections);
+            console.log(response.sections);
             data = response.sections;
             //filteredSections.push(response.sections);
             sectionFrame = $("#section-frame");
@@ -622,8 +626,8 @@ function updateSectionDetails(resort) {
         "<tr id=\"{1}-detail\">\n" + 
             "<td>\n" +
                 "<button type=\"button\" class=\"btn btn-info btn-xs\" data-toggle=\"modal\" data-target=\"#deselect-section\" onclick=\"removeSectionFromDetails(this)\"><span class=\"glyphicon glyphicon-minus\" title=\"Remove section from details\"></span>&nbsp;</button>\n" +
-                "<button type=\"button\" class=\"btn btn-info btn-xs\" data-toggle=\"modal\" data-target=\"#edit-section\"><span class=\"glyphicon glyphicon-edit\" title=\"Edit section\"></span>&nbsp;</button>\n" +
-                "<button type=\"button\" class=\"btn btn-info btn-xs\" data-toggle=\"modal\" data-target=\"#delete-section\"><span class=\"glyphicon glyphicon-trash\" title=\"Delete section\"></span>&nbsp;</button>\n" +
+                "<button type=\"button\" class=\"btn btn-info btn-xs\" data-toggle=\"modal\" data-target=\"#edit-section-modal\"><span class=\"glyphicon glyphicon-edit\" title=\"Edit section\"></span>&nbsp;</button>\n" +
+                "<button type=\"button\" class=\"btn btn-info btn-xs\" data-toggle=\"modal\" data-target=\"#delete-section-modal\"><span class=\"glyphicon glyphicon-trash\" title=\"Delete section\"></span>&nbsp;</button>\n" +
             "</td>\n" +
             "<td>{0}</td>\n" + 
             "<td>{1}</td>\n" + 
