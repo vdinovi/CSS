@@ -824,7 +824,62 @@ class StudentPlanData(models.Model):
     # Handles an uploaded student plan data file and commits it to the system
     @classmethod
     def import_student_plan_file(cls, file): # throws FileParserError
-        pass
+        chunks = []
+        for s in file.chunks():
+            chunks.append(s)
+        data = ''.join(chunks)
+        lines = data.split('\n')
+        term_ignore = ["quarter"] #Ignore these terms when reading in term name
+        # Keys that are accepted by the system
+        valid_keys = ["Term", "Subject Code", "Catalog Nbr", "Course Title", "Component", "Seat Demand",
+                      "Sections Offered", "Enrollment Capacity", "Unmet Seat Demand", "% Unmet Seat Demand"] 
+        # Index for parsing
+        index = lines[0].split(',')
+        print "len(index)=" + str(len(index))
+        # Null out anything that is not a valid key
+        for i in range(0, len(index)):
+            if index[i] not in valid_keys: 
+                index[i] = None
+        # Parse all lines using valid keys in index
+        try:
+            for i in range(1, len(lines)):
+                # Skip any empty lines
+                while (i < len(lines) and not lines[i].strip()):
+                    i += 1
+                # If done, end
+                if i >= len(lines):
+                    break
+                # Parse line
+                line = lines[i].split(',')
+                content = {} 
+                for j in range(0, len(index)):
+                    # Does not have a valid key
+                    if index[j] is None:
+                        continue
+                    # Make KV pair with valid key
+                    content[index[j]] = line[j]
+                # Collect parsed data
+                # Remove ignored words from term name
+                schedule = Schedule.get_schedule(term_name=' '.join([w for w in content['Term'].split() if w.lower() not in term_ignore]).strip())
+                course = Course.get_course(name=content['Subject Code']+' '+content['Catalog Nbr'])
+                section_type = SectionType.get_section_type(name=content['Component'])
+                already_parsed = ["Term", "Subject Code", "Catalog Nbr", "Component"] 
+                # Collect other secondary arguments
+                kwargs = {}
+                for k, v in content.iteritems():
+                    if (v is not None) and (k not in already_parsed):
+                        kwargs[k] = v
+                # Create entry
+                cls.create(schedule=schedule, course=course, section_type=section_type, **kwargs)
+                print 'Success'
+        except IndexError as e:
+            raise FileParserError("IndexError on line %d: %s" % (i, e[0]))
+        except ObjectDoesNotExist as e:
+            raise FileParserError("Invalid entry on line %d: %s" % (i, e[0]))
+        """
+        except:
+            raise FileParserError("Unknown error on line %d" % (i,))
+        """
  
 # Section Conflicts Model
 class SectionConflict(models.Model):
