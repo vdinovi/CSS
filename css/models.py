@@ -150,7 +150,6 @@ class CUser(models.Model):
                     email = self.user.email)
 
 
-
 class FacultyDetails(models.Model):
     # The user_id uses the User ID as a primary key.
     # Whenever this User is deleted, this entry in the table will also be deleted
@@ -158,6 +157,7 @@ class FacultyDetails(models.Model):
     target_work_units = models.IntegerField(default=0, null=True) # in units
     target_work_hours = models.IntegerField(default=0, null=True) # in hours
     changed_preferences = models.CharField(max_length=1) # 'y' or 'n'
+    #availability = models.ForeignKey(Availability, on_delete=models.CASCADE)
 
     @classmethod
     def create(cls, faculty, target_work_units, target_work_hours):
@@ -172,6 +172,17 @@ class FacultyDetails(models.Model):
         if new_work_hours:
             self.target_work_hours = new_work_hours
         self.changed_preferences = 'y'
+
+    @classmethod
+    def get_availability_list(cls, faculty):
+        entries = cls.objects.filter(faculty=faculty)
+        # join the course ID to the course table
+        aval_arr = []
+        for entry in entries: # go through and make list of tuples (rank, course_name, course_description, comments)
+            aval_arr += [(entry.preferred)]
+        course_arr.sort(key=lambda tup:tup[0]) # sort courses by rank (first spot in tuple)
+        return course_arr
+
 
     # @TODO Function to yes changed_preferences to 'n'? Also consider naming it something
     #       more indicative -> preferences_have_changed? has_changed_preferences? etc.
@@ -348,29 +359,28 @@ class WorkInfo(models.Model):
         work_info.save()
         return work_info
 
-
 class Availability(models.Model):
     class Meta:
         unique_together = (("faculty", "day_of_week", "start_time"),)
     faculty = models.OneToOneField(CUser, on_delete=models.CASCADE, null=True)
     day_of_week = models.CharField(max_length=16) # MWF or TR
-    start_time = models.TimeField()
-    end_time = models.TimeField()
-    level = models.CharField(max_length=16) # available, preferred, unavailable
+    start_time = models.IntegerField()
+    end_time = models.IntegerField()
+    level = models.CharField(max_length=16) #preferred, unavailable
 
     @classmethod
-    def create(cls, email, day, start, end, level):
+    def create(cls, email, day, start_time, end_time, level):
         faculty = CUser.get_faculty(email=email)
-        if (days is None):
+        if (day is None):
             raise ValidationError("Invalid days of week input")
-        elif (start is None):
+        elif (start_time is None):
             raise ValidationError("Need to input start time")
-        elif (end is None):
+        elif (end_time is None):
             raise ValidationError("Need to input end time")
-        elif (level is None) or (level != "available" and level != "preferred" and level != "unavailable"):
-            raise ValidationError("Need to input level of availability: preferred, available, or unavailable")
+        elif (level is None) or (level != "preferred" and level != "unavailable"):
+            raise ValidationError("Need to input level of availability: preferred or unavailable")
         else:
-            availability = cls(faculty=faculty, day_of_week=day, start_time=start, end_time=end,level=level)
+            availability = cls(faculty=faculty,day_of_week=day, start_time=start_time, end_time=end_time, level=level)
             availability.save()
             return availability
 
