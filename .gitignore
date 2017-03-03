@@ -4,6 +4,7 @@ venv
 .*.swp
 db.sqlite3
 cssenv
+.cssenv
 css/staticfiles
 css/migrations
 department_settings.json
