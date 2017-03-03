@@ -346,10 +346,10 @@ function selectTime(minTime, maxTime) {
         sweetAlert("Start time must come before end time");
         return false; 
     }
-    time.startTime = toStandardTime(startTime);
-    time.endTime = toStandardTime(endTime);
+    time.startTime = startTime;
+    time.endTime = endTime;
     var optionId = (time.day+"-"+time.startTime+"-"+time.endTime).replace(/[: ]/g, '-');
-    var optionText = time.day+": "+time.startTime+" - "+time.endTime;
+    var optionText = time.day+": "+toStandardTime(time.startTime)+" - "+toStandardTime(time.endTime);
     var timeOptionFormatString = 
         "<div id=\"{0}\"class=\"selected-option\">\n" +
         "  <button onclick=\"unselectSelectedTime('{0}')\">x</button>\n" +
@@ -385,7 +385,6 @@ function selectOption(element) {
                     "  <li class=\"filter-options\">{1}</li>\n" +
                     "</div>"; 
         var text = element.parentNode.parentNode.innerText;
-        var optionAlreadySelected = false;
         filterType.children("div").each( function(index, value) {
             if ($(value).prop('id').replace(/-/g, ' ') == text)
                 optionAlreadySelected = true;
@@ -476,7 +475,6 @@ function unselectAllOptions() {
 // Get the filters JSON object with correct filters to apply using getSelectedOptions
 function updateFilters() {
     filtersToApply = getSelectedOptions();  
-    scheduleToApply = getSelectedSchedules();
     $('.logic-checkbox').each(function (index, value) {        
         timeMWFarr = []
         timeTRarr = []
