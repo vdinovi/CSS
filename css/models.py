@@ -6,7 +6,7 @@ import MySQLdb
 import re
 from django.db import IntegrityError
 from django.core.exceptions import ValidationError, ObjectDoesNotExist
-from util import DepartmentSettings
+from util import *
 from settings import DEPARTMENT_SETTINGS
 import json
 import operator
@@ -95,8 +95,8 @@ class CUser(models.Model):
     @classmethod
     # Return cuser by full name
     def get_faculty_by_full_name(cls, full_name):
-        first_name = full_name.split()[0]
-        last_name = full_name.split()[1]
+        first_name = full_name.split("-")[0]
+        last_name = full_name.split("-")[1]
         print first_name + last_name
         return cls.objects.get(user_type='faculty', user__first_name=first_name,
                                user__last_name=last_name)
@@ -580,17 +580,23 @@ class Section(models.Model):
         if finalQuery == '':
             finalQuery = timeQuery
 
-        return cls.objects.filter(finalQuery)
+        try:
+            sections = cls.objects.filter(finalQuery)
+        except:
+            sections = []
+        return sections
 
     def to_json(self):
         return dict(id = str(self.id),
                     name = self.course.name + "-" + str(self.id),
+                    term = self.schedule.academic_term,
                     course = self.course.name,
                     type = self.section_type.name,
                     faculty = self.faculty.user.first_name + " " + self.faculty.user.last_name,
                     room = self.room.name,
                     days = self.days,
-                    time = self.start_time.strftime("%H:%M%p") + " - " + self.end_time.strftime("%H:%M%p"))
+                    start_time = self.start_time.strftime("%H:%M%p"),
+                    end_time = self.end_time.strftime("%H:%M%p"))
 
 
 class FacultyCoursePreferences(models.Model):
@@ -642,7 +648,7 @@ class CohortData(models.Model):
     major = models.CharField(max_length=8) # Major(CSC, CPE, SE, ...) or TOTAL
 
     freshman = models.IntegerField(default=0)
-    sophmore = models.IntegerField(default=0)
+    sophomore = models.IntegerField(default=0)
     junior = models.IntegerField(default=0)
     senior = models.IntegerField(default=0)
 
@@ -651,8 +657,8 @@ class CohortData(models.Model):
         cohort_entry = cls(schedule=schedule, course=course, major=major)
         if 'freshman' in kwargs:
             cohort_entry.freshman = kwargs['freshman']
-        if 'sophmore' in kwargs:
-            cohort_entry.sophmore = kwargs['sophmore']
+        if 'sophomore' in kwargs:
+            cohort_entry.sophomore = kwargs['sophomore']
         if 'junior' in kwargs:
             cohort_entry.junior = kwargs['junior']
         if 'senior' in kwargs:
@@ -666,16 +672,78 @@ class CohortData(models.Model):
 
     # Handles an uploaded cohort data file and commits it to the system
     @classmethod
-    def import_cohort_file(cls, file):
+    def import_cohort_file(cls, file): # throws FileParserError
         chunks = []
         for s in file.chunks():
             chunks.append(s)
         data = ''.join(chunks)
-        print data
-        # @TODO handle file
+        lines = data.split('\n')
+        # Read schedule
+        term = ''
+        for w in lines[0].split():
+            term += w + ' '
+        term.strip()
+        # Get Schedule
+        try:
+            schedule = Schedule.get_schedule(term_name = term)
+        except ObjectDoesNotExist:
+            raise FileParserError("Term '%s' not found on line %d" % (term, i))
+        # Begin parsing data 
+        courses = None
+        i = 1
+        while i < len(lines):
+            # Skip lines until non-empty line or end
+            # @TODO Change the re check to look for lines without [A-Za-z0-9]+  (safer)
+            while (i < len(lines) and not lines[i].strip()):
+                i += 1
+            # If done, end
+            if i >= len(lines):
+                break
+            # Else, Process cohort data
+            words = lines[i].split()
+            major = words[0] # Get major
+            # If line continues, create new course array ['Total', 'CPE 101', ... ]
+            if len(words) > 1:
+                courses = []
+                if words[1] != "Total":
+                    raise FileParserError("Missing 'Total' index on line  %d" % (i,))
+                for j in range(2, len(words), 2):
+                    name = words[j] + ' ' + words[j+1]
+                    #if not Course.objects.filter(name=name).exists():
+                    #    raise FileParserError("Could not find course '%s' on line %d" % (name, i))
+                    #else:
+                    courses.append(name)
+            i += 1
+            freshman = lines[i].split()
+            sophomore = lines[i+1].split()
+            junior = lines[i+2].split()
+            senior = lines[i+3].split()
+            if (freshman[0] != "Freshman"):
+                raise FileParserError("Unexpected keyword '%s', expected 'Freshman' on line %d" % (freshman[0], i))
+            if (sophomore[0] != "Sophomore"):
+                raise FileParserError("Unexpected keyword '%s', expected 'Sophomore' on line %d" % (sophomore[0], i+1))
+            if (junior[0] != "Junior"):
+                raise FileParserError("Unexpected keyword '%s', expected 'Freshman' on line %d" % (junior[0], i+2))
+            if (senior[0] != "Senior"):
+                raise FileParserError("Unexpected keyword '%s', expected 'Freshman' on line %d" % (senior[0], i+3))
+            # Create cohort total
+            for j  in range (1, len(courses)):
+                try:
+                    if (courses[j] == "Total"):
+                        #CohortTotal.create(schedule=schedule, major=major, 
+                        #                   freshman=int(freshman[j+1]), sophomore=int(sophomore[j+1]),
+                        #                   junior=int(junior[j+1]), senior=int(senior[j+1]))
+                        pass
+                    else: 
+                        #course = Course.get_course(name=courses[j])
+                        #CohortData.create(schedule=schedule, course=course, major=major,
+                        #                  freshman=int(freshman[j+1]), sophomore=int(sophomore[j+1]),
+                        #                  junior=int(junior[j+1]), senior=int(senior[j+1]))
+                        pass
+                except IndexError:
+                    raise FileParserError("Not enough data entries on lines %d through %d" % (i, i+3)) 
+            i += 4
 
-
-# Contains totals for
 class CohortTotal(models.Model):
     class Meta:
         unique_together =(("schedule", "major"),)
@@ -683,7 +751,7 @@ class CohortTotal(models.Model):
     major = models.CharField(max_length=8) # Major(CSC, CPE, SE, ...)
 
     freshman = models.IntegerField(default=0)
-    sophmore = models.IntegerField(default=0)
+    sophomore = models.IntegerField(default=0)
     junior = models.IntegerField(default=0)
     senior = models.IntegerField(default=0)
 
@@ -692,8 +760,8 @@ class CohortTotal(models.Model):
         cohort_total = cls(schedule=schedule, major=major)
         if 'freshman' in kwargs:
             cohort_total.freshman = kwargs['freshman']
-        if 'sophmore' in kwargs:
-            cohort_total.sophmore = kwargs['sophmore']
+        if 'sophomore' in kwargs:
+            cohort_total.sophomore = kwargs['sophomore']
         if 'junior' in kwargs:
             cohort_total.junior = kwargs['junior']
         if 'senior' in kwargs:
@@ -706,7 +774,53 @@ class CohortTotal(models.Model):
         return cls.objects.get(schedule=schedule, major=major)
 
 
-# Student Plan Data. File of form:
-# Term, College, CourseID(X), Subject Code, Course Nbr, Description, Component,
-# @TODO Complete Student Plan Data model and import mechanism
-#class
+# Student Plan Data.
+class StudentPlanData(models.Model):
+    class Meta:
+        unique_together = (("schedule", "course", "section_type"),)
+    schedule = models.ForeignKey(Schedule, on_delete=models.CASCADE)
+    course = models.ForeignKey(Course, on_delete=models.CASCADE)
+    section_type = models.ForeignKey(SectionType, on_delete=models.CASCADE)
+
+    seat_demand = models.IntegerField(default=0)
+    sections_offered = models.IntegerField(default=0)
+    enrollment_capacity = models.IntegerField(default=0)
+    unmet_seat_demand = models.IntegerField(default=0)
+    percent_unmet_seat_demand = models.FloatField(default=0)
+    
+    @classmethod
+    def create(cls, schedule, course, section_type, **kwargs):
+        plan_data = cls(schedule=schedule, course=course, section_type=section_type)
+        if 'seat_demand' in kwargs:
+            plan_data.seat_demand = kwargs['seat_demand']
+        if 'sections_offered' in kwargs:
+            plan_data.sections_offered = kwargs['sections_offered']
+        if 'enrollment_capacity' in kwargs:
+            plan_data.enrollment_capacity = kwargs['enrollment_capacity']
+        if 'unmet_seat_demand' in kwargs:
+            plan_data.unmet_seat_demand = kwargs['unmet_seat_demand']
+        if 'percent_unmet_seat_demand' in kwargs:
+            plan_data.percent_unmet_seat_demand = kwargs['percent_unmet_seat_demand']
+        plan_data.save()
+        return plan_data
+
+    @classmethod
+    def get_student_plan_data(cls, schedule, course=None, section_type=None):
+        if course == None:
+            return cls.objects.filter(schedule=schedule)
+        if sectionType == None:
+            return cls.objects.filter(schedule=schedule, course=course)
+        return cls.objects.get(schedule=schedule, course=course, section_type=section_type)
+
+    # Handles an uploaded student plan data file and commits it to the system
+    @classmethod
+    def import_student_plan_file(cls, file): # throws FileParserError
+        pass
+ 
+
+
+
+    
+
+
+
