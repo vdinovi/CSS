@@ -265,7 +265,8 @@ def CoursesView(request):
                 'add_course_form': AddCourseForm(auto_id='add_course_%s'),
                 'edit_course_form': EditCourseForm(auto_id='edit_course_%s'),
                 'delete_course_form': DeleteCourseForm(),
-                'add_course_section_type_form': AddCourseSectionTypeForm()
+                'add_course_section_type_form': AddCourseSectionTypeForm(),
+		'course_import_data_form': UploadForm(),
             });
     elif request.method == "POST" and 'add-course-form' in request.POST:
         form = AddCourseForm(request.POST);
@@ -330,6 +331,19 @@ def CoursesView(request):
             course.add_section_type(name, work_units, work_hours)
 
             res.content = course.get_all_section_types_JSON()
+    elif request.methong == "POST" and 'course-import-data' in request.POST:
+	form = UploadForm(request.POST, request.FILES)
+	if form.is_valid():
+	    try:
+		Course.import_course_data_file(request.FILES['file'])
+		return HttpResponseRedirect("/resources/courses")
+	    except:
+		raise
+	    res.status_code = 500
+	else:
+	    res.status_code = 400
+	    res.reason_phrase = "Invalid form entry"
+
     else:
         print res.content
         res.status_code = 400

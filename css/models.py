@@ -304,6 +304,8 @@ class Course(models.Model):
             i+=1
         return JsonResponse(sectionTypesDictionary)
 
+    def import_course_file(cls, file):
+	#file handling (parsing)
 
 class SectionType(models.Model):
     name = models.CharField(max_length=32, unique=True) # eg. lecture or lab

@@ -55,12 +55,10 @@
     </div>
           
           <h1 align="center">File Upload</h1>
-          
-          <form method="POST" action="?">{% csrf_token %}
 
-          <form method = "POST" enctype = "multipart/form-data">
-              <input type="file" name="myfile" />
-              <input type="submit" name="submit" value="Upload" />
+          <form method = "POST" enctype = "multipart/form-data" action="#"> {% csrf_token %}
+	      {{course_import_data_form.as_p}}
+              <button type="submit" name="course-import-data" class="save btn btn-default">submit</button>
           </form>
 
     <div id="add-course" class="modal fade" role="dialog">
