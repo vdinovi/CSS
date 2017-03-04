@@ -42,41 +42,87 @@
           <button type="button" class="btn btn-info" data-toggle="modal" data-target="#new-term-modal">Create New Term</button>
         </div>
         <!-- New Section Frame -->
-        <div id="new-section-frame" class="col-xs-12 new-section-frame" style="display:none;">
+        <!-- <div id="new-section-frame" class="col-xs-12 new-section-frame" style="display:none;"> -->
+        <div id="new-section-frame" class="col-xs-12 new-section-frame">
           <div class="row" style="padding-top:20px">
             <button id="filter-frame-btn" class="btn switch-frame-btn col-xs-4 col-xs-offset-4" onclick='switchFrame("new-section-frame", "filter-frame")'>Filter Sections</button>
           </div>
             <form method="POST" action="#" class="form-horizontal" role="form"> 
             {% csrf_token %}
             <div class="form-group col-xs-6">
-              <!-- <label for="course" class="row control-label">Course</label> -->
               <div  class="row new-section-inputs">
-                {{ add_section_form.academic_term.label }}
-                {{ add_section_form.academic_term }}
+                <div class="form-group col-xs-6">
+                  <label for="academic-term">Academic Term</label>
+                </div>
+                <div class="form-group col-xs-6 col-xs-offset-6">
+                  <select id="academic-term" class="form-control" type="text">
+                    <option value="" disabled selected>Select a term</option>
+                  {% for term in academic_terms %}
+                    <option value={{ term.academic_term }}>{{ term.academic_term }}</option>
+                  {% endfor %}
+                  </select>
+                </div>
               </div>
               <div class="row new-section-inputs">
-                {{ add_section_form.course.label }}
-                {{ add_section_form.course }}
+                <div class="form-group col-xs-6">
+                  <label for="course">Course</label>
+                </div>
+                <div class="form-group col-xs-6 col-xs-offset-6">
+                  <select id="course" class="form-control" type="text">
+                    <option value="" disabled selected>Select a Course</option>
+                  {% for course in courses %}
+                    <option value={{course.name}}>{{ course.name }}</option>
+                  {% endfor %}
+                  </select>
+                </div>
               </div>
               <div class="row new-section-inputs">
-                {{ add_section_form.section_type.label }}
-                {{ add_section_form.section_type }}
+                <div class="form-group col-xs-6">
+                  <label for="section-type">Section Type</label>
+                </div>
+                <div class="form-group col-xs-6 col-xs-offset-6">
+                  <select id="section-type" class="form-control" type="text">
+                    <option value="" disabled selected>Select a type</option>
+                  {% for section_type in section_types %}
+                    <option value={{section_type.name}}>{{ section_type.name }}</option>
+                  {% endfor %}
+                  </select>
+                </div>
               </div>
               <div class="row new-section-inputs">
-                {{ add_section_form.faculty.label }}
-                {{ add_section_form.faculty }}
+                <div class="form-group col-xs-6">
+                  <label for="faculty">Faculty</label>
+                </div>
+                <div class="form-group col-xs-6 col-xs-offset-6">
+                  <select id="faculty" class="form-control" type="text">
+                    <option value="" disabled selected>Select faculty</option>
+                  {% for f in faculty %}
+                    <option value={{f.user.email}}>{{ f.user.first_name }} {{ f.user.last_name }}</option>
+                  {% endfor %}
+                  </select>
+                </div>
               </div>
               <div class="row new-section-inputs">
-                {{ add_section_form.room.label }}
-                {{ add_section_form.room }}
+                <div class="form-group col-xs-6">
+                  <label for="room">Room</label>
+                </div>
+                <div class="form-group col-xs-6 col-xs-offset-6">
+                  <select id="room" class="form-control" type="text">
+                    <option value="" disabled selected>Select a room</option>
+                  {% for room in rooms %}
+                    <option value={{room.name}}>{{ room.name }}</option>
+                  {% endfor %}
+                  </select>
+                </div>
               </div>
               <div class="row new-section-inputs">
-                {{ add_section_form.capacity.label }}
-                {{ add_section_form.capacity }}
+                <div class="form-group col-xs-6">
+                  <label for="capacity">Capacity</label>
+                </div>
+                <div class="form-group col-xs-6 col-xs-offset-6">
+                  <input id="capacity" class="form-control" type="integer">
+                </div>
               </div>
-              <button type="submit" class="btn btn-primary">Create Section</button>
-            </div>
-            <div class="form-group col-xs-6">
               <!-- <div class="btn-group row" data-toggle="buttons">
                 <label class="btn btn-primary active">
                   <input type="radio" name="days" id="MWF" autocomplete="off" checked onclick="setDays(this, new_section_form)"> MWF
@@ -86,17 +132,34 @@
                 </label>
               </div> -->
               <div class="row">
-                {{ add_section_form.days.label }}
-                {{ add_section_form.days }}
+                <div class="form-group col-xs-6">
+                  <label for="days">Days</label>
+                </div>
+                <div class="form-group col-xs-6 col-xs-offset-6">
+                  <select id="days" class="form-control" type="text">
+                    <option value="" disabled selected>Select Days</option>
+                    <option value="MWF">Mon/Wed/Fri</option>
+                    <option value="TR">Tue/Thu</option>
+                  </select>
+                </div>
               </div>
               <div class="row">
-                {{ add_section_form.start_time.label }}
-                {{ add_section_form.start_time }}
+                <div class="form-group col-xs-6">
+                  <label for="start-time">Start Time</label>
+                </div>
+                <div class="form-group col-xs-6 col-xs-offset-6">
+                  <input id="start-time" class="form-control" type="time">
+                </div>
               </div>
               <div class="row">
-                {{ add_section_form.end_time.label }}
-                {{ add_section_form.end_time }}
+                <div class="form-group col-xs-6">
+                  <label for="end-time">End Time</label>
+                </div>
+                <div class="form-group col-xs-6 col-xs-offset-6">
+                  <input id="end-time" class="form-control" type="time">
+                </div>
               </div>
+              <button type="submit" class="btn btn-primary" onclick='NewSection();'>Create Section</button>
             </div>
           </form>
         </div>

@@ -223,13 +223,11 @@ class AddAvailabilityForm(forms.Form):
 	DAYS = ('Monday', 'Monday',),('Tuesday','Tuesday'),('Wednesday','Wednesday'), ('Thursday','Thursday',), ('Friday', 'Friday')
 	day = forms.ChoiceField(label='Day', choices=DAYS)
 	start_time = forms.IntegerField(label='Start Time')
-		#input_formats=('%I:%M %p'))
 	end_time = forms.IntegerField(label='End Time')
-	#input_formats=('%I:%M %p'))
 	level = forms.ChoiceField(label='Type', choices=[('Preferred', 'Preferred'), ('Unavailable','Unavailable')])
 
-	def save(self,email):
-		availability = Availability.create(email = email,
+	def save(self, email):
+		availability = Availability.create(email=email,
 											day = self.cleaned_data['day'],
 											start_time = self.cleaned_data['start_time'],
 											end_time = self.cleaned_data['end_time'],

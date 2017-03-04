@@ -643,6 +643,52 @@ function getSelectedFilters() {
     return selectedFilters;
 }
 
+function NewSection(request) {
+    var sectionData = {};
+    console.log("here");
+    sectionData = {
+        'schedule': "#academic-term", 
+         'course': "#course",
+         'section-type': "#section-type",
+         'faculty': "#faculty",
+         'room': "#room",
+         'days': "#days",
+         'capacity': "#capacity",
+         'start-time': "#start-time",
+         'end-time': "#end-time"
+         };
+    $.ajax({
+        type: "POST",
+        url: "newSection",
+        data: JSON.stringify(sectionData),
+        dataType: 'json',
+        success: function(response) {
+            console.log(data);
+            Section.create(
+                sectionData.get(schedule),
+                sectionData.get(course),
+                sectionData.get(section-type),
+                sectionData.get(start_time),
+                sectionData.get(end_time),
+                sectionData.get(days),
+                sectionData.get(faculty),
+                sectionData.get(room),
+                sectionData.get(capacity),
+                0, 
+                0,
+                'n',
+                None,
+                'n',
+                None
+                )
+        },
+        error: function(err) {
+            console.log(err);
+        }
+    });
+}
+
+
 /* Section Details Functions */
 
 function updateSectionDetails(resort) {
@@ -697,3 +743,10 @@ function setDays(element, form) {
     form.days=element.id;
     form.save();
 }
+
+
+
+
+
+
+
