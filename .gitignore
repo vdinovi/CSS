@@ -8,5 +8,8 @@ cssenv
 css/staticfiles
 css/migrations
 department_settings.json
+.DS_Store
+tests/.DS_Store
 css/.DS_Store
 css/templates/.DS_Store
+css/static/.DS_Store
