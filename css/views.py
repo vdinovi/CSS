@@ -83,18 +83,19 @@ def HomeView(request):
 
 def AvailabilityView(request):
     res = HttpResponse()
+    email = request.session.get('email')
+    list = Availability.get_availability_list(CUser.get_faculty(email))
+    print(list)
     if request.method == "GET":
         return render(request,'availability.html', {
-        			'availbilities_list': Availability.objects.filter(),
+        			'availability_list': list,
         			'add_availability_form': AddAvailabilityForm()})
     elif request.method == "POST" and 'add_availability_form' in request.POST: 
         form = AddAvailabilityForm(request.POST)
         print(form.errors.as_data())
         if form.is_valid(): 
             try:
-                faculty = request.session.get('email')
-                #form.save()
-                form.save(faculty)
+                form.save(email)
                 return HttpResponseRedirect('/availability')
             except ValidationError as e:
                 res.status_code = 400
