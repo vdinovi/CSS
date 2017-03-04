@@ -83,8 +83,9 @@ def HomeView(request):
 
 def AvailabilityView(request):
     res = HttpResponse()
-    email = request.session.get('email')
-    list = Availability.get_availability_list(CUser.get_faculty(email))
+    #email = request.session.get('email')
+    list = Availability.get_availability_list(CUser.get_faculty('jasonmsawatzky@gmail.com'))
+    print('faculty availability')
     print(list)
     if request.method == "GET":
         return render(request,'availability.html', {
@@ -92,7 +93,6 @@ def AvailabilityView(request):
         			'add_availability_form': AddAvailabilityForm()})
     elif request.method == "POST" and 'add_availability_form' in request.POST: 
         form = AddAvailabilityForm(request.POST)
-        print(form.errors.as_data())
         if form.is_valid(): 
             try:
                 form.save(email)

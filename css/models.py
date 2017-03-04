@@ -361,16 +361,19 @@ class Availability(models.Model):
 
     @classmethod
     def get_availability_list(cls, faculty):
-    	print(faculty.user.first_name)
-        entries = cls.objects.filter(faculty=faculty)
-        print(entries)
-        # return entries
-        # for entry in entries: #add each availability object to a specific faculty member 
-        #     print(type(entry))
+        return cls.objects.filter(faculty=faculty)
+	
+	@classmethod
+	def to_json(self):
+		return dict(faculty = self.faculty,
+					day = self.day_of_week,
+					start_time = self.start_time,
+					end_time = self.end_time, 
+					level = self.level)
 
-    @classmethod
-    def create(cls, email, day, start_time, end_time, level):
-        faculty = CUser.get_faculty(email=email)
+	@classmethod
+	def create(cls, email, day, start_time, end_time, level):
+		faculty = CUser.get_faculty(email=email)
         if (day is None):
             raise ValidationError("Invalid days of week input")
         elif (start_time is None):
