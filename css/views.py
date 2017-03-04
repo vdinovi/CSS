@@ -23,7 +23,8 @@ def RegistrationView(request):
         first_name = request.GET.get('first_name')
         last_name = request.GET.get('last_name')
         user_type = request.GET.get('user_type')
-        if first_name is None or last_name is None or user_type is None:
+        email = request.GET.get('email')
+        if first_name is None or last_name is None or user_type is None or email is None:
             res.status_code = 400
             res.reason_phrase = "Bad query string"
         else:
@@ -34,7 +35,8 @@ def RegistrationView(request):
                                    'registration_form': RegisterUserForm(request="GET",
                                                                          first_name=first_name,
                                                                          last_name=last_name,
-                                                                         user_type=user_type)
+                                                                         user_type=user_type,
+                                                                         email=email)
                          });
     elif request.method == "POST":
         form = RegisterUserForm(request.POST, request="POST")
@@ -79,23 +81,51 @@ def IndexView(request):
 def HomeView(request):
     return render(request, 'home.html')
 
+from django.views.decorators.csrf import csrf_exempt
+@csrf_exempt
 def AvailabilityView(request):
-	res = HttpResponse()
-	if request.method == "GET":
-		return render(request,'availability.html', {'add_availability_form': AddAvailabilityForm()})
-	# elif request.method == "POST":
-	# 	form = AddAvailabilityForm(request.POST)
- #        if form.is_valid():
- #        	faculty = request.session.email
- #        	day = form.cleaned_data['day']
- #        	start_time = form.cleaned_data['start_time']
- #        	end_time = form.cleaned_data['end_time']
- #        	level = form.cleaned_data['level']
+    res = HttpResponse()
+    email = request.session.get('email')
+    list = Availability.get_availability_list(CUser.get_faculty('jasonmsawatzky@gmail.com'))
+    print(request.body)
+    if request.method == "GET":
+        return render(request,'availability.html', {
+        			'availability_list': list,
+        			'add_availability_form': AddAvailabilityForm()})
+    elif request.method == "POST" and 'add_availability_form' in request.POST: 
+        form = AddAvailabilityForm(request.POST)
+        if form.is_valid(): 
+            try:
+                form.save(email)
+                return HttpResponseRedirect('/availability')
+            except ValidationError as e:
+                res.status_code = 400
+                res.reason_phrase = "Invalid form entry"
+                return res  
+        else:
+            res.status_code = 400
+            res.reason_phrase = "Invalid form entry"
+            return res
+    elif request.method == "POST" and 'availability_view' in request.body: 
+    	data = json.dumps({"availability_view": [avail.to_json() for avail in list] })
+    	print(data)
+    	data.append({'email': email})
+        res.write(data)
+        res.status_code = 200
+    else:
+        res.status_code = 400
+    return res
+            
 
 def SchedulingView(request):
     res = HttpResponse()
     if request.method == "GET":
         return render(request, 'scheduling.html', {
+                      'academic_terms': Schedule.objects.filter().all(),
+                      'courses': Course.objects.filter().all(),
+                      'section_types': SectionType.objects.filter().all(),
+                      'faculty': CUser.get_all_faculty(),
+                      'rooms': Room.objects.filter().all(),
                       'add_section_form': AddSectionForm(),
                       'add_schedule_form': AddScheduleForm()
                       })
@@ -113,7 +143,7 @@ def SettingsView(request):
                 'settings': DEPARTMENT_SETTINGS,
                 'section_type_list': SectionType.objects.filter().all(),
                 'add_section_type_form': AddSectionTypeForm(),
-                'cohort_data_form': UploadForm(),
+                'upload_form': UploadForm(),
             });
     elif request.method == "POST" and "submit-settings" in request.POST:
         try:
@@ -156,6 +186,18 @@ def SettingsView(request):
         else:
             res.status_code = 400
             res.reason_phrase = "Invalid form entry"
+    elif request.method == "POST" and 'student-plan-data' in request.POST:
+        form = UploadForm(request.POST, request.FILES)
+        if form.is_valid():
+            try:
+                StudentPlanData.import_student_plan_file(request.FILES['file'])
+                return HttpResponseRedirect("/department/settings")
+            except:
+                raise
+            res.status_code = 500
+        else:
+            res.status_code = 400
+            res.reason_phrase = "Invalid form entry"
     else:
         res.status_code = 400
     return res
@@ -184,7 +226,7 @@ def LoginView(request):
                 request.session['user_type'] = cuser.user_type
                 request.session['first_name'] = user.first_name
                 request.session['last_name'] = user.last_name
-                request.session.set_expiry(300) # 5 min session duration
+                request.session.set_expiry(6000) # 5 min session duration
                 return HttpResponseRedirect('/home')
             # Authentication failed
             else:

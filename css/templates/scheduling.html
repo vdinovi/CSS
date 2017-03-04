@@ -15,7 +15,7 @@
     <link href="{% static "css/scheduling.css" %}" rel="stylesheet">
     <!-- Nice looking checkbox, would like to use to fill box where existing checkboxes are 
       Has some bugs to work out. Taken from: http://bootsnipp.com/snippets/featured/checkboxradio-css-only -->
-      <link href="{% static "css/checkbox.css" %}" rel="stylesheet"> 
+    <!--<link href="{% static "css/checkbox.css" %}" rel="stylesheet"> --> <!-- Paula: I commented this out to get glyphicons...--> 
     <link href="{% static "css/sweetalert.css" %}" rel="stylesheet">
     <script src="{% static "js/sweetalert.min.js" %}"></script>
 
@@ -42,41 +42,88 @@
           <button type="button" class="btn btn-info" data-toggle="modal" data-target="#new-term-modal">Create New Term</button>
         </div>
         <!-- New Section Frame -->
-        <div id="new-section-frame" class="col-xs-12 new-section-frame" style="display:none;">
+        <!-- <div id="new-section-frame" class="col-xs-12 new-section-frame" style="display:none;"> -->
+        <div id="new-section-frame" class="col-xs-12 new-section-frame">
           <div class="row" style="padding-top:20px">
             <button id="filter-frame-btn" class="btn switch-frame-btn col-xs-4 col-xs-offset-4" onclick='switchFrame("new-section-frame", "filter-frame")'>Filter Sections</button>
           </div>
-            <form method="POST" action="#" class="form-horizontal" role="form"> 
+            <!-- <form id="new-section-form" method="POST" class="form-horizontal" role="form" onsubmit="NewSection()">  -->
+            <div id="new-section-form" class="new-section-frame" style="height:50%; overflow-y: scroll;">
             {% csrf_token %}
             <div class="form-group col-xs-6">
-              <!-- <label for="course" class="row control-label">Course</label> -->
               <div  class="row new-section-inputs">
-                {{ add_section_form.academic_term.label }}
-                {{ add_section_form.academic_term }}
+                <div class="form-group col-xs-6">
+                  <label for="academic-term">Academic Term</label>
+                </div>
+                <div class="form-group col-xs-6 col-xs-offset-6">
+                  <select id="academic-term" class="form-control" type="text">
+                    <option value="" disabled selected>Select a term</option>
+                  {% for term in academic_terms %}
+                    <option value={{ term.academic_term }}>{{ term.academic_term }}</option>
+                  {% endfor %}
+                  </select>
+                </div>
               </div>
               <div class="row new-section-inputs">
-                {{ add_section_form.course.label }}
-                {{ add_section_form.course }}
+                <div class="form-group col-xs-6">
+                  <label for="course">Course</label>
+                </div>
+                <div class="form-group col-xs-6 col-xs-offset-6">
+                  <select id="course" class="form-control" type="text">
+                    <option value="" disabled selected>Select a Course</option>
+                  {% for course in courses %}
+                    <option value={{course.name}}>{{ course.name }}</option>
+                  {% endfor %}
+                  </select>
+                </div>
               </div>
               <div class="row new-section-inputs">
-                {{ add_section_form.section_type.label }}
-                {{ add_section_form.section_type }}
+                <div class="form-group col-xs-6">
+                  <label for="section-type">Section Type</label>
+                </div>
+                <div class="form-group col-xs-6 col-xs-offset-6">
+                  <select id="section-type" class="form-control" type="text">
+                    <option value="" disabled selected>Select a type</option>
+                  {% for section_type in section_types %}
+                    <option value={{section_type.name}}>{{ section_type.name }}</option>
+                  {% endfor %}
+                  </select>
+                </div>
               </div>
               <div class="row new-section-inputs">
-                {{ add_section_form.faculty.label }}
-                {{ add_section_form.faculty }}
+                <div class="form-group col-xs-6">
+                  <label for="faculty">Faculty</label>
+                </div>
+                <div class="form-group col-xs-6 col-xs-offset-6">
+                  <select id="faculty" class="form-control" type="text">
+                    <option value="" disabled selected>Select faculty</option>
+                  {% for f in faculty %}
+                    <option value={{f.user.email}}>{{ f.user.first_name }} {{ f.user.last_name }}</option>
+                  {% endfor %}
+                  </select>
+                </div>
               </div>
               <div class="row new-section-inputs">
-                {{ add_section_form.room.label }}
-                {{ add_section_form.room }}
+                <div class="form-group col-xs-6">
+                  <label for="room">Room</label>
+                </div>
+                <div class="form-group col-xs-6 col-xs-offset-6">
+                  <select id="room" class="form-control" type="text">
+                    <option value="" disabled selected>Select a room</option>
+                  {% for room in rooms %}
+                    <option value={{room.name}}>{{ room.name }}</option>
+                  {% endfor %}
+                  </select>
+                </div>
               </div>
               <div class="row new-section-inputs">
-                {{ add_section_form.capacity.label }}
-                {{ add_section_form.capacity }}
+                <div class="form-group col-xs-6">
+                  <label for="capacity">Capacity</label>
+                </div>
+                <div class="form-group col-xs-6 col-xs-offset-6">
+                  <input id="capacity" class="form-control" type="integer">
+                </div>
               </div>
-              <button type="submit" class="btn btn-primary">Create Section</button>
-            </div>
-            <div class="form-group col-xs-6">
               <!-- <div class="btn-group row" data-toggle="buttons">
                 <label class="btn btn-primary active">
                   <input type="radio" name="days" id="MWF" autocomplete="off" checked onclick="setDays(this, new_section_form)"> MWF
@@ -86,19 +133,37 @@
                 </label>
               </div> -->
               <div class="row">
-                {{ add_section_form.days.label }}
-                {{ add_section_form.days }}
+                <div class="form-group col-xs-6">
+                  <label for="days">Days</label>
+                </div>
+                <div class="form-group col-xs-6 col-xs-offset-6">
+                  <select id="days" class="form-control" type="text">
+                    <option value="" disabled selected>Select Days</option>
+                    <option value="MWF">Mon/Wed/Fri</option>
+                    <option value="TR">Tue/Thu</option>
+                  </select>
+                </div>
               </div>
               <div class="row">
-                {{ add_section_form.start_time.label }}
-                {{ add_section_form.start_time }}
+                <div class="form-group col-xs-6">
+                  <label for="start-time">Start Time</label>
+                </div>
+                <div class="form-group col-xs-6 col-xs-offset-6">
+                  <input id="start-time" class="form-control" type="time">
+                </div>
               </div>
               <div class="row">
-                {{ add_section_form.end_time.label }}
-                {{ add_section_form.end_time }}
+                <div class="form-group col-xs-6">
+                  <label for="end-time">End Time</label>
+                </div>
+                <div class="form-group col-xs-6 col-xs-offset-6">
+                  <input id="end-time" class="form-control" type="time">
+                </div>
               </div>
+              <button id="create-section-button" type="submit" class="btn btn-primary" onsubmit="NewSection()">Create Section</button>
             </div>
-          </form>
+          <!-- </form> -->
+          </div>
         </div>
         <!-- Filter Window -->
         <div id="filter-frame" class="col-xs-12 filter-frame">
@@ -126,7 +191,7 @@
                 <div id="time-options" class="list-group" style="margin:0px">
                 </div>
               </div>
-              <button id="clear-filter-btn" class="btn" style="margin-top:5px;" onclick="unselectAllSelectedOptions()">Clear</button>
+              <button id="clear-filter-btn" class="btn" style="margin-top:5px;width:100%;" onclick="unselectAllSelectedOptions()">Clear</button>
             </div>
           </div>
           <!-- Option Window -->
@@ -135,11 +200,15 @@
             <div id="option-frame" class="inner-frame">
               <!-- Options get inserted here -->
             </div>
+            <div style="width:100%">
+                <button class="btn" style="margin-top:5px;width:49%;" onclick="selectAllOptions()">Select All</button>
+                <button class="btn" style="margin-top:5px;width:49%;" onclick="unselectAllOptions()">Select None</button>
+            </div>
           </div>
           <!-- Filter Logic Window -->
           <div class="col-xs-3 outer-frame">
-            <h2 style="text-align:center;">Filter Logic</h2>
-              <div id="filter-logic-frame" class="inner-frame" style="padding-top: 5%">
+            <h4 class="filter-logic">Choose Filter Logic:</h4>
+              <div id="filter-logic-frame" class="inner-frame">
                 <!-- COURSE LOGIC FILTER -->
                 <div id="course-filter-logic" class="filter-logic">
                   <div class="col-xs-8 col-xs-offset-2" style="height:100%;">
@@ -177,37 +246,23 @@
                   </div>
                 </div>
               </div>
-            <button id="apply-filter-btn" class="btn" style="margin-top:5px;width:100%;" onclick="getFilteredSections(this)">Apply</button>
+            <button id="apply-filter-btn" class="btn" onclick="getFilteredSections();">Apply</button>
           </div>
-          <!-- @TODO Fill with real entries -->
+          <!-- Section Window -->
           <div class="col-xs-3 outer-frame">
             <h2 style="text-align:center;">Sections</h2>
             <div id="section-frame" class="inner-frame">
-              <ul class="list-group">
-                <div id="section-cpe101-01" class="input-group">
-                  <span class="input-group-addon">
-                    <input id="section-checkbox" type="checkbox">
-                  </span>
-                  <p class="form-control">CPE101-01</p>
-                </div>
-                <div id="section-cpe101-02" class="input-group">
-                  <span class="input-group-addon">
-                    <input id="option-checkbox" type="checkbox">
-                  </span>
-                  <p class="form-control">CPE101-02</p>
-                </div>
-                <div id="section-cpe101-03" class="input-group">
-                  <span class="input-group-addon">
-                    <input id="option-checkbox" type="checkbox">
-                  </span>
-                  <p class="form-control">CPE101-03</p>
-                </div>
-              </ul>
+             <!-- Filtered Section Results get inserted here when getFilteredSections() gets called -->
             </div> 
+            <div style="width:100%">
+                <button class="btn" style="margin-top:5px;width:49%;" onclick="selectAllSections()">Select All</button>
+                <button class="btn" style="margin-top:5px;width:49%;" onclick="unselectAllSections()">Select None</button>
+            </div>
+            <button id="details-filter-btn" class="btn" style="margin-top:5px;width:100%;" onclick="updateSectionDetails();">Add to Details</button>
           </div>
         </div>
       </div>
-      <!-- Section Frame -->
+      <!-- Section Details Frame -->
       <div class="row" style="padding-top: 20px;">
         <h2 style="text-align:center"> Section Details </h2>
       </div>
@@ -216,19 +271,36 @@
           <table class="table table-striped table-hover table-bordered">
             <thead>
               <tr class="top">
-                <th>Term</th>
-                <th>Section</th>
-                <th>Course</th>
-                <th>Type</th>
-                <th>Days</th>
-                <th>Start Time</th>
-                <th>End Time</th>
-                <th>Faculty</th>
-                <th>Room</th>
+                <th><!--blank for edit buttons--></th>
+                <th onclick="sortSectionDetailsBy(this, 'name')" class="">Section &#x25BC;</th>
+                <th onclick="sortSectionDetailsBy(this, 'term')" class="">Term &#x25BC;</th>
+                <th onclick="sortSectionDetailsBy(this, 'course')" class="">Course &#x25BC;</th>
+                <th onclick="sortSectionDetailsBy(this, 'type')" class="">Type &#x25BC;</th>
+                <th onclick="sortSectionDetailsBy(this, 'faculty')" class="">Faculty &#x25BC;</th>
+                <th onclick="sortSectionDetailsBy(this, 'room')" class="">Room &#x25BC;</th>
+                <th onclick="sortSectionDetailsBy(this, 'days')" class="">Days &#x25BC;</th>
+                <th onclick="sortSectionDetailsBy(this, 'start_time')" class="">Start Time &#x25BC;</th>
+                <th onclick="sortSectionDetailsBy(this, 'end_time')" class="">End Time &#x25BC;</th>
               </tr>
             </thead>
-            <!-- @TODO Fill with real entries -->
-            <tbody>
+            <tbody id="section-detail-rows">
+            <!-- Selected filtered Section Results get inserted here when updateSectionDetails() gets called -->
+              <tr>
+                <td>
+                  <button type="button" class="btn btn-info btn-xs" data-toggle="modal" data-target="#deselect-section" onclick="removeSectionFromDetails(this)"><span class="glyphicon glyphicon-minus" title="Remove section from details"></span>&nbsp;</button>
+                  <button type="button" class="btn btn-info btn-xs" data-toggle="modal" data-target="#edit-section"><span class="glyphicon glyphicon-edit" title="Edit section"></span>&nbsp;</button>
+                  <button type="button" class="btn btn-info btn-xs" data-toggle="modal" data-target="#delete-section"><span class="glyphicon glyphicon-trash" title="Delete section"></span>&nbsp;</button>
+                </td>
+                <td>cpe101-01</td>
+                <td>Fall 2016</td>
+                <td>cpe101</td>
+                <td>lecture</td>
+                <td>Kearns</td>
+                <td>14-256</td>
+                <td>mwf</td>
+                <td>10:00AM</td>
+                <td>12:00PM</td>
+              </tr>
             </tbody>
           </table>
         </div>
@@ -300,6 +372,8 @@
     <!-- Custom JS -->
     <script src="{% static "js/scheduling.js" %}"></script>
     <script language="javascript">
+        var target = document.registerElement('x-target');
+        document.body.appendChild(new target());
        // Fixes Dropdown bug.
         $(document).ready(function () {
             $('.dropdown-toggle').dropdown();
@@ -310,5 +384,8 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
     <!-- Include all compiled plugins (below), or include individual files as needed -->
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+    
+  <script> window.onload = getFilteredSections(); </script>
   </body>
 </html>
