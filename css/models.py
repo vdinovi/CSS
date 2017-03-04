@@ -783,7 +783,6 @@ class CohortTotal(models.Model):
     def get_cohort_total(cls, schedule, major):
         return cls.objects.get(schedule=schedule, major=major)
 
-
 # Student Plan Data.
 class StudentPlanData(models.Model):
     class Meta:
@@ -881,10 +880,22 @@ class StudentPlanData(models.Model):
         except:
             raise FileParserError("Unknown error on line %d" % (i,))
         """
+ 
+# Section Conflicts Model
+class SectionConflict(models.Model):
+    section1 = models.ForeignKey(Section, related_name="first_section", on_delete=models.CASCADE)
+    section2 = models.ForeignKey(Section, related_name="second_section", on_delete=models.CASCADE)
+    conflict_reason = models.CharField(max_length=8) # Faculty or Room
 
-
-
-    
-
-
-
+    @classmethod
+    def create(cls, section1, section2, conflict_reason):
+        if section1 == section2:
+            raise ValidationError("Section does not conflict with itself.")
+        if conflict_reason != "faculty" and conflict_reason != "room":
+            raise ValidationError("Invalid conflict reason.")
+        conflict = cls(
+                    section1=section1, 
+                    section2=section2, 
+                    conflict_reason=conflict_reason)
+        conflict.save()
+        return conflict
