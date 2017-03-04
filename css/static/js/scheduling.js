@@ -641,7 +641,6 @@ function getSelectedFilters() {
 
 function NewSection(request) {
     var sectionData = {};
-    console.log("here");
     sectionData = {
         'schedule': "#academic-term", 
          'course': "#course",

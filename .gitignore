@@ -1,0 +1,12 @@
+venv
+*.pyc
+.env
+.*.swp
+db.sqlite3
+cssenv
+.cssenv
+css/staticfiles
+css/migrations
+department_settings.json
+css/.DS_Store
+css/templates/.DS_Store
