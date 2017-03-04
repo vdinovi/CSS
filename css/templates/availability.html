@@ -23,7 +23,7 @@
             			<h4 class="modal-title">Set Availability</h4>
           			</div>
           			<div class="modal-body">
-            			<form method="POST" action="?">{% csrf_token %}
+            			<form method="POST">{% csrf_token %}
               				{{ add_availability_form.as_p }}
               				<button type="submit" name="add_availability_form" class="save btn btn-default">Submit</button>
             			</form>

@@ -232,6 +232,11 @@ class AddAvailabilityForm(forms.Form):
 											start_time = self.cleaned_data['start_time'],
 											end_time = self.cleaned_data['end_time'],
 											level = self.cleaned_data['level'])
+		print(email)
+		print(day)
+		print(start_time)
+		print(end_time)
+		print(level)
 		availability.save()
 
 class AddScheduleForm(forms.Form):
