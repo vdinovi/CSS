@@ -81,12 +81,13 @@ def IndexView(request):
 def HomeView(request):
     return render(request, 'home.html')
 
+from django.views.decorators.csrf import csrf_exempt
+@csrf_exempt
 def AvailabilityView(request):
     res = HttpResponse()
-    #email = request.session.get('email')
+    email = request.session.get('email')
     list = Availability.get_availability_list(CUser.get_faculty('jasonmsawatzky@gmail.com'))
-    print('faculty availability')
-    print(list)
+    print(request.body)
     if request.method == "GET":
         return render(request,'availability.html', {
         			'availability_list': list,
@@ -105,7 +106,12 @@ def AvailabilityView(request):
             res.status_code = 400
             res.reason_phrase = "Invalid form entry"
             return res
-    
+    elif request.method == "POST" and 'availability_view' in request.body: 
+    	data = json.dumps({"availability_view": [avail.to_json() for avail in list] })
+    	print(data)
+    	data.append({'email': email})
+        res.write(data)
+        res.status_code = 200
     else:
         res.status_code = 400
     return res
