@@ -220,7 +220,7 @@ def LoginView(request):
                 request.session['user_type'] = cuser.user_type
                 request.session['first_name'] = user.first_name
                 request.session['last_name'] = user.last_name
-                request.session.set_expiry(300) # 5 min session duration
+                request.session.set_expiry(6000) # 5 min session duration
                 return HttpResponseRedirect('/home')
             # Authentication failed
             else:
