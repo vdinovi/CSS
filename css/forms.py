@@ -2,7 +2,7 @@ from django import forms
 from django.core.mail import send_mail
 from css.models import CUser, Room, Course, SectionType, Schedule, Section, Availability
 from django.http import HttpResponseRedirect
-from settings import DEPARTMENT_SETTINGS
+from settings import DEPARTMENT_SETTINGS, HOSTNAME
 import re
 from django.forms import ModelChoiceField
 
@@ -30,7 +30,8 @@ class InviteUserForm(forms.Form):
         last_name = self.cleaned_data['last_name']
         name = first_name + ' ' + last_name
         email = self.cleaned_data['email']
-        link = HOSTNAME + '/register?first_name=' + first_name +'&last_name=' + last_name +'&user_type='+ usertype + '&email=' + email
+        #@TODO fix HOSTNAME
+        link = 'localhost:8000' + '/register?first_name=' + first_name +'&last_name=' + last_name +'&user_type='+ usertype + '&email=' + email
         send_mail('Invite to register for CSS', name + """, you have been invited to register for CSS. Please register using the following link: """ 
         + link, 'registration@inviso-css', [self.cleaned_data['email']])
         print("sent email to " + self.cleaned_data['email'])
