@@ -364,14 +364,6 @@ class Availability(models.Model):
         return cls.objects.filter(faculty=faculty)
 	
 	@classmethod
-	def to_json(self):
-		return dict(faculty = self.faculty,
-					day = self.day_of_week,
-					start_time = self.start_time,
-					end_time = self.end_time, 
-					level = self.level)
-
-	@classmethod
 	def create(cls, email, day, start_time, end_time, level):
 		faculty = CUser.get_faculty(email=email)
         if (day is None):
@@ -386,6 +378,13 @@ class Availability(models.Model):
             availability = cls(faculty=faculty,day_of_week=day, start_time=start_time, end_time=end_time, level=level)
             availability.save()
             return availability
+
+    def to_json(self):
+		return dict(faculty = self.faculty,
+					day = self.day_of_week,
+					start_time = self.start_time,
+					end_time = self.end_time,
+					level = self.level)
 
 # ---------- Scheduling Models ----------
 # Schedule is a container for scheduled sections and correponds to exactly 1 academic term
