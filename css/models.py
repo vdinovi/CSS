@@ -435,6 +435,7 @@ class Schedule(models.Model):
 # Section is our systems primary scheduled object
 # Each section represents a department section that is planned for a particular schedule
 class Section(models.Model):
+    section_num = models.IntegerField()
     schedule = models.ForeignKey(Schedule, on_delete=models.CASCADE)
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
     section_type = models.ForeignKey(SectionType, null=True, on_delete=models.SET_NULL)
@@ -453,7 +454,7 @@ class Section(models.Model):
 
     @classmethod
     def create(
-        cls, term_name, course_name, section_type, start_time, end_time, days, faculty_email, room_name,
+        cls, section_num, term_name, course_name, section_type, start_time, end_time, days, faculty_email, room_name,
         capacity, students_enrolled, students_waitlisted, conflict,
         conflict_reason, fault, fault_reason):
         # these objects will actually be passed into the Section because of the ForeignKey
@@ -483,6 +484,7 @@ class Section(models.Model):
         if fault == 'y' and fault_reason != "faculty" and fault_reason != "room":
             raise ValidationError("Invalid fault reason.")
         section = cls(
+                  section_num=section_num,
                   schedule=schedule,
                   course=course,
                   section_type=section_type,
