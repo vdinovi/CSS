@@ -178,9 +178,9 @@ def SettingsView(request):
         form = UploadForm(request.POST, request.FILES)
         if form.is_valid():
             try:
-                result = CohortData.import_cohort_file(request, request.FILES['file'])
+                result = CohortData.import_cohort_file(request.FILES['file'])
                 for m in result:
-                    messages.error(request, m) 
+                    messages.add_message(request, messages.ERROR, m, extra_tags="cohort") 
                 return HttpResponseRedirect("/department/settings")
             except:
                 raise
@@ -192,9 +192,9 @@ def SettingsView(request):
         form = UploadForm(request.POST, request.FILES)
         if form.is_valid():
             try:
-                result = StudentPlanData.import_student_plan_file(request, request.FILES['file'])
+                result = StudentPlanData.import_student_plan_file(request.FILES['file'])
                 for m in result:
-                    messages.error(request, m)
+                    messages.add_message(request, messages.ERROR, m, extra_tags="plan") 
                 return HttpResponseRedirect("/department/settings")
             except:
                 raise

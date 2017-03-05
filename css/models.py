@@ -700,7 +700,7 @@ class CohortData(models.Model):
         try:
             schedule = Schedule.get_schedule(term_name = term)
         except ObjectDoesNotExist:
-            messages.append("Schedule '%s' on line %d does not exist" % (term, i))
+            messages.append("Schedule '%s' on line %d does not exist" % (term, 0))
             return messages
         # Begin parsing data 
         courses = None
@@ -902,9 +902,9 @@ class StudentPlanData(models.Model):
                 cls.create(schedule=schedule, course=course, section_type=section_type, **kwargs)
                 print 'Success'
         except IndexError as e:
-            raise FileParserError("Invalid entry on line %d: %s" % (i, e[0]))
+            messages.append("Invalid entry on line %d: %s" % (i, e[0])) 
         except:
-            raise FileParserError("Unknown error on line %d" % (i,))
+            messages.append("Unknown error on line %d" % (i,)) 
         return messages
  
 # Section Conflicts Model
