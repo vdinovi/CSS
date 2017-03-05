@@ -363,9 +363,9 @@ class Availability(models.Model):
     def get_availability_list(cls, faculty):
         return cls.objects.filter(faculty=faculty)
 	
-	@classmethod
-	def create(cls, email, day, start_time, end_time, level):
-		faculty = CUser.get_faculty(email=email)
+    @classmethod
+    def create(cls, email, day, start_time, end_time, level):
+	faculty = CUser.get_faculty(email=email)
         if (day is None):
             raise ValidationError("Invalid days of week input")
         elif (start_time is None):
@@ -380,13 +380,13 @@ class Availability(models.Model):
             return availability
 
     def to_json(self):
-		return dict(faculty = self.faculty,
-					day = self.day_of_week,
-					start_time = self.start_time,
-					end_time = self.end_time,
-					level = self.level)
+        return dict(faculty = self.faculty,
+                    day = self.day_of_week,
+                    start_time = self.start_time,
+                    end_time = self.end_time,
+                    level = self.level)
 
-# ---------- Scheduling Models ----------
+        # ---------- Scheduling Models ----------
 # Schedule is a container for scheduled sections and correponds to exactly 1 academic term
 class Schedule(models.Model):
     academic_term = models.CharField(max_length=16, unique=True) # eg. "Fall 2016"
@@ -690,6 +690,7 @@ class CohortData(models.Model):
             chunks.append(s)
         data = ''.join(chunks)
         lines = data.split('\n')
+        messages = []
         # Read schedule
         term = ''
         for w in lines[0].split():
@@ -699,7 +700,8 @@ class CohortData(models.Model):
         try:
             schedule = Schedule.get_schedule(term_name = term)
         except ObjectDoesNotExist:
-            raise FileParserError("Term '%s' not found on line %d" % (term, i))
+            messages.append("Schedule '%s' on line %d does not exist" % (term, i))
+            return messages
         # Begin parsing data 
         courses = None
         i = 1
@@ -718,43 +720,54 @@ class CohortData(models.Model):
             if len(words) > 1:
                 courses = []
                 if words[1] != "Total":
-                    raise FileParserError("Missing 'Total' index on line  %d" % (i,))
+                    messages.append("Missing 'Total' index on line %d" % (i,))
+                    continue
                 for j in range(2, len(words), 2):
                     name = words[j] + ' ' + words[j+1]
-                    #if not Course.objects.filter(name=name).exists():
-                    #    raise FileParserError("Could not find course '%s' on line %d" % (name, i))
-                    #else:
-                    courses.append(name)
+                    if not Course.objects.filter(name=name).exists():
+                        messages.append("Could not find course '%s' on line %d" % (name, i))
+                        return messages
+                    else:
+                        courses.append(name)
             i += 1
             freshman = lines[i].split()
             sophomore = lines[i+1].split()
             junior = lines[i+2].split()
             senior = lines[i+3].split()
             if (freshman[0] != "Freshman"):
-                raise FileParserError("Unexpected keyword '%s', expected 'Freshman' on line %d" % (freshman[0], i))
+                messages.append("Unexpected keyword '%s', expected 'Freshman' on line %d" % (freshman[0], i))
+                continue
             if (sophomore[0] != "Sophomore"):
-                raise FileParserError("Unexpected keyword '%s', expected 'Sophomore' on line %d" % (sophomore[0], i+1))
+                messages.append("Unexpected keyword '%s', expected 'Sophomore' on line %d" % (sophomore[0], i))
+                continue
             if (junior[0] != "Junior"):
-                raise FileParserError("Unexpected keyword '%s', expected 'Freshman' on line %d" % (junior[0], i+2))
+                messages.append("Unexpected keyword '%s', expected 'Junior' on line %d" % (junior[0], i))
+                continue
             if (senior[0] != "Senior"):
-                raise FileParserError("Unexpected keyword '%s', expected 'Freshman' on line %d" % (senior[0], i+3))
+                messages.append("Unexpected keyword '%s', expected 'Senior' on line %d" % (senior[0], i))
+                continue
             # Create cohort total
             for j  in range (1, len(courses)):
                 try:
                     if (courses[j] == "Total"):
-                        #CohortTotal.create(schedule=schedule, major=major, 
-                        #                   freshman=int(freshman[j+1]), sophomore=int(sophomore[j+1]),
-                        #                   junior=int(junior[j+1]), senior=int(senior[j+1]))
+                        CohortTotal.create(schedule=schedule, major=major, 
+                                           freshman=int(freshman[j+1]), sophomore=int(sophomore[j+1]),
+                                           junior=int(junior[j+1]), senior=int(senior[j+1]))
                         pass
                     else: 
-                        #course = Course.get_course(name=courses[j])
-                        #CohortData.create(schedule=schedule, course=course, major=major,
-                        #                  freshman=int(freshman[j+1]), sophomore=int(sophomore[j+1]),
-                        #                  junior=int(junior[j+1]), senior=int(senior[j+1]))
+                        course = Course.get_course(name=courses[j])
+                        CohortData.create(schedule=schedule, course=course, major=major,
+                                          freshman=int(freshman[j+1]), sophomore=int(sophomore[j+1]),
+                                          junior=int(junior[j+1]), senior=int(senior[j+1]))
                         pass
-                except IndexError:
-                    raise FileParserError("Not enough data entries on lines %d through %d" % (i, i+3)) 
+                except ObjectDoesNotExist as e:
+                    messages.append("Could not create data entries on lines %d through %d" % (i, i+3))
+                except IndexError as e:
+                    messages.append("Not enough data entries on lines %d through %d" % (i, i+3))
+                except:
+                    messages.append("Unkown error on lines %d through %d" % i (i+3))
             i += 4
+        return messages
 
 class CohortTotal(models.Model):
     class Meta:
@@ -830,6 +843,7 @@ class StudentPlanData(models.Model):
         for s in file.chunks():
             chunks.append(s)
         data = ''.join(chunks)
+        messages = []
         lines = data.split('\n')
         term_ignore = ["quarter"] #Ignore these terms when reading in term name
         # Keys that are accepted by the system
@@ -863,8 +877,21 @@ class StudentPlanData(models.Model):
                 # Collect parsed data
                 # Remove ignored words from term name
                 schedule = Schedule.get_schedule(term_name=' '.join([w for w in content['Term'].split() if w.lower() not in term_ignore]).strip())
-                course = Course.get_course(name=content['Subject Code']+' '+content['Catalog Nbr'])
-                section_type = SectionType.get_section_type(name=content['Component'])
+                course = None
+                section_type = None
+                try:
+                    course = Course.get_course(name=content['Subject Code']+' '+content['Catalog Nbr'])
+                    continue
+                except ObjectDoesNotExist:
+                    messages.append("Course '%s' on line %d does not exist" % (content['Subject Code']+' '+content['Catalog Nbr'], i))
+                try:
+                    section_type = SectionType.get_section_type(name=content['Component'])
+                except ObjectDoesNotExist:
+                    messages.append("Section Type '%s' on line %d does not exist" % (content['Component'], i))
+                    continue
+                if course and section_type and not course.get_section_type(course=course, section_type=section_type):
+                    messages.append("Course '%s' has no associated section type '%s'" % (course.name, section_type.name)) 
+                    continue
                 already_parsed = ["Term", "Subject Code", "Catalog Nbr", "Component"] 
                 # Collect other secondary arguments
                 kwargs = {}
@@ -875,13 +902,10 @@ class StudentPlanData(models.Model):
                 cls.create(schedule=schedule, course=course, section_type=section_type, **kwargs)
                 print 'Success'
         except IndexError as e:
-            raise FileParserError("IndexError on line %d: %s" % (i, e[0]))
-        except ObjectDoesNotExist as e:
             raise FileParserError("Invalid entry on line %d: %s" % (i, e[0]))
-        """
         except:
             raise FileParserError("Unknown error on line %d" % (i,))
-        """
+        return messages
  
 # Section Conflicts Model
 class SectionConflict(models.Model):
