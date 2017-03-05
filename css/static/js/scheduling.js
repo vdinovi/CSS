@@ -646,15 +646,15 @@ function getSelectedFilters() {
 function NewSection(request) {
     var sectionData = {};
     sectionData = {
-        'schedule': $("#academic-term").text(), 
-         'course': "#course",
-         'section-type': "#section-type",
-         'faculty': "#faculty",
-         'room': "#room",
-         'days': "#days",
-         'capacity': "#capacity",
-         'start-time': "#start-time",
-         'end-time': "#end-time"
+        'schedule': $("#academic-term").val(), 
+         'course': $("#course").val(),
+         'section-type': $("#section-type").val(),
+         'faculty': $("#faculty").val(),
+         'room': $("#room").val(),
+         'days': $("#days").val(),
+         'capacity': $("#capacity").val(),
+         'start-time': $("#start-time").val(),
+         'end-time': $("#end-time").val()
          };
     $.ajax({
         type: "POST",
@@ -662,7 +662,14 @@ function NewSection(request) {
         data: JSON.stringify({"test": "hello"}),
         dataType: 'json',
         success: function(response) {
-            console.log("Hello");
+            console.log(sectionData)
+            // Clear all elements
+            $("#new-section-frame").find("select").each(function (index, value) {
+                $($(value).children('option')[0]).prop('selected', true);
+            })
+            $("#new-section-frame").find("input").each(function (index, value) {
+                ($(value).val(''));
+            })
         },
         error: function(err) {
             console.log(err);

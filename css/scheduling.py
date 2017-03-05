@@ -130,10 +130,27 @@ def Sections(request):
 def NewSection(request):
     res = HttpResponse()
     if request.method == "POST":
-        print "TEST POST"
         res.status_code = 200
+        res.write(request.body)
+        sectionData = json.loads(request.body)
+        Section.create(
+                sectionData['schedule'],
+                sectionData['course'],
+                sectionData['section-type'],
+                sectionData['start-time'],
+                sectionData['end-time'],
+                sectionData['days'],
+                sectionData['faculty'],
+                sectionData['room'],
+                sectionData['capacity'],
+                0, 
+                0,
+                'n',
+                None,
+                'n',
+                None
+                )
     else:
-        print "TEST OTHER"
         res.status_code = 400
     return res
 
