@@ -81,20 +81,22 @@ def IndexView(request):
 def HomeView(request):
     return render(request, 'home.html')
 
+from django.views.decorators.csrf import csrf_exempt
+@csrf_exempt
 def AvailabilityView(request):
     res = HttpResponse()
+    email = request.session.get('email')
+    list = Availability.get_availability_list(CUser.get_faculty('jasonmsawatzky@gmail.com'))
+    print(request.body)
     if request.method == "GET":
         return render(request,'availability.html', {
-        			'availbilities_list': Availability.objects.filter(),
+        			'availability_list': list,
         			'add_availability_form': AddAvailabilityForm()})
     elif request.method == "POST" and 'add_availability_form' in request.POST: 
         form = AddAvailabilityForm(request.POST)
-        print(form.errors.as_data())
         if form.is_valid(): 
             try:
-                faculty = request.session.get('email')
-                #form.save()
-                form.save(faculty)
+                form.save(email)
                 return HttpResponseRedirect('/availability')
             except ValidationError as e:
                 res.status_code = 400
@@ -104,7 +106,12 @@ def AvailabilityView(request):
             res.status_code = 400
             res.reason_phrase = "Invalid form entry"
             return res
-    
+    elif request.method == "POST" and 'availability_view' in request.body: 
+    	data = json.dumps({"availability_view": [avail.to_json() for avail in list] })
+    	print(data)
+    	data.append({'email': email})
+        res.write(data)
+        res.status_code = 200
     else:
         res.status_code = 400
     return res
@@ -171,7 +178,9 @@ def SettingsView(request):
         form = UploadForm(request.POST, request.FILES)
         if form.is_valid():
             try:
-                CohortData.import_cohort_file(request.FILES['file'])
+                result = CohortData.import_cohort_file(request.FILES['file'])
+                for m in result:
+                    messages.add_message(request, messages.ERROR, m, extra_tags="cohort") 
                 return HttpResponseRedirect("/department/settings")
             except:
                 raise
@@ -183,7 +192,9 @@ def SettingsView(request):
         form = UploadForm(request.POST, request.FILES)
         if form.is_valid():
             try:
-                StudentPlanData.import_student_plan_file(request.FILES['file'])
+                result = StudentPlanData.import_student_plan_file(request.FILES['file'])
+                for m in result:
+                    messages.add_message(request, messages.ERROR, m, extra_tags="plan") 
                 return HttpResponseRedirect("/department/settings")
             except:
                 raise
@@ -219,7 +230,7 @@ def LoginView(request):
                 request.session['user_type'] = cuser.user_type
                 request.session['first_name'] = user.first_name
                 request.session['last_name'] = user.last_name
-                request.session.set_expiry(300) # 5 min session duration
+                request.session.set_expiry(6000) # 5 min session duration
                 return HttpResponseRedirect('/home')
             # Authentication failed
             else:
