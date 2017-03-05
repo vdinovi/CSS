@@ -378,6 +378,8 @@ function selectOption(element) {
         }
     }
    // Add option to selected option list
+    if (filterType = "#time-options")
+        return;
     if (element.checked) {
         var optionFormatString = 
                     "<div id=\"{0}\"class=\"selected-option\">\n" +
@@ -385,6 +387,7 @@ function selectOption(element) {
                     "  <li class=\"filter-options\">{1}</li>\n" +
                     "</div>"; 
         var text = element.parentNode.parentNode.innerText;
+        var optionAlreadySelected = false;
         filterType.children("div").each( function(index, value) {
             if ($(value).prop('id').replace(/-/g, ' ') == text)
                 optionAlreadySelected = true;
@@ -408,7 +411,7 @@ function selectOption(element) {
 // Unselect all selected options
 function unselectAllSelectedOptions() {
     for (var i = 0; i < filter_types.length; ++i) {
-        $("#"+filter_types[i]+"-options").children("div").each(function(index, value) {
+       $("#"+filter_types[i]+"-options").children("div").each(function(index, value) {
             unselectSelectedOption(value.id);
         });
     }

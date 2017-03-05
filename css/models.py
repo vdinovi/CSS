@@ -435,7 +435,7 @@ class Schedule(models.Model):
 # Section is our systems primary scheduled object
 # Each section represents a department section that is planned for a particular schedule
 class Section(models.Model):
-    section_num = models.IntegerField(default=0)
+    section_num = models.IntegerField()
     schedule = models.ForeignKey(Schedule, on_delete=models.CASCADE)
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
     section_type = models.ForeignKey(SectionType, null=True, on_delete=models.SET_NULL)
