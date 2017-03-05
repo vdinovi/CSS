@@ -7,8 +7,8 @@ class DepartmentSettings():
     def __init__(self):
         self.name = None
         self.chair = None
-        self.start_time = "00:00 AM"
-        self.end_time = "00:00 AM"
+        self.start_time = "00:00"
+        self.end_time = "00:00"
 
     @classmethod
     def load_settings(cls):
@@ -49,3 +49,10 @@ class DepartmentSettings():
                 self.end_time = end_time
         self.save_settings()
         
+
+# Custom FileContent error. Used when parsing inavlid data within file
+class FileParserError(Exception):
+    """ Raise for problems parsing input files """
+    pass
+
+

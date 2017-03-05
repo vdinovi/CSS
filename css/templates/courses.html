@@ -39,7 +39,7 @@
               <tr>
                 <td>
                   <button type="button" class="btn btn-info btn-xs" data-toggle="modal" data-target="#delete-course" onclick="setDeleteFormItem('{{ course.name }}', 'id_course_name')"><span class="glyphicon glyphicon-minus"></span>&nbsp;</button>
-                  <button type="button" class="btn btn-info btn-xs" data-toggle="modal" data-target="#edit-course" onclick="setEditFormFields('{{ course.name }}', 'course')"><span class="glyphicon glyphicon-edit"></span>&nbsp;</button>
+                  <button type="button" class="btn btn-info btn-xs" data-toggle="modal" data-target="#edit-course" onclick="setEditFormFields('{{ course.name }}', 'course'), getCourseInfo('{{ course.name }}', '{{ csrf_token }}')"><span class="glyphicon glyphicon-edit"></span>&nbsp;</button>
                 </td>
                 <td name="courseName">{{ course.name }}</td>
                 <td name="description">{{ course.description }}</td>
@@ -48,7 +48,7 @@
               {% endfor %}
             </tbody>
           </table>
-          <button type="button" class="btn btn-info btn-xs" data-toggle="modal" data-target="#add-course">+</button>
+          <button type="button" class="btn btn-info btn-xs" data-toggle="modal" data-target="#add-course"><span class="glyphicon glyphicon-plus"></button>
           <!-- <button type="button" class="btn btn-info btn-xs" data-toggle="modal" data-target="#delete-course">-</button> -->
         </div>
       </div>
@@ -82,11 +82,23 @@
             <h4 class="modal-title">Edit Course</h4>
           </div>
           <div class="modal-body">
-            <form method="POST" action="?">{% csrf_token %}
-              <p>Edit Course</p>
+            <form id="edit-course-form-form" novalidate method="POST" action="?">{% csrf_token %}
+              <h4>Course Info</h4>
               {{ edit_course_form.as_p }}
-              <button type="submit" name="edit-course-form" class="save btn btn-default">submit</button>
-            </form>
+              <button type="submit" name="edit-course-form" class="save btn btn-default">save</button>
+                </form>
+              <h4>Section Types</h4>
+              <p id="ajax-area"></p>
+              <div id="add-section-type-area" style="display: none;">
+                {{ add_course_section_type_form.as_p }}
+              </div>
+              <div style="margin-bottom: 2%;">
+                <button id="add-section-type-button" style="font-size: .7em;" type="button" class="btn btn-info btn-xs"  onclick="addSectionType()"><span class="glyphicon glyphicon-plus"></button>
+                <button id="save-section-type-button" style="font-size: .7em; display: none;" type="button" class="btn btn-info btn-xs"  onclick="submitSectionType()"><span class="glyphicon glyphicon-ok"></button>
+              </div>
+
+            <div>
+            </div>
           </div>
         </div>
       </div>
@@ -114,5 +126,6 @@
 
     {% load static %}
     <script src="{% static "js/resources.js" %}"></script>
+
   </body>
 </html>

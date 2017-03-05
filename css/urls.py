@@ -34,6 +34,8 @@ urlpatterns = [
         url(r'^$', views.SchedulingView, name='scheduling'),
         url(r'^options$', scheduling.Options, name='options'), 
         url(r'^schedules$', scheduling.Schedules, name='schedules'),
+        url(r'^sections$', scheduling.Sections, name='sections'),
+        url(r'^newSection$', scheduling.NewSection, name='newSection')
     ])),
     url(r'^department/', include([
         url(r'^schedulers/$', views.SchedulersView, name='schedulers'),
@@ -46,7 +48,8 @@ urlpatterns = [
     url(r'^loginhelp/$', views.LoginView, name='loginhelp'),
     url(r'^landing/$', views.LandingView, name='landing'),
     url(r'^logout/$', views.LogoutView, name='logout'),
-    url(r'^availability/$', views.AvailabilityView, name='availability')
+    url(r'^availability/$', views.AvailabilityView, name='availability'),
+    url(r'^availability/availabilityView$', views.AvailabilityView, name='availabilityView')
 
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 

@@ -143,6 +143,13 @@ STATICFILES_DIRS = [
         os.path.join(PROJECT_ROOT, 'static')
 ]
 
+
+import socket
+try:
+    HOSTNAME = socket.gethostname()
+except:
+    HOSTNAME = 'localhost:8000'
+
 # EMAIL
 EMAIL_HOST='smtp.gmail.com'
 EMAIL_PORT=587
@@ -159,3 +166,8 @@ DEPARTMENT_SETTINGS = DepartmentSettings.load_settings()
 
 SESSION_ENGINE = "django.contrib.sessions.backends.signed_cookies" # 
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True # force session expiration on browser close 
+
+FILE_UPLOAD_HANDLERS = [
+    'django.core.files.uploadhandler.MemoryFileUploadHandler',
+    'django.core.files.uploadhandler.TemporaryFileUploadHandler',
+]

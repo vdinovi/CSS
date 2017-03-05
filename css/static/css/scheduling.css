@@ -81,6 +81,15 @@
     color: black;
 }
 
+.btn.active .btn:active {
+    background-color: #94bdbd;
+}
+
+.invis-btn {
+    background: white;
+    
+}
+
 /* Enlarged text box */
 body input[type=checkbox] {
   transform: scale(2);
@@ -95,6 +104,11 @@ body input[type=checkbox] {
     /*margin-top: 13px;*/
     height:100%;
     vertical-align: middle;
+}
+
+.active-schedule {
+    background-color: #b5cadc;
+    border-radius:2px;
 }
 
 /* **************************** */
@@ -149,6 +163,8 @@ body input[type=checkbox] {
     border-bottom: 0px;
 }
 
+/* selected-option is for options that have been checked 
+ * and show up in filter window */
 .selected-option {
     display: inline-block;
     float: left;
@@ -169,6 +185,20 @@ body input[type=checkbox] {
     height:25px;
 }
 
+/* Window for the time option */
+.time-option-window {
+    width: 100%;
+    height: 100%;
+    background-color: white;
+    border-radius: 5px;
+    text-align: center;
+}
+
+.day-btn:active {
+    display:inline-block;
+    background-color: #94bdbd;
+}
+
 
 
 /************* ABOVE IS ORGANIZED *************/
@@ -184,7 +214,7 @@ body input[type=checkbox] {
 .filter-logic {
     background-color: #ccccc9;
     width: 100%;
-    height: 25%;
+    height: 23%;
     bottom:0;
     vertical-align: middle;
     display: inline-block;
@@ -229,10 +259,9 @@ body input[type=checkbox] {
     white-space: nowrap;
 }
 
-.section-detail-table {
-
+.table > thead > tr.top > th.sorted {
+    background-color: #b3cccc;
 }
-
 
 
 .logic-buttons {
@@ -240,4 +269,49 @@ body input[type=checkbox] {
     padding-top:0;
 }
 
+/* drop down AND/OR style */
+div#filter-logic-frame > div > div > select {
+    margin-left: 20px;
+    padding: 0 15px;
+    border: solid #94bdbd;
+}
+div#filter-logic-frame > div > div > select[disabled] {
+    display: none;
+}
+
+/* filter logic frame custom style from other frames */
+h4.filter-logic {
+    background-color: #e5e5e5;
+    text-align: center;
+    padding-top: 50px;
+}
+div#filter-logic-frame {
+    margin-top: 10px;
+    margin-left: 12%;
+    padding-right: 32%;
+    width: 80%;
+    height: 250px;
+}
+button#apply-filter-btn {
+    margin-left: 12%;
+    width: 80%;
+    margin-top: 5px;
+    padding-right: 10%;
+}
+
+/* Filter Type in Logic Window style */
+label.checkbox-inline {
+    color:gray;
+    padding-top: 15px!important;
+}
+label.checkbox-inline.checked {
+    color:#333;
+    padding-top: 15px;
+}
+
+/* New Section Form */
+.new_section_inputs {
+    position:relative;
+    text-align: center;
+}
 
