@@ -130,8 +130,22 @@ def Sections(request):
 def NewSection(request):
     res = HttpResponse()
     if request.method == "POST":
-        return
+        print "TEST POST"
+        res.status_code = 200
     else:
+        print "TEST OTHER"
+        res.status_code = 400
+    return res
+
+# Deleting a section.
+@csrf_exempt
+def DeleteSection(request):
+    res = HttpResponse()
+    if request.method == "POST":
+        print "TEST POST"
+        res.status_code = 200
+    else:
+        print "TEST OTHER"
         res.status_code = 400
     return res
 

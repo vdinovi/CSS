@@ -433,6 +433,7 @@ class Schedule(models.Model):
 # Section is our systems primary scheduled object
 # Each section represents a department section that is planned for a particular schedule
 class Section(models.Model):
+    section_num = models.IntegerField(default=0)
     schedule = models.ForeignKey(Schedule, on_delete=models.CASCADE)
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
     section_type = models.ForeignKey(SectionType, null=True, on_delete=models.SET_NULL)
@@ -451,7 +452,7 @@ class Section(models.Model):
 
     @classmethod
     def create(
-        cls, term_name, course_name, section_type, start_time, end_time, days, faculty_email, room_name,
+        cls, section_num, term_name, course_name, section_type, start_time, end_time, days, faculty_email, room_name,
         capacity, students_enrolled, students_waitlisted, conflict,
         conflict_reason, fault, fault_reason):
         # these objects will actually be passed into the Section because of the ForeignKey
@@ -481,6 +482,7 @@ class Section(models.Model):
         if fault == 'y' and fault_reason != "faculty" and fault_reason != "room":
             raise ValidationError("Invalid fault reason.")
         section = cls(
+                  section_num=section_num,
                   schedule=schedule,
                   course=course,
                   section_type=section_type,
@@ -499,8 +501,18 @@ class Section(models.Model):
         section.save()
         return section
 
+    # This takes in the name which is constructed in .to_json() as course-section_num
     @classmethod
-    def get_section(cls, **kwargs):
+    def get_section_by_name(cls, name):
+        nameStrArr = name.split("-")
+        course = nameStrArr[0]
+        num = nameStrArr[1]
+        return cls.objects.get(course=course, section_num=num)
+
+
+    # THIS IS FOR PAULA's TESTING PURPOSES: don't use for anything besides the foreign key attributes
+    @classmethod
+    def get_section_test(cls, **kwargs):
         for k,v in kwargs.iteritems():
             if k == 'schedule':
                 return cls.objects.get(schedule=Schedule.get_schedule(v))
@@ -591,15 +603,14 @@ class Section(models.Model):
             finalQuery = timeQuery
 
         try:
-            print "FILTERS APP"
             sections = cls.objects.filter(finalQuery)
         except:
             sections = []
         return sections
 
     def to_json(self):
-        return dict(id = str(self.id),
-                    name = self.course.name + "-" + str(self.id),
+        return dict(id = str(self.section_num),
+                    name = self.course.name + "-" + str(self.section_num),
                     term = self.schedule.academic_term,
                     course = self.course.name,
                     type = self.section_type.name,

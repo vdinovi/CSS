@@ -646,7 +646,7 @@ function getSelectedFilters() {
 function NewSection(request) {
     var sectionData = {};
     sectionData = {
-        'schedule': "#academic-term", 
+        'schedule': $("#academic-term").text(), 
          'course': "#course",
          'section-type': "#section-type",
          'faculty': "#faculty",
@@ -659,27 +659,10 @@ function NewSection(request) {
     $.ajax({
         type: "POST",
         url: "newSection",
-        data: JSON.stringify(sectionData),
+        data: JSON.stringify({"test": "hello"}),
         dataType: 'json',
         success: function(response) {
-            console.log(data);
-            Section.create(
-                sectionData.get(schedule),
-                sectionData.get(course),
-                sectionData.get(section-type),
-                sectionData.get(start_time),
-                sectionData.get(end_time),
-                sectionData.get(days),
-                sectionData.get(faculty),
-                sectionData.get(room),
-                sectionData.get(capacity),
-                0, 
-                0,
-                'n',
-                None,
-                'n',
-                None
-                )
+            console.log("Hello");
         },
         error: function(err) {
             console.log(err);
@@ -717,6 +700,25 @@ function updateSectionDetails(resort) {
         }
     }
 }
+
+function deleteSection(element) {
+    sectionName = $($(element).children("td")[0]).text();
+    console.log(sectionName);
+    $.ajax({
+        type: "POST",
+        url: "delete-section",
+        dataType: 'json',
+        data: JSON.stringify({"section": sectionName}),
+        success: function(response) {
+            console.log("Hello");
+        },
+        error: function(err) {
+            console.log(err);
+        }
+    });
+}
+
+
 
 // removes the section row from Section Details (does not delete)
 function removeSectionFromDetails(element) {
