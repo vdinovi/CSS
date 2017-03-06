@@ -66,6 +66,8 @@
     border: 1px solid black;
     border-radius: 5px;
     display:inline-block;
+    overflow:auto;
+    overflow-y: scroll;
 }
 
 #filter-logic-frame {
@@ -90,9 +92,19 @@
     
 }
 
+
+.active-schedule {
+    background-color: #b5cadc;
+    border-radius:2px;
+}
+
 /* Enlarged text box */
-body input[type=checkbox] {
-  transform: scale(2);
+input[type=checkbox] {
+ -ms-transform: scale(2); /* IE */
+ -moz-transform: scale(2); /* FF */
+ -webkit-transform: scale(2); /* Safari and Chrome */
+ -o-transform: scale(2); /* Opera */
+  padding: 10px;
 }
 
 /* ********************** */
@@ -106,10 +118,7 @@ body input[type=checkbox] {
     vertical-align: middle;
 }
 
-.active-schedule {
-    background-color: #b5cadc;
-    border-radius:2px;
-}
+
 
 /* **************************** */
 /* ***** Section Creation ***** */
@@ -130,7 +139,6 @@ body input[type=checkbox] {
 .filter-type-window {
     width: 100%;
     height: 100%;
-    overflow-y: scroll;
 }
 
 /* [INACTIVE] Individual filter type div (inactive) */
@@ -161,6 +169,9 @@ body input[type=checkbox] {
     border: 1px solid #cccccc;
     border-top: 0px;
     border-bottom: 0px;
+}
+
+.option-frame { 
 }
 
 /* selected-option is for options that have been checked 

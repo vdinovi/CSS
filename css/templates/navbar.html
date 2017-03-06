@@ -18,11 +18,12 @@
                 {% else %}
                 <a href="/login" class="navbar-link navbar-right logout-button">Login</a>
                 {% endif %}
-                <a href="http://{{ request.get_host }}/register" class="navbar-link navbar-right logout-button">Register</a>
         </div>
     </div>
 
     <div class="collapse navbar-collapse custom-nav-bar-header">
+    {% if request.user.is_authenticated %}
+        {% if request.session.user_type == "scheduler" %}
         <ul class="nav navbar-nav navbar-right" style="margin-right: 25px;">
             <!-- Home -->
             <div class="dropdown">
@@ -54,6 +55,22 @@
                 </div>
             </div>
         </ul>
+        {% elif request.session.user_type == "faculty" %}
+        <ul class="nav navbar-nav navbar-right" style="margin-right: 25px;">
+            <div class="dropdown">
+                <button onclick="" class="dropbtn">
+                    <a href="http://{{ request.get_host }}/home" style="color: #777; text-decoration: none;">HOME</a>
+                </button>
+            </div>
+            <div class="dropdown">
+                <button onclick="dropdownPreferencesFunction()" class="dropbtn">PREFERENCES</button>
+                <div id="preferences-dropdown" class="dropdown-content">
+                    <a href="http://{{ request.get_host }}/availability">Availability</a>
+                    <a href="http://{{ request.get_host }}/course">Course</a>
+                </div>
+        </ul>
+        {% endif %}
+    {% endif %}
     </div>      
 
     <!-- Bootstrap js -->
@@ -75,7 +92,9 @@
         document.getElementById("department-dropdown").classList.toggle("show");
     }
 
-
+    function dropdownPreferencesFunction() {
+        document.getElementById("preferences-dropdown").classList.toggle("show");
+    }
     // Close the dropdown menu if the user clicks outside of it
     window.onclick = function(event) {
         if (!event.target.matches('.dropbtn')) {

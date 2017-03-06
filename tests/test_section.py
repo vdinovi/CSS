@@ -17,11 +17,11 @@ class SectionTestCase(TestCase):
         room = Room.create("14-156", "Graphics", 30, None, None)
         room = Room.create("14-157", "Security", 30, None, None)
         Section.create(
-            schedule1.academic_term, course101.name, type1.name, "10:00", "12:00", "MWF", 
+            1, schedule1.academic_term, course101.name, type1.name, "10:00", "12:00", "MWF", 
             "paula@calpoly.edu", "14-156", 30, 0, 0, 
             "n", None, "n", None)
         Section.create(
-            schedule2.academic_term, course102.name, type2.name, "12:00", "14:00", "MWF", 
+            1, schedule2.academic_term, course102.name, type2.name, "12:00", "14:00", "MWF", 
             "sigal@calpoly.edu", "14-157", 50, 0, 0, 
             "y", "faculty", "y", "room")
         
@@ -123,7 +123,7 @@ class SectionTestCase(TestCase):
     #     section = Section.objects.get(fault="n")
     #     self.assertEquals(section.fault_reason, None)
 
-        #--------------- Filter Tests ----------------#
+    #     #--------------- Filter Tests ----------------#
 
     # def test_section_filter_course_one(self):
     #     """ A section matches the name of one course we filter by. """
@@ -206,7 +206,7 @@ class SectionTestCase(TestCase):
     #     res_sections = Section.filter_json(course_faculty_filter)
     #     self.assertEquals(len(res_sections), 1)
 
-    # # extra more complex tests to still be implemented
+    # extra more complex tests to still be implemented
 
     # def test_section_time_invalid(self):
     #     """ 

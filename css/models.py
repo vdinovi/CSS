@@ -157,7 +157,6 @@ class FacultyDetails(models.Model):
     target_work_units = models.IntegerField(default=0, null=True) # in units
     target_work_hours = models.IntegerField(default=0, null=True) # in hours
     changed_preferences = models.CharField(max_length=1) # 'y' or 'n'
-    #availability = models.ForeignKey(Availability, on_delete=models.CASCADE)
 
     @classmethod
     def create(cls, faculty, target_work_units, target_work_hours):
@@ -173,15 +172,7 @@ class FacultyDetails(models.Model):
             self.target_work_hours = new_work_hours
         self.changed_preferences = 'y'
 
-    @classmethod
-    def get_availability_list(cls, faculty):
-        entries = cls.objects.filter(faculty=faculty)
-        # join the course ID to the course table
-        aval_arr = []
-        for entry in entries: # go through and make list of tuples (rank, course_name, course_description, comments)
-            aval_arr += [(entry.preferred)]
-        course_arr.sort(key=lambda tup:tup[0]) # sort courses by rank (first spot in tuple)
-        return course_arr
+
 
 
     # @TODO Function to yes changed_preferences to 'n'? Also consider naming it something
@@ -362,17 +353,18 @@ class WorkInfo(models.Model):
 class Availability(models.Model):
     class Meta:
         unique_together = (("faculty", "day_of_week", "start_time"),)
-    faculty = models.ForeignKey(CUser, on_delete=models.CASCADE)
+    faculty = models.ForeignKey(CUser, on_delete=models.CASCADE, null=True)
     day_of_week = models.CharField(max_length=16) # MWF or TR
-    start_time = models.IntegerField()
-    end_time = models.IntegerField()
+    start_time = models.TimeField()
+    end_time = models.TimeField()
     level = models.CharField(max_length=16) #preferred, unavailable
 
     @classmethod
+    def get_availability_list(cls, faculty):
+        return cls.objects.filter(faculty=faculty)
+
+    @classmethod
     def create(cls, email, day, start_time, end_time, level):
-        print("Create availability")
-        print("level")
-        print(level)
         faculty = CUser.get_faculty(email=email)
         if (day is None):
             print("Invalid days of week input")
@@ -392,7 +384,14 @@ class Availability(models.Model):
             availability.save()
             return availability
 
-# ---------- Scheduling Models ----------
+    def to_json(self):
+		  return dict(faculty = self.faculty.to_json(),
+					day = self.day_of_week,
+					start_time = self.start_time,
+					end_time = self.end_time,
+					level = self.level)
+
+        # ---------- Scheduling Models ----------
 # Schedule is a container for scheduled sections and correponds to exactly 1 academic term
 class Schedule(models.Model):
     academic_term = models.CharField(max_length=16, unique=True) # eg. "Fall 2016"
@@ -441,6 +440,7 @@ class Schedule(models.Model):
 # Section is our systems primary scheduled object
 # Each section represents a department section that is planned for a particular schedule
 class Section(models.Model):
+    section_num = models.IntegerField()
     schedule = models.ForeignKey(Schedule, on_delete=models.CASCADE)
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
     section_type = models.ForeignKey(SectionType, null=True, on_delete=models.SET_NULL)
@@ -459,7 +459,7 @@ class Section(models.Model):
 
     @classmethod
     def create(
-        cls, term_name, course_name, section_type, start_time, end_time, days, faculty_email, room_name,
+        cls, section_num, term_name, course_name, section_type, start_time, end_time, days, faculty_email, room_name,
         capacity, students_enrolled, students_waitlisted, conflict,
         conflict_reason, fault, fault_reason):
         # these objects will actually be passed into the Section because of the ForeignKey
@@ -489,6 +489,7 @@ class Section(models.Model):
         if fault == 'y' and fault_reason != "faculty" and fault_reason != "room":
             raise ValidationError("Invalid fault reason.")
         section = cls(
+                  section_num=section_num,
                   schedule=schedule,
                   course=course,
                   section_type=section_type,
@@ -696,6 +697,7 @@ class CohortData(models.Model):
             chunks.append(s)
         data = ''.join(chunks)
         lines = data.split('\n')
+        messages = []
         # Read schedule
         term = ''
         for w in lines[0].split():
@@ -705,7 +707,8 @@ class CohortData(models.Model):
         try:
             schedule = Schedule.get_schedule(term_name = term)
         except ObjectDoesNotExist:
-            raise FileParserError("Term '%s' not found on line %d" % (term, i))
+            messages.append("Schedule '%s' on line %d does not exist" % (term, 0))
+            return messages
         # Begin parsing data
         courses = None
         i = 1
@@ -724,43 +727,54 @@ class CohortData(models.Model):
             if len(words) > 1:
                 courses = []
                 if words[1] != "Total":
-                    raise FileParserError("Missing 'Total' index on line  %d" % (i,))
+                    messages.append("Missing 'Total' index on line %d" % (i,))
+                    continue
                 for j in range(2, len(words), 2):
                     name = words[j] + ' ' + words[j+1]
-                    #if not Course.objects.filter(name=name).exists():
-                    #    raise FileParserError("Could not find course '%s' on line %d" % (name, i))
-                    #else:
-                    courses.append(name)
+                    if not Course.objects.filter(name=name).exists():
+                        messages.append("Could not find course '%s' on line %d" % (name, i))
+                        return messages
+                    else:
+                        courses.append(name)
             i += 1
             freshman = lines[i].split()
             sophomore = lines[i+1].split()
             junior = lines[i+2].split()
             senior = lines[i+3].split()
             if (freshman[0] != "Freshman"):
-                raise FileParserError("Unexpected keyword '%s', expected 'Freshman' on line %d" % (freshman[0], i))
+                messages.append("Unexpected keyword '%s', expected 'Freshman' on line %d" % (freshman[0], i))
+                continue
             if (sophomore[0] != "Sophomore"):
-                raise FileParserError("Unexpected keyword '%s', expected 'Sophomore' on line %d" % (sophomore[0], i+1))
+                messages.append("Unexpected keyword '%s', expected 'Sophomore' on line %d" % (sophomore[0], i))
+                continue
             if (junior[0] != "Junior"):
-                raise FileParserError("Unexpected keyword '%s', expected 'Freshman' on line %d" % (junior[0], i+2))
+                messages.append("Unexpected keyword '%s', expected 'Junior' on line %d" % (junior[0], i))
+                continue
             if (senior[0] != "Senior"):
-                raise FileParserError("Unexpected keyword '%s', expected 'Freshman' on line %d" % (senior[0], i+3))
+                messages.append("Unexpected keyword '%s', expected 'Senior' on line %d" % (senior[0], i))
+                continue
             # Create cohort total
             for j  in range (1, len(courses)):
                 try:
                     if (courses[j] == "Total"):
-                        #CohortTotal.create(schedule=schedule, major=major,
-                        #                   freshman=int(freshman[j+1]), sophomore=int(sophomore[j+1]),
-                        #                   junior=int(junior[j+1]), senior=int(senior[j+1]))
+                        CohortTotal.create(schedule=schedule, major=major,
+                                           freshman=int(freshman[j+1]), sophomore=int(sophomore[j+1]),
+                                           junior=int(junior[j+1]), senior=int(senior[j+1]))
                         pass
                     else:
-                        #course = Course.get_course(name=courses[j])
-                        #CohortData.create(schedule=schedule, course=course, major=major,
-                        #                  freshman=int(freshman[j+1]), sophomore=int(sophomore[j+1]),
-                        #                  junior=int(junior[j+1]), senior=int(senior[j+1]))
+                        course = Course.get_course(name=courses[j])
+                        CohortData.create(schedule=schedule, course=course, major=major,
+                                          freshman=int(freshman[j+1]), sophomore=int(sophomore[j+1]),
+                                          junior=int(junior[j+1]), senior=int(senior[j+1]))
                         pass
-                except IndexError:
-                    raise FileParserError("Not enough data entries on lines %d through %d" % (i, i+3))
+                except ObjectDoesNotExist as e:
+                    messages.append("Could not create data entries on lines %d through %d" % (i, i+3))
+                except IndexError as e:
+                    messages.append("Not enough data entries on lines %d through %d" % (i, i+3))
+                except:
+                    messages.append("Unkown error on lines %d through %d" % i (i+3))
             i += 4
+        return messages
 
 class CohortTotal(models.Model):
     class Meta:
@@ -790,7 +804,6 @@ class CohortTotal(models.Model):
     @classmethod
     def get_cohort_total(cls, schedule, major):
         return cls.objects.get(schedule=schedule, major=major)
-
 
 # Student Plan Data.
 class StudentPlanData(models.Model):
@@ -837,6 +850,7 @@ class StudentPlanData(models.Model):
         for s in file.chunks():
             chunks.append(s)
         data = ''.join(chunks)
+        messages = []
         lines = data.split('\n')
         term_ignore = ["quarter"] #Ignore these terms when reading in term name
         # Keys that are accepted by the system
@@ -844,14 +858,13 @@ class StudentPlanData(models.Model):
                       "Sections Offered", "Enrollment Capacity", "Unmet Seat Demand", "% Unmet Seat Demand"]
         # Index for parsing
         index = lines[0].split(',')
-        print "len(index)=" + str(len(index))
         # Null out anything that is not a valid key
         for i in range(0, len(index)):
             if index[i] not in valid_keys:
                 index[i] = None
         # Parse all lines using valid keys in index
-        try:
-            for i in range(1, len(lines)):
+        for i in range(1, len(lines)):
+            try:
                 # Skip any empty lines
                 while (i < len(lines) and not lines[i].strip()):
                     i += 1
@@ -869,9 +882,29 @@ class StudentPlanData(models.Model):
                     content[index[j]] = line[j]
                 # Collect parsed data
                 # Remove ignored words from term name
-                schedule = Schedule.get_schedule(term_name=' '.join([w for w in content['Term'].split() if w.lower() not in term_ignore]).strip())
-                course = Course.get_course(name=content['Subject Code']+' '+content['Catalog Nbr'])
-                section_type = SectionType.get_section_type(name=content['Component'])
+                term = ' '.join([w for w in content['Term'].split() if w.lower() not in term_ignore]).strip()
+                try:
+                    schedule = Schedule.get_schedule(term_name=term)
+                except:
+                    messages.append("Schedule '%s' on line %d does not exist" % (term, i))
+                    continue
+                course = None
+                section_type = None
+                try:
+                    course = Course.get_course(name=content['Subject Code']+' '+content['Catalog Nbr'])
+                except ObjectDoesNotExist:
+                    messages.append("Course '%s' on line %d does not exist" % (content['Subject Code']+' '+content['Catalog Nbr'], i))
+                    continue
+                try:
+                    section_type = SectionType.get_section_type(name=content['Component'])
+                except ObjectDoesNotExist:
+                    messages.append("Section Type '%s' on line %d does not exist" % (content['Component'], i))
+                    continue
+                try:
+                    course.get_section_type(section_type_name=section_type.name)
+                except:
+                    messages.append("Course '%s' has no associated section type '%s'" % (course.name, section_type.name))
+                    continue
                 already_parsed = ["Term", "Subject Code", "Catalog Nbr", "Component"]
                 # Collect other secondary arguments
                 kwargs = {}
@@ -881,11 +914,28 @@ class StudentPlanData(models.Model):
                 # Create entry
                 cls.create(schedule=schedule, course=course, section_type=section_type, **kwargs)
                 print 'Success'
-        except IndexError as e:
-            raise FileParserError("IndexError on line %d: %s" % (i, e[0]))
-        except ObjectDoesNotExist as e:
-            raise FileParserError("Invalid entry on line %d: %s" % (i, e[0]))
-        """
-        except:
-            raise FileParserError("Unknown error on line %d" % (i,))
-        """
+            except IndexError as e:
+                messages.append("Invalid entry on line %d: %s" % (i, e[0]))
+            except:
+                raise
+                messages.append("Unknown error on line %d" % (i,))
+        return messages
+
+# Section Conflicts Model
+class SectionConflict(models.Model):
+    section1 = models.ForeignKey(Section, related_name="first_section", on_delete=models.CASCADE)
+    section2 = models.ForeignKey(Section, related_name="second_section", on_delete=models.CASCADE)
+    conflict_reason = models.CharField(max_length=8) # Faculty or Room
+
+    @classmethod
+    def create(cls, section1, section2, conflict_reason):
+        if section1 == section2:
+            raise ValidationError("Section does not conflict with itself.")
+        if conflict_reason != "faculty" and conflict_reason != "room":
+            raise ValidationError("Invalid conflict reason.")
+        conflict = cls(
+                    section1=section1,
+                    section2=section2,
+                    conflict_reason=conflict_reason)
+        conflict.save()
+        return conflict

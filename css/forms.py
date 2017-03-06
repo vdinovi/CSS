@@ -2,7 +2,7 @@ from django import forms
 from django.core.mail import send_mail
 from css.models import CUser, Room, Course, SectionType, Schedule, Section, Availability
 from django.http import HttpResponseRedirect
-from settings import DEPARTMENT_SETTINGS
+from settings import DEPARTMENT_SETTINGS, HOSTNAME
 import re
 from django.forms import ModelChoiceField
 
@@ -19,21 +19,21 @@ class LoginForm(forms.Form):
 
 #  Invite Form
 class InviteUserForm(forms.Form):
-    #@TODO Email field not working -> is_valid fails
-    email = forms.CharField()
+    email = forms.EmailField()
     first_name = forms.CharField()
     last_name = forms.CharField()
 
-    #@TODO send registraiton link in email
     def send_invite(self, usertype, request):
         first_name = self.cleaned_data['first_name']
         last_name = self.cleaned_data['last_name']
         name = first_name + ' ' + last_name
         email = self.cleaned_data['email']
-        link = HOSTNAME + '/register?first_name=' + first_name +'&last_name=' + last_name +'&user_type='+ usertype + '&email=' + email
-        send_mail('Invite to register for CSS', name + """, you have been invited to register for CSS. Please register using the following link: """
+        host = request.META['HTTP_HOST']
+        if not re.search(r'http', host):
+            host = 'http://' + host
+        link = host + '/register?first_name=' + first_name +'&last_name=' + last_name +'&user_type='+ usertype + '&email=' + email
+        send_mail('Invite to register for CSS', name + ", you have been invited to register for CSS. Please register using the following link:\n\n "
         + link, 'registration@inviso-css', [self.cleaned_data['email']])
-        print("sent email to " + self.cleaned_data['email'])
 
 # Registration Form
 # @TODO on load, pull fields from query string -> show failure if field not able to be loaded:
@@ -47,7 +47,6 @@ class RegisterUserForm(forms.Form):
     password2 = forms.CharField(label='Confirm Password', widget=forms.PasswordInput)
 
     def __init__(self, *args, **kwargs):
-        print(kwargs)
         if kwargs.pop('request') is "GET":
             self.first_name = kwargs.pop('first_name')
             self.last_name = kwargs.pop('last_name')
@@ -222,8 +221,8 @@ class AddSectionForm(forms.Form):
 class AddAvailabilityForm(forms.Form):
 	DAYS = ('Monday', 'Monday',),('Tuesday','Tuesday'),('Wednesday','Wednesday'), ('Thursday','Thursday',), ('Friday', 'Friday')
 	day = forms.ChoiceField(label='Day', choices=DAYS)
-	start_time = forms.IntegerField(label='Start Time')
-	end_time = forms.IntegerField(label='End Time')
+	start_time = forms.TimeField(label='Start Time')
+	end_time = forms.TimeField(label='End Time')
 	level = forms.ChoiceField(label='Type', choices=[('Preferred', 'Preferred'), ('Unavailable','Unavailable')])
 
 	def save(self, email):
