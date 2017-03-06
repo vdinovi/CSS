@@ -83,14 +83,21 @@ def HomeView(request):
 
 def AvailabilityView(request):
     res = HttpResponse()
+    availList = Availability.objects.filter()
+    for avail in availList:
+        print avail.faculty.user.first_name
+        print avail.start_time
+        print avail.end_time
+        #avail.delete()
+
     if request.method == "GET":
         return render(request,'availability.html', {
         			'availbilities_list': Availability.objects.filter(),
         			'add_availability_form': AddAvailabilityForm()})
-    elif request.method == "POST" and 'add_availability_form' in request.POST: 
+    elif request.method == "POST" and 'add_availability_form' in request.POST:
         form = AddAvailabilityForm(request.POST)
         print(form.errors.as_data())
-        if form.is_valid(): 
+        if form.is_valid():
             try:
                 faculty = request.session.get('email')
                 #form.save()
@@ -99,16 +106,16 @@ def AvailabilityView(request):
             except ValidationError as e:
                 res.status_code = 400
                 res.reason_phrase = "Invalid form entry"
-                return res  
+                return res
         else:
             res.status_code = 400
             res.reason_phrase = "Invalid form entry"
             return res
-    
+
     else:
         res.status_code = 400
     return res
-            
+
 
 def SchedulingView(request):
     res = HttpResponse()

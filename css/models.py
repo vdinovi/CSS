@@ -362,7 +362,7 @@ class WorkInfo(models.Model):
 class Availability(models.Model):
     class Meta:
         unique_together = (("faculty", "day_of_week", "start_time"),)
-    faculty = models.OneToOneField(CUser, on_delete=models.CASCADE, null=True)
+    faculty = models.ForeignKey(CUser, on_delete=models.CASCADE)
     day_of_week = models.CharField(max_length=16) # MWF or TR
     start_time = models.IntegerField()
     end_time = models.IntegerField()
@@ -370,17 +370,25 @@ class Availability(models.Model):
 
     @classmethod
     def create(cls, email, day, start_time, end_time, level):
+        print("Create availability")
+        print("level")
+        print(level)
         faculty = CUser.get_faculty(email=email)
         if (day is None):
+            print("Invalid days of week input")
             raise ValidationError("Invalid days of week input")
         elif (start_time is None):
+            print("Need to input start time")
             raise ValidationError("Need to input start time")
         elif (end_time is None):
+            print("Need to input end time")
             raise ValidationError("Need to input end time")
-        elif (level is None) or (level != "preferred" and level != "unavailable"):
+        elif (level is None) or ((level != "Preferred" and level != "Unavailable")):
+            print("Need to input level of availability: preferred or unavailable")
             raise ValidationError("Need to input level of availability: preferred or unavailable")
         else:
             availability = cls(faculty=faculty,day_of_week=day, start_time=start_time, end_time=end_time, level=level)
+            print("Availability saved for: " + faculty.user.first_name + " on " + str(day) + " from " + str(start_time) + " to " + str(end_time) + " at level: " + str(level))
             availability.save()
             return availability
 
@@ -698,7 +706,7 @@ class CohortData(models.Model):
             schedule = Schedule.get_schedule(term_name = term)
         except ObjectDoesNotExist:
             raise FileParserError("Term '%s' not found on line %d" % (term, i))
-        # Begin parsing data 
+        # Begin parsing data
         courses = None
         i = 1
         while i < len(lines):
@@ -740,18 +748,18 @@ class CohortData(models.Model):
             for j  in range (1, len(courses)):
                 try:
                     if (courses[j] == "Total"):
-                        #CohortTotal.create(schedule=schedule, major=major, 
+                        #CohortTotal.create(schedule=schedule, major=major,
                         #                   freshman=int(freshman[j+1]), sophomore=int(sophomore[j+1]),
                         #                   junior=int(junior[j+1]), senior=int(senior[j+1]))
                         pass
-                    else: 
+                    else:
                         #course = Course.get_course(name=courses[j])
                         #CohortData.create(schedule=schedule, course=course, major=major,
                         #                  freshman=int(freshman[j+1]), sophomore=int(sophomore[j+1]),
                         #                  junior=int(junior[j+1]), senior=int(senior[j+1]))
                         pass
                 except IndexError:
-                    raise FileParserError("Not enough data entries on lines %d through %d" % (i, i+3)) 
+                    raise FileParserError("Not enough data entries on lines %d through %d" % (i, i+3))
             i += 4
 
 class CohortTotal(models.Model):
@@ -797,7 +805,7 @@ class StudentPlanData(models.Model):
     enrollment_capacity = models.IntegerField(default=0)
     unmet_seat_demand = models.IntegerField(default=0)
     percent_unmet_seat_demand = models.FloatField(default=0)
-    
+
     @classmethod
     def create(cls, schedule, course, section_type, **kwargs):
         plan_data = cls(schedule=schedule, course=course, section_type=section_type)
@@ -833,13 +841,13 @@ class StudentPlanData(models.Model):
         term_ignore = ["quarter"] #Ignore these terms when reading in term name
         # Keys that are accepted by the system
         valid_keys = ["Term", "Subject Code", "Catalog Nbr", "Course Title", "Component", "Seat Demand",
-                      "Sections Offered", "Enrollment Capacity", "Unmet Seat Demand", "% Unmet Seat Demand"] 
+                      "Sections Offered", "Enrollment Capacity", "Unmet Seat Demand", "% Unmet Seat Demand"]
         # Index for parsing
         index = lines[0].split(',')
         print "len(index)=" + str(len(index))
         # Null out anything that is not a valid key
         for i in range(0, len(index)):
-            if index[i] not in valid_keys: 
+            if index[i] not in valid_keys:
                 index[i] = None
         # Parse all lines using valid keys in index
         try:
@@ -852,7 +860,7 @@ class StudentPlanData(models.Model):
                     break
                 # Parse line
                 line = lines[i].split(',')
-                content = {} 
+                content = {}
                 for j in range(0, len(index)):
                     # Does not have a valid key
                     if index[j] is None:
@@ -864,7 +872,7 @@ class StudentPlanData(models.Model):
                 schedule = Schedule.get_schedule(term_name=' '.join([w for w in content['Term'].split() if w.lower() not in term_ignore]).strip())
                 course = Course.get_course(name=content['Subject Code']+' '+content['Catalog Nbr'])
                 section_type = SectionType.get_section_type(name=content['Component'])
-                already_parsed = ["Term", "Subject Code", "Catalog Nbr", "Component"] 
+                already_parsed = ["Term", "Subject Code", "Catalog Nbr", "Component"]
                 # Collect other secondary arguments
                 kwargs = {}
                 for k, v in content.iteritems():
@@ -881,10 +889,3 @@ class StudentPlanData(models.Model):
         except:
             raise FileParserError("Unknown error on line %d" % (i,))
         """
-
-
-
-    
-
-
-
