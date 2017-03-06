@@ -34,20 +34,20 @@
       </div>
 
       <div class="col-lg-12">
-        <div class="col-lg-12">
+        <div class="panel panel-default col-md-6">
           <form method="POST" action="#" class="form-horizontal" role="form">
             {% csrf_token %}
             <div class="form-group">
               <label for=" department_name " class="col-md-6 control-label">Department Name</label>
               <div class="col-md-3 fieldWrapper">
-                <input type="text" name="name" class="form-control" value={{ settings.name }}>
+                <input type="text" name="name" class="form-control" value="{{ settings.name }}">
               </div>
             </div>
 
             <div class="form-group">
               <label for=" department_chair " class="col-md-6 control-label">Department Chair</label>
               <div class="col-md-3">
-                <input type="text" name="chair" class="form-control" id="inputType" value={{ settings.chair }}>
+                <input type="text" name="chair" class="form-control" id="inputType" value="{{ settings.chair }}">
               </div>
             </div>
 
@@ -55,25 +55,22 @@
               <label for="hours" class="col-md-6 col-md-offset-3 hours-label">Department Hours</label>
             </div>
 
-            <div class="time-inputs col-md-6 col-md-offset-3">
-              <div class="col-md-6">
-                <input type="time" name="start_time" class="form-control" id="settings_form.start_time" value={{ settings.start_time }} placeholder={{ settings.start_time }}>
-              </div>
-              <div class="col-md-6">
-                <input type="time" name="end_time" class="form-control" id="settings_form.end_time" value={{ settings.end_time }} placeholder={{ settings.end_time }}>
-              </div>
+            <div class="col-md-12 form-inline time-inputs col-md-offset-3">
+                <input type="time" name="start_time" class="form-control" id="settings_form.start_time" value="{{ settings.start_time }}" placeholder="{{ settings.start_time }}">
+                <input type="time" name="end_time" class="form-control" id="settings_form.end_time" value="{{ settings.end_time }}" placeholder="{{ settings.end_time }}">
             </div>
 
             <div class="col-md-12 space">
             </div>
 
-            <input name="submit-settings" type="submit" class="btn btn-small col-md-2 col-md-offset-5" value="Submit Settings">
+            <input name="submit-settings" type="submit" class="btn btn-small col-md-4 col-md-offset-4" value="Submit Settings">
 
             <div class="col-md-12 space">
             </div>
           </form>
-       </div>
-
+        </div>
+        <div class="col-sm-1 space">
+        </div>
         <div class="panel panel-default col-md-4">
           <div class="panel-heading">
             <h4>
@@ -108,17 +105,25 @@
           <button type="button" class="col-md-6 col-md-offset-3 btn btn-small" data-toggle="modal" data-target="#add-section-type">Add New</button>
         </div>
         <div class="panel panel-default col-md-4">
-          <h4>Upload Cohort Data</h4>
+          <h4>Upload File</h4>
+          {% if messages %}
+          <ul class="messages">
+            {% for m in messages %}
+            <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>
+              {{ m }}
+            </li>
+            {% endfor %}
+          </ul>
+          {% endif %}
           <form method="POST" enctype="multipart/form-data" action="#"> {% csrf_token %}
+            <label for="filetype">Select the type of file you wish to upload</label>
+            <select id="filetype" name="filetype" class="form-control">
+              <option>Student Plan Data</option>
+              <option>Cohort Data</option>
+              <option>Historic Enrollment Data</option>
+            </select>
             {{ upload_form.as_p }}
-            <button type="submit" name="cohort-data" class="save btn btn-default">submit</button>
-          </form>
-        </div>
-        <div class="panel panel-default col-md-4">
-          <h4>Upload Student Plan Data</h4>
-          <form method="POST" enctype="multipart/form-data" action="#"> {% csrf_token %}
-            {{ upload_form.as_p }}
-            <button type="submit" name="student-plan-data" class="save btn btn-default">submit</button>
+            <button type="submit" name="file-upload" class="save btn btn-default">submit</button>
           </form>
         </div>
       </div>
