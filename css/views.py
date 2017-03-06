@@ -12,57 +12,57 @@ from .forms import *
 from settings import DEPARTMENT_SETTINGS
 from json import *
 
+# ------ UTIL -----
+def ErrorView(request, code, reason):
+    return render(request, 'error.html', {
+                    'code': code,
+                    'reason': reason
+                  })
+
 # ---------------------------
 # --  Method-Based Views   --
 # ---------------------------
 def RegistrationView(request):
     res = HttpResponse()
-    #pass these credentials to the RegisterUserForm
-
     if request.method == "GET":
         first_name = request.GET.get('first_name')
         last_name = request.GET.get('last_name')
         user_type = request.GET.get('user_type')
-        email = request.GET.get('email')
+        email =  request.GET.get('email')
         if first_name is None or last_name is None or user_type is None or email is None:
-            res.status_code = 400
-            res.reason_phrase = "Bad query string"
+            return ErrorView(request, 400, "Please visit from the emailed registration link")
         else:
             storage = messages.get_messages(request)
             for msg in storage:
                 pass
             return render(request, 'registration.html', {
-                                   'registration_form': RegisterUserForm(request="GET",
-                                                                         first_name=first_name,
-                                                                         last_name=last_name,
-                                                                         user_type=user_type,
-                                                                         email=email)
-                         });
+                'registration_form': RegisterUserForm(request="GET",
+                    first_name=first_name,
+                    last_name=last_name,
+                    user_type=user_type,
+                    email=email)
+                });
     elif request.method == "POST":
         form = RegisterUserForm(request.POST, request="POST")
         if form.is_valid():
             try:
                 user = form.save()
                 return HttpResponseRedirect("/home")
-            except ValidationError as e:
-                res.status_code = 400
-                res.reason_phrase = "Invalid password entry"
-                return HttpResponseRedirect("/register")
             # db error
-            except IntegrityError as e:
-                if not e[0] == 1062:
-                    res.status_code = 500
-                    res.reason_phrase = "db error:" + e[0]
+            except ValidationError as e:
+                if re.search(r'duplicate', e[0]):
+                    return ErrorView(request, 400, "A user with that name already exists. Please login if that's you or contact a department scheduler.")
                 else:
-                    res.status_code = 400
-                    res.reason_phrase = "Duplicate entry"
-                    messages.error(request, "A user with that email already exists. Please login if that's you or contact a department scheduler.")
-                    return render(request, 'registration.html', {'registration_form': RegisterUserForm(), 'errors': messages.get_messages(request)})
+                    return ErrorView(request, 500, "Validation Error:" + e[0])
+            except IntegrityError as e:
+                if re.search(r'duplicate', e[0]):
+                    return ErrorView(request, 400, "A user with that email already exists. Please login if that's you or contact a department scheduler.") 
+                else:
+                    return ErrorView(request, 500, "DB Error:" + e[0])
         else:
-            res.status_code = 400
-            res.reason_phrase = "Invalid form entry"
+            return ErrorView(request, 400, "Invalid form entry")
     else:
-        res.status_code = 400
+        return ErrorView(request, 400, "")
     return res
 
 #  Index View
@@ -86,8 +86,8 @@ from django.views.decorators.csrf import csrf_exempt
 def AvailabilityView(request):
     res = HttpResponse()
     email = request.session.get('email')
-    list = Availability.get_availability_list(CUser.get_faculty('jasonmsawatzky@gmail.com'))
-    print(request.body)
+    list = Availability.get_availability_list(CUser.get_faculty(email=email))
+    
     if request.method == "GET":
         return render(request,'availability.html', {
         			'availability_list': list,
@@ -99,21 +99,15 @@ def AvailabilityView(request):
                 form.save(email)
                 return HttpResponseRedirect('/availability')
             except ValidationError as e:
-                res.status_code = 400
-                res.reason_phrase = "Invalid form entry"
-                return res  
+                return ErrorView(request, 400, "Invalid form entry")
         else:
-            res.status_code = 400
-            res.reason_phrase = "Invalid form entry"
-            return res
+            return ErrorView(request, 400, "Invalid form entry")
     elif request.method == "POST" and 'availability_view' in request.body: 
-    	data = json.dumps({"availability_view": [avail.to_json() for avail in list] })
-    	print(data)
-    	data.append({'email': email})
+    	data = json.dumps({"availability_view": [avail.to_json() for avail in list]})
         res.write(data)
         res.status_code = 200
     else:
-        res.status_code = 400
+        return ErrorView(request, 400, "")
     return res
             
 
@@ -130,7 +124,7 @@ def SchedulingView(request):
                       'add_schedule_form': AddScheduleForm()
                       })
     else:
-        res.status_code = 400
+        return ErrorView(request, 400, "")
     return res
 
 def LandingView(request):
@@ -153,57 +147,49 @@ def SettingsView(request):
                                              end_time=request.POST['end_time'])
             return HttpResponseRedirect('/department/settings')
         except ValidationError as e:
-            res.status_code = 400
-            res.reason_phrase = e[0]
+            return ErrorView(request, 400, e[0])
         else:
-            res.status_code = 400
-            res.reason_phrase = "Invalid form entry"
+            return ErrorView(request, 400, "Invalid form entry")
     elif request.method == "POST" and "add-section-type" in request.POST:
         form = AddSectionTypeForm(request.POST)
         if form.is_valid():
             form.save()
             return HttpResponseRedirect('/department/settings')
         else:
-            res.status_code = 200
-            res.reason_phrase = "Invalid form entry"
+            return ErrorView(request, 400, "Invalid form entry")
     elif request.method == "POST" and "delete-section-type" in request.POST:
         section = SectionType.get_section_type(name=request.POST['section-type-name'])
         if section is not None:
             section.delete()
             return HttpResponseRedirect('/department/settings')
         else:
-            res.status_code = 400
-            res.reason_phrase = "SectionType " + request.POST['section-type-name'] + " does not exist"
-    elif request.method == "POST" and 'cohort-data' in request.POST:
+            return ErrorView(request, 400, "SectionType " + request.POST['section-type-name'] + " does not exist")
+    elif request.method == "POST" and 'file-upload' in request.POST:
         form = UploadForm(request.POST, request.FILES)
         if form.is_valid():
             try:
-                result = CohortData.import_cohort_file(request.FILES['file'])
+                filetype = request.POST.get('filetype')
+                result = None
+                if filetype == "Student Plan Data":
+                    result = StudentPlanData.import_student_plan_file(request.FILES['file']) 
+                elif filetype == "Cohort Data":
+                    result = CohortData.import_cohort_file(request.FILES['file']) 
+                elif filetype == "Historic Enrollment Data":
+                    #@TODO implement
+                    #result = StudentPlanData.import_student_plan_file(request.FILES['file']) 
+                    result = ["Historic Data File Parsing: NOT YET IMPLEMENTED"]
+                else:
+                    return ErrorView(request, 400, "Invalid form entry")
                 for m in result:
                     messages.add_message(request, messages.ERROR, m, extra_tags="cohort") 
                 return HttpResponseRedirect("/department/settings")
             except:
                 raise
-            res.status_code = 500
+            return ErrorView(request, 500, "Failed upload")
         else:
-            res.status_code = 400
-            res.reason_phrase = "Invalid form entry"
-    elif request.method == "POST" and 'student-plan-data' in request.POST:
-        form = UploadForm(request.POST, request.FILES)
-        if form.is_valid():
-            try:
-                result = StudentPlanData.import_student_plan_file(request.FILES['file'])
-                for m in result:
-                    messages.add_message(request, messages.ERROR, m, extra_tags="plan") 
-                return HttpResponseRedirect("/department/settings")
-            except:
-                raise
-            res.status_code = 500
-        else:
-            res.status_code = 400
-            res.reason_phrase = "Invalid form entry"
+            return ErrorView(request, 400, "Invalid form entry")
     else:
-        res.status_code = 400
+        return ErrorView(request, 400, "")
     return res
 
 from .forms import LoginForm
@@ -237,9 +223,9 @@ def LoginView(request):
                 messages.error(request, "Invalid login credentials. Please try again.")
                 return render(request,'login.html', {'login_form':LoginForm(),'errors': messages.get_messages(request)})
         else:
-            res.status_code = 400
+            return ErrorView(request, 400, "")
     else:
-        res.status_code = 400
+        return ErrorView(request, 400, "")
     return res
 
 
@@ -266,18 +252,14 @@ def RoomsView(request):
                 form.save();
                 return HttpResponseRedirect("/resources/rooms")
             except ValidationError as e:
-                res.status_code = 400
-                res.reason_phrase = "Invalid form entry"
+                return ErrorView(request, 400, "Invalid form entry")
             except IntegrityError as e:
                 if not e[0] == 1062:
-                    res.status_code = 500
-                    res.reason_phrase = "db error:" + e[0]
+                    return ErrorView(request, 500, e[0])
                 else:
-                    res.status_code = 400
-                    res.reason_phrase = "Duplicate entry"
+                    return ErrorView(request, 400, "Duplicate Entry")
         else:
-            res.status_code = 400
-            res.reason_phrase = "Invalid form entry"
+            return ErrorView(request, 400, "Invalid form entry")
     elif request.method == "POST" and 'edit-form' in request.POST:
         form = EditRoomForm(request.POST)
         if form.is_valid():
@@ -285,7 +267,7 @@ def RoomsView(request):
             res.status_code = 200
             return HttpResponseRedirect('/resources/rooms')
         else:
-            res.status_code = 400
+            return ErrorView(request, 400, "")
     elif request.method == "POST" and 'delete-form' in request.POST:
         form = DeleteRoomForm(request.POST)
         if form.is_valid():
@@ -293,9 +275,9 @@ def RoomsView(request):
             res.status_code = 200
             return HttpResponseRedirect('/resources/rooms')
         else:
-            res.status_code = 400
+            return ErrorView(request, 400, "")
     else:
-        res.status_code = 400
+        return ErrorView(request, 400, "")
     return res
 
 #  Courses View
@@ -320,18 +302,14 @@ def CoursesView(request):
                 form.save();
                 return HttpResponseRedirect("/resources/courses")
             except ValidationError as e:
-                res.status_code = 400
-                res.reason_phrase = "Invalid form entry"
+                return ErrorView(request, 400, "Invalid form entry")
             except IntegrityError as e:
                 if not e[0] == 1062:
-                    res.status_code = 500
-                    res.reason_phrase = "db error:" + e[0]
+                    return ErrorView(request, 400, e[0])
                 else:
-                    res.status_code = 400
-                    res.reason_phrase = "Duplicate entry"
+                    return ErrorView(request, 400, "Duplicate Entry")
         else:
-            res.status_code = 400
-            res.reason_phrase = "Invalid form entry"
+            return ErrorView(request, 400, "Invalid form entry")
     elif request.method == "POST" and 'edit-course-form' in request.POST:
         form = EditCourseForm(request.POST)
         if form.is_valid():
@@ -339,8 +317,7 @@ def CoursesView(request):
             res.status_code = 200
             return HttpResponseRedirect('/resources/courses')
         else:
-            res.status_code = 400
-            res.reason_phrase = "Invalid form entry"
+            return ErrorView(request, 400, "Invalid form entry")
     elif request.method == "POST" and 'delete-course-form' in request.POST:
         form = DeleteCourseForm(request.POST)
         if form.is_valid():
@@ -348,8 +325,7 @@ def CoursesView(request):
             res.status_code = 200
             return HttpResponseRedirect('/resources/courses')
         else:
-            res.status_code = 400
-            res.reason_phrase = "Invalid form entry"
+            return ErrorView(request, 400, "Invalid form entry")
 
     elif request.method == "POST" and request.POST['request-name'] == 'course-section-request':
         courseName = request.POST.__getitem__('course')
@@ -377,8 +353,7 @@ def CoursesView(request):
 
             res.content = course.get_all_section_types_JSON()
     else:
-        print res.content
-        res.status_code = 400
+        return ErrorView(request, 400, "")
     return res
 
 #  Schedulers View
@@ -397,9 +372,9 @@ def SchedulersView(request):
         form = InviteUserForm(request.POST)
         if form.is_valid():
             form.send_invite('scheduler', request)
-            res.status_code = 200
+            return HttpResponseRedirect('/department/schedulers')
         else:
-            res.status_code = 400
+            return ErrorView(request, 400, "")
     elif reqest.method == "POST" and 'edit-form' in request.POST:
         res.status_code = 400
         res.reason_phrase = "NYI"
@@ -413,10 +388,9 @@ def SchedulersView(request):
                 res.status_code = 404
                 res.reason_phrase = "User not found"
         else:
-            res.status_code = 400
-            res.reason_phrase = "Invalid form entry"
+            return ErrorView(request, 400, "Invalid form entry")
     else:
-        res.status_code = 400
+        return ErrorView(request, 400, "")
     return res
 
 #  Faculty View
@@ -436,9 +410,9 @@ def FacultyView(request):
         form = InviteUserForm(request.POST)
         if form.is_valid():
             form.send_invite('faculty', request)
-            res.status_code = 200
+            return HttpResponseRedirect('/resources/faculty')
         else:
-            res.status_code = 400
+            return ErrorView(request, 400, "")
     elif request.method == "POST" and 'edit-form' in request.POST:
         form = EditUserForm(request.POST)
         if form.is_valid():
@@ -446,8 +420,7 @@ def FacultyView(request):
             res.status_code = 200
             return HttpResponseRedirect('/resources/faculty')
         else:
-            res.status_code = 400
-            res.reason_phrase = "Invalid form entry"
+            return ErrorView(request, 400, "Invalid form entry")
     elif request.method == "POST" and 'delete-form' in request.POST:
         form = DeleteUserForm(request.POST)
         if form.is_valid():
@@ -458,12 +431,12 @@ def FacultyView(request):
                 res.status_code = 404
                 res.reason_phrase = "User not found"
         else:
-            res.status_code = 400
-            res.reason_phrase = "Invalid form entry"
+            return ErrorView(request, 400, "Invalid form entry")
 
     else:
-        res.status_code = 400
+        return ErrorView(request, 400, "")
     return res
+
 
 #  FAQ View
 # -- Low Priority --
@@ -478,7 +451,7 @@ def FAQView(request):
                 'faq_list': []
             });
     else:
-       res.status_code = 400;
+        return ErrorView(request, 400, "")
     return res
 
 

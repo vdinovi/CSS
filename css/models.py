@@ -355,8 +355,8 @@ class Availability(models.Model):
         unique_together = (("faculty", "day_of_week", "start_time"),)
     faculty = models.ForeignKey(CUser, on_delete=models.CASCADE, null=True)
     day_of_week = models.CharField(max_length=16) # MWF or TR
-    start_time = models.IntegerField()
-    end_time = models.IntegerField()
+    start_time = models.TimeField()
+    end_time = models.TimeField()
     level = models.CharField(max_length=16) #preferred, unavailable
 
     @classmethod
@@ -380,11 +380,11 @@ class Availability(models.Model):
             return availability
 
     def to_json(self):
-        return dict(faculty = self.faculty,
-                    day = self.day_of_week,
-                    start_time = self.start_time,
-                    end_time = self.end_time,
-                    level = self.level)
+		  return dict(faculty = self.faculty.to_json(),
+					day = self.day_of_week,
+					start_time = self.start_time,
+					end_time = self.end_time,
+					level = self.level)
 
         # ---------- Scheduling Models ----------
 # Schedule is a container for scheduled sections and correponds to exactly 1 academic term
@@ -866,14 +866,13 @@ class StudentPlanData(models.Model):
                       "Sections Offered", "Enrollment Capacity", "Unmet Seat Demand", "% Unmet Seat Demand"] 
         # Index for parsing
         index = lines[0].split(',')
-        print "len(index)=" + str(len(index))
         # Null out anything that is not a valid key
         for i in range(0, len(index)):
             if index[i] not in valid_keys: 
                 index[i] = None
         # Parse all lines using valid keys in index
-        try:
-            for i in range(1, len(lines)):
+        for i in range(1, len(lines)):
+            try:
                 # Skip any empty lines
                 while (i < len(lines) and not lines[i].strip()):
                     i += 1
@@ -891,20 +890,27 @@ class StudentPlanData(models.Model):
                     content[index[j]] = line[j]
                 # Collect parsed data
                 # Remove ignored words from term name
-                schedule = Schedule.get_schedule(term_name=' '.join([w for w in content['Term'].split() if w.lower() not in term_ignore]).strip())
+                term = ' '.join([w for w in content['Term'].split() if w.lower() not in term_ignore]).strip()
+                try:
+                    schedule = Schedule.get_schedule(term_name=term)
+                except:
+                    messages.append("Schedule '%s' on line %d does not exist" % (term, i))
+                    continue
                 course = None
                 section_type = None
                 try:
                     course = Course.get_course(name=content['Subject Code']+' '+content['Catalog Nbr'])
-                    continue
                 except ObjectDoesNotExist:
                     messages.append("Course '%s' on line %d does not exist" % (content['Subject Code']+' '+content['Catalog Nbr'], i))
+                    continue
                 try:
                     section_type = SectionType.get_section_type(name=content['Component'])
                 except ObjectDoesNotExist:
                     messages.append("Section Type '%s' on line %d does not exist" % (content['Component'], i))
                     continue
-                if course and section_type and not course.get_section_type(course=course, section_type=section_type):
+                try:
+                    course.get_section_type(section_type_name=section_type.name)
+                except:
                     messages.append("Course '%s' has no associated section type '%s'" % (course.name, section_type.name)) 
                     continue
                 already_parsed = ["Term", "Subject Code", "Catalog Nbr", "Component"] 
@@ -916,10 +922,11 @@ class StudentPlanData(models.Model):
                 # Create entry
                 cls.create(schedule=schedule, course=course, section_type=section_type, **kwargs)
                 print 'Success'
-        except IndexError as e:
-            messages.append("Invalid entry on line %d: %s" % (i, e[0])) 
-        except:
-            messages.append("Unknown error on line %d" % (i,)) 
+            except IndexError as e:
+                messages.append("Invalid entry on line %d: %s" % (i, e[0])) 
+            except:
+                raise
+                messages.append("Unknown error on line %d" % (i,)) 
         return messages
  
 # Section Conflicts Model

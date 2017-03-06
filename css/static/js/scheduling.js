@@ -189,14 +189,15 @@ function selectSchedule(name) {
     /*$("#open-terms").children("li").each(function (index, value) {
         value.className = "";
     });*/
-    $("#"+name).parent().addClass("active-schedule");
+    //$("#"+name).parent().className("dropdown active-schedule");
+    $("#"+name).addClass("active-schedule");
 }
 
 // Gets the currently selected term. If none, returns false
 function getSelectedSchedules() {
     var arr = []
     $("#open-terms").children("li").each( function(index, value) {
-        if ($(value).hasClass("active-schedule"))
+        if ($(value).children("a").hasClass("active-schedule"))
             arr.push($(value).children("a").text());
     });
     for (var i = 0; i < arr.length; ++i) {
@@ -253,16 +254,16 @@ function selectFilter(element, filterType) {
                         "<div id=\"time-option-window\" class=\"time-option-window\">\n" +
                         "  <div class=\"btn-group\" role=\"group\" aria-label=\"...\">\n" +
                         "    <div class=\"col-xs-12\"style=\"margin-top:30px;\">\n" +
-                        "      <button id=\"mwf-btn\" type=\"button\" class=\"btn btn-primary\" value=\"active\" onclick=\"selectDay('mwf')\" style=\"display:inline-block;\">MWF</button>\n" +
-                        "      <button id=\"th-btn\" type=\"button\" class=\"btn btn-default\" value=\"inactive\" onclick=\"selectDay('th')\" style=\"display:inline-block;\">TH</button>\n" +
+                        "      <button id=\"time-window-mwf-btn\" type=\"button\" class=\"btn btn-primary\" value=\"active\" onclick=\"selectDay('mwf')\" style=\"display:inline-block;\">MWF</button>\n" +
+                        "      <button id=\"time-window-th-btn\" type=\"button\" class=\"btn btn-default\" value=\"inactive\" onclick=\"selectDay('th')\" style=\"display:inline-block;\">TH</button>\n" +
                         "    </div>\n" +
                         "    <div class=\"col-xs-12\" style=\"margin-top:30px;\">\n" +
-                        "      <label for=\"start-time\">Start Time:</label>\n" +
-                        "      <input id=\"start-time\" type=\"time\" name=\"start-time\"></input>\n" +
+                        "      <label for=\"time-window-start-time\">Start Time:</label>\n" +
+                        "      <input id=\"time-window-start-time\" type=\"time\" name=\"start-time\"></input>\n" +
                         "    </div>\n" +
                         "    <div class=\"col-xs-12\" style=\"margin-top:30px;\">\n" +
-                        "      <label for=\"end-time\">End Time:</label>\n" +
-                        "      <input id=\"end-time\" type=\"time\" name=\"end-time\"></input>\n" +
+                        "      <label for=\"time-window-end-time\">End Time:</label>\n" +
+                        "      <input id=\"time-window-end-time\" type=\"time\" name=\"end-time\"></input>\n" +
                         "    </div> \n" +
                         "    <div class=\"col-xs-12\" style=\"text-align:center; margin-top:30px;\">\n" +
                         "      <button class=\"btn btn-primary\" onclick=\"selectTime('{0}', '{1}')\">Save</button>\n" +
@@ -274,11 +275,13 @@ function selectFilter(element, filterType) {
                 // Filter Type is course, faculty, or room
                 else {
                     var optionFormatString =
-                        "<div id=\"option-{0}\" class=\"input-group\">\n" +
+                        "<div id=\"option-{0}\" class=\"input-group\" style=\"height:auto\">\n" +
                         "  <span class=\"input-group-addon\">\n" +
                         "    <input id=\"option-{0}-checkbox\" type=\"checkbox\" onclick=\"selectOption(this)\">\n" +
                         "  </span>\n" +
-                        "  <p class=\"form-control\" style=\"max-width: 100%; white-space: nowrap\">{1}</p>\n" +
+                        "  <div class=\"form-control\" style=\"max-width:100%; height:100%;\">\n" +
+                        "    <p style=\"height: 100%;\">{1}</p>\n" +
+                        "  </div>\n" +
                         "</div>\n";
                     for (var i in data.options) {
                         // Add to option window 
@@ -328,32 +331,32 @@ function selectDay(dayGroup) {
 // }
 function selectTime(minTime, maxTime) {
     var time = {};
-    if ($("#mwf-btn")[0].value == "active")
+    if ($("#time-window-mwf-btn")[0].value == "active")
         time.day = "mwf";
     else
         time.day = "th";
-    var startTime = $("#start-time").val();
-    var endTime = $("#end-time").val();
-    if ((compareTime(startTime, minTime)) < 1 || (compareTime(startTime, maxTime) > 0)) {
+    var startTime = $("#time-window-start-time").val();
+    var endTime = $("#time-window-end-time").val();
+    if ((compareTime(startTime, minTime)) < 0 || (compareTime(maxTime, startTime) < 0)) {
         sweetAlert("Invalid Start Time", "Department Hours: "+toStandardTime(minTime)+" - "+toStandardTime(maxTime));
         return false;
     }
-    if ((compareTime(endTime, minTime) < 1) || (compareTime(endTime, maxTime) > 0)) {
+    if ((compareTime(endTime, minTime) < 0) || (compareTime(maxTime, endTime) < 0)) {
         sweetAlert("Invalid End Time", "Department Hours: "+toStandardTime(minTime)+" - "+toStandardTime(maxTime));
         return false;
     }
-    if (compareTime(startTime, endTime) >= 0) {
+    if (compareTime(startTime, endTime) > 0) {
         sweetAlert("Start time must come before end time");
         return false; 
     }
     time.startTime = startTime;
     time.endTime = endTime;
     var optionId = (time.day+"-"+time.startTime+"-"+time.endTime).replace(/[: ]/g, '-');
-    var optionText = time.day+": "+toStandardTime(time.startTime)+" - "+toStandardTime(time.endTime);
+    var optionText = time.day.toUpperCase()+":<br> "+toStandardTime(time.startTime)+" - "+toStandardTime(time.endTime);
     var timeOptionFormatString = 
-        "<div id=\"{0}\"class=\"selected-option\">\n" +
-        "  <button onclick=\"unselectSelectedTime('{0}')\">x</button>\n" +
-        "  <li class=\"filter-options\">{1}</li>\n" +
+        "<div id=\"{0}\"class=\"selected-option\" style=\"overflow:hidden;height:100%; min-height: 20px;\">\n" +
+        "  <button onclick=\"unselectSelectedTime('{0}')\" style=\"float:left;padding-bottom:100%; margin-bottom:-100%;\">x</button>\n" +
+        "  <li class=\"filter-options\" style=\"display:flex;height:100%;min-height: 25px;\">{1}</li>\n" +
         "</div>"; 
     $("#time-options").append(timeOptionFormatString.format(optionId, optionText));
     $("#"+optionId).data("data", time);
@@ -377,16 +380,14 @@ function selectOption(element) {
             break;
         }
     }
-   // Add option to selected option list
-    if (filterType = "#time-options")
-        return;
-    if (element.checked) {
+    // Add option to selected option list
+    if (filterType.prop('id') != "time-options" && element.checked) {
         var optionFormatString = 
-                    "<div id=\"{0}\"class=\"selected-option\">\n" +
-                    "  <button onclick=\"unselectSelectedOption('{0}')\">x</button>\n" +
-                    "  <li class=\"filter-options\">{1}</li>\n" +
+                    "<div id=\"{0}\"class=\"selected-option\" style=\"overflow:hidden;height:100%; min-height: 20px;\">\n" +
+                    "  <button onclick=\"unselectSelectedOption('{0}')\" style=\"float:left;padding-bottom:100%;margin-bottom:-100%;\">x</button>\n" +
+                    "  <li class=\"filter-options\" style=\"height:100%;min-height: 25px;\">{1}</li>\n" +
                     "</div>"; 
-        var text = element.parentNode.parentNode.innerText;
+        var text = $(element).parents("div").children("div").children("p").text();
         var optionAlreadySelected = false;
         filterType.children("div").each( function(index, value) {
             if ($(value).prop('id').replace(/-/g, ' ') == text)
@@ -402,7 +403,7 @@ function selectOption(element) {
     // Remove option from selected option list
     else {
         filterType.children("div").each(function(index, value) {
-            if (value.id.replace(/-/g, ' ') == element.parentNode.parentNode.innerText)
+            if (value.id.replace(/-/g, ' ') == $(element).parent().parent().children('div').children("p").text())
                 value.remove();
         });
     }
@@ -423,7 +424,7 @@ function unselectAllSelectedOptions() {
 //    - Unselect option from options window
 function unselectSelectedOption(name) {
     $("#option-frame").children("div").each(function(index, value) {
-        if (name.replace(/-/g, ' ') == $(value).children("p").text()) {
+        if (name.replace(/-/g, ' ') == $(value).children("div").children('p').text()) {
             $(value).children("span").children("input").prop("checked", false);
         }
     });
@@ -466,9 +467,10 @@ function selectAllOptions() {
 // Unselects all sections in filtered Section window
 function unselectAllOptions() {
     $("#option-frame").children("div").each(function(index, value) { 
-        if ($("#"+value.id+"-checkbox").prop("checked") == true) {
-            $("#"+value.id+"-checkbox").prop("checked", false);
-            selectOption($("#"+value.id+"-checkbox")[0]);
+        if ($(value).children("span").children("input").prop('checked') == true) {
+            checkbox = $(value).children("span").children("input");
+            checkbox.prop('checked', false);
+            selectOption(checkbox);
         }
     });
 }
