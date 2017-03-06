@@ -178,7 +178,9 @@ def SettingsView(request):
         form = UploadForm(request.POST, request.FILES)
         if form.is_valid():
             try:
-                CohortData.import_cohort_file(request.FILES['file'])
+                result = CohortData.import_cohort_file(request.FILES['file'])
+                for m in result:
+                    messages.add_message(request, messages.ERROR, m, extra_tags="cohort") 
                 return HttpResponseRedirect("/department/settings")
             except:
                 raise
@@ -190,7 +192,9 @@ def SettingsView(request):
         form = UploadForm(request.POST, request.FILES)
         if form.is_valid():
             try:
-                StudentPlanData.import_student_plan_file(request.FILES['file'])
+                result = StudentPlanData.import_student_plan_file(request.FILES['file'])
+                for m in result:
+                    messages.add_message(request, messages.ERROR, m, extra_tags="plan") 
                 return HttpResponseRedirect("/department/settings")
             except:
                 raise
@@ -407,7 +411,7 @@ def SchedulersView(request):
         form = InviteUserForm(request.POST)
         if form.is_valid():
             form.send_invite('scheduler', request)
-            res.status_code = 200
+            return HttpResponseRedirect('/department/schedulers')
         else:
             res.status_code = 400
     elif reqest.method == "POST" and 'edit-form' in request.POST:
@@ -446,7 +450,7 @@ def FacultyView(request):
         form = InviteUserForm(request.POST)
         if form.is_valid():
             form.send_invite('faculty', request)
-            res.status_code = 200
+            return HttpResponseRedirect('/resources/faculty')
         else:
             res.status_code = 400
     elif request.method == "POST" and 'edit-form' in request.POST:
