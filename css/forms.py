@@ -19,22 +19,21 @@ class LoginForm(forms.Form):
 
 #  Invite Form
 class InviteUserForm(forms.Form):
-    #@TODO Email field not working -> is_valid fails
-    email = forms.CharField()
+    email = forms.EmailField()
     first_name = forms.CharField()
     last_name = forms.CharField()
 
-    #@TODO send registraiton link in email
     def send_invite(self, usertype, request):
         first_name = self.cleaned_data['first_name']
         last_name = self.cleaned_data['last_name']
         name = first_name + ' ' + last_name
         email = self.cleaned_data['email']
-        #@TODO fix HOSTNAME
-        link = 'localhost:8000' + '/register?first_name=' + first_name +'&last_name=' + last_name +'&user_type='+ usertype + '&email=' + email
-        send_mail('Invite to register for CSS', name + """, you have been invited to register for CSS. Please register using the following link: """ 
+        host = request.META['HTTP_HOST']
+        if not re.search(r'http', host):
+            host = 'http://' + host
+        link = host + '/register?first_name=' + first_name +'&last_name=' + last_name +'&user_type='+ usertype + '&email=' + email
+        send_mail('Invite to register for CSS', name + ", you have been invited to register for CSS. Please register using the following link:\n\n "
         + link, 'registration@inviso-css', [self.cleaned_data['email']])
-        print("sent email to " + self.cleaned_data['email'])
 
 # Registration Form
 # @TODO on load, pull fields from query string -> show failure if field not able to be loaded:
@@ -48,7 +47,6 @@ class RegisterUserForm(forms.Form):
     password2 = forms.CharField(label='Confirm Password', widget=forms.PasswordInput)
 
     def __init__(self, *args, **kwargs):
-        print(kwargs)
         if kwargs.pop('request') is "GET":
             self.first_name = kwargs.pop('first_name')
             self.last_name = kwargs.pop('last_name')
