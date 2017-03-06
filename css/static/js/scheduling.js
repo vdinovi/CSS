@@ -1,8 +1,8 @@
 /* *** GLOBALS *** */
-const filter_types = ["course", "faculty", "room", "time"];
-var filters = {"course":{"logic":"and", "filters":[]}, "faculty":{"logic":"and", "filters":[]}, "room":{"logic":"and", "filters":[]}, "time":{"logic": "and", "filters":{"MWF":[], "TR":[]}}};
+const filter_types = ["schedule", "course", "faculty", "room", "time"];
+var filters = {"schedule":{"logic":"and", "filters":[]}, "course":{"logic":"and", "filters":[]}, "faculty":{"logic":"and", "filters":[]}, "room":{"logic":"and", "filters":[]}, "time":{"logic": "and", "filters":{"MWF":[], "TR":[]}}}; //
 var filteredSections = [];
-var sectionDetails = [];
+var sectionDetails = [{"name":"cpe101-01", "term":"fall2016", "course":"cpe101", "type":"lecture", "faculty":"kearns", "room":"14-256", "days":"mwf", "start_time":"10:00AM", "end_time":"12:00PM"}];
 
 /* *** UTILITY *** */
 // String format function. 
@@ -475,6 +475,17 @@ function unselectAllOptions() {
 
 /* *** FILTER LOGIC / SECTIONS *** */
 
+// returns strings with underscores as spaces
+function underscoreToSpaces(string) {
+    return string.split("_").join(" ");
+}
+
+// returns strings with spaces as underscores
+function spacesToUnderscores(string) {
+    return string.split(" ").join("_");
+}
+
+
 // Get the filters JSON object with correct filters to apply using getSelectedOptions
 function updateFilters() {
     filtersToApply = getSelectedOptions();  
@@ -483,6 +494,7 @@ function updateFilters() {
         timeTRarr = []
         otherArr = []
         filterType = value.id; 
+        console.log(filterType);
         if (value.checked) {
             for (var t=0;t<filtersToApply[filterType].length;t++) {
                 timeArr = filtersToApply[filterType][t].split("-");
@@ -503,6 +515,7 @@ function updateFilters() {
             filters[filterType]['filters'] = otherArr
         }
     }); 
+    console.log(filters);
 }
 
 // OnClick function for a filter logic checkbox
@@ -567,16 +580,16 @@ function getFilteredSections() {
             var sectionFormatString =
                 "<div id=\"section-{0}\" class=\"input-group\">\n" +
                 "  <span class=\"input-group-addon\">\n" +
-                "    <input id=\"section-{0}-checkbox\" type=\"checkbox\" onclick=\"selectSection(this)\">\n" +
+                "    <input id=\"section-{0}-checkbox\" type=\"checkbox\">\n" +
                 "  </span>\n" +
-                "  <p class=\"form-control\">{0}</p>\n" +
+                "  <p class=\"form-control\">{1}</p>\n" +
                 "</div>\n";
             for (var i in data) {
                 if ($.inArray(data[i], filteredSections) == -1) {
                     filteredSections.push(data[i]);
                 }
                 // Add to section window 
-                sectionFrame.append(sectionFormatString.format(data[i].name));
+                sectionFrame.append(sectionFormatString.format(data[i].name, underscoreToSpaces(data[i].name)));
             }
         },
         error: function(err) {
@@ -599,7 +612,9 @@ function inArrayByName(name, array) {
 function getSelectedSections() {
     newSectionSelected = false;
     $("#section-frame").children("div").each(function(index, value) { 
+        console.log(value.id);
         if ($("#"+value.id+"-checkbox").prop('checked')) { 
+            console.log("HELLO");
             if (inArrayByName(value.id.split("section-")[1], sectionDetails) === -1) {
                 console.log("pushing...");
                 console.log(filteredSections[inArrayByName(value.id.split("section-")[1], filteredSections)]);
@@ -648,8 +663,10 @@ function getSelectedFilters() {
 
 function NewSection(request) {
     var sectionData = {};
+    console.log($("#section_num").val());
     sectionData = {
-        'schedule': $("#academic-term").val(), 
+         'section_num': $("#section_num").val(), 
+         'schedule': $("#academic-term").val(), 
          'course': $("#course").val(),
          'section-type': $("#section-type").val(),
          'faculty': $("#faculty").val(),
@@ -658,11 +675,12 @@ function NewSection(request) {
          'capacity': $("#capacity").val(),
          'start-time': $("#start-time").val(),
          'end-time': $("#end-time").val()
-         };
+        };
+    console.log(sectionData);
     $.ajax({
         type: "POST",
         url: "newSection",
-        data: JSON.stringify({"test": "hello"}),
+        data: JSON.stringify(sectionData),
         dataType: 'json',
         success: function(response) {
             console.log(sectionData)
@@ -685,13 +703,12 @@ function NewSection(request) {
 
 function updateSectionDetails(resort) {
     var sectionDetailsFormatString = 
-        "<tr id=\"{1}-detail\">\n" + 
+        "<tr id=\"{0}-detail\">\n" + 
             "<td>\n" +
                 "<button type=\"button\" class=\"btn btn-info btn-xs\" data-toggle=\"modal\" data-target=\"#deselect-section\" onclick=\"removeSectionFromDetails(this)\"><span class=\"glyphicon glyphicon-minus\" title=\"Remove section from details\"></span>&nbsp;</button>\n" +
                 "<button type=\"button\" class=\"btn btn-info btn-xs\" data-toggle=\"modal\" data-target=\"#edit-section-modal\"><span class=\"glyphicon glyphicon-edit\" title=\"Edit section\"></span>&nbsp;</button>\n" +
-                "<button type=\"button\" class=\"btn btn-info btn-xs\" data-toggle=\"modal\" data-target=\"#delete-section-modal\"><span class=\"glyphicon glyphicon-trash\" title=\"Delete section\"></span>&nbsp;</button>\n" +
+                "<button type=\"button\" class=\"btn btn-info btn-xs\" data-toggle=\"modal\" data-target=\"#delete-section-modal\" onclick=\"confirmDeleteModal(this)\"><span class=\"glyphicon glyphicon-trash\" title=\"Delete section\"></span>&nbsp;</button>\n" +
             "</td>\n" +
-            "<td>{0}</td>\n" + 
             "<td>{1}</td>\n" + 
             "<td>{2}</td>\n" + 
             "<td>{3}</td>\n" + 
@@ -700,27 +717,51 @@ function updateSectionDetails(resort) {
             "<td>{6}</td>\n" + 
             "<td>{7}</td>\n" + 
             "<td>{8}</td>\n" + 
+            "<td>{9}</td>\n" + 
         "</tr>\n";
     var detailFrame = $("#section-detail-rows");
     if (getSelectedSections() || resort) {
         detailFrame.empty();
         for (var i in sectionDetails) {  
-            detailFrame.append(sectionDetailsFormatString.format(sectionDetails[i].name, sectionDetails[i].term, sectionDetails[i].course, sectionDetails[i].type, sectionDetails[i].faculty, sectionDetails[i].room, sectionDetails[i].days, sectionDetails[i].start_time, 
+            detailFrame.append(sectionDetailsFormatString.format(sectionDetails[i].name, underscoreToSpaces(sectionDetails[i].name), sectionDetails[i].term, sectionDetails[i].course, sectionDetails[i].type, sectionDetails[i].faculty, sectionDetails[i].room, sectionDetails[i].days, sectionDetails[i].start_time, 
             sectionDetails[i].end_time));
         }
     }
 }
 
+function confirmDeleteModal(sectionElement) {
+    sectionName = spacesToUnderscores($($(sectionElement).parent().next("td")).text());
+    sectionIndex = inArrayByName(sectionName, sectionDetails);
+    section = sectionDetails[sectionIndex];
+    formatStr = "<h4\>{0}\</h4>\n" +
+                "<ul>\n" +
+                "<li>{1} {2}</li>\n" +
+                "<li>{3} {4}</li>\n" +
+                "<li>{5} {6} - {7}</li>\n" +
+                "</ul>\n";
+    console.log(section);
+    frame = $("#delete-section-check");
+    frame.empty();
+    frame.append(formatStr.format(underscoreToSpaces(section.name), section.term, section.faculty, section.type, section.room, section.days, section.start_time, section.end_time));
+}
+
+
+function removeDeletedSection(sectionName) {
+    $("#"+sectionName+"-detail").remove();
+    // $("#delete-section-modal .close").click();
+    $("#delete-section-modal").modal('hide');
+}
+
 function deleteSection(element) {
-    sectionName = $($(element).children("td")[0]).text();
-    console.log(sectionName);
+    sectionName = $($("#delete-section-check").children('h4')[0]).text();
+    console.log("HERE" + sectionName);
     $.ajax({
         type: "POST",
         url: "delete-section",
         dataType: 'json',
         data: JSON.stringify({"section": sectionName}),
         success: function(response) {
-            console.log("Hello");
+            removeDeletedSection(spacesToUnderscores(sectionName));
         },
         error: function(err) {
             console.log(err);

@@ -484,7 +484,7 @@ class Section(models.Model):
         if fault == 'y' and fault_reason != "faculty" and fault_reason != "room":
             raise ValidationError("Invalid fault reason.")
         section = cls(
-                  section_num=section_num,
+                  section_num=int(section_num),
                   schedule=schedule,
                   course=course,
                   section_type=section_type,
@@ -507,8 +507,8 @@ class Section(models.Model):
     @classmethod
     def get_section_by_name(cls, name):
         nameStrArr = name.split("-")
-        course = nameStrArr[0]
-        num = nameStrArr[1]
+        course = Course.get_course(nameStrArr[0])
+        num = " ".join(nameStrArr[1].split("_"))
         return cls.objects.get(course=course, section_num=num)
 
 
@@ -569,7 +569,7 @@ class Section(models.Model):
                 queryLoop = Q()
                 for index in range(len(filters)):
                     if key == "course":
-                        filterObject = Course.get_course(filters[index])
+                        filterObject = Course.get_course(" ".join(filters[index].split("_")))
                         queryLoop = reduce(operator.or_, [queryLoop, Q(course=filterObject)])
                     elif key == "faculty":
                         filterObject = CUser.get_faculty_by_full_name(filters[index])
@@ -577,6 +577,9 @@ class Section(models.Model):
                     elif key == "room":
                         filterObject = Room.get_room(filters[index])
                         queryLoop = reduce(operator.or_, [queryLoop, Q(room=filterObject)])
+                    elif key == "schedule":
+                        filterObject = Schedule.get_schedule(filters[index])
+                        queryLoop = reduce(operator.or_, [queryLoop, Q(schedule=filterObject)])
                     else:
                         raise ValidationError("Invalid filter type.")
 
@@ -612,7 +615,7 @@ class Section(models.Model):
 
     def to_json(self):
         return dict(id = str(self.section_num),
-                    name = self.course.name + "-" + str(self.section_num),
+                    name = "_".join(self.course.name.split(" ")) + "-" + str(self.section_num),
                     term = self.schedule.academic_term,
                     course = self.course.name,
                     type = self.section_type.name,

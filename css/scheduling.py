@@ -130,10 +130,9 @@ def Sections(request):
 def NewSection(request):
     res = HttpResponse()
     if request.method == "POST":
-        res.status_code = 200
-        res.write(request.body)
         sectionData = json.loads(request.body)
         Section.create(
+                sectionData['section_num'],
                 sectionData['schedule'],
                 sectionData['course'],
                 sectionData['section-type'],
@@ -150,6 +149,8 @@ def NewSection(request):
                 'n',
                 None
                 )
+        res.status_code = 200
+        res.write(request.body)
     else:
         res.status_code = 400
     return res
@@ -159,10 +160,13 @@ def NewSection(request):
 def DeleteSection(request):
     res = HttpResponse()
     if request.method == "POST":
-        print "TEST POST"
+        # sectionName = json.loads(request.body)["section"]
+        # sectionObject = Section.get_section_by_name(sectionName)
+        # sectionObject.delete()
+        res.content_type = "json"
+        res.write(json.dumps({"response":"Success!"}))
         res.status_code = 200
     else:
-        print "TEST OTHER"
         res.status_code = 400
     return res
 
