@@ -221,8 +221,8 @@ class AddSectionForm(forms.Form):
 class AddAvailabilityForm(forms.Form):
 	DAYS = ('Monday', 'Monday',),('Tuesday','Tuesday'),('Wednesday','Wednesday'), ('Thursday','Thursday',), ('Friday', 'Friday')
 	day = forms.ChoiceField(label='Day', choices=DAYS)
-	start_time = forms.IntegerField(label='Start Time')
-	end_time = forms.IntegerField(label='End Time')
+	start_time = forms.TimeField(label='Start Time')
+	end_time = forms.TimeField(label='End Time')
 	level = forms.ChoiceField(label='Type', choices=[('Preferred', 'Preferred'), ('Unavailable','Unavailable')])
 
 	def save(self, email):

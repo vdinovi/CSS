@@ -14,13 +14,12 @@ function viewAvailablity() {
         data: JSON.stringify(availabilityData),
         dataType: 'json',
         success: function(response) {
-            Availability.create(
-            	response['email'],
-                availabilityData.get['day'],
-                availabilityData.get['start_time'],
-               	availabilityData.get['end_time'],
-               	availabilityData.get['level']
-                )
+        	//javascript object of returned after success 
+   			data = response
+   			//loop over all of the availability objects for one faculty
+        	for (avail in data.availability_view) {
+        		console.log(data.availability_view[avail])
+        	}
         },
         error: function(err) {
             console.log(err);

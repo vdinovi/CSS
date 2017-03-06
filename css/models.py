@@ -355,8 +355,8 @@ class Availability(models.Model):
         unique_together = (("faculty", "day_of_week", "start_time"),)
     faculty = models.ForeignKey(CUser, on_delete=models.CASCADE, null=True)
     day_of_week = models.CharField(max_length=16) # MWF or TR
-    start_time = models.IntegerField()
-    end_time = models.IntegerField()
+    start_time = models.TimeField()
+    end_time = models.TimeField()
     level = models.CharField(max_length=16) #preferred, unavailable
 
     @classmethod
@@ -380,11 +380,11 @@ class Availability(models.Model):
             return availability
 
     def to_json(self):
-        return dict(faculty = self.faculty,
-                    day = self.day_of_week,
-                    start_time = self.start_time,
-                    end_time = self.end_time,
-                    level = self.level)
+		  return dict(faculty = self.faculty.to_json(),
+					day = self.day_of_week,
+					start_time = self.start_time,
+					end_time = self.end_time,
+					level = self.level)
 
         # ---------- Scheduling Models ----------
 # Schedule is a container for scheduled sections and correponds to exactly 1 academic term

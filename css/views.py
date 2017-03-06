@@ -87,7 +87,7 @@ def AvailabilityView(request):
     res = HttpResponse()
     email = request.session.get('email')
     list = Availability.get_availability_list(CUser.get_faculty(email=email))
-    print(request.body)
+    
     if request.method == "GET":
         return render(request,'availability.html', {
         			'availability_list': list,
@@ -103,9 +103,7 @@ def AvailabilityView(request):
         else:
             return ErrorView(request, 400, "Invalid form entry")
     elif request.method == "POST" and 'availability_view' in request.body: 
-    	data = json.dumps({"availability_view": [avail.to_json() for avail in list] })
-    	print(data)
-    	data.append({'email': email})
+    	data = json.dumps({"availability_view": [avail.to_json() for avail in list]})
         res.write(data)
         res.status_code = 200
     else:
