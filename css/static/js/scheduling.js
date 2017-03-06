@@ -1,12 +1,13 @@
 /* *** GLOBALS *** */
 const filter_types = ["course", "faculty", "room", "time"];
+// Format structure for selected options
 var filters = {"course":{"logic":"and", "filters":[]}, "faculty":{"logic":"and", "filters":[]}, "room":{"logic":"and", "filters":[]}, "time":{"logic": "and", "filters":{"MWF":[], "TR":[]}}};
 var filteredSections = [];
 var sectionDetails = [];
 
 /* *** UTILITY *** */
 // String format function. 
-// Replaces {n} in format string with n-th positional arg.
+// Replaces all '{n}' in format string with n-th positional arg.
 String.prototype.format = function() {
     var content = this;
     for (var i=0; i < arguments.length; i++) {
@@ -682,7 +683,6 @@ function NewSection(request) {
 
 
 /* Section Details Functions */
-
 function updateSectionDetails(resort) {
     var sectionDetailsFormatString = 
         "<tr id=\"{1}-detail\">\n" + 
@@ -735,6 +735,70 @@ function setDays(element, form) {
     form.days=element.id;
     form.save();
 }
+
+function openDataTab(name, title, data) {
+    var tabAlreadyOpened = false;
+    $("#data-tab-window").children("ul").each( function(index, value) {
+        if ($(value).prop('id') == name+"-tab")
+            tabAlreadyOpened = true;
+    });
+    if (!tabAlreadyOpened) {
+        var tabFormat = "<li id=\"{0}-tab\" class=\"data-tab\"><a href=\"#\">{1}</a></li>\n";
+        $("#data-tab-window").children("ul").append(tabFormat.format(name, title));
+    }
+    $("#data-window").each( function(index, value) {
+        if ($(value).prop('id') == name)  {
+            $(value).remove();
+        }
+    });
+    $("#data-window").append(data)
+
+
+}
+
+// Section Creation - Data window interaction
+// On term selection
+$("#academic-term").on('change', function() {
+    var dataFormat = 
+        "<table id=\"student-plan\" class=\"table\">\n" +
+        "  <thead>\n" +
+        "    <tr>\n" +
+        "      <th>Schedule</th>\n" +
+        "      <th>Course</th>\n" +
+        "      <th>Section Type</th>\n" +
+        "      <th>Seat Demand</th>\n" +
+        "      <th>Sections Offered</th>\n" +
+        "      <th>Enrollment Capacity</th>\n" +
+        "      <th>Unmet Seat Demand</th>\n" +
+        "    </tr>\n" +
+        "  </thead>\n" +
+        "  <tbody>\n" +
+        "    <tr>\n" +
+        "      <td>{0}</td>\n" +
+        "      <td>{0}</td>\n" +
+        "      <td>{0}</td>\n" +
+        "      <td>{0}</td>\n" +
+        "      <td>{0}</td>\n" +
+        "      <td>{0}</td>\n" +
+        "      <td>{0}</td>\n" +
+        "    </tr>\n" +
+        "    <tr>\n";
+    openDataTab('student-plan', 'Student Plan Data', dataFormat.format('temp'));
+});
+
+$("#course").on('change', function() {
+
+});
+
+$("#faculty").on('change', function() {
+    console.log(this.value);
+});
+
+$("#room").on('change', function() {
+    console.log(this.value);
+});
+
+
 
 
 

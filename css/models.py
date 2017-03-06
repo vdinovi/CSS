@@ -380,11 +380,11 @@ class Availability(models.Model):
             return availability
 
     def to_json(self):
-		  return dict(faculty = self.faculty.to_json(),
-					day = self.day_of_week,
-					start_time = self.start_time,
-					end_time = self.end_time,
-					level = self.level)
+        return dict(faculty = self.faculty.to_json(),
+		    day = self.day_of_week,
+		    start_time = self.start_time,
+		    end_time = self.end_time,
+		    level = self.level)
 
         # ---------- Scheduling Models ----------
 # Schedule is a container for scheduled sections and correponds to exactly 1 academic term
@@ -837,6 +837,17 @@ class StudentPlanData(models.Model):
         if sectionType == None:
             return cls.objects.filter(schedule=schedule, course=course)
         return cls.objects.get(schedule=schedule, course=course, section_type=section_type)
+
+    def to_json(self):
+        return dict(
+                schedule=self.schedule.name,
+                course=self.course.name,
+                section_type=self.section_type.name,
+                seat_demand=self.seat_demand,
+                sections_offered=self.sections_offered,
+                enrollment_capacity=self.enrollment_capacity,
+                unmet_seat_demand=self.unmet_seat_demand,
+                percent_unmet_seat_demand=self.percent_unmet_seat_demand)
 
     # Handles an uploaded student plan data file and commits it to the system
     @classmethod
