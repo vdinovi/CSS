@@ -159,10 +159,63 @@
                   <input id="end-time" class="form-control" type="time">
                 </div>
               </div>
+             
               <button id="create-section-button" type="submit" class="btn btn-primary" onclick="NewSection()">Create Section</button>
             </div>
-          <!-- </form> -->
-          <!-- </div> -->
+            <div class="col-xs-6 col-offset-xs-6">
+              <!-- Data Display -->
+              <div class="data-display-window">
+                <!-- Data Display Tabs -->
+                <div id="data-tab-window" class="row" style="background-color: #d9d9d9" > 
+                  <ul class="pagination" style="margin: 0">
+                    <!--<li class="data-tab"><a href="#">Student Plan Data</a></li>
+                    <li class="data-tab"><a href="#">Course Information</a></li>
+                    <li class="data-tab"><a href="#">Cohort Data</a></li>
+                    <li class="data-tab"><a href="#">Enrollment Data</a></li>
+                    <li class="data-tab"><a href="#">Faculty Preferences</a></li>
+                    <li class="data-tab"><a href="#">Room Information</a></li>-->
+                  </ul>
+                </div>
+                <div id="data-window" class="row data-window">
+                  <!--<table id="student-plan" class="table data-table">
+                    <h3>Student Plan Data</h3>
+                    <thead>
+                      <tr>
+                        <th>Schedule</th>
+                        <th>Course</th>
+                        <th>Section Type</th>
+                        <th>Seat Demand</th>
+                        <th>Sections Offered</th>
+                        <th>Enrollment Capacity</th>
+                        <th>Unmet Seat Demand</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>Fall 2018</td>
+                        <td>CPE 101</td>
+                        <td>LEC</td>
+                        <td>12</td>
+                        <td>3</td>
+                        <td>32</td>
+                        <td>4(12%)</td>
+                      </tr>
+                      <tr>
+                        <td>Fall 2018</td>
+                        <td>CPE 102</td>
+                        <td>LEC</td>
+                        <td>12</td>
+                        <td>3</td>
+                        <td>32</td>
+                        <td>4(12%)</td>
+                      </tr> 
+                    </tbody>
+                  </table>-->
+                </div>
+              </div>
+            </div>
+              <!-- </form> -->
+              <!-- </div> -->
         </div>
         <!-- Filter Window -->
         <div id="filter-frame" class="col-xs-12 filter-frame">
@@ -190,8 +243,8 @@
                 <div id="time-options" class="list-group" style="margin:0px">
                 </div>
               </div>
-              <button id="clear-filter-btn" class="btn" style="margin-top:5px;width:100%;" onclick="unselectAllSelectedOptions()">Clear</button>
             </div>
+            <button id="clear-filter-btn" class="btn" style="margin-top:5px;width:100%;" onclick="unselectAllSelectedOptions()">Clear</button>
           </div>
           <!-- Option Window -->
           <div class="col-xs-3 outer-frame">

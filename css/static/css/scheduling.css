@@ -41,6 +41,7 @@
     display:inline-block;
 }
 
+
 /* Window for filters */
 .filter-frame {
     position: absolute;
@@ -66,6 +67,8 @@
     border: 1px solid black;
     border-radius: 5px;
     display:inline-block;
+    overflow:auto;
+    overflow-y: scroll;
 }
 
 #filter-logic-frame {
@@ -90,9 +93,19 @@
     
 }
 
+
+.active-schedule {
+    background-color: #b5cadc;
+    border-radius:2px;
+}
+
 /* Enlarged text box */
-body input[type=checkbox] {
-  transform: scale(2);
+input[type=checkbox] {
+ -ms-transform: scale(2); /* IE */
+ -moz-transform: scale(2); /* FF */
+ -webkit-transform: scale(2); /* Safari and Chrome */
+ -o-transform: scale(2); /* Opera */
+  padding: 10px;
 }
 
 /* ********************** */
@@ -106,10 +119,7 @@ body input[type=checkbox] {
     vertical-align: middle;
 }
 
-.active-schedule {
-    background-color: #b5cadc;
-    border-radius:2px;
-}
+
 
 /* **************************** */
 /* ***** Section Creation ***** */
@@ -122,6 +132,50 @@ body input[type=checkbox] {
     height: 100%;
 }
 
+/* **************************** */
+/* ***** Data Display ********* */
+/* **************************** */
+
+.data-display-window {
+    margin-top: 20px;
+    background-color: white;
+    width: 100%;
+    height: 450px;
+    border: 1px solid black;
+    border-radius: 5px;
+    display:inline-block;
+    overflow:auto;
+    overflow-y: scroll;
+    overflow-x: scroll;
+}
+
+.data-tab {
+    height: 100%; 
+}
+
+.data-window {
+    float:left;
+    border: 1px solid black;
+    padding-left: 15px;
+}
+
+.data-table {
+    font-size:12px; 
+}
+
+.data-table th {
+    max-width: 50px;
+    overflow: auto;
+}
+
+.data-table tr {
+    height:5px;
+    white-space: nowrap;
+}
+
+
+ 
+
 /* ****************** */
 /* ***** FILTER ***** */
 /* ****************** */
@@ -130,7 +184,6 @@ body input[type=checkbox] {
 .filter-type-window {
     width: 100%;
     height: 100%;
-    overflow-y: scroll;
 }
 
 /* [INACTIVE] Individual filter type div (inactive) */
@@ -161,6 +214,9 @@ body input[type=checkbox] {
     border: 1px solid #cccccc;
     border-top: 0px;
     border-bottom: 0px;
+}
+
+.option-frame { 
 }
 
 /* selected-option is for options that have been checked 

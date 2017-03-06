@@ -1,12 +1,13 @@
 /* *** GLOBALS *** */
 const filter_types = ["course", "faculty", "room", "time"];
+// Format structure for selected options
 var filters = {"course":{"logic":"and", "filters":[]}, "faculty":{"logic":"and", "filters":[]}, "room":{"logic":"and", "filters":[]}, "time":{"logic": "and", "filters":{"MWF":[], "TR":[]}}};
 var filteredSections = [];
 var sectionDetails = [];
 
 /* *** UTILITY *** */
 // String format function. 
-// Replaces {n} in format string with n-th positional arg.
+// Replaces all '{n}' in format string with n-th positional arg.
 String.prototype.format = function() {
     var content = this;
     for (var i=0; i < arguments.length; i++) {
@@ -189,14 +190,15 @@ function selectSchedule(name) {
     /*$("#open-terms").children("li").each(function (index, value) {
         value.className = "";
     });*/
-    $("#"+name).parent().addClass("active-schedule");
+    //$("#"+name).parent().className("dropdown active-schedule");
+    $("#"+name).addClass("active-schedule");
 }
 
 // Gets the currently selected term. If none, returns false
 function getSelectedSchedules() {
     var arr = []
     $("#open-terms").children("li").each( function(index, value) {
-        if ($(value).hasClass("active-schedule"))
+        if ($(value).children("a").hasClass("active-schedule"))
             arr.push($(value).children("a").text());
     });
     for (var i = 0; i < arr.length; ++i) {
@@ -351,11 +353,11 @@ function selectTime(minTime, maxTime) {
     time.startTime = startTime;
     time.endTime = endTime;
     var optionId = (time.day+"-"+time.startTime+"-"+time.endTime).replace(/[: ]/g, '-');
-    var optionText = time.day+": "+toStandardTime(time.startTime)+" - "+toStandardTime(time.endTime);
+    var optionText = time.day.toUpperCase()+":<br> "+toStandardTime(time.startTime)+" - "+toStandardTime(time.endTime);
     var timeOptionFormatString = 
-        "<div id=\"{0}\"class=\"selected-option\" style=\"height:100%; min-height: 20px;\">\n" +
-        "  <button onclick=\"unselectSelectedTime('{0}')\" style=\"height:100%;\">x</button>\n" +
-        "  <li class=\"filter-options\" style=\"height:100%;min-height: 25px;\">{1}</li>\n" +
+        "<div id=\"{0}\"class=\"selected-option\" style=\"overflow:hidden;height:100%; min-height: 20px;\">\n" +
+        "  <button onclick=\"unselectSelectedTime('{0}')\" style=\"float:left;padding-bottom:100%; margin-bottom:-100%;\">x</button>\n" +
+        "  <li class=\"filter-options\" style=\"display:flex;height:100%;min-height: 25px;\">{1}</li>\n" +
         "</div>"; 
     $("#time-options").append(timeOptionFormatString.format(optionId, optionText));
     $("#"+optionId).data("data", time);
@@ -382,8 +384,8 @@ function selectOption(element) {
     // Add option to selected option list
     if (filterType.prop('id') != "time-options" && element.checked) {
         var optionFormatString = 
-                    "<div id=\"{0}\"class=\"selected-option\" style=\"height:100%; min-height: 20px;\">\n" +
-                    "  <button onclick=\"unselectSelectedOption('{0}')\" style=\"height:100%;\">x</button>\n" +
+                    "<div id=\"{0}\"class=\"selected-option\" style=\"overflow:hidden;height:100%; min-height: 20px;\">\n" +
+                    "  <button onclick=\"unselectSelectedOption('{0}')\" style=\"float:left;padding-bottom:100%;margin-bottom:-100%;\">x</button>\n" +
                     "  <li class=\"filter-options\" style=\"height:100%;min-height: 25px;\">{1}</li>\n" +
                     "</div>"; 
         var text = $(element).parents("div").children("div").children("p").text();
@@ -681,7 +683,6 @@ function NewSection(request) {
 
 
 /* Section Details Functions */
-
 function updateSectionDetails(resort) {
     var sectionDetailsFormatString = 
         "<tr id=\"{1}-detail\">\n" + 
@@ -734,6 +735,70 @@ function setDays(element, form) {
     form.days=element.id;
     form.save();
 }
+
+function openDataTab(name, title, data) {
+    var tabAlreadyOpened = false;
+    $("#data-tab-window").children("ul").each( function(index, value) {
+        if ($(value).prop('id') == name+"-tab")
+            tabAlreadyOpened = true;
+    });
+    if (!tabAlreadyOpened) {
+        var tabFormat = "<li id=\"{0}-tab\" class=\"data-tab\"><a href=\"#\">{1}</a></li>\n";
+        $("#data-tab-window").children("ul").append(tabFormat.format(name, title));
+    }
+    $("#data-window").each( function(index, value) {
+        if ($(value).prop('id') == name)  {
+            $(value).remove();
+        }
+    });
+    $("#data-window").append(data)
+
+
+}
+
+// Section Creation - Data window interaction
+// On term selection
+$("#academic-term").on('change', function() {
+    var dataFormat = 
+        "<table id=\"student-plan\" class=\"table\">\n" +
+        "  <thead>\n" +
+        "    <tr>\n" +
+        "      <th>Schedule</th>\n" +
+        "      <th>Course</th>\n" +
+        "      <th>Section Type</th>\n" +
+        "      <th>Seat Demand</th>\n" +
+        "      <th>Sections Offered</th>\n" +
+        "      <th>Enrollment Capacity</th>\n" +
+        "      <th>Unmet Seat Demand</th>\n" +
+        "    </tr>\n" +
+        "  </thead>\n" +
+        "  <tbody>\n" +
+        "    <tr>\n" +
+        "      <td>{0}</td>\n" +
+        "      <td>{0}</td>\n" +
+        "      <td>{0}</td>\n" +
+        "      <td>{0}</td>\n" +
+        "      <td>{0}</td>\n" +
+        "      <td>{0}</td>\n" +
+        "      <td>{0}</td>\n" +
+        "    </tr>\n" +
+        "    <tr>\n";
+    openDataTab('student-plan', 'Student Plan Data', dataFormat.format('temp'));
+});
+
+$("#course").on('change', function() {
+
+});
+
+$("#faculty").on('change', function() {
+    console.log(this.value);
+});
+
+$("#room").on('change', function() {
+    console.log(this.value);
+});
+
+
 
 
 
