@@ -45,8 +45,8 @@
               {% for cuser in faculty_list %}
               <tr>
                 <td>
-                <button type="button" class="btn btn-info btn-xs" data-toggle="modal" data-target="#delete-faculty" onclick="setDeleteID('{{ faculty.user.email }}')"><span class="glyphicon glyphicon-trash"></span>&nbsp;</button>
-                <button type="button" class="btn btn-info btn-xs" data-toggle="modal" data-target="#edit-faculty"><span onclick="updateRoom('{{ faculty.user.name }}')" class="glyphicon glyphicon-edit"></span>&nbsp;</button>
+                <button type="button" class="btn btn-info btn-xs" data-toggle="modal" data-target="#delete-faculty" onclick="setDeleteFormItem('{{ faculty.user.email}}', 'id_user_name')"><span class="glyphicon glyphicon-trash"></span>&nbsp;</button>
+                <button type="button" class="btn btn-info btn-xs" data-toggle="modal" data-target="#edit-faculty" onclick="setEditFormFields('{{ faculty.user.name }}', 'user'), getFacultyInfo('{{ faculty.user.name }}', '{{ csrf_token }}')"><span class="glyphicon glyphicon-edit"></span>&nbsp;</button>
                 </td>
                 <td>{{ cuser.user.email }}</td>
                 <td>{{ cuser.user.first_name }} {{ cuser.user.last_name }}</td>

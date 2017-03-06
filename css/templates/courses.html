@@ -54,10 +54,10 @@
       </div>
     </div>
           
-          <h1 align="center">File Upload</h1>
+          <h1 align="center">Course Information Upload</h1>
 
           <form method = "POST" enctype = "multipart/form-data" action="#"> {% csrf_token %}
-	      {{course_import_data_form.as_p}}
+	      {{upload_form.as_p}}
               <button type="submit" name="course-import-data" class="save btn btn-default">submit</button>
           </form>
 
