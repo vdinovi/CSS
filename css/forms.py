@@ -31,8 +31,8 @@ class InviteUserForm(forms.Form):
         name = first_name + ' ' + last_name
         email = self.cleaned_data['email']
         #@TODO fix HOSTNAME
-        link = 'localhost:8000' + '/register?first_name=' + first_name +'&last_name=' + last_name +'&user_type='+ usertype + '&email=' + email
-        send_mail('Invite to register for CSS', name + """, you have been invited to register for CSS. Please register using the following link: """ 
+        link = 'http://localhost:8000' + '/register?first_name=' + first_name +'&last_name=' + last_name +'&user_type='+ usertype + '&email=' + email
+        send_mail('Invite to register for CSS', name + """, you have been invited to register for CSS. Please register using the following link: \n""" 
         + link, 'registration@inviso-css', [self.cleaned_data['email']])
         print("sent email to " + self.cleaned_data['email'])
 
@@ -223,8 +223,8 @@ class AddSectionForm(forms.Form):
 class AddAvailabilityForm(forms.Form):
 	DAYS = ('Monday', 'Monday',),('Tuesday','Tuesday'),('Wednesday','Wednesday'), ('Thursday','Thursday',), ('Friday', 'Friday')
 	day = forms.ChoiceField(label='Day', choices=DAYS)
-	start_time = forms.IntegerField(label='Start Time')
-	end_time = forms.IntegerField(label='End Time')
+	start_time = forms.TimeField(label='Start Time')
+	end_time = forms.TimeField(label='End Time')
 	level = forms.ChoiceField(label='Type', choices=[('Preferred', 'Preferred'), ('Unavailable','Unavailable')])
 
 	def save(self, email):

@@ -24,8 +24,32 @@
           			</div>
           			<div class="modal-body">
             			<form method="POST">{% csrf_token %}
-              				{{ add_availability_form.as_p }}
+            				<p>
+            				{{ add_availability_form.day.label_tag }}
+              				{{ add_availability_form.day }}
+              				{{ add_availability_form.day.errors }}
+              				</p>
+
+              				<p>
+              				<label for="id_start_time">Start Time:</label>
+              				<input id="id_start_time" name="start_time" type="time" required="">
+              				{{ add_availability_form.start_time.errors }}
+              				</p>
+
+              				<p>
+              				<label for="id_end_time">End Time:</label>
+              				<input id="id_end_time" name="end_time" type="time" required="">
+              				{{ add_availability_form.end_time.errors }}
+              				</p>
+              				
+              				<p>
+              				{{ add_availability_form.level.label_tag}}
+              				{{ add_availability_form.level }}
+              				{{ add_availability_form.level.errors }}
+              				</p>
+
               				<button type="submit" name="add_availability_form" class="save btn btn-default">Submit</button>
+              				
             			</form>
           			</div>
           			<div class="modal-footer">
