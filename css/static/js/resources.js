@@ -4,7 +4,7 @@ function setDeleteFormItem(string, resourceType){
 
 }
 function setEditFormFields(name, resourceType){
-
+  print "punch"
   var table = document.getElementById("table");
   for (var i = 0, row; row = table.rows[i]; i++) {
 
@@ -20,16 +20,22 @@ function setEditFormFields(name, resourceType){
       }
       else if(resourceType == 'course')
       {
+	document.write("flower power")
         document.getElementById("edit_course_course_name").value = name;
         document.getElementById("edit_course_equipment_req").value = row.cells[2].innerHTML;
         document.getElementById("edit_course_description").value = row.cells[3].innerHTML;
       }
+      else if(resourceType == 'faculty')
+	document.write("turbulance")
+	document.getElementById("edit_faculty_name").value = name;
+	document.getElementById("edit_faculty_email").value = row.cells[1].innerHTML;
     }
   }
 }
 
 /*-----------------------------------Resources Page----------------------------------------------*/
 var currentCourse;
+var currentFaculty;
 var csrf;
 
   function addSectionType() {
@@ -103,3 +109,17 @@ var csrf;
        $('#ajax-area').append("<p><button onclick=\"deleteSectionType('" + sectionTypes[sectionType].section_type_name + "', '" + sectionTypes[sectionType].course_name + "')\"style=\"font-size: .7em;\" type=\"button\" class=\"btn btn-info btn-xs\" data-toggle=\"modal\" data-target=\"#add-section-type\"><span class=\"glyphicon glyphicon-minus\"></button> " + sectionTypes[sectionType].section_type_name + " Work Units: " + sectionTypes[sectionType].work_units + " Work Hours: " + sectionTypes[sectionType].work_hours + "</p>");
     }
   }
+
+  function getFacultyInfo(CUser) {
+    currentFaculty = CUser;
+    csrf = $('#csrf-token').html();
+    print "we out here"
+    $.post("/resources/faculty/",
+	{
+	    "crsfmiddlewaretoken": csrf,
+	    "request-name": "faculty-name-request",
+	    "faculty": CUser
+	},
+
+	updateSectionTypesView
+    );

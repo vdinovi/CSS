@@ -313,6 +313,7 @@ class Course(models.Model):
             chunks.append(s)
         data = ''.join(chunks)
         lines = data.split('\n')
+	messages = []
         i = 0
 	while i < len(lines):
 	    while (i < len(lines) and not lines[i].strip()):
@@ -325,8 +326,10 @@ class Course(models.Model):
 	    courseDescription = words[1]
 	    if Course.objects.filter(name = courseName).exists():
 		#create a log of the duplicate course entry error
-		print "%s: %i\n" % (courseName, i)
-		pass
+		messages.append("Course '%s' on line %d already exists, not added to database" % (courseName, i))
+		print "course: '%s' number: '%d'" % (courseName, i)
+		i += 1
+		continue
 	    else:
 		Course.objects.create(name = courseName, equipment_req = '', description = courseDescription)
 		if len(words) > 2:
@@ -336,15 +339,7 @@ class Course(models.Model):
 			    if lineObject[1].strip() != "unit":
 
     			        time = lineObject[0]
-
-				if lineObject[1].strip == 'lect':
-				    sectType = 'Lecture'
-				elif lineObject[1].strip == 'lab':
-				    sectType = 'Lab'
-				elif lineObject[1].strip == 'supv':
-				    sectType = 'Supervisor'
-				else:
-				    sectType = lineObject[1].strip()
+				sectType = lineObject[1].strip()
 
 				if not SectionType.objects.filter(name = sectType).exists():
 				    print type(sectType)
@@ -362,7 +357,7 @@ class Course(models.Model):
                                 units = lineObject[0] 
 				WorkInfo.create(Course.get_course(courseName), SectionType.get_section_type(sectType), work_units = units, work_hours = time)
 	    i += 1
-		
+	return messages		
 		
 
 class SectionType(models.Model):
