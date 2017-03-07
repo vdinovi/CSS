@@ -15,7 +15,7 @@ class LoginForm(forms.Form):
     @staticmethod
     def validate_password(password):
         if re.match(r'^(?=.*\d)(?=.*[A-Za-z])(?=.*[-._!@#$%^&*?+])[A-Za-z0-9-._!@#$%^&*?+]{8,32}$', password) is None:
-            raise ValidationError("Attempted CUser creation with invalid password") 
+            raise ValidationError("Attempted CUser creation with invalid password")
 
 #  Invite Form
 class InviteUserForm(forms.Form):

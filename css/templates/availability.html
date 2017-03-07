@@ -41,7 +41,7 @@
               				<input id="id_end_time" name="end_time" type="time" required="">
               				{{ add_availability_form.end_time.errors }}
               				</p>
-              				
+
               				<p>
               				{{ add_availability_form.level.label_tag}}
               				{{ add_availability_form.level }}
@@ -49,7 +49,7 @@
               				</p>
 
               				<button type="submit" name="add_availability_form" class="save btn btn-default">Submit</button>
-              				
+
             			</form>
           			</div>
           			<div class="modal-footer">
@@ -72,6 +72,9 @@
 	    </thead>
 	    <tbody>
 	    	{% for avail in availability_list %}
+
+					<p>{{ avail.faculty.user.first_name}}</p>
+
 	    	{% endfor %}
 	        <tr>
 	            <td>08:00am</td>
