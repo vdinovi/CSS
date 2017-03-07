@@ -378,4 +378,27 @@ def GetCourseInfo(request):
     return res
 
 
+def GetRoomInfo(request):
+    res = HttpResponse()
+    if request.method == "GET":
+        try:
+            room_name = request.GET.get('room')
+            room = Room.get_room(name=room_name)
+            res.write(json.dumps({'room': room.to_json()}))
+        except KeyError as e:
+            res.status_code = 400
+            if room == None:
+                res.reason_phrase = "Missing room name in query string"
+            else:
+                res.status_code = 500
+        except ObjectDoesNotExist:
+            res.status_code = 400
+            if room is None:
+                res.reason_phrase = "Room '%s' does not exist" % (request.GET.get('room'),)
+            else:
+                res.status_code = 500
+    else:
+        res.status_code = 400
+    return res
+
 

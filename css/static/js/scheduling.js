@@ -403,7 +403,7 @@ function selectOption(element) {
     // Remove option from selected option list
     else {
         filterType.children("div").each(function(index, value) {
-            if (value.id.replace(/-/g, ' ') == $(element).parent().parent().children('div').children("p").text())
+            if ($(value).children("li").text() == $(element).parent().parent().children('div').children("p").text())
                 value.remove();
         });
     }
@@ -938,11 +938,9 @@ $("#academic-term").on('change', function() {
             $("#data-window").empty();
             $("#data-tab-window").empty();
             openDataTab('student-plan', 'Student Plan Data', dataFormat.format('temp'));
-            console.log('Success: ');
-            console.log(response);
+            selectDataTab('student-plan');
         },
         error: function(error) {
-            console.log('Error: ');
             console.log(error);
         }
     });
@@ -1059,14 +1057,12 @@ $("#course").on('change', function() {
             var cohortData = response.cohort_data
             var cohortTotal = response.cohort_total
             openDataTab('cohort-data', 'Cohort Data', formatCohortData(course.name, cohortData, cohortTotal));
-            /*openDataTab('enrollment-data', 'Historic Enrollment Data', enrollmentDataFormat.format(course.name));
-
-            //$("#cohort-data").hide();
-            //$("#enrollment-data").hide();
-            //openDataTab('course-info', 'Course Info', courseDataFormat.format(course.name,
+            openDataTab('enrollment-data', 'Historic Enrollment Data', enrollmentDataFormat.format(course.name));
+            openDataTab('course-info', 'Course Info', courseDataFormat.format(course.name,
                                                                               course.equipment_req,
                                                                               course.description)
-            );*/ 
+            );
+            selectDataTab('course-info');
         },
         error: function(error) {
             console.log(error);
@@ -1079,7 +1075,52 @@ $("#faculty").on('change', function() {
 });
 
 $("#room").on('change', function() {
-    //@TODO Render room info
+    var roomDataFormat =
+        "<div id=\"room-info\" class=\"container\">\n" +
+        "<h3>Room Info</h3>\n" +   
+        "<table class=\"table\">\n" +
+        "  <thead>\n" +
+        "    <tr>\n" +
+        "      <th>{0}</th>" + // Room Name
+        "    </tr>\n" +
+        "    <tr>\n" +
+        "      <th>Description</th>\n" +
+        "      <th>Equipement</th>\n" +
+        "      <th>Capacity</th>\n" +
+        "      <th>notes</th>\n" +
+        "    </tr>\n" +
+        "  </thead>\n" +
+        "  <tbody>\n" +
+        "    <tr>\n" +
+        "      <td>{1}</td>\n" +
+        "      <td>{2}</td>\n" +
+        "      <td>{3}</td>\n" +
+        "      <td>{4}</td>\n" +
+        "    </tr>\n" +
+        "  </tbody>\n" +
+        "</table>\n" +
+        "</div>\n";
+    $.ajax({
+        type: "GET",
+        url: "room-info",
+        contentType: "application/json",
+        dataType: "json",
+        data: {
+            'room': $("#room").val()
+        },   
+        success: function(response) {
+            room = response.room
+            openDataTab('room-info', 'Room Info', 
+                        roomDataFormat.format(room.name, room.description, room.equipment,
+                                              room.capacity, room.notes
+                        )
+            );
+            selectDataTab('room-info');
+        },
+        error: function(error) {
+            console.log(error);
+        } 
+    });
 });
 
 
