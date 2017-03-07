@@ -227,6 +227,8 @@ def Conflicts(section):
     room = section.room
     faculty = section.faculty
     academic_term = section.schedule
+    room_conflict = False
+    faculty_conflict = False
 
     # Find all sections that are between start_time and end_time of the new section
     # sections = Section.objects.filter(schedule=academic_term).filter(start_time__range=[start_time, end_time]).filter(end_time__range=[start_time, end_time])
@@ -248,6 +250,20 @@ def Conflicts(section):
             if s.id != section.id:
                 conflict = SectionConflict.create(section, s, 'faculty')
                 conflict.save()
+
+def Conflicts(start_time, end_time, room, faculty, academic_term):
+    sections = Section.objects.filter(schedule=academic_term).filter(Q(start_time__range=[start_time, end_time]) | Q(end_time__range=[time(start_time.hour, start_time.minute + 1), end_time]))
+
+    # Check if rooms or faculty overlap
+    for s in sections:
+        if s.room == room:
+            s.conflict = 'y'
+            s.conflict_reason = 'room'
+            return 
+        if s.faculty == faculty:
+            s.conflict = 'y'
+            s.conflict_reason = 'faculty'
+            return 
 
 
 def GetStudentPlanData(request):
