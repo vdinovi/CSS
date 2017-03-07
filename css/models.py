@@ -89,7 +89,6 @@ class CUser(models.Model):
     def get_cuser_by_full_name(cls, full_name):
         first_name = full_name.split()[0]
         last_name = full_name.split()[1]
-        print first_name + last_name
         return cls.objects.get(user__first_name=first_name,
                                user__last_name=last_name)
     @classmethod
@@ -97,7 +96,6 @@ class CUser(models.Model):
     def get_faculty_by_full_name(cls, full_name):
         first_name = full_name.split("-")[0]
         last_name = full_name.split("-")[1]
-        print first_name + last_name
         return cls.objects.get(user_type='faculty', user__first_name=first_name,
                                user__last_name=last_name)
     # Return faculty cuser by email
@@ -689,11 +687,11 @@ class CohortData(models.Model):
     @classmethod
     def get_cohort_data(cls, **kwargs):
         if 'schedule' in kwargs and 'course' in kwargs and 'major' in kwargs:
-            return cls.objects.get(schedule=schedule, course=course, major=major)
+            return cls.objects.get(schedule=kwargs['schedule'], course=kwargs['course'], major=kwargs['major'])
         elif 'schedule' in kwargs and 'course' in kwargs:
-            return cls.objects.filter(schedule=schedule, course=course)
+            return cls.objects.filter(schedule=kwargs['schedule'], course=kwargs['course'])
         elif 'schedule' in kwagrs:
-            return cls.objects.filter(schedule=schedule)
+            return cls.objects.filter(schedule=kwargs['schedule'])
         return None
 
 
@@ -810,8 +808,14 @@ class CohortTotal(models.Model):
         return cohort_total
 
     @classmethod
-    def get_cohort_total(cls, schedule, major):
-        return cls.objects.get(schedule=schedule, major=major)
+    def get_cohort_total(cls, **kwargs):
+        if 'schedule' in kwargs and 'major' in kwargs:
+            return cls.objects.get(schedule=kwargs['schedule'], major=kwargs['major'])
+        elif 'schedule' in kwargs:
+            return cls.objects.filter(schedule=kwargs['schedule'])
+        return None
+
+
 
 # Student Plan Data.
 class StudentPlanData(models.Model):
@@ -845,7 +849,6 @@ class StudentPlanData(models.Model):
 
     @classmethod
     def get_student_plan_data(cls, **kwargs):
-        print kwargs
         if 'course' in kwargs and 'schedule' in kwargs and 'section_type' in kwargs:
             return cls.objects.get(schedule=kwargs['scheudle'], course=kwargs['course'], section_type=kwargs['section_type'])
         elif 'course' in kwargs and 'schedule' in kwargs:
@@ -935,7 +938,6 @@ class StudentPlanData(models.Model):
                         kwargs[k] = v
                 # Create entry
                 cls.create(schedule=schedule, course=course, section_type=section_type, **kwargs)
-                print 'Success'
             except IndexError as e:
                 messages.append("Invalid entry on line %d: %s" % (i, e[0])) 
             except:
