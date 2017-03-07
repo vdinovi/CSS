@@ -1,5 +1,5 @@
 /* *** GLOBALS *** */
-const filter_types = ["schedule", "course", "faculty", "room", "time"];
+const filter_types = ["course", "faculty", "room", "time"];
 var filters = {"schedule":{"logic":"and", "filters":[]}, "course":{"logic":"and", "filters":[]}, "faculty":{"logic":"and", "filters":[]}, "room":{"logic":"and", "filters":[]}, "time":{"logic": "and", "filters":{"MWF":[], "TR":[]}}}; //
 var filteredSections = [];
 var sectionDetails = [{"name":"cpe101-01", "term":"fall2016", "course":"cpe101", "type":"lecture", "faculty":"kearns", "room":"14-256", "days":"mwf", "start_time":"10:00AM", "end_time":"12:00PM"}];
@@ -491,11 +491,12 @@ function spacesToUnderscores(string) {
 // Get the filters JSON object with correct filters to apply using getSelectedOptions
 function updateFilters() {
     filtersToApply = getSelectedOptions();  
+    filters['schedule']['filters'] = filtersToApply['schedule'];
     $('.logic-checkbox').each(function (index, value) {        
         timeMWFarr = []
         timeTRarr = []
         otherArr = []
-        filterType = value.id; 
+        filterType = value.id.split("-logic-checkbox")[0]; 
         console.log(filterType);
         if (value.checked) {
             for (var t=0;t<filtersToApply[filterType].length;t++) {
@@ -506,9 +507,9 @@ function updateFilters() {
                 else if (filtersToApply[filterType][t].includes('tr')) { timeTRarr.push(new Array(startTime, endTime)); }
             } 
             otherArr = filtersToApply[filterType]       
-            $('#'+filterType).parent('label').addClass("checked");
+            $('#'+value.id).parent('label').addClass("checked");
         } else {      
-            $('#'+filterType).parent('label').removeClass("checked");
+            $('#'+value.id).parent('label').removeClass("checked");
         }
         if (filterType == "time") {
             filters[filterType]['filters']['MWF'] = timeMWFarr
@@ -537,11 +538,6 @@ function updateFilterLogic() {
             $("#"+value.id).parent().next().prop("disabled", true);
         }
     }); 
-}
-
-// OnClick function that adds the logic for this filter
-function addLogic(element) {
-
 }
 
 /* *** HELPER FUNCTIONS FOR LOGIC *** */
@@ -658,7 +654,7 @@ function setLogic(element) {
 function getSelectedFilters() {
     var selectedFilters = [];
     $('.logic-checkbox').each(function (index, value) {
-        if (value.checked) { selectedFilters.push(value.id); }
+        if (value.checked) { selectedFilters.push(value.id.split("-logic-checkbox")[0]); }
     });
     return selectedFilters;
 }
@@ -757,7 +753,7 @@ function deleteSection(element) {
     console.log("HERE" + sectionName);
     $.ajax({
         type: "POST",
-        url: "delete-section",
+        url: "deleteSection",
         dataType: 'json',
         data: JSON.stringify({"section": sectionName}),
         success: function(response) {
@@ -767,6 +763,37 @@ function deleteSection(element) {
             console.log(err);
         }
     });
+}
+
+function displaySectionInfo(sectionElement) {
+    sectionName = spacesToUnderscores($($(sectionElement).parent().next("td")).text());
+    $.ajax({
+        type: "POST",
+        url: "editSection",
+        dataType: "json",
+        data: JSON.stringify({"section": sectionName}),
+        success: function(response) {
+            optionFormatString = "<option value=\"{0}\">{1}</option>"
+            selectedOptionFormatString = "<option selected value=\"{0}\">{1}</option>"
+            for (var attribute in response.options) {
+                for (var i=0;i<attributes.length;i++) {
+                    $("select#edit-"+spacesToUnderscores(attribute)).append(optionFormatString.format(spacesToUnderscores(attribute[i]), attribute[i]));
+                }
+            }
+        },
+        error: function(err) {
+            console.log(err);
+        }
+    });
+}
+
+/*** EDIT SECTION INFO FUNCTIONS  ***/
+function renderSectionNumber() {
+
+}
+
+function displayEditOptions(id, options) {
+
 }
 
 
