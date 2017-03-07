@@ -355,16 +355,44 @@ class WorkInfo(models.Model):
         return work_info
 
 class Availability(models.Model):
-    class Meta:
-        unique_together = (("faculty", "day_of_week", "start_time"),)
-    faculty = models.ForeignKey(CUser, on_delete=models.CASCADE, null=True)
-    day_of_week = models.CharField(max_length=16) # MWF or TR
-    start_time = models.TimeField()
-    end_time = models.TimeField()
-    level = models.CharField(max_length=16) #preferred, unavailable
+    faculty = models.OneToOneField(CUser, on_delete=models.CASCADE)
+    timeList = [0, 30, 100, 130, 200, 230, 300, 330, 400, 430, 500, 530, 600, 630, 700, 730, 800, 830, 900, 930, 1000, 1030, 1100, 1130, 1200, 1230, 1300, 1330, 1400, 1430, 1500, 1530, 1600, 1630, 1700, 1730, 1800, 1830, 1900, 1930, 2000]
+    days = {}
+    dayList = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday']
 
     @classmethod
-    def get_availability_list(cls, faculty):
+    def create(cls, faculty):
+
+        for day in dayList:
+            for time in timeList:
+                days[day][time] = "unset"
+
+        faculty = cls(faculty=faculty, days = days, )
+        return faculty
+
+    def setRange(self, startTime, endTime, day, setting):
+        hour = startTime.hour * 100
+        if(startTime.minute < 15 or startTime.minute > 45):
+            minute = 0
+        else:
+            minute = 30
+        start = hour + minute
+
+        hour = endTime.hour * 100
+        if(endTime.minute < 15 or endTime.minute > 45):
+            minute = 0
+        else:
+            minute = 30
+        end = hour + minute
+
+        for time in self.timeList:
+            if(time >= start and time <= end):
+                self.days[day][time] = setting
+        print "Added range:"
+        print self.days
+
+    @classmethod
+    def get_availability(cls, faculty):
         return cls.objects.filter(faculty=faculty)
 
     @classmethod
@@ -383,6 +411,7 @@ class Availability(models.Model):
             availability.save()
             return availability
 
+    # deprecated!!!
     def to_json(self):
         return dict(faculty = self.faculty.to_json(),
 		    day = self.day_of_week,

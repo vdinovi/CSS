@@ -218,20 +218,19 @@ class AddSectionForm(forms.Form):
         section.save()
         return
 
-class AddAvailabilityForm(forms.Form):
-	DAYS = ('Monday', 'Monday',),('Tuesday','Tuesday'),('Wednesday','Wednesday'), ('Thursday','Thursday',), ('Friday', 'Friday')
-	day = forms.ChoiceField(label='Day', choices=DAYS)
-	start_time = forms.TimeField(label='Start Time')
-	end_time = forms.TimeField(label='End Time')
-	level = forms.ChoiceField(label='Type', choices=[('preferred', 'preferred'), ('Unavailable','Unavailable')])
 
-	def save(self, email):
-		availability = Availability.create(email=email,
-											day = self.cleaned_data['day'],
-											start_time = self.cleaned_data['start_time'],
-											end_time = self.cleaned_data['end_time'],
-											level = self.cleaned_data['level'])
-		availability.save()
+class AddAvailabilityForm(forms.Form):
+    DAYS = ('Monday', 'Monday',),('Tuesday','Tuesday'),('Wednesday','Wednesday'), ('Thursday','Thursday',), ('Friday', 'Friday')
+    day = forms.ChoiceField(label='Day', choices=DAYS)
+    start_time = forms.TimeField(label='Start Time')
+    end_time = forms.TimeField(label='End Time')
+    level = forms.ChoiceField(label='Type', choices=[('preferred', 'preferred'), ('Unavailable','Unavailable')])
+
+    def save(self, email):
+        availability = Availability.create(faculty=CUser.get_user(email))
+        availability.setRange(start_time, end_time, day, level)
+        availability.save()
+
 
 class AddScheduleForm(forms.Form):
     academic_term = forms.CharField(max_length=16)
