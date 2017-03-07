@@ -736,31 +736,44 @@ function setDays(element, form) {
     form.save();
 }
 
+function selectDataTab(name) {
+    $("#data-tab-window").children().each( function(index, value) {
+        if ($(value).prop('id') != name+'-tab' && $(value).hasClass('active')) {
+            $(value).removeClass('active');
+        }
+    });
+    $("#"+name+'-tab').addClass('active');
+    $("#data-window").children().each( function(index, value) {
+        $(value).hide();
+    });
+    $("#"+name).show() 
+}
+
 function openDataTab(name, title, data) {
     var tabAlreadyOpened = false;
-    $("#data-tab-window").children("ul").each( function(index, value) {
+    $("#data-tab-window").children().each( function(index, value) {
         if ($(value).prop('id') == name+"-tab")
             tabAlreadyOpened = true;
     });
     if (!tabAlreadyOpened) {
-        var tabFormat = "<li id=\"{0}-tab\" class=\"data-tab\"><a href=\"#\">{1}</a></li>\n";
-        $("#data-tab-window").children("ul").append(tabFormat.format(name, title));
+        var tabFormat = "<li id=\"{0}-tab\" onclick=\"selectDataTab('{0}')\"><a href=\"#\">{1}</a></li>";
+        $("#data-tab-window").append(tabFormat.format(name, title));
     }
-    $("#data-window").each( function(index, value) {
+    $("#data-window").children().each( function(index, value) {
         if ($(value).prop('id') == name)  {
             $(value).remove();
         }
     });
     $("#data-window").append(data)
-
-
 }
 
 // Section Creation - Data window interaction
 // On term selection
 $("#academic-term").on('change', function() {
     var dataFormat = 
-        "<table id=\"student-plan\" class=\"table\">\n" +
+        "<div id=\"student-plan\" class=\"container\">\n" +
+        "<h3>Student Plan Data</h3>\n" + 
+        "<table class=\"table\">\n" +
         "  <thead>\n" +
         "    <tr>\n" +
         "      <th>Schedule</th>\n" +
@@ -782,20 +795,164 @@ $("#academic-term").on('change', function() {
         "      <td>{0}</td>\n" +
         "      <td>{0}</td>\n" +
         "    </tr>\n" +
-        "    <tr>\n";
-    openDataTab('student-plan', 'Student Plan Data', dataFormat.format('temp'));
+        "  </tbody>\n" +
+        "</table>\n" +
+        "</div>";
+    // Get Student Plan Data
+    $.ajax({
+        type: "GET",
+        url: "student-plan-data",
+        contentType: "application/json",
+        dataType: "json",
+        data: {
+            'schedule': $("#academic-term").val()
+        },
+        success: function(response) {
+            $("#data-window").empty();
+            $("#data-tab-window").empty();
+            openDataTab('student-plan', 'Student Plan Data', dataFormat.format('temp'));
+            console.log('Success: ');
+            console.log(response);
+        },
+        error: function(error) {
+            console.log('Error: ');
+            console.log(error);
+        }
+    });
 });
 
-$("#course").on('change', function() {
+// Format cohort data
+function formatCohortData(courseName, cohortData, cohortTotal) {
+    var grades = ['freshman', 'sophomore', 'junior', 'senior'];
+    var cohortDataFormat = 
+        "<div id=\"cohort-data\" class=\"container\">\n" +
+        "<h3>Cohort Data</h3>\n" +
+        "<table class=\"table\">\n" +
+        "  <thead>\n" +
+        "    <tr>\n" +
+        "      <th>"+courseName+"</th>" + // Course Name
+        "    </tr>\n" +
+        "    <tr>\n" +
+        "      <th></th>\n";
+    // Paste in majors
+    for (var k in cohortData) {
+        cohortDataFormat += 
+        "      <th>"+k+"</th>\n";
+    }
+        "    </tr>\n" +
+        "  </thead>\n" +
+        "  <tbody>\n";
+    // Paste in data
+    for (var i = 0; i < 3; ++i) {
+        cohortDataFormat +=
+        "    <tr>\n" +
+        "      <td>"+grades[i]+"</td>\n";
+        for (var k in cohortData) {
+        cohortDataFormat += 
+        "      <td>"+cohortData[k][i]+"</td>\n";
+        }
+        cohortDataFormat +=
+        "    </tr>\n";
+    }
+    cohortDataFormat +=
+        "    <tr>\n" +
+        "      <td>Cohort Total</td>\n" +
+        "    </tr>\n";
+    // @TODO Add cohort total
+    /*for (var i = 0; i < 3; ++i) {
+        cohortDataFormat +=
+        "    <tr>\n" +
+        "    <td>"+grades[i]+"</td>\n";
+        for (var k in cohortData) {
+        cohortDataFormat += 
+        "      <td>"+cohortTotal[k][i]+"</td>\n";
+        }
+        cohortDataFormat +=
+        "    </tr>\n";
+    }*/
+        "  </tbody>\n" +
+        "</table>\n" +
+        "</div>";
+    return cohortDataFormat;
+}
 
+$("#course").on('change', function() {
+    // Get Cohort, Course, and Enrollment Data
+    var courseDataFormat =
+        "<div id=\"course-info\" class=\"container\">\n" +
+        "<h3>Course Info</h3>\n" +  
+        "<table class=\"table\">\n" +
+        "  <thead>\n" +
+        "    <tr>\n" +
+        "      <th>{0}</th>" + // Course Name
+        "    </tr>\n" +
+        "    <tr>\n" +
+        "      <th>Description</th>\n" +
+        "      <th>Equipement Required</th>\n" +
+        "    </tr>\n" +
+        "  </thead>\n" +
+        "  <tbody>\n" +
+        "    <tr>\n" +
+        "      <td>{1}</td>\n" +
+        "      <td>{2}</td>\n" +
+        "    </tr>\n" +
+        "  </tbody>\n" +
+        "</table>\n" +
+        "</div>";
+    var enrollmentDataFormat = 
+        "<div id=\"enrollment-data\" class=\"container\">\n" +
+        "<h3>Historic Enrollment Data</h3>\n" +   
+        "<table class=\"table\">\n" +
+        "  <thead>\n" +
+        "    <tr>\n" +
+        "      <th>{0}</th>" + // Course Name
+        "    </tr>\n" +
+        "  </thead>\n" +
+        "  <tbody>\n" +
+        "    <tr>\n" +
+        "      <td>NOT YET IMPLEMENTED</td>\n" +
+        "    </tr>\n" +
+        "  </tbody>\n" +
+        "</table>\n" +
+        "</div>";
+    $.ajax({
+        type: "GET",
+        url: "course-info",
+        contentType: "application/json",
+        dataType: "json",
+        data: {
+            'schedule': $("#academic-term").val(),
+            'course': $("#course").val()
+        },
+        success: function(response) {
+            $("#data-window").children().each( function(index, value) {
+                $(value).hide();
+            });
+            var course = response.course
+            var cohortData = response.cohort_data
+            var cohortTotal = response.cohort_total
+            openDataTab('cohort-data', 'Cohort Data', formatCohortData(course.name, cohortData, cohortTotal));
+            /*openDataTab('enrollment-data', 'Historic Enrollment Data', enrollmentDataFormat.format(course.name));
+
+            //$("#cohort-data").hide();
+            //$("#enrollment-data").hide();
+            //openDataTab('course-info', 'Course Info', courseDataFormat.format(course.name,
+                                                                              course.equipment_req,
+                                                                              course.description)
+            );*/ 
+        },
+        error: function(error) {
+            console.log(error);
+        }
+    });
 });
 
 $("#faculty").on('change', function() {
-    console.log(this.value);
+    //@TODO Render faculty availability and course preferences
 });
 
 $("#room").on('change', function() {
-    console.log(this.value);
+    //@TODO Render room info
 });
 
 

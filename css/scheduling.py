@@ -1,5 +1,5 @@
 from django.http import HttpResponse, HttpResponseRedirect
-from .models import Course, CUser, Room, Schedule, Section, SectionConflict
+from .models import Course, CUser, Room, Schedule, Section, SectionConflict, StudentPlanData, CohortData, CohortTotal
 from .forms import AddScheduleForm
 import json
 from django.db import IntegrityError
@@ -187,6 +187,90 @@ def Conflicts(section):
             s.save()
             if s.id != section.id:
                 SectionConflict.create(section, s, 'faculty')
+
+
+def GetStudentPlanData(request):
+    res = HttpResponse()
+    if request.method == "GET":
+        try:
+            term = request.GET.get('schedule')
+            schedule = Schedule.get_schedule(term_name=term)
+            student_plan_data = StudentPlanData.get_student_plan_data(schedule=schedule).all()
+            data = []
+            for _,v in student_plan_data:
+               data.append(v.to_json())
+            res.write(json.dumps({'data': data}))
+        except KeyError as e:
+            res.status_code = 400
+            if term == None:
+                res.reason_phrase = "Missing schedule in query string"
+            else:
+                res.status_code = 500
+        except ObjectDoesNotExist:
+            res.status_code = 400
+            if schedule is None:
+                res.reason_phrase = "Schedule '%s' does not exist" % (request.GET.get('schedule'),)
+            elif student_plan_data is None:
+                res.reason_phrase = "No student plan data for schedule '%s'" % (schedule.name,)
+            else:
+                res.status_code = 500
+    else:
+        res.status_code = 400
+    return res
+
+def GetCourseInfo(request):
+    res = HttpResponse()
+    if request.method == "GET":
+        try:
+            term = request.GET.get('schedule')
+            schedule = Schedule.get_schedule(term_name=term)
+            course_name = request.GET.get('course')
+            course = Course.get_course(name=course_name)
+            cohort_data = CohortData.get_cohort_data(schedule=schedule, course=course).all()
+            cohort_total = CohortTotal.get_cohort_total(schedule=schedule).all()
+            
+            data = {}  
+            data['course'] = course.to_json()
+            tmp = {}
+            for c in cohort_data:
+                tmp[c.major] = [
+                    c.freshman,
+                    c.sophomore,
+                    c.junior,
+                    c.senior
+                ]
+            data['cohort_data'] = tmp
+            tmp = []
+            for c in cohort_total:
+                tmp[c.major] = [
+                    c.freshman,
+                    c.sophomore,
+                    c.junior,
+                    c.senior
+                ]
+            data['cohort_total'] = tmp
+            res.write(json.dumps(data))
+        except KeyError as e:
+            res.status_code = 400
+            if term is None:
+                res.reason_phrase = "Missing schedule in query string"
+            elif course is None:
+                res.reason_phrase = "Missing course in query string"
+            else:
+                res.status_code = 500
+        except ObjectDoesNotExist:
+            res.status_code = 400
+            if schedule is None:
+                res.reason_phrase = "Schedule '%s' does not exist" % (request.GET.get('schedule'),)
+            if course is None:
+                res.reason_phrase = "Course '%s' does not exist" % (request.GET.get('course'),)
+            elif cohort_data is None or cohort_total is None:
+                res.reason_phrase = "No cohort data for schedule '%s' and course '%s'" % (schedule.name, course.name)
+            else:
+                res.status_code = 500
+    else:
+        res.status_code = 400
+    return res
 
 
 
