@@ -659,7 +659,7 @@ function getSelectedFilters() {
     return selectedFilters;
 }
 
-function NewSection(request) {
+function newSection() {
     var sectionData = {};
     console.log($("#section_num").val());
     sectionData = {
@@ -696,6 +696,46 @@ function NewSection(request) {
     });
 }
 
+/* Confirming new section */
+function newSectionConfirmation() {
+    var sectionData = {};
+    console.log($("#section_num").val());
+    sectionData = {
+         'section_num': $("#section_num").val(), 
+         'schedule': $("#academic-term").val(), 
+         'course': $("#course").val(),
+         'section-type': $("#section-type").val(),
+         'faculty': $("#faculty").val(),
+         'room': $("#room").val(),
+         'days': $("#days").val(),
+         'capacity': $("#capacity").val(),
+         'start-time': $("#start-time").val(),
+         'end-time': $("#end-time").val()
+        };
+    console.log(sectionData);
+    $.ajax({
+        type: "POST",
+        url: "conflict-check",
+        data: JSON.stringify(sectionData),
+        dataType: 'json',
+        success: function(response) {
+            room_conflicts = response.room;
+            console.log(room_conflicts);
+            faculty_conflicts = response.faculty;
+            console.log(faculty_conflicts);
+            if (!(room_conflicts.length) && !(faculty_conflicts.length)) {
+                newSection();
+            }
+            else {
+                $('#confirm-conflicts-modal').show();
+                $('#confirm-conflicts-modal').toggleClass("in");                
+            }
+        },
+        error: function(err) {
+            console.log(err);
+        }
+    });
+}
 
 /* Section Details Functions */
 function updateSectionDetails(resort) {
