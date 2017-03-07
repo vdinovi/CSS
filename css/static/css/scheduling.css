@@ -370,3 +370,7 @@ label.checkbox-inline.checked {
     text-align: center;
 }
 
+.col-xs-offset-6 {
+    margin-left:0 !important;
+}
+
