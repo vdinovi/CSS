@@ -264,8 +264,7 @@ input[type=checkbox] {
     height:100%;
 }
 
-
-
+/* **** FILTER LOGIC **** */
 .filter-logic {
     background-color: #ccccc9;
     width: 100%;
@@ -307,6 +306,8 @@ input[type=checkbox] {
     float:left;
 }
 
+/***** SECTION DETAIL STYLE *****/
+
 .section-detail-frame {
     margin-top: 10px;
     min-width:300px;
@@ -316,6 +317,18 @@ input[type=checkbox] {
 
 .table > thead > tr.top > th.sorted {
     background-color: #b3cccc;
+}
+div#response-btns {
+    margin-left: 60%;
+}
+button.btn.response-btn {
+    margin-left: 0;
+}
+
+.section-detail-modal-header {
+    font-size: 26px;
+    width: 50%;
+    float: left;
 }
 
 

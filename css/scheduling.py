@@ -130,10 +130,9 @@ def Sections(request):
 def NewSection(request):
     res = HttpResponse()
     if request.method == "POST":
-        res.status_code = 200
-        res.write(request.body)
         sectionData = json.loads(request.body)
         Section.create(
+                sectionData['section_num'],
                 sectionData['schedule'],
                 sectionData['course'],
                 sectionData['section-type'],
@@ -150,6 +149,66 @@ def NewSection(request):
                 'n',
                 None
                 )
+        res.status_code = 200
+        res.write(request.body)
+    else:
+        res.status_code = 400
+    return res
+
+# Editing a section
+@csrf_exempt
+def EditSection(request):
+    res = HttpResponse()
+    if request.method == "POST":
+        sectionName = json.loads(request.body)['section']
+        section = Section.get_section_by_name(sectionName)
+        section_info = {'options': {
+                            'section-type': SectionType.objects.filter().all(),
+                            'faculty': CUser.get_all_faculty(),
+                            'room': Room.objects.filter().all(), 
+                        }, 
+                        'info': {
+                            'section-num': section.section_num,
+                            'section-type': section.section_type,
+                            'faculty': section.faculty.user.first_name + " " +  section.faculty.user.last_name,
+                            'room': section.room.name,
+                            'capacity': section.capacity,
+                            'students-enrolled': section.students_enrolled, 
+                            'students-waitlisted': section.students_waitlisted,
+                            'days': section.days,
+                            'start-time': section.start_time, 
+                            'end_time': section.end_time
+                        }}
+        res.content_type = "application/json"
+        data = json.dumps(section_info)     
+        res.write(data)
+        res.status_code = 200
+    # elif request.method == "POST":
+    #     section_info = json.loads(request.body)
+    #     section = Section.get_section_by_name(section_info['name'])
+    #     section.update(schedule=section_info['term'],
+    #                     capacity=section_info['capacity'], 
+    #                     students_waitlisted=section_info['num_waitlisted'],
+    #                     students_enrolled=section_info['num_enrolled'], 
+    #                     start_time=section_info['start_time'],  
+    #                     end_time=section_info['end_time'],  
+    #                     days=section_info['days'], 
+    #                     room=section_info['room'], 
+    #                     section_type=section_info['days']
+    #                     )
+### Can edit everything besides the section number, the course, and the term 
+
+# Deleting a section.
+@csrf_exempt
+def DeleteSection(request):
+    res = HttpResponse()
+    if request.method == "POST":
+        # sectionName = json.loads(request.body)["section"]
+        # sectionObject = Section.get_section_by_name(sectionName)
+        # sectionObject.delete()
+        res.content_type = "json"
+        res.write(json.dumps({"response":"Success!"}))
+        res.status_code = 200
     else:
         res.status_code = 400
     return res

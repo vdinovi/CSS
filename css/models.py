@@ -488,7 +488,7 @@ class Section(models.Model):
         if fault == 'y' and fault_reason != "faculty" and fault_reason != "room":
             raise ValidationError("Invalid fault reason.")
         section = cls(
-                  section_num=section_num,
+                  section_num=int(section_num),
                   schedule=schedule,
                   course=course,
                   section_type=section_type,
@@ -507,8 +507,18 @@ class Section(models.Model):
         section.save()
         return section
 
+    # This takes in the name which is constructed in .to_json() as course-section_num
     @classmethod
-    def get_section(cls, **kwargs):
+    def get_section_by_name(cls, name):
+        nameStrArr = name.split("-")
+        course = Course.get_course(nameStrArr[0])
+        num = " ".join(nameStrArr[1].split("_"))
+        return cls.objects.get(course=course, section_num=num)
+
+
+    # THIS IS FOR PAULA's TESTING PURPOSES: don't use for anything besides the foreign key attributes
+    @classmethod
+    def get_section_test(cls, **kwargs):
         for k,v in kwargs.iteritems():
             if k == 'schedule':
                 return cls.objects.get(schedule=Schedule.get_schedule(v))
@@ -563,7 +573,7 @@ class Section(models.Model):
                 queryLoop = Q()
                 for index in range(len(filters)):
                     if key == "course":
-                        filterObject = Course.get_course(filters[index])
+                        filterObject = Course.get_course(" ".join(filters[index].split("_")))
                         queryLoop = reduce(operator.or_, [queryLoop, Q(course=filterObject)])
                     elif key == "faculty":
                         filterObject = CUser.get_faculty_by_full_name(filters[index])
@@ -571,6 +581,9 @@ class Section(models.Model):
                     elif key == "room":
                         filterObject = Room.get_room(filters[index])
                         queryLoop = reduce(operator.or_, [queryLoop, Q(room=filterObject)])
+                    elif key == "schedule":
+                        filterObject = Schedule.get_schedule(filters[index])
+                        queryLoop = reduce(operator.or_, [queryLoop, Q(schedule=filterObject)])
                     else:
                         raise ValidationError("Invalid filter type.")
 
@@ -605,8 +618,8 @@ class Section(models.Model):
         return sections
 
     def to_json(self):
-        return dict(id = str(self.id),
-                    name = self.course.name + "-" + str(self.id),
+        return dict(id = str(self.section_num),
+                    name = "_".join(self.course.name.split(" ")) + "-" + str(self.section_num),
                     term = self.schedule.academic_term,
                     course = self.course.name,
                     type = self.section_type.name,
