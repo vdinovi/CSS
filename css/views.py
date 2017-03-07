@@ -94,7 +94,6 @@ def AvailabilityView(request):
         			'add_availability_form': AddAvailabilityForm()})
     elif request.method == "POST" and 'add_availability_form' in request.POST:
         form = AddAvailabilityForm(request.POST)
-
         if form.is_valid():
             try:
                 form.save(email)

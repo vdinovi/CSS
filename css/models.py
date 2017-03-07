@@ -365,22 +365,17 @@ class Availability(models.Model):
 
     @classmethod
     def create(cls, email, day, start_time, end_time, level):
-        faculty = CUser.get_faculty(email=email)
+	faculty = CUser.get_faculty(email=email)
         if (day is None):
-            print("Invalid days of week input")
             raise ValidationError("Invalid days of week input")
         elif (start_time is None):
-            print("Need to input start time")
             raise ValidationError("Need to input start time")
         elif (end_time is None):
-            print("Need to input end time")
             raise ValidationError("Need to input end time")
-        elif (level is None) or ((level != "Preferred" and level != "Unavailable")):
-            print("Need to input level of availability: preferred or unavailable")
+        elif (level is None) or (level != "Preferred" and level != "Unavailable"):
             raise ValidationError("Need to input level of availability: preferred or unavailable")
         else:
             availability = cls(faculty=faculty,day_of_week=day, start_time=start_time, end_time=end_time, level=level)
-            print("Availability saved for: " + faculty.user.first_name + " on " + str(day) + " from " + str(start_time) + " to " + str(end_time) + " at level: " + str(level))
             availability.save()
             return availability
 
