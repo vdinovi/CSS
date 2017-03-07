@@ -35,7 +35,9 @@ urlpatterns = [
         url(r'^options$', scheduling.Options, name='options'), 
         url(r'^schedules$', scheduling.Schedules, name='schedules'),
         url(r'^sections$', scheduling.Sections, name='sections'),
-        url(r'^newSection$', scheduling.NewSection, name='newSection')
+        url(r'^newSection$', scheduling.NewSection, name='newSection'),
+        url(r'^student-plan-data$', scheduling.GetStudentPlanData, name='student_plan_data'),
+        url(r'^course-info$', scheduling.GetCourseInfo, name='course_info')
     ])),
     url(r'^department/', include([
         url(r'^schedulers/$', views.SchedulersView, name='schedulers'),

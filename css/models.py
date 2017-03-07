@@ -306,6 +306,12 @@ class Course(models.Model):
             i+=1
         return JsonResponse(sectionTypesDictionary)
 
+    def to_json(self):
+        return dict(name=self.name,
+                    equipment_req=self.equipment_req,
+                    description=self.description)
+
+
 
 class SectionType(models.Model):
     name = models.CharField(max_length=32, unique=True) # eg. lecture or lab
@@ -681,8 +687,15 @@ class CohortData(models.Model):
         return cohort_entry
 
     @classmethod
-    def get_cohort_data(cls, schedule, course, major):
-        return cls.objects.get(schedule=schedule, course=course, major=major)
+    def get_cohort_data(cls, **kwargs):
+        if 'schedule' in kwargs and 'course' in kwargs and 'major' in kwargs:
+            return cls.objects.get(schedule=schedule, course=course, major=major)
+        elif 'schedule' in kwargs and 'course' in kwargs:
+            return cls.objects.filter(schedule=schedule, course=course)
+        elif 'schedule' in kwagrs:
+            return cls.objects.filter(schedule=schedule)
+        return None
+
 
     # Handles an uploaded cohort data file and commits it to the system
     @classmethod
@@ -831,12 +844,15 @@ class StudentPlanData(models.Model):
         return plan_data
 
     @classmethod
-    def get_student_plan_data(cls, schedule, course=None, section_type=None):
-        if course == None:
-            return cls.objects.filter(schedule=schedule)
-        if sectionType == None:
-            return cls.objects.filter(schedule=schedule, course=course)
-        return cls.objects.get(schedule=schedule, course=course, section_type=section_type)
+    def get_student_plan_data(cls, **kwargs):
+        print kwargs
+        if 'course' in kwargs and 'schedule' in kwargs and 'section_type' in kwargs:
+            return cls.objects.get(schedule=kwargs['scheudle'], course=kwargs['course'], section_type=kwargs['section_type'])
+        elif 'course' in kwargs and 'schedule' in kwargs:
+            return cls.objects.filter(schedule=kwargs['schedule'], course=kwargs['course'])
+        elif 'schedule' in kwargs:
+            return cls.objects.filter(schedule=kwargs['schedule'])
+        return None
 
     def to_json(self):
         return dict(

@@ -782,20 +782,118 @@ $("#academic-term").on('change', function() {
         "      <td>{0}</td>\n" +
         "      <td>{0}</td>\n" +
         "    </tr>\n" +
-        "    <tr>\n";
-    openDataTab('student-plan', 'Student Plan Data', dataFormat.format('temp'));
+    // Get Student Plan Data
+    $.ajax({
+        type: "GET",
+        url: "student-plan-data",
+        contentType: "application/json",
+        dataType: "json",
+        data: {
+            'schedule': $("#academic-term")[0].value
+        },
+        success: function(response) {
+            openDataTab('student-plan', 'Student Plan Data', dataFormat.format('temp'));
+            console.log('Success: ');
+            console.log(response);
+        },
+        error: function(error) {
+            console.log('Error: ');
+            console.log(error);
+        }
+    });
 });
 
 $("#course").on('change', function() {
-
+    //@TODO Render course info, cohort, and enrollment data
+    // Get Cohort, Course, and Enrollment Data
+    var courseDataFormat =
+        "<h3>Course Info</h3>\n" +
+        "<table id=\"course-info\" class=\"table\">\n" +
+        "  <thead>\n" +
+        "    <tr>\n" +
+        "      <th>{0}</th>" + // Course Name
+        "    </tr>\n" +
+        "  </thead>\n" +
+        "  <tbody>\n" +
+        "    <tr>\n" +
+        "      <th>NOT YET IMPLEMENTED</th>\n" +
+        "    </tr>\n" +
+        "  </tbody>\n" +
+        "</table>\n";
+    var cohortDataFormat = 
+        "<h3>Cohort Data</h3>\n" +
+        "<table id=\"cohort-data\" class=\"table\">\n" +
+        "  <thead>\n" +
+        "    <tr>\n" +
+        "      <th>{0}</th>" + // Course Name
+        "    </tr>\n" +
+        "    <tr>\n" +
+        "      <th></th>\n" +
+        "{1}" + // Majors
+        "    </tr>\n" +
+        "  </thead>\n" +
+        "  <tbody>\n" +
+        "    <tr>\n" +
+        "{2}" + // Freshman
+        "    </tr>\n" +
+        "    <tr>\n" +
+        "{3}" + // Sophomore
+        "    </tr>\n" +
+        "    <tr>\n" +
+        "{4}" + // Junior
+        "    </tr>\n" +
+        "    <tr>\n" +
+        "{5}" + // Senior
+        "    </tr>\n" +
+        "    <tr>\n" +
+        "{6}" + // Total
+        "    </tr>\n" +
+        "  </tbody>\n" +
+        "</table>|n"; 
+    var enrollmentDataFormat = 
+        "<h3>Historic Enrollment Data</h3>\n" +
+        "<table id=\"cohort-data\" class=\"table\">\n" +
+        "  <thead>\n" +
+        "    <tr>\n" +
+        "      <th>{0}</th>" + // Course Name
+        "    </tr>\n" +
+        "  </thead>\n" +
+        "  <tbody>\n" +
+        "    <tr>\n" +
+        "      <th>NOT YET IMPLEMENTED</th>\n" +
+        "    </tr>\n" +
+        "  </tbody>\n" +
+        "</table>\n";
+    $.ajax({
+        type: "GET",
+        url: "course-info",
+        contentType: "application/json",
+        dataType: "json",
+        data: {
+            'schedule': $("#academic-term").val(),
+            'course': $("#course").val()
+        },
+        success: function(response) {
+            openDataTab('course-info', 'Course Info', 
+                        courseDataFormat.format(response.course));
+            openDataTab('cohort-data', 'Cohort Data', cohortDataFormat.format(response.course));
+            openDataTab('enrollment-data', 'Historic Enrollment Data', enrollmentDataFormat.format(response.course));
+            console.log('Success: ');
+            console.log(response);
+        },
+        error: function(error) {
+            console.log('Error: ');
+            console.log(error);
+        }
+    });
 });
 
 $("#faculty").on('change', function() {
-    console.log(this.value);
+    //@TODO Render faculty availability and course preferences
 });
 
 $("#room").on('change', function() {
-    console.log(this.value);
+    //@TODO Render room info
 });
 
 
