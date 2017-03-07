@@ -180,13 +180,15 @@ def Conflicts(section):
             s.conflict_reason = 'room'
             s.save()
             if s.id != section.id:
-                SectionConflict.create(section, s, 'room')
+                conflict = SectionConflict.create(section, s, 'room')
+                conflict.save()
         if s.faculty == faculty:
             s.conflict = 'y'
             s.conflict_reason = 'faculty'
             s.save()
             if s.id != section.id:
-                SectionConflict.create(section, s, 'faculty')
+                conflict = SectionConflict.create(section, s, 'faculty')
+                conflict.save()
 
 
 def GetStudentPlanData(request):
