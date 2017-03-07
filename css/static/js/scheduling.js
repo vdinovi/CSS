@@ -750,8 +750,7 @@ function confirmDeleteModal(sectionElement) {
 
 function removeDeletedSection(sectionName) {
     $("#"+sectionName+"-detail").remove();
-    // $("#delete-section-modal .close").click();
-    $("#delete-section-modal").modal('hide');
+    $("#delete-section-modal").children(".close").click();
 }
 
 function deleteSection(element) {

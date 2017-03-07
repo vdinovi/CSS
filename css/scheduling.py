@@ -155,6 +155,24 @@ def NewSection(request):
         res.status_code = 400
     return res
 
+# Editing a section
+@csrf_exempt
+def EditSection(request):
+    res = HttpResponse()
+    if request.method == "GET":
+        section_info = {'academic_terms': Schedule.objects.filter().all(),
+                        'courses': Course.objects.filter().all(),
+                        'section_types': SectionType.objects.filter().all(),
+                        'faculty': CUser.get_all_faculty(),
+                        'rooms': Room.objects.filter().all(),
+                        'add_section_form': AddSectionForm(),
+                        'add_schedule_form': AddScheduleForm()}
+        res.content_type = "application/json"
+        data = json.dumps(section_info)     
+        res.write(data)
+        res.status_code = 200
+    
+
 # Deleting a section.
 @csrf_exempt
 def DeleteSection(request):
