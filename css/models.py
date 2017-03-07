@@ -660,13 +660,15 @@ class Section(models.Model):
 
     # Returns list of sections that conflict because of faculty
     @classmethod
-    def get_faculty_conflicts(cls, section):
-        return SectionConflict.objects.filter(conflict_reason='faculty').filter(Q(section1=section) | Q(section2=section))
-
-    @classmethod
-    def get_room_conflicts(cls, section):
-        return SectionConflict.objects.filter(conflict_reason='room').filter(Q(section1=section) | Q(section2=section))
-
+    def get_conflicts(cls, reason, section):
+        conflicts = SectionConflict.objects.filter(conflict_reason=reason).filter(Q(section1=section) | Q(section2=section))
+        sections = []
+        for conflict in conflicts:
+            if conflicts.section1 == section:
+                sections.append(section2.to_json())
+            else: 
+                sections.append(section1.to_json())
+        return sections
 
 
 class FacultyCoursePreferences(models.Model):

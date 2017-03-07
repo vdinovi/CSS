@@ -159,7 +159,7 @@
                 </div>
               </div>
              
-              <button id="create-section-button" type="submit" class="btn btn-primary" onclick="NewSection()">Create Section</button>
+              <button id="create-section-button" type="submit" class="btn btn-primary" onclick="newSectionConfirmation()">Create Section</button>
             </div>
             <div class="col-xs-6 col-offset-xs-6">
               <!-- Data Display -->
@@ -523,6 +523,26 @@
           <div id="delete-term-modal-body" class="modal-body">
             <form method="POST" action="schedules"> {% csrf_token %}
             </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="confirm-conflicts-modal" class="modal fade" role="dialog">
+      <div class="modal-dialog">
+        <!-- Modal content-->
+        <div class="modal-content">
+          <div class="modal-header">
+            <div class="section-detail-modal-header">You have a conflict!!!</div>
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+          </div>
+          <div id="delete-section-modal-body" class="modal-body">
+            <div id="delete-section-check">              
+            </div>
+            <div id="response-btns">
+                <button class="btn response-btn" data-dismiss="modal">Cancel</button>
+                <button class="btn response-btn" onclick="newSection()">Create Section</button>
+            </div>
           </div>
         </div>
       </div>
