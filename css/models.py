@@ -612,6 +612,16 @@ class Section(models.Model):
                     start_time = self.start_time.strftime("%H:%M%p"),
                     end_time = self.end_time.strftime("%H:%M%p"))
 
+    # Returns list of sections that conflict because of faculty
+    @classmethod
+    def get_faculty_conflicts(cls, section):
+        return SectionConflict.objects.filter(conflict_reason='faculty').filter(Q(section1=section) | Q(section2=section))
+
+    @classmethod
+    def get_room_conflicts(cls, section):
+        return SectionConflict.objects.filter(conflict_reason='room').filter(Q(section1=section) | Q(section2=section))
+
+
 
 class FacultyCoursePreferences(models.Model):
     faculty = models.ForeignKey(CUser, on_delete = models.CASCADE)
