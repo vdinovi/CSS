@@ -11,6 +11,7 @@ from .models import *
 from .forms import *
 from settings import DEPARTMENT_SETTINGS
 from json import *
+from collections import OrderedDict
 
 # ------ UTIL -----
 def ErrorView(request, code, reason):
@@ -86,11 +87,47 @@ from django.views.decorators.csrf import csrf_exempt
 def AvailabilityView(request):
     res = HttpResponse()
     email = request.session.get('email')
-    list = Availability.get_availability_list(CUser.get_faculty(email=email))
+    availList = Availability.get_availability_list(CUser.get_faculty(email=email))
+
+    week = OrderedDict()
+    times = [0, 30, 100, 130, 200, 230, 300, 330, 400, 430, 500, 530, 600, 630, 700, 730, 800, 830, 900, 930, 1000, 1030, 1100, 1130, 1200, 1230, 1300, 1330, 1400, 1430, 1500, 1530, 1600, 1630, 1700, 1730, 1800, 1830, 1900, 1930, 2000]
+
+    avail = availList[1]
+    #for avail in list:
+
+    for time in times:
+        week[time] = "unset"
+
+    start = avail.start_time.hour*100
+    minute = avail.start_time.minute
+
+    if(minute < 30):
+        minute = 0
+    else:
+        minute = 30
+    start = start + minute
+
+    end = avail.end_time.hour*100
+    minute = avail.end_time.minute
+
+    if(minute < 30):
+        minute = 0
+    else:
+        minute = 30
+    end = end + minute
+
+    for time in times:
+        if(time >= start and time <= end):
+            week[time] = "set"
+
+
+
+    monday = week
 
     if request.method == "GET":
         return render(request,'availability.html', {
-        			'availability_list': list,
+        			'availability_list': availList,
+                    'monday': monday,
         			'add_availability_form': AddAvailabilityForm()})
     elif request.method == "POST" and 'add_availability_form' in request.POST:
         form = AddAvailabilityForm(request.POST)
@@ -103,8 +140,10 @@ def AvailabilityView(request):
         else:
             return ErrorView(request, 400, "Invalid form entry")
     elif request.method == "POST" and 'availability_view' in request.body:
-    	data = json.dumps({"availability_view": [avail.to_json() for avail in list]})
-        res.write(data)
+    	#data = json.dumps({"availability_view": [avail.to_json() for avail in list]})
+        #res.write(data)
+        #weekArray = [[0 for x in range(24)] for y in range(24)]
+
         res.status_code = 200
     else:
         return ErrorView(request, 400, "")
