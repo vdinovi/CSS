@@ -13,6 +13,8 @@
     {% load static %}
     <link href="{% static "css/table.css" %}" rel="stylesheet">
 
+    <p id="csrf-token" style="display: none;">{{ csrf_token }}</p>
+
   </head>
   <body>
     {% include "navbar.html" %}
@@ -86,18 +88,15 @@
               <h4>Course Info</h4>
               {{ edit_course_form.as_p }}
               <button type="submit" name="edit-course-form" class="save btn btn-default">save</button>
-                </form>
-              <h4>Section Types</h4>
-              <p id="ajax-area"></p>
-              <div id="add-section-type-area" style="display: none;">
-                {{ add_course_section_type_form.as_p }}
-              </div>
-              <div style="margin-bottom: 2%;">
-                <button id="add-section-type-button" style="font-size: .7em;" type="button" class="btn btn-info btn-xs"  onclick="addSectionType()"><span class="glyphicon glyphicon-plus"></button>
-                <button id="save-section-type-button" style="font-size: .7em; display: none;" type="button" class="btn btn-info btn-xs"  onclick="submitSectionType()"><span class="glyphicon glyphicon-ok"></button>
-              </div>
-
-            <div>
+            </form>
+            <h4>Section Types</h4>
+            <p id="ajax-area"></p>
+            <div id="add-section-type-area" style="display: none;">
+              {{ add_course_section_type_form.as_p }}
+            </div>
+            <div style="margin-bottom: 2%;">
+              <button id="add-section-type-button" style="font-size: .7em;" type="button" class="btn btn-info btn-xs"  onclick="addSectionType()"><span class="glyphicon glyphicon-plus"></button>
+              <button id="save-section-type-button" style="font-size: .7em; display: none;" type="button" class="btn btn-info btn-xs"  onclick="submitSectionType()"><span class="glyphicon glyphicon-ok"></button>
             </div>
           </div>
         </div>

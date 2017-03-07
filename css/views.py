@@ -56,7 +56,7 @@ def RegistrationView(request):
                     return ErrorView(request, 500, "Validation Error:" + e[0])
             except IntegrityError as e:
                 if re.search(r'duplicate', e[0]):
-                    return ErrorView(request, 400, "A user with that email already exists. Please login if that's you or contact a department scheduler.") 
+                    return ErrorView(request, 400, "A user with that email already exists. Please login if that's you or contact a department scheduler.")
                 else:
                     return ErrorView(request, 500, "DB Error:" + e[0])
         else:
@@ -87,14 +87,14 @@ def AvailabilityView(request):
     res = HttpResponse()
     email = request.session.get('email')
     list = Availability.get_availability_list(CUser.get_faculty(email=email))
-    
+
     if request.method == "GET":
         return render(request,'availability.html', {
         			'availability_list': list,
         			'add_availability_form': AddAvailabilityForm()})
-    elif request.method == "POST" and 'add_availability_form' in request.POST: 
+    elif request.method == "POST" and 'add_availability_form' in request.POST:
         form = AddAvailabilityForm(request.POST)
-        if form.is_valid(): 
+        if form.is_valid():
             try:
                 form.save(email)
                 return HttpResponseRedirect('/availability')
@@ -102,14 +102,14 @@ def AvailabilityView(request):
                 return ErrorView(request, 400, "Invalid form entry")
         else:
             return ErrorView(request, 400, "Invalid form entry")
-    elif request.method == "POST" and 'availability_view' in request.body: 
+    elif request.method == "POST" and 'availability_view' in request.body:
     	data = json.dumps({"availability_view": [avail.to_json() for avail in list]})
         res.write(data)
         res.status_code = 200
     else:
         return ErrorView(request, 400, "")
     return res
-            
+
 
 def SchedulingView(request):
     res = HttpResponse()
@@ -171,17 +171,17 @@ def SettingsView(request):
                 filetype = request.POST.get('filetype')
                 result = None
                 if filetype == "Student Plan Data":
-                    result = StudentPlanData.import_student_plan_file(request.FILES['file']) 
+                    result = StudentPlanData.import_student_plan_file(request.FILES['file'])
                 elif filetype == "Cohort Data":
-                    result = CohortData.import_cohort_file(request.FILES['file']) 
+                    result = CohortData.import_cohort_file(request.FILES['file'])
                 elif filetype == "Historic Enrollment Data":
                     #@TODO implement
-                    #result = StudentPlanData.import_student_plan_file(request.FILES['file']) 
+                    #result = StudentPlanData.import_student_plan_file(request.FILES['file'])
                     result = ["Historic Data File Parsing: NOT YET IMPLEMENTED"]
                 else:
                     return ErrorView(request, 400, "Invalid form entry")
                 for m in result:
-                    messages.add_message(request, messages.ERROR, m, extra_tags="cohort") 
+                    messages.add_message(request, messages.ERROR, m, extra_tags="cohort")
                 return HttpResponseRedirect("/department/settings")
             except:
                 raise

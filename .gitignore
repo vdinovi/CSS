@@ -13,3 +13,5 @@ tests/.DS_Store
 css/.DS_Store
 css/templates/.DS_Store
 css/static/.DS_Store
+*.old
+.gitignore
