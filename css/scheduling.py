@@ -131,7 +131,7 @@ def NewSection(request):
     res = HttpResponse()
     if request.method == "POST":
         sectionData = json.loads(request.body)
-        Section.create(
+        new_section = Section.create(
                 sectionData['section_num'],
                 sectionData['schedule'],
                 sectionData['course'],
@@ -149,11 +149,33 @@ def NewSection(request):
                 'n',
                 None
                 )
+        Conflicts(new_section)
         res.status_code = 200
         res.write(request.body)
     else:
         res.status_code = 400
     return res
+
+# Checking conflicts for new section.
+@csrf_exempt
+def ConflictCheck(request):
+    res = HttpResponse()
+    if request.method == "POST":
+        sectionData = json.loads(request.body)
+        conflicts = Confirmation(
+            sectionData['start-time'], 
+            sectionData['end-time'], 
+            sectionData['room'], 
+            sectionData['faculty'], 
+            sectionData['schedule'])
+        res.content_type = 'json'
+        res.write(json.dumps(conflicts))
+        res.status_code = 200
+    else:
+        res.status_code = 400
+    return res
+
+
 
 # Editing a section
 @csrf_exempt
@@ -251,19 +273,25 @@ def Conflicts(section):
                 conflict = SectionConflict.create(section, s, 'faculty')
                 conflict.save()
 
-def Conflicts(start_time, end_time, room, faculty, academic_term):
+# Temporary confirmation that there are no conflicts when creating a 
+# section.
+def Confirmation(start_time, end_time, room, faculty, schedule):
+    academic_term = Schedule.get_schedule(schedule)
+    room = Room.get_room(room)
+    faculty = CUser.get_faculty(faculty)
+    start_time = datetime.strptime(start_time, '%H:%M').time()
+    end_time = datetime.strptime(end_time, '%H:%M').time()
     sections = Section.objects.filter(schedule=academic_term).filter(Q(start_time__range=[start_time, end_time]) | Q(end_time__range=[time(start_time.hour, start_time.minute + 1), end_time]))
+    conflicts = {'room': [], 'faculty': []}
 
     # Check if rooms or faculty overlap
     for s in sections:
         if s.room == room:
-            s.conflict = 'y'
-            s.conflict_reason = 'room'
-            return 
+            conflicts['room'].append(s.to_json())
         if s.faculty == faculty:
-            s.conflict = 'y'
-            s.conflict_reason = 'faculty'
-            return 
+            conflicts['faculty'].append(s.to_json())
+
+    return conflicts
 
 
 def GetStudentPlanData(request):
