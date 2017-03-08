@@ -218,21 +218,20 @@ class AddSectionForm(forms.Form):
         section.save()
         return
 
-# class CoursePrefModelChoiceField(forms.ModelChoiceField):
-# 	def label_from_instance(self,obj):
-# 		return obj.name
+class CoursePrefModelChoiceField(forms.ModelChoiceField):
+    def label_from_instance(self,obj):
+ 	    return obj.name
 
 class CoursePrefForm(forms.Form):
-	 #course = CoursePrefModelChoiceField(queryset=Course.objects.all())
-	 course = forms.ModelChoiceField(label='Course', queryset=Course.objects.values_list('name', flat=True), empty_label="      ")
+	 course = CoursePrefModelChoiceField(label='Course', queryset=Course.objects.filter(), empty_label="      ")
 	 comments = forms.CharField()
 	 rank = forms.IntegerField()
 
 	 def save(self, faculty):
 	 	course_pref = FacultyCoursePreferences.create(faculty=faculty,
- 										course = Course.objects.get(course=self.cleaned_data['course']),
-	 									comments = self.cleaned_data['comments'],
-	 						  			rank  = self.cleaned_data['rank'])
+                    course = self.cleaned_data['course'],
+	 						      comments = self.cleaned_data['comments'],
+	 						      rank  = self.cleaned_data['rank'])
 	 	course_pref.save()
 
 class AddAvailabilityForm(forms.Form):

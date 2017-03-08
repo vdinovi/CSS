@@ -341,7 +341,7 @@ def GetStudentPlanData(request):
             schedule = Schedule.get_schedule(term_name=term)
             student_plan_data = StudentPlanData.get_student_plan_data(schedule=schedule).all()
             data = []
-            for _,v in student_plan_data:
+            for v in student_plan_data:
                data.append(v.to_json())
             res.write(json.dumps({'data': data}))
         except KeyError as e:
@@ -355,7 +355,7 @@ def GetStudentPlanData(request):
             if schedule is None:
                 res.reason_phrase = "Schedule '%s' does not exist" % (request.GET.get('schedule'),)
             elif student_plan_data is None:
-                res.reason_phrase = "No student plan data for schedule '%s'" % (schedule.name,)
+                res.reason_phrase = "No student plan data for schedule '%s'" % (schedule.academic_term,)
             else:
                 res.status_code = 500
     else:
