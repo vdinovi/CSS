@@ -11,6 +11,7 @@ from .models import *
 from .forms import *
 from settings import DEPARTMENT_SETTINGS
 from json import *
+from collections import OrderedDict
 
 # ------ UTIL -----
 def ErrorView(request, code, reason):
@@ -86,12 +87,14 @@ from django.views.decorators.csrf import csrf_exempt
 def AvailabilityView(request):
     res = HttpResponse()
     email = request.session.get('email')
-    list = Availability.get_availability_list(CUser.get_faculty(email=email))
+    availability = Availability.get_availability(CUser.get_faculty(email=email))
+    print "Availability"
+    print Availability.objects.count()
 
     if request.method == "GET":
         return render(request,'availability.html', {
-        			'availability_list': list,
-        			'add_availability_form': AddAvailabilityForm()})
+        			'availability': availability,
+                    'add_availability_form': AddAvailabilityForm()})
     elif request.method == "POST" and 'add_availability_form' in request.POST:
         form = AddAvailabilityForm(request.POST)
         if form.is_valid():
@@ -99,13 +102,11 @@ def AvailabilityView(request):
                 form.save(email)
                 return HttpResponseRedirect('/availability')
             except ValidationError as e:
+            	print('form cannot save')
+            	print(request.POST.get('level'))
                 return ErrorView(request, 400, "Invalid form entry")
         else:
             return ErrorView(request, 400, "Invalid form entry")
-    elif request.method == "POST" and 'availability_view' in request.body:
-    	data = json.dumps({"availability_view": [avail.to_json() for avail in list]})
-        res.write(data)
-        res.status_code = 200
     else:
         return ErrorView(request, 400, "")
     return res

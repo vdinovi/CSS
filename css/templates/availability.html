@@ -10,7 +10,7 @@
     	{% load static %}
     	<link href="{% static "css/availability.css" %}" rel="stylesheet">
 	</head>
-	<body onload="viewAvailablity()">
+	<body">
   		{% include "navbar.html" %}
   		<button type="button" class="btn btn-info btn-xs" data-toggle="modal" data-target="#add-availability">+</button>
 
@@ -71,22 +71,25 @@
 	        </tr>
 	    </thead>
 	    <tbody>
-	    	{% for avail in availability_list %}
-
-					<p>{{ avail.faculty.user.first_name}}</p>
-
-	    	{% endfor %}
-	        <tr>
-	            <td>08:00am</td>
-	  			<td class=" no-events" rowspan="1"></td>
-	            <td class=" no-events" rowspan="1"></td>
-	            <td class=" no-events" rowspan="1"></td>
-	            <td class=" no-events" rowspan="1"></td>
-	            <td class=" no-events" rowspan="1"></td>
-	        </tr>
+				<tr>
+						<td>8:00am</td>
+						{% if monday.800 == "set" %}
+							<td class="no-events success" rowspan="1"></td>
+						{% else %}
+						<td class=" no-events warning" rowspan="1"></td>
+						{% endif%}
+						<td class=" no-events" rowspan="1"></td>
+						<td class=" no-events" rowspan="1"></td>
+						<td class=" no-events" rowspan="1"></td>
+						<td class=" no-events" rowspan="1"></td>
+				</tr>
 	        <tr>
 	            <td>08:30am</td>
-	            <td class=" no-events" rowspan="1"></td>
+							{% if monday.830 == "set" %}
+								<td class=" no-events success" rowspan="1"></td>
+							{% else %}
+							<td class=" no-events warning" rowspan="1"></td>
+							{% endif%}
 	            <td class=" no-events" rowspan="1"></td>
 	            <td class=" no-events" rowspan="1"></td>
 	            <td class=" no-events" rowspan="1"></td>
@@ -94,7 +97,11 @@
 	        </tr>
 	        <tr>
 	            <td>09:00am</td>
-	            <td class=" no-events" rowspan="1"></td>
+							{% if monday.900 == "set" %}
+								<td class=" no-events success" rowspan="1"></td>
+							{% else %}
+							<td class=" no-events warning" rowspan="1"></td>
+							{% endif%}
 	            <td class=" no-events" rowspan="1"></td>
 	            <td class=" no-events" rowspan="1"></td>
 	            <td class=" no-events" rowspan="1"></td>
@@ -103,7 +110,11 @@
 	        </tr>
 	        <tr>
 	            <td>09:30am</td>
-	            <td class=" no-events" rowspan="1"></td>
+							{% if monday.930 == "set" %}
+								<td class=" no-events success" rowspan="1"></td>
+							{% else %}
+							<td class=" no-events warning" rowspan="1"></td>
+							{% endif%}
 	            <td class=" no-events" rowspan="1"></td>
 	            <td class=" no-events" rowspan="1"></td>
 	            <td class=" no-events" rowspan="1"></td>
@@ -111,11 +122,11 @@
 	        </tr>
 	        <tr>
 	            <td>10:00am</td>
-	            <!-- <td class=" has-events" rowspan="4">
-	                <div class="row-fluid lecture" style="width: 99%; height: 100%;">
-	                    <span class="title">Unavailable</span>
-	                </div>
-	            </td> -->
+							{% if monday.1000 == "set" %}
+								<td class=" no-events success" rowspan="1"></td>
+							{% else %}
+							<td class=" no-events warning" rowspan="1"></td>
+							{% endif%}
 	            <td class=" no-events" rowspan="1"></td>
 	            <td class=" no-events" rowspan="1"></td>
 	            <td class=" no-events" rowspan="1"></td>
@@ -124,8 +135,12 @@
 	        </tr>
 	        <tr>
 	            <td>10:30am</td>
-	            <td class=" no-events" rowspan="1"></td>
-	            <td class=" no-events" rowspan="1"></td>
+							{% if monday.1030 == "set" %}
+								<td class=" no-events success" rowspan="1"></td>
+							{% else %}
+							<td class=" no-events warning" rowspan="1"></td>
+							{% endif%}
+							<td class=" no-events" rowspan="1"></td>
 	            <td class=" no-events" rowspan="1"></td>
 	            <td class=" no-events" rowspan="1"></td>
 	            <td class=" no-events" rowspan="1"></td>
@@ -133,40 +148,58 @@
 	        </tr>
 	        <tr>
 	            <td>11:00am</td>
-	            <td class=" no-events" rowspan="1"></td>
-	            <td class=" no-events" rowspan="1"></td>
+							{% if monday.1100 == "set" %}
+								<td class=" no-events success" rowspan="1"></td>
+							{% else %}
+							<td class=" no-events warning" rowspan="1"></td>
+							{% endif%}
+							<td class=" no-events" rowspan="1"></td>
 	            <td class=" no-events" rowspan="1"></td>
 	            <td class=" no-events" rowspan="1"></td>
 	            <td class=" no-events" rowspan="1"></td>
 	        </tr>
 	        <tr>
 	            <td>11:30am</td>
-	            <td class=" no-events" rowspan="1"></td>
-	            <td class=" no-events" rowspan="1"></td>
+							{% if monday.1130 == "set" %}
+								<td class="no-events success" rowspan="1"></td>
+							{% else %}
+							<td class=" no-events warning" rowspan="1"></td>
+							{% endif%}
+							<td class=" no-events" rowspan="1"></td>
 	            <td class=" no-events" rowspan="1"></td>
 	            <td class=" no-events" rowspan="1"></td>
 	            <td class=" no-events" rowspan="1"></td>
 	        </tr>
 	        <tr>
 	            <td>12:00pm</td>
-	            <td class=" no-events" rowspan="1"></td>
-	            <td class=" no-events" rowspan="1"></td>
+							{% if monday.1200 == "set" %}
+								<td class=" no-events success" rowspan="1"></td>
+							{% else %}
+							<td class=" no-events warning" rowspan="1"></td>
+							{% endif%}	            <td class=" no-events" rowspan="1"></td>
 	            <td class=" no-events" rowspan="1"></td>
 	            <td class=" no-events" rowspan="1"></td>
 	            <td class=" no-events" rowspan="1"></td>
 	        </tr>
 	        <tr>
 	            <td>12:30pm</td>
-	            <td class=" no-events" rowspan="1"></td>
-	            <td class=" no-events" rowspan="1"></td>
+							{% if monday.1230 == "set" %}
+								<td class=" no-events success" rowspan="1"></td>
+							{% else %}
+							<td class=" no-events warning" rowspan="1"></td>
+							{% endif%}	            <td class=" no-events" rowspan="1"></td>
 	            <td class=" no-events" rowspan="1"></td>
 	            <td class=" no-events" rowspan="1"></td>
 	            <td class=" no-events" rowspan="1"></td>
 	        </tr>
 	        <tr>
 	            <td>1:00pm</td>
-	            <td class=" no-events" rowspan="1"></td>
-	            <td class=" no-events" rowspan="1"></td>
+							{% if monday.1300 == "set" %}
+								<td class=" no-events success" rowspan="1"></td>
+							{% else %}
+							<td class=" no-events warning" rowspan="1"></td>
+							{% endif%}
+							<td class=" no-events" rowspan="1"></td>
 	            <td class=" no-events" rowspan="1"></td>
 	            <td class=" no-events" rowspan="1"></td>
 	            <td class=" no-events" rowspan="1"></td>
@@ -174,8 +207,12 @@
 	        </tr>
 	        <tr>
 	            <td>1:30pm</td>
-	            <td class=" no-events" rowspan="1"></td>
-	            <td class=" no-events" rowspan="1"></td>
+							{% if monday.1330 == "set" %}
+								<td class=" no-events success" rowspan="1"></td>
+							{% else %}
+							<td class=" no-events warning" rowspan="1"></td>
+							{% endif%}
+							<td class=" no-events" rowspan="1"></td>
 	            <td class=" no-events" rowspan="1"></td>
 	            <td class=" no-events" rowspan="1"></td>
 	            <td class=" no-events" rowspan="1"></td>
@@ -184,8 +221,12 @@
 	        </tr>
 	        <tr>
 	            <td>2:00pm</td>
-	            <td class=" no-events" rowspan="1"></td>
-	            <td class=" no-events" rowspan="1"></td>
+							{% if monday.1400 == "set" %}
+								<td class=" no-events success" rowspan="1"></td>
+							{% else %}
+							<td class=" no-events warning" rowspan="1"></td>
+							{% endif%}
+							<td class=" no-events" rowspan="1"></td>
 	            <td class=" no-events" rowspan="1"></td>
 	            <td class=" no-events" rowspan="1"></td>
 	            <td class=" no-events" rowspan="1"></td>
@@ -193,87 +234,129 @@
 	        </tr>
 	        <tr>
 	            <td>2:30pm</td>
-	            <td class=" no-events" rowspan="1"></td>
-	            <td class=" no-events" rowspan="1"></td>
+							{% if monday.1430 == "set" %}
+								<td class=" no-events success" rowspan="1"></td>
+							{% else %}
+							<td class=" no-events warning" rowspan="1"></td>
+							{% endif%}	            <td class=" no-events" rowspan="1"></td>
 	            <td class=" no-events" rowspan="1"></td>
 	            <td class=" no-events" rowspan="1"></td>
 	            <td class=" no-events" rowspan="1"></td>
 	        </tr>
 	        <tr>
 	            <td>3:00pm</td>
-	            <td class=" no-events" rowspan="1"></td>
-	            <td class=" no-events" rowspan="1"></td>
+							{% if monday.1500 == "set" %}
+								<td class=" no-events success" rowspan="1"></td>
+							{% else %}
+							<td class=" no-events warning" rowspan="1"></td>
+							{% endif%}
+							<td class=" no-events" rowspan="1"></td>
 	            <td class=" no-events" rowspan="1"></td>
 	            <td class=" no-events" rowspan="1"></td>
 	            <td class=" no-events" rowspan="1"></td>
 	        </tr>
 	        <tr>
 	            <td>3:30pm</td>
-	            <td class=" no-events" rowspan="1"></td>
-	            <td class=" no-events" rowspan="1"></td>
+							{% if monday.1530 == "set" %}
+								<td class=" no-events success" rowspan="1"></td>
+							{% else %}
+							<td class=" no-events warning" rowspan="1"></td>
+							{% endif%}
+							<td class=" no-events" rowspan="1"></td>
 	            <td class=" no-events" rowspan="1"></td>
 	            <td class=" no-events" rowspan="1"></td>
 	            <td class=" no-events" rowspan="1"></td>
 	        </tr>
 	        <tr>
 	            <td>4:00pm</td>
-	            <td class=" no-events" rowspan="1"></td>
-	            <td class=" no-events" rowspan="1"></td>
+							{% if monday.1600 == "set" %}
+								<td class=" no-events success" rowspan="1"></td>
+							{% else %}
+							<td class=" no-events warning" rowspan="1"></td>
+							{% endif%}
+							<td class=" no-events" rowspan="1"></td>
 	            <td class=" no-events" rowspan="1"></td>
 	            <td class=" no-events" rowspan="1"></td>
 	            <td class=" no-events" rowspan="1"></td>
 	        </tr>
 	            <td>4:30pm</td>
-	            <td class=" no-events" rowspan="1"></td>
-	            <td class=" no-events" rowspan="1"></td>
+							{% if monday.1630 == "set" %}
+								<td class=" no-events success" rowspan="1"></td>
+							{% else %}
+							<td class=" no-events warning" rowspan="1"></td>
+							{% endif%}
+							<td class=" no-events" rowspan="1"></td>
 	            <td class=" no-events" rowspan="1"></td>
 	            <td class=" no-events" rowspan="1"></td>
 	            <td class=" no-events" rowspan="1"></td>
 	        </tr>
 	        <tr>
 	            <td>5:00pm</td>
-	            <td class=" no-events" rowspan="1"></td>
-	            <td class=" no-events" rowspan="1"></td>
+							{% if monday.1700 == "set" %}
+								<td class=" no-events success" rowspan="1"></td>
+							{% else %}
+							<td class=" no-events warning" rowspan="1"></td>
+							{% endif%}	            <td class=" no-events" rowspan="1"></td>
 	            <td class=" no-events" rowspan="1"></td>
 	            <td class=" no-events" rowspan="1"></td>
 	            <td class=" no-events" rowspan="1"></td>
 	        </tr>
 	        <tr>
 	            <td>5:30pm</td>
-	            <td class=" no-events" rowspan="1"></td>
-	            <td class=" no-events" rowspan="1"></td>
+							{% if monday.1730 == "set" %}
+								<td class=" no-events success" rowspan="1"></td>
+							{% else %}
+							<td class=" no-events warning" rowspan="1"></td>
+							{% endif%}
+							<td class=" no-events" rowspan="1"></td>
 	            <td class=" no-events" rowspan="1"></td>
 	            <td class=" no-events" rowspan="1"></td>
 	            <td class=" no-events" rowspan="1"></td>
 	        </tr>
 	        <tr>
 	            <td>6:00pm</td>
-	            <td class=" no-events" rowspan="1"></td>
-	            <td class=" no-events" rowspan="1"></td>
-	            <td class=" no-events" rowspan="1"></td>
-	            <td class=" no-events" rowspan="1"></td>
-	            <td class=" no-events" rowspan="1"></td>
-	        </tr>
-	        <tr>
-	            <td>6:30pm</td>
-	            <td class=" no-events" rowspan="1"></td>
-	            <td class=" no-events" rowspan="1"></td>
+							{% if monday.1800 == "set" %}
+								<td class=" no-events success" rowspan="1"></td>
+							{% else %}
+							<td class=" no-events warning" rowspan="1"></td>
+							{% endif%}
+							<td class=" no-events" rowspan="1"></td>
 	            <td class=" no-events" rowspan="1"></td>
 	            <td class=" no-events" rowspan="1"></td>
 	            <td class=" no-events" rowspan="1"></td>
 	        </tr>
 	        <tr>
-	            <td>7:00pm</td>
-	            <td class=" no-events" rowspan="1"></td>
-	            <td class=" no-events" rowspan="1"></td>
+						<td>6:30pm</td>
+						{% if monday.1830 == "set" %}
+							<td class=" no-events success" rowspan="1"></td>
+						{% else %}
+						<td class=" no-events warning" rowspan="1"></td>
+						{% endif%}
+							<td class=" no-events" rowspan="1"></td>
 	            <td class=" no-events" rowspan="1"></td>
 	            <td class=" no-events" rowspan="1"></td>
 	            <td class=" no-events" rowspan="1"></td>
 	        </tr>
 	        <tr>
-	            <td>7:30pm</td>
+						<td>7:00pm</td>
+						{% if monday.1900 == "set" %}
+							<td class=" no-events success" rowspan="1"></td>
+						{% else %}
+						<td class=" no-events warning" rowspan="1"></td>
+						{% endif%}
+							<td class=" no-events" rowspan="1"></td>
 	            <td class=" no-events" rowspan="1"></td>
 	            <td class=" no-events" rowspan="1"></td>
+	            <td class=" no-events" rowspan="1"></td>
+	        </tr>
+	        <tr>
+						<td>7:30pm</td>
+						{% if monday.1930 == "set" %}
+							<td class=" no-events success" rowspan="1"></td>
+						{% else %}
+							<td class=" no-events warning" rowspan="1"></td>
+						{% endif%}
+							<td class=" no-events" rowspan="1"></td>
 	            <td class=" no-events" rowspan="1"></td>
 	            <td class=" no-events" rowspan="1"></td>
 	            <td class=" no-events" rowspan="1"></td>
@@ -281,7 +364,7 @@
 	    </tbody>
 	</table>
 
-	<script src="{% static "js/availability.js" %}"></script>
+	<!-- <script src="{% static "js/availability.js" %}"></script> -->
 
 	<!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>

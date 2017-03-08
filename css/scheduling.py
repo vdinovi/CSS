@@ -131,7 +131,7 @@ def NewSection(request):
     res = HttpResponse()
     if request.method == "POST":
         sectionData = json.loads(request.body)
-        Section.create(
+        new_section = Section.create(
                 sectionData['section_num'],
                 sectionData['schedule'],
                 sectionData['course'],
@@ -149,11 +149,33 @@ def NewSection(request):
                 'n',
                 None
                 )
+        Conflicts(new_section)
         res.status_code = 200
         res.write(request.body)
     else:
         res.status_code = 400
     return res
+
+# Checking conflicts for new section.
+@csrf_exempt
+def ConflictCheck(request):
+    res = HttpResponse()
+    if request.method == "POST":
+        sectionData = json.loads(request.body)
+        conflicts = Confirmation(
+            sectionData['start-time'], 
+            sectionData['end-time'], 
+            sectionData['room'], 
+            sectionData['faculty'], 
+            sectionData['schedule'])
+        res.content_type = 'json'
+        res.write(json.dumps(conflicts))
+        res.status_code = 200
+    else:
+        res.status_code = 400
+    return res
+
+
 
 # Editing a section
 @csrf_exempt
@@ -242,6 +264,8 @@ def Conflicts(section):
     room = section.room
     faculty = section.faculty
     academic_term = section.schedule
+    room_conflict = False
+    faculty_conflict = False
 
     # Find all sections that are between start_time and end_time of the new section
     # sections = Section.objects.filter(schedule=academic_term).filter(start_time__range=[start_time, end_time]).filter(end_time__range=[start_time, end_time])
@@ -263,6 +287,26 @@ def Conflicts(section):
             if s.id != section.id:
                 conflict = SectionConflict.create(section, s, 'faculty')
                 conflict.save()
+
+# Temporary confirmation that there are no conflicts when creating a 
+# section.
+def Confirmation(start_time, end_time, room, faculty, schedule):
+    academic_term = Schedule.get_schedule(schedule)
+    room = Room.get_room(room)
+    faculty = CUser.get_faculty(faculty)
+    start_time = datetime.strptime(start_time, '%H:%M').time()
+    end_time = datetime.strptime(end_time, '%H:%M').time()
+    sections = Section.objects.filter(schedule=academic_term).filter(Q(start_time__range=[start_time, end_time]) | Q(end_time__range=[time(start_time.hour, start_time.minute + 1), end_time]))
+    conflicts = {'room': [], 'faculty': []}
+
+    # Check if rooms or faculty overlap
+    for s in sections:
+        if s.room == room:
+            conflicts['room'].append(s.to_json())
+        if s.faculty == faculty:
+            conflicts['faculty'].append(s.to_json())
+
+    return conflicts
 
 
 def GetStudentPlanData(request):
@@ -348,5 +392,28 @@ def GetCourseInfo(request):
         res.status_code = 400
     return res
 
+
+def GetRoomInfo(request):
+    res = HttpResponse()
+    if request.method == "GET":
+        try:
+            room_name = request.GET.get('room')
+            room = Room.get_room(name=room_name)
+            res.write(json.dumps({'room': room.to_json()}))
+        except KeyError as e:
+            res.status_code = 400
+            if room == None:
+                res.reason_phrase = "Missing room name in query string"
+            else:
+                res.status_code = 500
+        except ObjectDoesNotExist:
+            res.status_code = 400
+            if room is None:
+                res.reason_phrase = "Room '%s' does not exist" % (request.GET.get('room'),)
+            else:
+                res.status_code = 500
+    else:
+        res.status_code = 400
+    return res
 
 
