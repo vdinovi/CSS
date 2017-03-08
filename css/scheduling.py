@@ -175,6 +175,24 @@ def ConflictCheck(request):
         res.status_code = 400
     return res
 
+@csrf_exempt
+def SectionDetailConflicts(request):
+    res = HttpResponse()
+    if request.method == "POST":
+        sectionDetails = json.loads(request.body)['section_details']
+        conflict_dict = {}
+        for s in sectionDetails:
+            section = Section.get_section_by_name(s['name'])
+            faculty_conflicts = Section.get_conflicts('faculty', section)
+            room_conflicts = Section.get_conflicts('room', section)
+            conflict_dict[s['name']] = {'faculty': faculty_conflicts,
+                                        'room': room_conflicts}
+        res.content_type = 'json'
+        res.write(json.dumps(conflict_dict))
+        res.status_code = 200
+    else:
+        res.status_code = 400
+    return res
 
 
 # Editing a section

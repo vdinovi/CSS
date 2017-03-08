@@ -677,7 +677,6 @@ function newSection(sectionData) {
         data: JSON.stringify(sectionData),
         dataType: 'json',
         success: function(response) {
-            console.log(sectionData)
             // Clear all elements
             $("#new-section-frame").find("select").each(function (index, value) {
                 $($(value).children('option')[0]).prop('selected', true);
@@ -741,7 +740,6 @@ function sectionConflictCheck(element) {
                     newSection();
                 }
                 else {
-                    console.log(sectionData);
                     editSection();
                 }
             }
@@ -797,6 +795,21 @@ function sectionConflictCheck(element) {
     });
 }
 
+function updateSectionDetailConflicts() {
+    $.ajax({
+        type: "POST",
+        url: "section-detail-conflicts",
+        data: JSON.stringify({'section_details': sectionDetails}),
+        dataType: 'json',
+        success: function(response) {
+            console.log(response['CPE_225-12']);
+        },
+        error: function(err) {
+            console.log(err);
+        }
+    });
+}
+
 /* Section Details Functions */
 function updateSectionDetails(resort) {
     var sectionDetailsFormatString = 
@@ -823,7 +836,12 @@ function updateSectionDetails(resort) {
             detailFrame.prepend(sectionDetailsFormatString.format(sectionDetails[i].name, underscoreToSpaces(sectionDetails[i].name), sectionDetails[i].term, sectionDetails[i].course, sectionDetails[i].type, sectionDetails[i].faculty, sectionDetails[i].room, sectionDetails[i].days, sectionDetails[i].start_time, 
             sectionDetails[i].end_time));
         }
+        console.log(sectionDetails);
     }
+
+    console.log(sectionDetails);
+
+    updateSectionDetailConflicts();
 }
 
 function confirmDeleteModal(sectionElement) {
