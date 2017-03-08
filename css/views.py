@@ -115,14 +115,12 @@ def AvailabilityView(request):
     if availabilities.count() < 14:
         print "Reset availabilities!"
         Availability.initializeAvailabilities(faculty = CUser.get_faculty(email=email))
-        availabilities = Availability.get_availabilities(faculty = CUser.get_faculty(email=email))
+        availabilities = Availability.get_availabilities(faculty = CUser.get_faculty(email=email)).order_by('start_time')
 
-
+    print "Availability"
     for availability in availabilities:
-        print "Availability"
-        print availability.faculty
-        print availability.start_time
-        print availability.level
+        if availability.day_of_week == "mwf":
+            print str(availability.start_time) + " " + availability.level
 
     if request.method == "GET":
         return render(request,'availability.html', {

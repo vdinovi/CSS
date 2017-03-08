@@ -14,6 +14,7 @@ from django.db.models import Q
 from django.http import JsonResponse
 from django.core import serializers
 from datetime import datetime
+import time
 
 
 # System User class,
@@ -371,34 +372,46 @@ class Availability(models.Model):
     class Meta:
         unique_together = (("faculty", "day_of_week", "start_time"),)
     faculty = models.ForeignKey(CUser, on_delete=models.CASCADE, null=True)
-    day_of_week = models.CharField(max_length=16) # MWF or TR
-    start_time = models.TimeField()
-    level = models.CharField(max_length=16) #preferred, unavailable
+    day_of_week = models.CharField(max_length=16, null=True) # MWF or TR
+    start_time = models.TimeField(null=True)
+    level = models.CharField(max_length=16, null=True) #preferred, unavailable
 
     @classmethod
     def get_availabilities(cls, faculty):
         print "Get availabilities: Faculty:"
         print faculty.user.first_name
-        print Availability.objects.filter(faculty=faculty)
         return Availability.objects.filter(faculty=faculty)
     @classmethod
     def initializeAvailabilities(cls, faculty):
             for hour in range(8, 19):
-                time = datetime.time
-                time.hour = hour
+                currentTime = datetime(year=2000, month=1, day=1, hour=hour, minute=0)
 
-                time.minute = 0
-                mwfAvail = cls(faculty=faculty, day_of_week="mwf", start_time = time, level = "unset")
-                tthAvail = cls(faculty=faculty, day_of_week="tth", start_time = time, level = "unset")
+                mwfAvail = cls(faculty=faculty, day_of_week="mwf", start_time = currentTime, level = "unset")
+                tthAvail = cls(faculty=faculty, day_of_week="tth", start_time = currentTime, level = "unset")
                 mwfAvail.save()
                 tthAvail.save()
 
-                time.minute = 30
-                mwfAvail = cls(faculty=faculty, day_of_week="mwf", start_time = time, level = "unset")
-                tthAvail = cls(faculty=faculty, day_of_week="tth", start_time = time, level = "unset")
+                currentTime = datetime(year=2000, month=1, day=1, hour=hour, minute=30)
+
+                mwfAvail = cls(faculty=faculty, day_of_week="mwf", start_time = currentTime, level = "unset")
+                tthAvail = cls(faculty=faculty, day_of_week="tth", start_time = currentTime, level = "unset")
                 mwfAvail.save()
                 tthAvail.save()
 
+    @classmethod
+    def setRange(self, faculty, day_of_week, start_time, end_time, level):
+        if day_of_week == "Monday" or day_of_week == "Wednesday" or day_of_week == "Friday":
+            day_of_week = "mwf"
+        else:
+            day_of_week = "tth"
+        availabilities = Availability.objects.filter(faculty=faculty, day_of_week=day_of_week)
+
+        for availability in availabilities:
+            if(availability.start_time >= start_time and availability.start_time <= end_time):
+                availability.level = level
+                availability.save()
+
+    # Deprecated
     def create(cls, email, day, start_time, end_time, level):
         faculty = CUser.get_faculty(email=email)
         if (day is None):
