@@ -371,10 +371,17 @@ class WorkInfo(models.Model):
 class Availability(models.Model):
     class Meta:
         unique_together = (("faculty", "day_of_week", "start_time"),)
+<<<<<<< HEAD
+    faculty = models.ForeignKey(CUser, on_delete=models.CASCADE)
+    day_of_week = models.CharField(max_length=16) # MWF or TR
+    start_time = models.TimeField()
+    level = models.CharField(max_length=16) #preferred, unavailable
+=======
     faculty = models.ForeignKey(CUser, on_delete=models.CASCADE, null=True)
     day_of_week = models.CharField(max_length=16, null=True) # MWF or TR
     start_time = models.TimeField(null=True)
     level = models.CharField(max_length=16, null=True) #preferred, unavailable
+>>>>>>> ba8018a07b9b8eaad4284775e3ef1c6d5976efd6
 
     @classmethod
     def get_availabilities(cls, faculty):
