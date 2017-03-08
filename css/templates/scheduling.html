@@ -52,7 +52,7 @@
               <div  class="row new-section-inputs">
                 <h3 style="text-align:center;">Create a New Section</h3>
                 <div class="col-xs-6">
-                  <label for="academic-term">Academic Term</label>
+                  <label class="form-control-label" for="academic-term">Academic Term</label>
                 </div>
                 <div class="col-xs-6 col-xs-offset-6">
                   <select id="academic-term" class="form-control" type="text">
@@ -63,7 +63,7 @@
                   </select>
                 </div>
               </div>
-              <div class="row new-section-inputs">
+              <div class="row new-section-inputs form-group has-danger">
                 <div class="col-xs-6">
                   <label for="course">Course</label>
                 </div>
@@ -76,7 +76,7 @@
                   </select>
                 </div>
               </div>
-              <div class="row new-section-inputs">
+              <div class="row new-section-inputs form-group has-danger">
                 <div class="col-xs-6">
                   <label for="section_num">Section Number</label>
                 </div>
@@ -84,7 +84,7 @@
                   <input id="section_num" class="form-control" type="integer">
                 </div>
               </div>
-              <div class="row new-section-inputs">
+              <div class="row new-section-inputs form-group has-danger">
                 <div class="col-xs-6">            
                   <label for="section-type">Section Type</label>
                 </div>
@@ -97,7 +97,7 @@
                   </select>
                 </div>
               </div>
-              <div class="row new-section-inputs">
+              <div class="row new-section-inputs form-group has-danger">
                 <div class="col-xs-6">
                   <label for="faculty">Faculty</label>
                 </div>
@@ -110,12 +110,12 @@
                   </select>
                 </div>
               </div>
-              <div class="row new-section-inputs">
+              <div class="row new-section-inputs form-group has-danger">
                 <div class="col-xs-6">
                   <label for="room">Room</label>
                 </div>
                 <div class="col-xs-6 col-xs-offset-6">
-                  <select id="room" class="form-control" type="text">
+                  <select required="true" id="room" class="form-control" type="text">
                     <option value="" disabled selected>Select a room</option>
                   {% for room in rooms %}
                     <option value="{{room.name}}">{{ room.name }}</option>
@@ -123,7 +123,7 @@
                   </select>
                 </div>
               </div>
-              <div class="row new-section-inputs">
+              <div class="row new-section-inputs form-group has-danger">
                 <div class="col-xs-6">
                   <label for="capacity">Capacity</label>
                 </div>
@@ -293,23 +293,19 @@
               </tr>
             </thead>
             <tbody id="section-detail-rows">
-            <!-- Selected filtered Section Results get inserted here when updateSectionDetails() gets called -->
-              <tr>
-                <td>
-                  <button type="button" class="btn btn-info btn-xs" onclick="removeSectionFromDetails(this)"><span class="glyphicon glyphicon-minus" title="Remove section from details"></span>&nbsp;</button>
-                  <button type="button" class="btn btn-info btn-xs" data-toggle="modal" data-target="#edit-section-modal" onclick="displaySectionInfo(this)"><span class="glyphicon glyphicon-edit" title="Edit section"></span>&nbsp;</button>
-                  <button type="button" class="btn btn-info btn-xs" data-toggle="modal" data-target="#delete-section-modal" onclick="confirmDeleteModal(this)"><span class="glyphicon glyphicon-trash" title="Delete section"></span>&nbsp;</button>
-                </td>
-                <td>cpe101-01</td>
-                <td>Fall 2016</td>
-                <td>cpe101</td>
-                <td>lecture</td>
-                <td>Kearns</td>
-                <td>14-256</td>
-                <td>mwf</td>
-                <td>10:00AM</td>
-                <td>12:00PM</td>
-              </tr>
+              <tr id="no-sections">
+                <td>&nbsp;</td>
+                <td>&nbsp;</td>
+                <td>&nbsp;</td>
+                <td>&nbsp;</td>
+                <td>&nbsp;</td>
+                <td>&nbsp;</td>
+                <td>&nbsp;</td>
+                <td>&nbsp;</td>
+                <td>&nbsp;</td>
+                <td>&nbsp;</td>
+                </tr>
+              <!-- Selected filtered Section Results get inserted here when updateSectionDetails() gets called -->
             </tbody>
           </table>
         </div>
@@ -331,16 +327,16 @@
                 <div class="col-xs-6">
                     <strong>Academic Term</strong>
                 </div>
-                <div class="col-xs-6 col-xs-offset-6">
-                    <p>Fall 2018</p>
+                <div id="edit-term" class="col-xs-6 col-xs-offset-6">
+                    <!-- the sections academic term is inserted here -->
                 </div>
               </div>
               <div class="row section-info">
                 <div class="col-xs-6">
                     <strong>Course</strong>
                 </div>
-                <div class="col-xs-6 col-xs-offset-6">
-                    <p>CPE 309</p>
+                <div id="edit-course" class="col-xs-6 col-xs-offset-6">
+                    <!-- the sections course is inserted here -->
                 </div>
               </div>
               <div class="row edit-section-inputs">
@@ -353,12 +349,12 @@
               </div>
               <div class="row new-section-inputs">
                 <div class="col-xs-6">            
-                  <label for="edit-section-type">Section Type</label>
+                  <label for="edit-type">Section Type</label>
                 </div>
                 <div class="col-xs-6 col-xs-offset-6">
-                  <select id="edit-section-type" class="form-control" type="text">
+                  <select id="edit-type" class="form-control" type="text">
                     <option value="" disabled="" selected="">Select a type</option>
-                    <option value="activity">activity</option>                  
+                    <!-- additional options inserted here -->
                   </select>
                 </div>
               </div>
@@ -368,8 +364,8 @@
                 </div>
                 <div class="col-xs-6 col-xs-offset-6">
                   <select id="edit-faculty" class="form-control" type="text">
-                    <option value="" disabled="" selected="">Select faculty</option>                  
-                    <option value="paledger@gmail.com">Paula Ledgerwood</option>
+                    <option value="" disabled="" selected="">Select faculty</option>
+                    <!-- additional options inserted here -->
                   </select>
                 </div>
               </div>
@@ -380,7 +376,7 @@
                 <div class="col-xs-6 col-xs-offset-6">
                   <select id="edit-room" class="form-control" type="text">
                     <option value="" disabled="" selected="">Select a room</option>
-                    <option value="HOT HOUSE">HOT HOUSE</option>
+                    <!-- additional options inserted here -->
                   </select>
                 </div>
               </div>
@@ -394,18 +390,18 @@
               </div>
               <div class="row edit-section-inputs">
                 <div class="col-xs-6">
-                  <label for="edit-students-enrolled">Students Enrolled</label>
+                  <label for="edit-students_enrolled">Students Enrolled</label>
                 </div>
                 <div class="col-xs-6 col-xs-offset-6">
-                  <input id="edit-students-enrolled" class="form-control" type="integer">
+                  <input id="edit-students_enrolled" class="form-control" type="integer">
                 </div>
               </div>
               <div class="row edit-section-inputs">
                 <div class="col-xs-6">
-                  <label for="edit-students-waitlisted">Students Waitlisted</label>
+                  <label for="edit-students_waitlisted">Students Waitlisted</label>
                 </div>
                 <div class="col-xs-6 col-xs-offset-6">
-                  <input id="edit-students-waitlisted" class="form-control" type="integer">
+                  <input id="edit-students_waitlisted" class="form-control" type="integer">
                 </div>
               </div>
               <div class="row">
@@ -422,24 +418,24 @@
               </div>
               <div class="row">
                 <div class="col-xs-6">
-                  <label for="edit-start-time">Start Time</label>
+                  <label for="edit-start_time">Start Time</label>
                 </div>
                 <div class="col-xs-6 col-xs-offset-6">
-                  <input id="edit-start-time" class="form-control" type="time">
+                  <input id="edit-start_time" class="form-control" type="time">
                 </div>
               </div>
               <div class="row">
                 <div class="col-xs-6">
-                  <label for="edit-end-time">End Time</label>
+                  <label for="edit-end_time">End Time</label>
                 </div>
                 <div class="col-xs-6 col-xs-offset-6">
-                  <input id="edit-end-time" class="form-control" type="time">
+                  <input id="edit-end_time" class="form-control" type="time">
                 </div>
               </div>
             </div>
             <div id="response-btns">
-                <button class="btn response-btn" data-dismiss="modal">Cancel</button>
-                <button class="btn response-btn">Update Section Info</button>
+                <button class="btn response-btn" data-dismiss="modal">Close</button>
+                <button class="btn response-btn" onclick="editSection()">Update Section Info</button>
             </div>
           </div>
         </div>
