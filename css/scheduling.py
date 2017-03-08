@@ -320,7 +320,7 @@ def Confirmation(start_time, end_time, room, faculty, schedule):
         faculty = CUser.get_faculty_by_full_name(faculty)
     start_time = datetime.strptime(start_time, '%H:%M').time()
     end_time = datetime.strptime(end_time, '%H:%M').time()
-    sections = Section.objects.filter(schedule=academic_term).filter(Q(start_time__range=[start_time, end_time]) | Q(end_time__range=[time(start_time.hour, start_time.minute + 1), end_time]))
+    sections = Section.objects.filter(schedule=academic_term).filter(Q(start_time__range=[start_time, end_time]) | Q(end_time__range=[time(start_time.hour, start_time.minute + 1), end_time]) | Q(start_time__lt = start_time, end_time__gt = end_time))
     conflicts = {'room': [], 'faculty': []}
 
     # Check if rooms or faculty overlap
