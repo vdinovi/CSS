@@ -56,7 +56,8 @@ urlpatterns = [
     url(r'^landing/$', views.LandingView, name='landing'),
     url(r'^logout/$', views.LogoutView, name='logout'),
     url(r'^availability/$', views.AvailabilityView, name='availability'),
-    url(r'^availability/availabilityView$', views.AvailabilityView, name='availabilityView')
+    url(r'^availability/availabilityView$', views.AvailabilityView, name='availabilityView'),
+    url(r'^course/$', views.CoursePreferences, name='course')
 
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 
