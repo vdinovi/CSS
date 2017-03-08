@@ -218,6 +218,21 @@ class AddSectionForm(forms.Form):
         section.save()
         return
 
+class CoursePrefForm(forms.Form):
+	 course = forms.ModelChoiceField(label='Course', queryset=Course.objects.values_list('name', flat=True))
+	 comments = forms.CharField()
+	 rank = forms.IntegerField()
+
+	 def save(self, faculty): 
+	 	course_pref = CoursePrefForm.create(faculty=faculty,
+								course = Course.objects.get(course=self.cleaned_data['course']),
+								comments = self.cleaned_data['comments'],
+	 						  	rank  = self.cleaned_data['rank'])
+	 	course_pref.save()
+	 	print(faculty)
+	 	print(course)
+	 	print(comments)
+	 	print(rank)
 
 class AddAvailabilityForm(forms.Form):
     DAYS = ('Monday', 'Monday',),('Tuesday','Tuesday'),('Wednesday','Wednesday'), ('Thursday','Thursday',), ('Friday', 'Friday')

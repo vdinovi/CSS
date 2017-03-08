@@ -657,20 +657,18 @@ function getSelectedFilters() {
     return selectedFilters;
 }
 
-function newSection() {
-    var sectionData = {};
-    console.log($("#section_num").val());
+function newSection(sectionData) {
     sectionData = {
-         'section_num': $("#section_num").val(), 
-         'schedule': $("#academic-term").val(), 
-         'course': $("#course").val(),
-         'section-type': $("#section-type").val(),
-         'faculty': $("#faculty").val(),
-         'room': $("#room").val(),
-         'days': $("#days").val(),
-         'capacity': $("#capacity").val(),
-         'start-time': $("#start-time").val(),
-         'end-time': $("#end-time").val()
+             'section-num': $("#section-num").val(), 
+             'schedule': $("#academic-term").val(), 
+             'course': $("#course").val(),
+             'section-type': $("#section-type").val(),
+             'faculty': $("#faculty").val(),
+             'room': $("#room").val(),
+             'days': $("#days").val(),
+             'capacity': $("#capacity").val(),
+             'start-time': $("#start-time").val(),
+             'end-time': $("#end-time").val()
         };
     console.log(sectionData);
     $.ajax({
@@ -695,21 +693,38 @@ function newSection() {
 }
 
 /* Confirming new section */
-function newSectionConfirmation() {
+function sectionConflictCheck(element) {
     var sectionData = {};
-    console.log($("#section_num").val());
-    sectionData = {
-         'section_num': $("#section_num").val(), 
-         'schedule': $("#academic-term").val(), 
-         'course': $("#course").val(),
-         'section-type': $("#section-type").val(),
-         'faculty': $("#faculty").val(),
-         'room': $("#room").val(),
-         'days': $("#days").val(),
-         'capacity': $("#capacity").val(),
-         'start-time': $("#start-time").val(),
-         'end-time': $("#end-time").val()
+    if (element.id.includes("create")) {
+        sectionData = {
+             'section_num': $("#section_num").val(), 
+             'schedule': $("#academic-term").val(), 
+             'course': $("#course").val(),
+             'section-type': $("#section-type").val(),
+             'faculty': $("#faculty").val(),
+             'room': $("#room").val(),
+             'days': $("#days").val(),
+             'capacity': $("#capacity").val(),
+             'start-time': $("#start-time").val(),
+             'end-time': $("#end-time").val()
         };
+    }
+    else {
+        sectionData = {
+         'schedule': $("#edit-term").children("p").text(),
+         'name': $("#edit-course").children("p").text() + "-" + $("#edit-section_num").val(),
+         'section_num': $("#edit-section_num").val(),
+         'type': $("#edit-type").val(),
+         'faculty': $("#edit-faculty").val(),
+         'room': $("#edit-room").val(),
+         'days': $("#edit-days").val(),
+         'capacity': $("#edit-capacity").val(),
+         'start-time': $("#edit-start_time").val(),
+         'end-time': $("#edit-end_time").val(),
+         'students_enrolled': $("#edit-students_enrolled").val(),
+         'students_waitlisted': $("#edit-students_waitlisted").val()
+        };
+    }
     console.log(sectionData);
     $.ajax({
         type: "POST",
@@ -722,11 +737,26 @@ function newSectionConfirmation() {
             faculty_conflicts = response.faculty;
             console.log(faculty_conflicts);
             if (!(room_conflicts.length) && !(faculty_conflicts.length)) {
-                newSection();
+                if (element.id.includes("create")) {
+                    newSection();
+                }
+                else {
+                    console.log(sectionData);
+                    editSection();
+                }
             }
             else {
-                $('#confirm-conflicts-modal').show();
-                $('#confirm-conflicts-modal').toggleClass("in");
+                if (element.id.includes("create")) {
+                    $('#confirm-create-conflicts-modal').show();
+                    $('#confirm-create-conflicts-modal').toggleClass("in");
+                    frame = $("#confirm-create-section-check");
+                }
+                else {
+                    $('#confirm-edit-conflicts-modal').show();
+                    $('#confirm-edit-conflicts-modal').toggleClass("in");
+                    frame = $("#confirm-edit-section-check");
+                }
+                
 
                 var roomFormatStr1 = "<div class=\"col-xs-6\" style=\"text-align:center;\"\>\n" +
                              "<h4>Room Conflicts</h4>\n" +
@@ -756,7 +786,6 @@ function newSectionConfirmation() {
                 var facultyFormatStr3 = "</ul>\n</div>\n";
                 var facultyFormatStr = facultyFormatStr1 + facultyFormatStr2 + facultyFormatStr3;
 
-                frame = $("#confirm-section-check");
                 frame.empty()
                 frame.append(roomFormatStr + facultyFormatStr);
                                    
@@ -894,18 +923,18 @@ function displaySectionInfo(sectionElement) {
     });
 }
 
-function editSection() {
-    var sectionData = {};
+function editSection(sectionData) {
     sectionData = {
+         'schedule': $("#edit-term").children("p").text(),
          'name': $("#edit-course").children("p").text() + "-" + $("#edit-section_num").val(),
-         'section_num': $("#edit-section_num").val(),
+         'section-num': $("#edit-section_num").val(),
          'type': $("#edit-type").val(),
          'faculty': $("#edit-faculty").val(),
          'room': $("#edit-room").val(),
          'days': $("#edit-days").val(),
          'capacity': $("#edit-capacity").val(),
-         'start_time': $("#edit-start_time").val(),
-         'end_time': $("#edit-end_time").val(),
+         'start-time': $("#edit-start_time").val(),
+         'end-time': $("#edit-end_time").val(),
          'students_enrolled': $("#edit-students_enrolled").val(),
          'students_waitlisted': $("#edit-students_waitlisted").val()
         };

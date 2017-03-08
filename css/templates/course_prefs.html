@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+    	<meta charset="utf-8">
+    	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+    	<meta name="viewport" content="width=device-width, initial-scale=1">
+    	<!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    	<title>Faculty Course Preferences</title>
+
+    	{% load static %}
+    	<link href="{% static "css/availability.css" %}" rel="stylesheet">
+	</head>
+	<body>
+  		{% include "navbar.html" %}
+
+  		<div class="container">
+      		<div class="row">
+        		<div class="col-sm-12" style="padding-bottom: 20px">
+         	 		<h1 align="center">Course Preferences</h1>
+         		</div>
+      		</div>
+      	</div>
+
+		<form method="POST">{% csrf_token %}
+      		{{ add_course_pref.as_p }}
+      		<button type="submit" name="add_course_pref" class="save btn btn-default">Submit</button>
+      	</form>
+
+ 	<!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+	</body>
+</html>
