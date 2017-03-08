@@ -37,6 +37,7 @@ urlpatterns = [
         url(r'^sections$', scheduling.Sections, name='sections'),
         url(r'^newSection$', scheduling.NewSection, name='newSection'),
         url(r'^conflict-check$', scheduling.ConflictCheck, name='conflict_check'),
+        url(r'^section-detail-conflicts$', scheduling.SectionDetailConflicts, name='section-detail-conflicts'),
         url(r'^deleteSection$', scheduling.DeleteSection, name='deleteSection'),
         url(r'^get-section-info$', scheduling.GetSectionInfo, name='get-section-info'),
         url(r'^edit-section$', scheduling.EditSection, name='edit-section'),
