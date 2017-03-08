@@ -360,7 +360,6 @@ class Availability(models.Model):
     faculty = models.ForeignKey(CUser, on_delete=models.CASCADE, null=True)
     day_of_week = models.CharField(max_length=16) # MWF or TR
     start_time = models.TimeField()
-    end_time = models.TimeField()
     level = models.CharField(max_length=16) #preferred, unavailable
 
     @classmethod
@@ -374,8 +373,6 @@ class Availability(models.Model):
             raise ValidationError("Invalid days of week input")
         elif (start_time is None):
             raise ValidationError("Need to input start time")
-        elif (end_time is None):
-            raise ValidationError("Need to input end time")
         elif (level is None) or (level != "Preferred" and level != "Unavailable"):
             raise ValidationError("Need to input level of availability: preferred or unavailable")
         else:
@@ -387,7 +384,6 @@ class Availability(models.Model):
         return dict(faculty = self.faculty.to_json(),
 		    day = self.day_of_week,
 		    start_time = self.start_time,
-		    end_time = self.end_time,
 		    level = self.level)
 
         # ---------- Scheduling Models ----------
