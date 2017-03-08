@@ -223,7 +223,7 @@ class CoursePrefForm(forms.Form):
 	 comments = forms.CharField()
 	 rank = forms.IntegerField()
 
-	 def save(self, faculty): 
+	 def save(self, faculty):
 	 	course_pref = CoursePrefForm.create(faculty=faculty,
 								course = Course.objects.get(course=self.cleaned_data['course']),
 								comments = self.cleaned_data['comments'],
@@ -242,9 +242,8 @@ class AddAvailabilityForm(forms.Form):
     level = forms.ChoiceField(label='Type', choices=[('Preferred', 'Preferred'), ('Unavailable','Unavailable')])
 
     def save(self, email):
-        availability = Availability.create(CUser.get_user(email))
-        availability.setRange(start_time, end_time, day, level)
-        availability.save()
+        faculty = faculty = CUser.get_faculty(email=email)
+        Availability.setRange(faculty=faculty, day_of_week=self.cleaned_data['day'], start_time= self.cleaned_data['start_time'], end_time=self.cleaned_data['end_time'], level=self.cleaned_data['level'])
 
 class AddScheduleForm(forms.Form):
     academic_term = forms.CharField(max_length=16)
