@@ -96,6 +96,7 @@ def CoursePreferences(request):
 	elif request.method == "POST" and 'add_course_pref' in request.POST:
 		form = CoursePrefForm(request.POST)
 		print(form.errors)
+                print request.POST
 		if form.is_valid():
 			try:
 				form.save(faculty)
