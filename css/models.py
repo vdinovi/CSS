@@ -370,7 +370,7 @@ class WorkInfo(models.Model):
 class Availability(models.Model):
     class Meta:
         unique_together = (("faculty", "day_of_week", "start_time"),)
-    faculty = models.ForeignKey(CUser, on_delete=models.CASCADE, null=True)
+    faculty = models.ForeignKey(CUser, on_delete=models.CASCADE)
     day_of_week = models.CharField(max_length=16) # MWF or TR
     start_time = models.TimeField()
     level = models.CharField(max_length=16) #preferred, unavailable
