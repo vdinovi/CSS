@@ -88,7 +88,9 @@ def AvailabilityView(request):
     res = HttpResponse()
     email = request.session.get('email')
     availability = Availability.get_availability(CUser.get_faculty(email=email))
-    print availability
+    print "Availability"
+    print Availability.objects.count()
+
 
     if request.method == "GET":
         return render(request,'availability.html', {

@@ -227,7 +227,7 @@ class AddAvailabilityForm(forms.Form):
     level = forms.ChoiceField(label='Type', choices=[('preferred', 'preferred'), ('Unavailable','Unavailable')])
 
     def save(self, email):
-        availability = Availability.create(faculty=CUser.get_user(email))
+        availability = Availability.create(CUser.get_user(email))
         availability.setRange(start_time, end_time, day, level)
         availability.save()
 

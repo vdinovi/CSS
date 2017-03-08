@@ -359,16 +359,22 @@ class Availability(models.Model):
     timeList = [0, 30, 100, 130, 200, 230, 300, 330, 400, 430, 500, 530, 600, 630, 700, 730, 800, 830, 900, 930, 1000, 1030, 1100, 1130, 1200, 1230, 1300, 1330, 1400, 1430, 1500, 1530, 1600, 1630, 1700, 1730, 1800, 1830, 1900, 1930, 2000]
     days = {}
     dayList = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday']
+    day_of_week = "defaultDay"
 
     @classmethod
     def create(cls, faculty):
+        print "add availability"
+        availability = cls(faculty=faculty)
 
-        for day in dayList:
-            for time in timeList:
-                days[day][time] = "unset"
-
-        faculty = cls(faculty=faculty, days = days, )
-        return faculty
+        for day in availability.dayList:
+            print day
+            for time in availability.timeList:
+                print time
+                availability.days[day] = "unset"
+        print availability
+        availability.save()
+        print "saved"
+        return availability
 
     def setRange(self, startTime, endTime, day, setting):
         hour = startTime.hour * 100
@@ -390,34 +396,12 @@ class Availability(models.Model):
                 self.days[day][time] = setting
         print "Added range:"
         print self.days
+        self.save()
 
     @classmethod
     def get_availability(cls, faculty):
         return cls.objects.filter(faculty=faculty)
 
-    @classmethod
-    def create(cls, email, day, start_time, end_time, level):
-	faculty = CUser.get_faculty(email=email)
-        if (day is None):
-            raise ValidationError("Invalid days of week input")
-        elif (start_time is None):
-            raise ValidationError("Need to input start time")
-        elif (end_time is None):
-            raise ValidationError("Need to input end time")
-        elif (level is None) or (level != "Preferred" and level != "Unavailable"):
-            raise ValidationError("Need to input level of availability: preferred or unavailable")
-        else:
-            availability = cls(faculty=faculty,day_of_week=day, start_time=start_time, end_time=end_time, level=level)
-            availability.save()
-            return availability
-
-    # deprecated!!!
-    def to_json(self):
-        return dict(faculty = self.faculty.to_json(),
-		    day = self.day_of_week,
-		    start_time = self.start_time,
-		    end_time = self.end_time,
-		    level = self.level)
 
         # ---------- Scheduling Models ----------
 # Schedule is a container for scheduled sections and correponds to exactly 1 academic term
@@ -666,7 +650,7 @@ class Section(models.Model):
         for conflict in conflicts:
             if conflicts.section1 == section:
                 sections.append(section2.to_json())
-            else: 
+            else:
                 sections.append(section1.to_json())
         return sections
 
