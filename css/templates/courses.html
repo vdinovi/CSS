@@ -55,6 +55,13 @@
         </div>
       </div>
     </div>
+          
+          <h1 align="center">Course Information Upload</h1>
+
+          <form method = "POST" enctype = "multipart/form-data" action="#"> {% csrf_token %}
+	      {{upload_form.as_p}}
+              <button type="submit" name="course-import-data" class="save btn btn-default">submit</button>
+          </form>
 
     <div id="add-course" class="modal fade" role="dialog">
       <div class="modal-dialog">
