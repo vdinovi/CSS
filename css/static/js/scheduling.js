@@ -1,9 +1,8 @@
 /* *** GLOBALS *** */
 const filter_types = ["course", "faculty", "room", "time"];
-// Format structure for selected options
-var filters = {"course":{"logic":"and", "filters":[]}, "faculty":{"logic":"and", "filters":[]}, "room":{"logic":"and", "filters":[]}, "time":{"logic": "and", "filters":{"MWF":[], "TR":[]}}};
+var filters = {"schedule":{"logic":"and", "filters":[]}, "course":{"logic":"and", "filters":[]}, "faculty":{"logic":"and", "filters":[]}, "room":{"logic":"and", "filters":[]}, "time":{"logic": "and", "filters":{"MWF":[], "TR":[]}}}; //
 var filteredSections = [];
-var sectionDetails = [];
+var sectionDetails = [{"name":"cpe101-01", "term":"fall2016", "course":"cpe101", "type":"lecture", "faculty":"kearns", "room":"14-256", "days":"mwf", "start_time":"10:00AM", "end_time":"12:00PM"}];
 
 /* *** UTILITY *** */
 // String format function. 
@@ -404,7 +403,7 @@ function selectOption(element) {
     // Remove option from selected option list
     else {
         filterType.children("div").each(function(index, value) {
-            if (value.id.replace(/-/g, ' ') == $(element).parent().parent().children('div').children("p").text())
+            if ($(value).children("li").text() == $(element).parent().parent().children('div').children("p").text())
                 value.remove();
         });
     }
@@ -458,8 +457,10 @@ function getSelectedOptions() {
 // Selects all sections in filtered Section window
 function selectAllOptions() {
     $("#option-frame").children("div").each(function(index, value) { 
-        $("#"+value.id+"-checkbox").prop("checked", true);
-        selectOption($("#"+value.id+"-checkbox")[0]);
+        if ($("#"+value.id+"-checkbox").prop("checked") == false) {
+            $("#"+value.id+"-checkbox").prop("checked", true);
+            selectOption($("#"+value.id+"-checkbox")[0]);
+        }
     });
 }
 
@@ -476,14 +477,27 @@ function unselectAllOptions() {
 
 /* *** FILTER LOGIC / SECTIONS *** */
 
+// returns strings with underscores as spaces
+function underscoreToSpaces(string) {
+    return string.split("_").join(" ");
+}
+
+// returns strings with spaces as underscores
+function spacesToUnderscores(string) {
+    return string.split(" ").join("_");
+}
+
+
 // Get the filters JSON object with correct filters to apply using getSelectedOptions
 function updateFilters() {
     filtersToApply = getSelectedOptions();  
+    filters['schedule']['filters'] = filtersToApply['schedule'];
     $('.logic-checkbox').each(function (index, value) {        
         timeMWFarr = []
         timeTRarr = []
         otherArr = []
-        filterType = value.id; 
+        filterType = value.id.split("-logic-checkbox")[0]; 
+        console.log(filterType);
         if (value.checked) {
             for (var t=0;t<filtersToApply[filterType].length;t++) {
                 timeArr = filtersToApply[filterType][t].split("-");
@@ -493,9 +507,9 @@ function updateFilters() {
                 else if (filtersToApply[filterType][t].includes('tr')) { timeTRarr.push(new Array(startTime, endTime)); }
             } 
             otherArr = filtersToApply[filterType]       
-            $('#'+filterType).parent('label').addClass("checked");
+            $('#'+value.id).parent('label').addClass("checked");
         } else {      
-            $('#'+filterType).parent('label').removeClass("checked");
+            $('#'+value.id).parent('label').removeClass("checked");
         }
         if (filterType == "time") {
             filters[filterType]['filters']['MWF'] = timeMWFarr
@@ -504,6 +518,7 @@ function updateFilters() {
             filters[filterType]['filters'] = otherArr
         }
     }); 
+    console.log(filters);
 }
 
 // OnClick function for a filter logic checkbox
@@ -523,11 +538,6 @@ function updateFilterLogic() {
             $("#"+value.id).parent().next().prop("disabled", true);
         }
     }); 
-}
-
-// OnClick function that adds the logic for this filter
-function addLogic(element) {
-
 }
 
 /* *** HELPER FUNCTIONS FOR LOGIC *** */
@@ -568,16 +578,16 @@ function getFilteredSections() {
             var sectionFormatString =
                 "<div id=\"section-{0}\" class=\"input-group\">\n" +
                 "  <span class=\"input-group-addon\">\n" +
-                "    <input id=\"section-{0}-checkbox\" type=\"checkbox\" onclick=\"selectSection(this)\">\n" +
+                "    <input id=\"section-{0}-checkbox\" type=\"checkbox\">\n" +
                 "  </span>\n" +
-                "  <p class=\"form-control\">{0}</p>\n" +
+                "  <p class=\"form-control\">{1}</p>\n" +
                 "</div>\n";
             for (var i in data) {
                 if ($.inArray(data[i], filteredSections) == -1) {
                     filteredSections.push(data[i]);
                 }
                 // Add to section window 
-                sectionFrame.append(sectionFormatString.format(data[i].name));
+                sectionFrame.append(sectionFormatString.format(data[i].name, underscoreToSpaces(data[i].name)));
             }
         },
         error: function(err) {
@@ -600,7 +610,9 @@ function inArrayByName(name, array) {
 function getSelectedSections() {
     newSectionSelected = false;
     $("#section-frame").children("div").each(function(index, value) { 
+        console.log(value.id);
         if ($("#"+value.id+"-checkbox").prop('checked')) { 
+            console.log("HELLO");
             if (inArrayByName(value.id.split("section-")[1], sectionDetails) === -1) {
                 console.log("pushing...");
                 console.log(filteredSections[inArrayByName(value.id.split("section-")[1], filteredSections)]);
@@ -642,15 +654,17 @@ function setLogic(element) {
 function getSelectedFilters() {
     var selectedFilters = [];
     $('.logic-checkbox').each(function (index, value) {
-        if (value.checked) { selectedFilters.push(value.id); }
+        if (value.checked) { selectedFilters.push(value.id.split("-logic-checkbox")[0]); }
     });
     return selectedFilters;
 }
 
-function NewSection(request) {
+function newSection() {
     var sectionData = {};
+    console.log($("#section_num").val());
     sectionData = {
-        'schedule': $("#academic-term").val(), 
+         'section_num': $("#section_num").val(), 
+         'schedule': $("#academic-term").val(), 
          'course': $("#course").val(),
          'section-type': $("#section-type").val(),
          'faculty': $("#faculty").val(),
@@ -659,7 +673,8 @@ function NewSection(request) {
          'capacity': $("#capacity").val(),
          'start-time': $("#start-time").val(),
          'end-time': $("#end-time").val()
-         };
+        };
+    console.log(sectionData);
     $.ajax({
         type: "POST",
         url: "newSection",
@@ -681,17 +696,56 @@ function NewSection(request) {
     });
 }
 
+/* Confirming new section */
+function newSectionConfirmation() {
+    var sectionData = {};
+    console.log($("#section_num").val());
+    sectionData = {
+         'section_num': $("#section_num").val(), 
+         'schedule': $("#academic-term").val(), 
+         'course': $("#course").val(),
+         'section-type': $("#section-type").val(),
+         'faculty': $("#faculty").val(),
+         'room': $("#room").val(),
+         'days': $("#days").val(),
+         'capacity': $("#capacity").val(),
+         'start-time': $("#start-time").val(),
+         'end-time': $("#end-time").val()
+        };
+    console.log(sectionData);
+    $.ajax({
+        type: "POST",
+        url: "conflict-check",
+        data: JSON.stringify(sectionData),
+        dataType: 'json',
+        success: function(response) {
+            room_conflicts = response.room;
+            console.log(room_conflicts);
+            faculty_conflicts = response.faculty;
+            console.log(faculty_conflicts);
+            if (!(room_conflicts.length) && !(faculty_conflicts.length)) {
+                newSection();
+            }
+            else {
+                $('#confirm-conflicts-modal').show();
+                $('#confirm-conflicts-modal').toggleClass("in");                
+            }
+        },
+        error: function(err) {
+            console.log(err);
+        }
+    });
+}
 
 /* Section Details Functions */
 function updateSectionDetails(resort) {
     var sectionDetailsFormatString = 
-        "<tr id=\"{1}-detail\">\n" + 
+        "<tr id=\"{0}-detail\">\n" + 
             "<td>\n" +
                 "<button type=\"button\" class=\"btn btn-info btn-xs\" data-toggle=\"modal\" data-target=\"#deselect-section\" onclick=\"removeSectionFromDetails(this)\"><span class=\"glyphicon glyphicon-minus\" title=\"Remove section from details\"></span>&nbsp;</button>\n" +
-                "<button type=\"button\" class=\"btn btn-info btn-xs\" data-toggle=\"modal\" data-target=\"#edit-section\"><span class=\"glyphicon glyphicon-edit\" title=\"Edit section\"></span>&nbsp;</button>\n" +
-                "<button type=\"button\" class=\"btn btn-info btn-xs\" data-toggle=\"modal\" data-target=\"#delete-section\"><span class=\"glyphicon glyphicon-trash\" title=\"Delete section\"></span>&nbsp;</button>\n" +
+                "<button type=\"button\" class=\"btn btn-info btn-xs\" data-toggle=\"modal\" data-target=\"#edit-section-modal\"><span class=\"glyphicon glyphicon-edit\" title=\"Edit section\"></span>&nbsp;</button>\n" +
+                "<button type=\"button\" class=\"btn btn-info btn-xs\" data-toggle=\"modal\" data-target=\"#delete-section-modal\" onclick=\"confirmDeleteModal(this)\"><span class=\"glyphicon glyphicon-trash\" title=\"Delete section\"></span>&nbsp;</button>\n" +
             "</td>\n" +
-            "<td>{0}</td>\n" + 
             "<td>{1}</td>\n" + 
             "<td>{2}</td>\n" + 
             "<td>{3}</td>\n" + 
@@ -700,16 +754,89 @@ function updateSectionDetails(resort) {
             "<td>{6}</td>\n" + 
             "<td>{7}</td>\n" + 
             "<td>{8}</td>\n" + 
+            "<td>{9}</td>\n" + 
         "</tr>\n";
     var detailFrame = $("#section-detail-rows");
     if (getSelectedSections() || resort) {
         detailFrame.empty();
         for (var i in sectionDetails) {  
-            detailFrame.append(sectionDetailsFormatString.format(sectionDetails[i].name, sectionDetails[i].term, sectionDetails[i].course, sectionDetails[i].type, sectionDetails[i].faculty, sectionDetails[i].room, sectionDetails[i].days, sectionDetails[i].start_time, 
+            detailFrame.append(sectionDetailsFormatString.format(sectionDetails[i].name, underscoreToSpaces(sectionDetails[i].name), sectionDetails[i].term, sectionDetails[i].course, sectionDetails[i].type, sectionDetails[i].faculty, sectionDetails[i].room, sectionDetails[i].days, sectionDetails[i].start_time, 
             sectionDetails[i].end_time));
         }
     }
 }
+
+function confirmDeleteModal(sectionElement) {
+    sectionName = spacesToUnderscores($($(sectionElement).parent().next("td")).text());
+    sectionIndex = inArrayByName(sectionName, sectionDetails);
+    section = sectionDetails[sectionIndex];
+    formatStr = "<h4\>{0}\</h4>\n" +
+                "<ul>\n" +
+                "<li>{1} {2}</li>\n" +
+                "<li>{3} {4}</li>\n" +
+                "<li>{5} {6} - {7}</li>\n" +
+                "</ul>\n";
+    console.log(section);
+    frame = $("#delete-section-check");
+    frame.empty();
+    frame.append(formatStr.format(underscoreToSpaces(section.name), section.term, section.faculty, section.type, section.room, section.days, section.start_time, section.end_time));
+}
+
+
+function removeDeletedSection(sectionName) {
+    $("#"+sectionName+"-detail").remove();
+    $("#delete-section-modal").children(".close").click();
+}
+
+function deleteSection(element) {
+    sectionName = $($("#delete-section-check").children('h4')[0]).text();
+    console.log("HERE" + sectionName);
+    $.ajax({
+        type: "POST",
+        url: "deleteSection",
+        dataType: 'json',
+        data: JSON.stringify({"section": sectionName}),
+        success: function(response) {
+            removeDeletedSection(spacesToUnderscores(sectionName));
+        },
+        error: function(err) {
+            console.log(err);
+        }
+    });
+}
+
+function displaySectionInfo(sectionElement) {
+    sectionName = spacesToUnderscores($($(sectionElement).parent().next("td")).text());
+    $.ajax({
+        type: "POST",
+        url: "editSection",
+        dataType: "json",
+        data: JSON.stringify({"section": sectionName}),
+        success: function(response) {
+            optionFormatString = "<option value=\"{0}\">{1}</option>"
+            selectedOptionFormatString = "<option selected value=\"{0}\">{1}</option>"
+            for (var attribute in response.options) {
+                for (var i=0;i<attributes.length;i++) {
+                    $("select#edit-"+spacesToUnderscores(attribute)).append(optionFormatString.format(spacesToUnderscores(attribute[i]), attribute[i]));
+                }
+            }
+        },
+        error: function(err) {
+            console.log(err);
+        }
+    });
+}
+
+/*** EDIT SECTION INFO FUNCTIONS  ***/
+function renderSectionNumber() {
+
+}
+
+function displayEditOptions(id, options) {
+
+}
+
+
 
 // removes the section row from Section Details (does not delete)
 function removeSectionFromDetails(element) {
@@ -736,31 +863,44 @@ function setDays(element, form) {
     form.save();
 }
 
+function selectDataTab(name) {
+    $("#data-tab-window").children().each( function(index, value) {
+        if ($(value).prop('id') != name+'-tab' && $(value).hasClass('active')) {
+            $(value).removeClass('active');
+        }
+    });
+    $("#"+name+'-tab').addClass('active');
+    $("#data-window").children().each( function(index, value) {
+        $(value).hide();
+    });
+    $("#"+name).show() 
+}
+
 function openDataTab(name, title, data) {
     var tabAlreadyOpened = false;
-    $("#data-tab-window").children("ul").each( function(index, value) {
+    $("#data-tab-window").children().each( function(index, value) {
         if ($(value).prop('id') == name+"-tab")
             tabAlreadyOpened = true;
     });
     if (!tabAlreadyOpened) {
-        var tabFormat = "<li id=\"{0}-tab\" class=\"data-tab\"><a href=\"#\">{1}</a></li>\n";
-        $("#data-tab-window").children("ul").append(tabFormat.format(name, title));
+        var tabFormat = "<li id=\"{0}-tab\" onclick=\"selectDataTab('{0}')\"><a href=\"#\">{1}</a></li>";
+        $("#data-tab-window").append(tabFormat.format(name, title));
     }
-    $("#data-window").each( function(index, value) {
+    $("#data-window").children().each( function(index, value) {
         if ($(value).prop('id') == name)  {
             $(value).remove();
         }
     });
     $("#data-window").append(data)
-
-
 }
 
 // Section Creation - Data window interaction
 // On term selection
 $("#academic-term").on('change', function() {
     var dataFormat = 
-        "<table id=\"student-plan\" class=\"table\">\n" +
+        "<div id=\"student-plan\" class=\"container\">\n" +
+        "<h3>Student Plan Data</h3>\n" + 
+        "<table class=\"table\">\n" +
         "  <thead>\n" +
         "    <tr>\n" +
         "      <th>Schedule</th>\n" +
@@ -782,20 +922,205 @@ $("#academic-term").on('change', function() {
         "      <td>{0}</td>\n" +
         "      <td>{0}</td>\n" +
         "    </tr>\n" +
-        "    <tr>\n";
-    openDataTab('student-plan', 'Student Plan Data', dataFormat.format('temp'));
+        "  </tbody>\n" +
+        "</table>\n" +
+        "</div>";
+    // Get Student Plan Data
+    $.ajax({
+        type: "GET",
+        url: "student-plan-data",
+        contentType: "application/json",
+        dataType: "json",
+        data: {
+            'schedule': $("#academic-term").val()
+        },
+        success: function(response) {
+            $("#data-window").empty();
+            $("#data-tab-window").empty();
+            openDataTab('student-plan', 'Student Plan Data', dataFormat.format('temp'));
+            selectDataTab('student-plan');
+        },
+        error: function(error) {
+            console.log(error);
+        }
+    });
 });
 
-$("#course").on('change', function() {
+// Format cohort data
+function formatCohortData(courseName, cohortData, cohortTotal) {
+    var grades = ['freshman', 'sophomore', 'junior', 'senior'];
+    var cohortDataFormat = 
+        "<div id=\"cohort-data\" class=\"container\">\n" +
+        "<h3>Cohort Data</h3>\n" +
+        "<table class=\"table\">\n" +
+        "  <thead>\n" +
+        "    <tr>\n" +
+        "      <th>"+courseName+"</th>" + // Course Name
+        "    </tr>\n" +
+        "    <tr>\n" +
+        "      <th></th>\n";
+    // Paste in majors
+    for (var k in cohortData) {
+        cohortDataFormat += 
+        "      <th>"+k+"</th>\n";
+    }
+        "    </tr>\n" +
+        "  </thead>\n" +
+        "  <tbody>\n";
+    // Paste in data
+    for (var i = 0; i < 3; ++i) {
+        cohortDataFormat +=
+        "    <tr>\n" +
+        "      <td>"+grades[i]+"</td>\n";
+        for (var k in cohortData) {
+        cohortDataFormat += 
+        "      <td>"+cohortData[k][i]+"</td>\n";
+        }
+        cohortDataFormat +=
+        "    </tr>\n";
+    }
+    cohortDataFormat +=
+        "    <tr>\n" +
+        "      <td>Cohort Total</td>\n" +
+        "    </tr>\n";
+    // @TODO Add cohort total
+    /*for (var i = 0; i < 3; ++i) {
+        cohortDataFormat +=
+        "    <tr>\n" +
+        "    <td>"+grades[i]+"</td>\n";
+        for (var k in cohortData) {
+        cohortDataFormat += 
+        "      <td>"+cohortTotal[k][i]+"</td>\n";
+        }
+        cohortDataFormat +=
+        "    </tr>\n";
+    }*/
+        "  </tbody>\n" +
+        "</table>\n" +
+        "</div>";
+    return cohortDataFormat;
+}
 
+$("#course").on('change', function() {
+    // Get Cohort, Course, and Enrollment Data
+    var courseDataFormat =
+        "<div id=\"course-info\" class=\"container\">\n" +
+        "<h3>Course Info</h3>\n" +  
+        "<table class=\"table\">\n" +
+        "  <thead>\n" +
+        "    <tr>\n" +
+        "      <th>{0}</th>" + // Course Name
+        "    </tr>\n" +
+        "    <tr>\n" +
+        "      <th>Description</th>\n" +
+        "      <th>Equipement Required</th>\n" +
+        "    </tr>\n" +
+        "  </thead>\n" +
+        "  <tbody>\n" +
+        "    <tr>\n" +
+        "      <td>{1}</td>\n" +
+        "      <td>{2}</td>\n" +
+        "    </tr>\n" +
+        "  </tbody>\n" +
+        "</table>\n" +
+        "</div>";
+    var enrollmentDataFormat = 
+        "<div id=\"enrollment-data\" class=\"container\">\n" +
+        "<h3>Historic Enrollment Data</h3>\n" +   
+        "<table class=\"table\">\n" +
+        "  <thead>\n" +
+        "    <tr>\n" +
+        "      <th>{0}</th>" + // Course Name
+        "    </tr>\n" +
+        "  </thead>\n" +
+        "  <tbody>\n" +
+        "    <tr>\n" +
+        "      <td>NOT YET IMPLEMENTED</td>\n" +
+        "    </tr>\n" +
+        "  </tbody>\n" +
+        "</table>\n" +
+        "</div>";
+    $.ajax({
+        type: "GET",
+        url: "course-info",
+        contentType: "application/json",
+        dataType: "json",
+        data: {
+            'schedule': $("#academic-term").val(),
+            'course': $("#course").val()
+        },
+        success: function(response) {
+            $("#data-window").children().each( function(index, value) {
+                $(value).hide();
+            });
+            var course = response.course
+            var cohortData = response.cohort_data
+            var cohortTotal = response.cohort_total
+            openDataTab('cohort-data', 'Cohort Data', formatCohortData(course.name, cohortData, cohortTotal));
+            openDataTab('enrollment-data', 'Historic Enrollment Data', enrollmentDataFormat.format(course.name));
+            openDataTab('course-info', 'Course Info', courseDataFormat.format(course.name,
+                                                                              course.equipment_req,
+                                                                              course.description)
+            );
+            selectDataTab('course-info');
+        },
+        error: function(error) {
+            console.log(error);
+        }
+    });
 });
 
 $("#faculty").on('change', function() {
-    console.log(this.value);
+    //@TODO Render faculty availability and course preferences
 });
 
 $("#room").on('change', function() {
-    console.log(this.value);
+    var roomDataFormat =
+        "<div id=\"room-info\" class=\"container\">\n" +
+        "<h3>Room Info</h3>\n" +   
+        "<table class=\"table\">\n" +
+        "  <thead>\n" +
+        "    <tr>\n" +
+        "      <th>{0}</th>" + // Room Name
+        "    </tr>\n" +
+        "    <tr>\n" +
+        "      <th>Description</th>\n" +
+        "      <th>Equipement</th>\n" +
+        "      <th>Capacity</th>\n" +
+        "      <th>notes</th>\n" +
+        "    </tr>\n" +
+        "  </thead>\n" +
+        "  <tbody>\n" +
+        "    <tr>\n" +
+        "      <td>{1}</td>\n" +
+        "      <td>{2}</td>\n" +
+        "      <td>{3}</td>\n" +
+        "      <td>{4}</td>\n" +
+        "    </tr>\n" +
+        "  </tbody>\n" +
+        "</table>\n" +
+        "</div>\n";
+    $.ajax({
+        type: "GET",
+        url: "room-info",
+        contentType: "application/json",
+        dataType: "json",
+        data: {
+            'room': $("#room").val()
+        },   
+        success: function(response) {
+            room = response.room
+            openDataTab('room-info', 'Room Info', 
+                        roomDataFormat.format(room.name, room.description, room.equipment,
+                                              room.capacity, room.notes
+                        )
+            );
+            selectDataTab('room-info');
+        },
+        error: function(error) {
+            console.log(error);
+        } 
+    });
 });
 
 
