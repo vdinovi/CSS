@@ -378,8 +378,6 @@ class Availability(models.Model):
 
     @classmethod
     def get_availabilities(cls, faculty):
-        print "Get availabilities: Faculty:"
-        print faculty.user.first_name
         return Availability.objects.filter(faculty=faculty)
     @classmethod
     def initializeAvailabilities(cls, faculty):
