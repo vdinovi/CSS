@@ -141,7 +141,7 @@ function getSchedules() {
         success: function(response) {
             data = JSON.parse(response);
             list = $("#view-term-modal-body").children("div");
-            var scheduleFormatString = "<button class=\"list-group-item\" onclick=\"addSchedule('{0}')\">{0}</button>\n";
+            var scheduleFormatString = "<button class=\"list-group-item\" onclick=\"addSchedule('{0}')\" data-dismiss=\"modal\">{0}</button>\n";
             list.empty();
             for (var i = 0; i < data.active.length; ++i) {
                 list.append(scheduleFormatString.format(data.active[i].academic_term));
@@ -728,7 +728,40 @@ function newSectionConfirmation() {
             }
             else {
                 $('#confirm-conflicts-modal').show();
-                $('#confirm-conflicts-modal').toggleClass("in");                
+                $('#confirm-conflicts-modal').toggleClass("in");
+
+                var roomFormatStr1 = "<div class=\"col-xs-6\" style=\"text-align:center;\"\>\n" +
+                             "<h4>Room Conflicts</h4>\n" +
+                             "<ul>\n";
+                var roomFormatStr2 = "";
+                if (room_conflicts.length == 0) {
+                    roomFormatStr2 = "None";
+                }
+                else {
+                    for (i = 0; i < room_conflicts.length; i++)
+                        roomFormatStr2 += "<li> {0} </li>\n".format(underscoreToSpaces(room_conflicts[i].name));
+                }
+                var roomFormatStr3 = "</ul>\n</div>\n";
+                var roomFormatStr = roomFormatStr1 + roomFormatStr2 + roomFormatStr3;
+
+                var facultyFormatStr1 = "<div class=\"col-xs-6 col-xs-offset-6\" style=\"text-align:center;\"\>\n" +
+                                        "<h4>Faculty Conflicts</h4>\n" +
+                                        "<ul>\n";
+                var facultyFormatStr2 = "";
+                if (faculty_conflicts.length == 0) {
+                    facultyFormatStr2 = "None";
+                }
+                else {
+                    for (i = 0; i < faculty_conflicts.length; i++)
+                        facultyFormatStr2 += "<li> {0} </li>\n".format(underscoreToSpaces(faculty_conflicts[i].name));
+                }
+                var facultyFormatStr3 = "</ul>\n</div>\n";
+                var facultyFormatStr = facultyFormatStr1 + facultyFormatStr2 + facultyFormatStr3;
+
+                frame = $("#confirm-section-check");
+                frame.empty()
+                frame.append(roomFormatStr + facultyFormatStr);
+                                   
             }
         },
         error: function(err) {

@@ -286,11 +286,13 @@ def Confirmation(start_time, end_time, room, faculty, schedule):
 
     # Check if rooms or faculty overlap
     for s in sections:
+        print str(s.course.name) + " " + str(s.section_num)
         if s.room == room:
             conflicts['room'].append(s.to_json())
         if s.faculty == faculty:
             conflicts['faculty'].append(s.to_json())
 
+    print conflicts
     return conflicts
 
 
