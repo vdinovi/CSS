@@ -88,18 +88,19 @@ def CoursePreferences(request):
 	if request.method == "GET":
 		return render(request,'course_prefs.html', {'add_course_pref': CoursePrefForm()})
 	elif request.method == "POST" and 'add_course_pref' in request.POST:
-		print('here')
 		form = CoursePrefForm(request.POST)
+		print(form.errors)
 		if form.is_valid():
 			try:
 				form.save(faculty)
 				return HttpResponseRedirect('/course')
 			except ValidationError as e:
+				
 				return ErrorView(request, 400, "Invalid form entry")
-			else:
-				return ErrorView(request, 400, "Invalid form entry")
+		else:
+			print('here')
+			return ErrorView(request, 400, "Invalid form entry")
 	else:
-		print('form not valid')
 		return ErrorView(request, 400, "")
 	return res
 
