@@ -363,12 +363,11 @@ class Availability(models.Model):
     level = models.CharField(max_length=16) #preferred, unavailable
 
     @classmethod
-    def get_availability_list(cls, faculty):
+    def get_availability(cls, faculty):
         return cls.objects.filter(faculty=faculty)
 
-    @classmethod
     def create(cls, email, day, start_time, end_time, level):
-	faculty = CUser.get_faculty(email=email)
+	  faculty = CUser.get_faculty(email=email)
         if (day is None):
             raise ValidationError("Invalid days of week input")
         elif (start_time is None):
@@ -633,7 +632,7 @@ class Section(models.Model):
         for conflict in conflicts:
             if conflicts.section1 == section:
                 sections.append(section2.to_json())
-            else: 
+            else:
                 sections.append(section1.to_json())
         return sections
 
