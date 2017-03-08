@@ -9,6 +9,13 @@
 
     	{% load static %}
     	<link href="{% static "css/availability.css" %}" rel="stylesheet">
+
+    	 <style>
+  			#sortable { list-style-type: none; margin: 0; padding: 0; width: 60%; }
+  			#sortable li { margin: 0 3px 3px 3px; padding: 0.4em; padding-left: 1.5em; font-size: 1.4em; height: 18px; }
+  			#sortable li span { position: absolute; margin-left: -1.3em; }
+  		</style>
+  		
 	</head>
 	<body>
   		{% include "navbar.html" %}
@@ -26,9 +33,33 @@
       		<button type="submit" name="add_course_pref" class="save btn btn-default">Submit</button>
       	</form>
 
+      	{% for course in course_pref_list %}
+      	
+      	<ul id="sortable">
+  			<li class="ui-state-default"><span class="ui-icon ui-icon-arrowthick-2-n-s"></span>{{ course.name}}</li>
+  			<li class="ui-state-default"><span class="ui-icon ui-icon-arrowthick-2-n-s"></span>Item 2</li>
+  			<li class="ui-state-default"><span class="ui-icon ui-icon-arrowthick-2-n-s"></span>Item 3</li>
+  			<li class="ui-state-default"><span class="ui-icon ui-icon-arrowthick-2-n-s"></span>Item 4</li>
+  			<li class="ui-state-default"><span class="ui-icon ui-icon-arrowthick-2-n-s"></span>Item 5</li>
+  			<li class="ui-state-default"><span class="ui-icon ui-icon-arrowthick-2-n-s"></span>Item 6</li>
+  			<li class="ui-state-default"><span class="ui-icon ui-icon-arrowthick-2-n-s"></span>Item 7</li>
+		</ul>
+
+		{% endfor %}
+
+
  	<!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
     <!-- Include all compiled plugins (below), or include individual files as needed -->
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+	<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+ 	<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <script>
+		$( function() {
+    	$( "#sortable" ).sortable();
+    	$( "#sortable" ).disableSelection();
+  		} );
+  	</script>
 	</body>
 </html>

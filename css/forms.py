@@ -232,7 +232,7 @@ class CoursePrefForm(forms.Form):
 	 	course_pref = FacultyCoursePreferences.create(faculty=faculty,
  										course = Course.objects.get(course=self.cleaned_data['course']),
 	 									comments = self.cleaned_data['comments'],
-	 						  		rank  = self.cleaned_data['rank'])
+	 						  			rank  = self.cleaned_data['rank'])
 	 	course_pref.save()
 
 class AddAvailabilityForm(forms.Form):
