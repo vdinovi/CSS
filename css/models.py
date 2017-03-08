@@ -884,7 +884,7 @@ class StudentPlanData(models.Model):
 
     def to_json(self):
         return dict(
-                schedule=self.schedule.name,
+                schedule=self.schedule.academic_term,
                 course=self.course.name,
                 section_type=self.section_type.name,
                 seat_demand=self.seat_demand,
@@ -962,6 +962,7 @@ class StudentPlanData(models.Model):
                     if (v is not None) and (k not in already_parsed):
                         kwargs[k] = v
                 # Create entry
+                print "creating student plan data with schedule '%s', course '%s', ... " % (schedule.academic_term, course.name)
                 cls.create(schedule=schedule, course=course, section_type=section_type, **kwargs)
             except IndexError as e:
                 messages.append("Invalid entry on line %d: %s" % (i, e[0]))
