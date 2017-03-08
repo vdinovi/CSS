@@ -319,7 +319,57 @@ class Course(models.Model):
                     equipment_req=self.equipment_req,
                     description=self.description)
 
+    @classmethod
+    def import_course_file(cls, file):
+        chunks = []
+        for s in file.chunks():
+            chunks.append(s)
+        data = ''.join(chunks)
+        lines = data.split('\n')
+	messages = []
+        i = 0
+	while i < len(lines):
+	    while (i < len(lines) and not lines[i].strip()):
+		i += 1
+	    if i >=len(lines):
+		break
+	    words = lines[i].split(',')
 
+	    courseName = words[0]
+	    courseDescription = words[1]
+	    if Course.objects.filter(name = courseName).exists():
+		#create a log of the duplicate course entry error
+		messages.append("Course '%s' on line %d already exists, not added to database" % (courseName, i))
+		i += 1
+		continue
+	    else:
+		Course.objects.create(name = courseName, equipment_req = '', description = courseDescription)
+		if len(words) > 2:
+    		    for j in range (2, len(words)): 
+			lineObject = words[j].split()
+			if lineObject[1].isalpha():
+			    if lineObject[1].strip() != "unit":
+
+    			        time = lineObject[0]
+				sectType = lineObject[1].strip()
+
+				if not SectionType.objects.filter(name = sectType).exists():
+				    print type(sectType)
+				    try:
+				        SectionType.create(name = sectType)
+				    except IntegrityError as e:
+					if not e[0] == 1062:
+					    res.status_code = 500
+					    res.reason.phrase = "db error:" + e[0]
+					else:
+					    res.status_code = 400
+					    res.reason_phrase = "Duplicate entry"
+					    messages.error(request, "This section type already exists")
+			    else:
+                                units = lineObject[0] 
+				WorkInfo.create(Course.get_course(courseName), SectionType.get_section_type(sectType), work_units = units, work_hours = time)
+	    i += 1
+	return messages		
 
 class SectionType(models.Model):
     name = models.CharField(max_length=32, unique=True) # eg. lecture or lab
@@ -701,7 +751,6 @@ class Section(models.Model):
                 sections.append(conflict.section1.to_json())
         return sections
 
-
 class FacultyCoursePreferences(models.Model):
     faculty = models.ForeignKey(CUser, on_delete = models.CASCADE)
     course = models.ForeignKey(Course, on_delete = models.CASCADE)
@@ -710,11 +759,13 @@ class FacultyCoursePreferences(models.Model):
 
     @classmethod
     def create(cls, faculty, course, comments, rank):
+        faculty = CUser.get_faculty(faculty)
+        course = Course.get_course(course)
         course_pref = cls(
-            faculty=faculty,
-            course=course,
-            comments=comments,
-            rank=rank)
+            			faculty=faculty,
+            			course=course,
+            			comments=comments,
+            			rank=rank)
         course_pref.save()
         return course_pref
 

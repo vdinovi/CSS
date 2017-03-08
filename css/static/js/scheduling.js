@@ -812,14 +812,12 @@ function updateSectionDetailConflicts() {
                 var room_conflicts = []
                 for (var room in conflicts['room']) {
                     room_conflicts.push(conflicts['room'][room].name)
-                    console.log(room_conflicts)
                 }
 
                 // Save faculty conflicts for section
                 var faculty_conflicts = []
                 for (var faculty in conflicts['faculty']) {
                     faculty_conflicts.push(conflicts['faculty'][faculty].name)
-                    console.log(faculty_conflicts)
                 }
 
                 var sectionDetailEntry = $("#{0}-detail".format(sectionDetails[key].name))
@@ -845,30 +843,15 @@ function updateSectionDetailConflicts() {
                     var faculty_string = ""
                     var room_string = ""
                     if (faculty_conflicts.length) {
-                        console.log("FACULTY CONFLICT FOUND")
                         faculty_string = 'class=\"alert-danger\" data-toggle=\"popover\" data-trigger=\"hover\" title=\"Conflicting Sections\" data-content=\"BLAH\"'
                     }
                     if (room_conflicts.length) {
-                        console.log("ROOM CONFLICT FOUND")
                         room_string = 'class=\"alert-danger\" data-toggle=\"popover\" data-trigger=\"hover\" title=\"Conflicting Sections\" data-content=\"BLAH\"'
                     }
 
-                    console.log(conflictSectionFormatString.format(sectionDetails[key].name, underscoreToSpaces(sectionDetails[key].name), sectionDetails[key].term, sectionDetails[key].course, sectionDetails[key].type, 
-                        faculty_string, 
-                        sectionDetails[key].faculty, room_string, sectionDetails[key].room, sectionDetails[key].days, sectionDetails[key].start_time, 
-                        sectionDetails[key].end_time));
                     sectionDetailEntry.prepend(conflictSectionFormatString.format(sectionDetails[key].name, underscoreToSpaces(sectionDetails[key].name), sectionDetails[key].term, sectionDetails[key].course, sectionDetails[key].type, 
                         faculty_string, sectionDetails[key].faculty, room_string, sectionDetails[key].room, sectionDetails[key].days, sectionDetails[key].start_time, 
                         sectionDetails[key].end_time));
-                    // if (room_conflicts.length) {
-                    //     console.log("ROOM CONFLICT FOUND");
-                    //     console.log(conflictSectionFormatString.format(sectionDetails[key].name, underscoreToSpaces(sectionDetails[key].name), sectionDetails[key].term, sectionDetails[key].course, sectionDetails[key].type, 
-                    //         "", sectionDetails[key].faculty, 'class=\"alert-danger\" data-toggle=\"popover\" data-trigger=\"hover\" title=\"Conflicting Sections\" data-content=\"BLAH\"', sectionDetails[key].room, sectionDetails[key].days, sectionDetails[key].start_time, 
-                    //         sectionDetails[key].end_time));
-                    //     sectionDetailEntry.append(conflictSectionFormatString.format(sectionDetails[key].name, underscoreToSpaces(sectionDetails[key].name), sectionDetails[key].term, sectionDetails[key].course, sectionDetails[key].type, 
-                    //         "", sectionDetails[key].faculty, 'class=\"alert-danger\" data-toggle=\"popover\" data-trigger=\"hover\" title=\"Conflicting Sections\" data-content=\"BLAH\"', sectionDetails[key].room, sectionDetails[key].days, sectionDetails[key].start_time, 
-                    //         sectionDetails[key].end_time));
-                    // }
                 }
             }
         },
