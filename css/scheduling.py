@@ -1,5 +1,5 @@
 from django.http import HttpResponse, HttpResponseRedirect
-from .models import Course, CUser, Room, Schedule, Section, SectionConflict, StudentPlanData, CohortData, CohortTotal
+from .models import Course, CUser, Room, Schedule, Section, SectionType, SectionConflict, StudentPlanData, CohortData, CohortTotal
 from .forms import AddScheduleForm
 import json
 from django.db import IntegrityError
@@ -132,7 +132,7 @@ def NewSection(request):
     if request.method == "POST":
         sectionData = json.loads(request.body)
         new_section = Section.create(
-                sectionData['section_num'],
+                sectionData['section-num'],
                 sectionData['schedule'],
                 sectionData['course'],
                 sectionData['section-type'],
@@ -179,55 +179,71 @@ def ConflictCheck(request):
 
 # Editing a section
 @csrf_exempt
-def EditSection(request):
+def GetSectionInfo(request):
     res = HttpResponse()
     if request.method == "POST":
         sectionName = json.loads(request.body)['section']
         section = Section.get_section_by_name(sectionName)
+        section_types = SectionType.get_all_section_types()
+        for obj in section_types:
+            for attr in section_types.query.deferred_loading[0]:
+                obj._meta.local_fields.append(section_types.model._meta.get_field(attr))
+        serialized_types = json.loads(serializers.serialize("json", section_types))
         section_info = {'options': {
-                            'section-type': SectionType.objects.filter().all(),
-                            'faculty': CUser.get_all_faculty(),
-                            'room': Room.objects.filter().all(), 
+                            'type': [serialized_types[i]["fields"]["name"] for i in range(len(serialized_types))],
+                            'faculty': [fac.to_json()['name'] for fac in CUser.get_all_faculty()],
+                            'room': [room.to_json()['name'] for room in Room.get_all_rooms()], 
                         }, 
-                        'info': {
-                            'section-num': section.section_num,
-                            'section-type': section.section_type,
-                            'faculty': section.faculty.user.first_name + " " +  section.faculty.user.last_name,
-                            'room': section.room.name,
-                            'capacity': section.capacity,
-                            'students-enrolled': section.students_enrolled, 
-                            'students-waitlisted': section.students_waitlisted,
-                            'days': section.days,
-                            'start-time': section.start_time, 
-                            'end_time': section.end_time
-                        }}
-        res.content_type = "application/json"
-        data = json.dumps(section_info)     
-        res.write(data)
+                        'info': section.to_json()
+                        }
+        res.content_type = "json"
+        res.write(json.dumps(section_info))
         res.status_code = 200
-    # elif request.method == "POST":
-    #     section_info = json.loads(request.body)
-    #     section = Section.get_section_by_name(section_info['name'])
-    #     section.update(schedule=section_info['term'],
-    #                     capacity=section_info['capacity'], 
-    #                     students_waitlisted=section_info['num_waitlisted'],
-    #                     students_enrolled=section_info['num_enrolled'], 
-    #                     start_time=section_info['start_time'],  
-    #                     end_time=section_info['end_time'],  
-    #                     days=section_info['days'], 
-    #                     room=section_info['room'], 
-    #                     section_type=section_info['days']
-    #                     )
+    else:
+        res.status_code = 400
+    return res
 ### Can edit everything besides the section number, the course, and the term 
+
+# Editing an existing section.
+@csrf_exempt
+def EditSection(request):
+    res = HttpResponse()
+    if request.method == "POST":
+        print request.body
+        sectionData = json.loads(request.body)
+        section = Section.get_section_by_name(sectionData['name'])
+        
+        section_type = SectionType.get_section_type(sectionData['type'])
+        faculty = CUser.get_faculty_by_full_name(sectionData['faculty'])
+        room = Room.get_room(sectionData['room'])
+
+        section.section_num=sectionData['section-num']
+        section.section_type=section_type
+        section.faculty=faculty
+        section.room=room
+        section.capacity=int(sectionData['capacity'])
+        section.students_enrolled=int(sectionData['students_enrolled'])
+        section.students_waitlisted=int(sectionData['students_waitlisted'])
+        section.days=sectionData['days']
+        section.start_time=sectionData['start-time']
+        section.end_time=sectionData['end-time']
+        
+        section.save()
+        res.status_code = 200
+        res.write(request.body)
+    else:
+        res.status_code = 400
+    return res
 
 # Deleting a section.
 @csrf_exempt
 def DeleteSection(request):
     res = HttpResponse()
     if request.method == "POST":
-        # sectionName = json.loads(request.body)["section"]
-        # sectionObject = Section.get_section_by_name(sectionName)
-        # sectionObject.delete()
+        sectionName = json.loads(request.body)["section"]
+        sectionObjects = Section.get_sections_by_name(sectionName)
+        for obj in sectionObjects:
+            obj.delete()
         res.content_type = "json"
         res.write(json.dumps({"response":"Success!"}))
         res.status_code = 200
@@ -278,7 +294,10 @@ def Conflicts(section):
 def Confirmation(start_time, end_time, room, faculty, schedule):
     academic_term = Schedule.get_schedule(schedule)
     room = Room.get_room(room)
-    faculty = CUser.get_faculty(faculty)
+    if "@" in faculty:
+        faculty = CUser.get_faculty(faculty)
+    else:
+        faculty = CUser.get_faculty_by_full_name(faculty)
     start_time = datetime.strptime(start_time, '%H:%M').time()
     end_time = datetime.strptime(end_time, '%H:%M').time()
     sections = Section.objects.filter(schedule=academic_term).filter(Q(start_time__range=[start_time, end_time]) | Q(end_time__range=[time(start_time.hour, start_time.minute + 1), end_time]))
@@ -286,11 +305,13 @@ def Confirmation(start_time, end_time, room, faculty, schedule):
 
     # Check if rooms or faculty overlap
     for s in sections:
+        print str(s.course.name) + " " + str(s.section_num)
         if s.room == room:
             conflicts['room'].append(s.to_json())
         if s.faculty == faculty:
             conflicts['faculty'].append(s.to_json())
 
+    print conflicts
     return conflicts
 
 

@@ -38,7 +38,8 @@ urlpatterns = [
         url(r'^newSection$', scheduling.NewSection, name='newSection'),
         url(r'^conflict-check$', scheduling.ConflictCheck, name='conflict_check'),
         url(r'^deleteSection$', scheduling.DeleteSection, name='deleteSection'),
-        url(r'^editSection$', scheduling.EditSection, name='editSection'),
+        url(r'^get-section-info$', scheduling.GetSectionInfo, name='get-section-info'),
+        url(r'^edit-section$', scheduling.EditSection, name='edit-section'),
         url(r'^student-plan-data$', scheduling.GetStudentPlanData, name='student_plan_data'),
         url(r'^course-info$', scheduling.GetCourseInfo, name='course_info'),
         url(r'^room-info$', scheduling.GetRoomInfo, name='room_info')
@@ -55,7 +56,8 @@ urlpatterns = [
     url(r'^landing/$', views.LandingView, name='landing'),
     url(r'^logout/$', views.LogoutView, name='logout'),
     url(r'^availability/$', views.AvailabilityView, name='availability'),
-    url(r'^availability/availabilityView$', views.AvailabilityView, name='availabilityView')
+    url(r'^availability/availabilityView$', views.AvailabilityView, name='availabilityView'),
+    url(r'^course/$', views.CoursePreferences, name='course')
 
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 
