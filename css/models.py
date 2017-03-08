@@ -94,8 +94,17 @@ class CUser(models.Model):
     @classmethod
     # Return cuser by full name
     def get_faculty_by_full_name(cls, full_name):
-        first_name = full_name.split("-")[0]
-        last_name = full_name.split("-")[1]
+        first_name = ''
+        last_name = ''
+        if (len(full_name.split("-")) > 1):
+            first_name = full_name.split("-")[0]
+            last_name = full_name.split("-")[1]
+        elif (len(full_name.split(" ")) > 1):
+            first_name = full_name.split(" ")[0]
+            last_name = full_name.split(" ")[1]
+        elif (len(full_name.split("_")) > 1):
+            first_name = full_name.split("_")[0]
+            last_name = full_name.split("_")[1]
         return cls.objects.get(user_type='faculty', user__first_name=first_name,
                                user__last_name=last_name)
     # Return faculty cuser by email
@@ -328,7 +337,7 @@ class SectionType(models.Model):
 
     @classmethod
     def get_all_section_types(cls):
-        return SectionType.objects.all()
+        return SectionType.objects.filter()
 
     @classmethod
     def get_all_section_types_list(cls):
@@ -336,6 +345,10 @@ class SectionType(models.Model):
         for sectionType in SectionType.objects.all():
             list.append((sectionType.name, sectionType.name))
         return tuple(list)
+    
+    @classmethod 
+    def to_json(self):
+        return dict(name=self.name)
 
 # WorkInfo contains the user defined information for specific Course-SectionType pairs
 # Each pair has an associated work units and work hours defined by the department
@@ -369,7 +382,7 @@ class Availability(models.Model):
 
     @classmethod
     def create(cls, email, day, start_time, end_time, level):
-	faculty = CUser.get_faculty(email=email)
+        faculty = CUser.get_faculty(email=email)
         if (day is None):
             raise ValidationError("Invalid days of week input")
         elif (start_time is None):
@@ -385,10 +398,10 @@ class Availability(models.Model):
 
     def to_json(self):
         return dict(faculty = self.faculty.to_json(),
-		    day = self.day_of_week,
-		    start_time = self.start_time,
-		    end_time = self.end_time,
-		    level = self.level)
+            day = self.day_of_week,
+            start_time = self.start_time,
+            end_time = self.end_time,
+            level = self.level)
 
         # ---------- Scheduling Models ----------
 # Schedule is a container for scheduled sections and correponds to exactly 1 academic term
@@ -511,10 +524,23 @@ class Section(models.Model):
     @classmethod
     def get_section_by_name(cls, name):
         nameStrArr = name.split("-")
-        course = Course.get_course(nameStrArr[0])
+        courseName = " ".join(nameStrArr[0].split("_"))
+        print courseName
+        course = Course.get_course(courseName)
         num = " ".join(nameStrArr[1].split("_"))
+        
         return cls.objects.get(course=course, section_num=num)
 
+    # This takes in the name which is constructed in .to_json() as course-section_num
+    @classmethod
+    def get_sections_by_name(cls, name):
+        nameStrArr = name.split("-")
+        courseName = " ".join(nameStrArr[0].split("_"))
+        print courseName
+        course = Course.get_course(courseName)
+        num = " ".join(nameStrArr[1].split("_"))
+        
+        return cls.objects.filter(course=course, section_num=num)
 
     # THIS IS FOR PAULA's TESTING PURPOSES: don't use for anything besides the foreign key attributes
     @classmethod
@@ -618,7 +644,7 @@ class Section(models.Model):
         return sections
 
     def to_json(self):
-        return dict(id = str(self.section_num),
+        return dict(section_num = str(self.section_num),
                     name = "_".join(self.course.name.split(" ")) + "-" + str(self.section_num),
                     term = self.schedule.academic_term,
                     course = self.course.name,
@@ -626,8 +652,16 @@ class Section(models.Model):
                     faculty = self.faculty.user.first_name + " " + self.faculty.user.last_name,
                     room = self.room.name,
                     days = self.days,
-                    start_time = self.start_time.strftime("%H:%M%p"),
-                    end_time = self.end_time.strftime("%H:%M%p"))
+                    start_time = self.start_time.strftime("%H:%M %p"),
+                    end_time = self.end_time.strftime("%H:%M %p"),
+                    capacity = str(self.capacity),
+                    students_enrolled = str(self.students_enrolled),
+                    students_waitlisted = str(self.students_waitlisted),
+                    conflict = self.conflict,
+                    conflict_reason = self.conflict_reason,
+                    fault = self.fault,
+                    fault_reason = self.fault_reason
+                    )
 
     # Returns list of sections that conflict because of faculty
     @classmethod
@@ -672,12 +706,12 @@ class FacultyCoursePreferences(models.Model):
         return course_arr
 
     def remove(self):
-    	# course_list = self.get_course_list(faculty=self.faculty)
-    	# for c in course_list:
-    	# 	if c.rank > self.rank:
-    	# 		c.update(rank = c.rank + 1)
-    	self.delete()
-    	#return course_list
+        # course_list = self.get_course_list(faculty=self.faculty)
+        # for c in course_list:
+        # 	if c.rank > self.rank:
+        # 		c.update(rank = c.rank + 1)
+        self.delete()
+        #return course_list
 
 # Cohort Data as imported from file
 class CohortData(models.Model):

@@ -2,7 +2,7 @@
 const filter_types = ["course", "faculty", "room", "time"];
 var filters = {"schedule":{"logic":"and", "filters":[]}, "course":{"logic":"and", "filters":[]}, "faculty":{"logic":"and", "filters":[]}, "room":{"logic":"and", "filters":[]}, "time":{"logic": "and", "filters":{"MWF":[], "TR":[]}}}; //
 var filteredSections = [];
-var sectionDetails = [{"name":"cpe101-01", "term":"fall2016", "course":"cpe101", "type":"lecture", "faculty":"kearns", "room":"14-256", "days":"mwf", "start_time":"10:00AM", "end_time":"12:00PM"}];
+var sectionDetails = [];
 
 /* *** UTILITY *** */
 // String format function. 
@@ -497,7 +497,6 @@ function updateFilters() {
         timeTRarr = []
         otherArr = []
         filterType = value.id.split("-logic-checkbox")[0]; 
-        console.log(filterType);
         if (value.checked) {
             for (var t=0;t<filtersToApply[filterType].length;t++) {
                 timeArr = filtersToApply[filterType][t].split("-");
@@ -530,6 +529,7 @@ function updateFilterLogic() {
     if (selectedFilters.length != 0) {
         filters[selectedFilters[0]]['logic'] = "and";
     }
+
     // for each filter type that is checked, either disable or enable the AND/OR box accordingly
     $('.logic-checkbox').each(function (index, value) {
         if (value.checked && ++numSelected < selectedFilters.length) {
@@ -610,9 +610,7 @@ function inArrayByName(name, array) {
 function getSelectedSections() {
     newSectionSelected = false;
     $("#section-frame").children("div").each(function(index, value) { 
-        console.log(value.id);
         if ($("#"+value.id+"-checkbox").prop('checked')) { 
-            console.log("HELLO");
             if (inArrayByName(value.id.split("section-")[1], sectionDetails) === -1) {
                 console.log("pushing...");
                 console.log(filteredSections[inArrayByName(value.id.split("section-")[1], filteredSections)]);
@@ -703,7 +701,7 @@ function updateSectionDetails(resort) {
         "<tr id=\"{0}-detail\">\n" + 
             "<td>\n" +
                 "<button type=\"button\" class=\"btn btn-info btn-xs\" data-toggle=\"modal\" data-target=\"#deselect-section\" onclick=\"removeSectionFromDetails(this)\"><span class=\"glyphicon glyphicon-minus\" title=\"Remove section from details\"></span>&nbsp;</button>\n" +
-                "<button type=\"button\" class=\"btn btn-info btn-xs\" data-toggle=\"modal\" data-target=\"#edit-section-modal\"><span class=\"glyphicon glyphicon-edit\" title=\"Edit section\"></span>&nbsp;</button>\n" +
+                "<button type=\"button\" class=\"btn btn-info btn-xs\" data-toggle=\"modal\" data-target=\"#edit-section-modal\" onclick=\"displaySectionInfo(this)\"><span class=\"glyphicon glyphicon-edit\" title=\"Edit section\"></span>&nbsp;</button>\n" +
                 "<button type=\"button\" class=\"btn btn-info btn-xs\" data-toggle=\"modal\" data-target=\"#delete-section-modal\" onclick=\"confirmDeleteModal(this)\"><span class=\"glyphicon glyphicon-trash\" title=\"Delete section\"></span>&nbsp;</button>\n" +
             "</td>\n" +
             "<td>{1}</td>\n" + 
@@ -720,7 +718,7 @@ function updateSectionDetails(resort) {
     if (getSelectedSections() || resort) {
         detailFrame.empty();
         for (var i in sectionDetails) {  
-            detailFrame.append(sectionDetailsFormatString.format(sectionDetails[i].name, underscoreToSpaces(sectionDetails[i].name), sectionDetails[i].term, sectionDetails[i].course, sectionDetails[i].type, sectionDetails[i].faculty, sectionDetails[i].room, sectionDetails[i].days, sectionDetails[i].start_time, 
+            detailFrame.prepend(sectionDetailsFormatString.format(sectionDetails[i].name, underscoreToSpaces(sectionDetails[i].name), sectionDetails[i].term, sectionDetails[i].course, sectionDetails[i].type, sectionDetails[i].faculty, sectionDetails[i].room, sectionDetails[i].days, sectionDetails[i].start_time, 
             sectionDetails[i].end_time));
         }
     }
@@ -765,21 +763,87 @@ function deleteSection(element) {
     });
 }
 
+function daysAreEqual(sectionOption, sectionAttr) {
+    // console.log(sectionOption);
+    // console.log(sectionAttr);
+    return ((sectionOption == "Mon/Wed/Fri" && sectionAttr == "MWF") || (sectionOption == "Tue/Thu" && sectionAttr == "TR"));
+}
+
 function displaySectionInfo(sectionElement) {
-    sectionName = spacesToUnderscores($($(sectionElement).parent().next("td")).text());
+    sectionName = $(sectionElement).parent().parent().attr('id').split("-detail")[0];
     $.ajax({
         type: "POST",
-        url: "editSection",
+        url: "get-section-info",
         dataType: "json",
         data: JSON.stringify({"section": sectionName}),
         success: function(response) {
+            console.log("SUCCESS");
+            sectionInfo = response.info;
+            sectionOptions = response.options;
+            parStr = "<p>{0}</p>";
+
             optionFormatString = "<option value=\"{0}\">{1}</option>"
             selectedOptionFormatString = "<option selected value=\"{0}\">{1}</option>"
-            for (var attribute in response.options) {
-                for (var i=0;i<attributes.length;i++) {
-                    $("select#edit-"+spacesToUnderscores(attribute)).append(optionFormatString.format(spacesToUnderscores(attribute[i]), attribute[i]));
+
+            for (var attribute in sectionInfo) {
+                element = $("#edit-"+attribute);
+                if (element.is("div")) {
+                    element.empty();
+                    element.append(parStr.format(sectionInfo[attribute]));
+                } else if (element.is("select")) {
+                    if (attribute == "days") {
+                        $("#edit-days").children("option").each(function(index, value) {
+                            if ((sectionInfo['days'] == $(value).val())) {
+                                $(value).prop("selected", true);
+                            }
+                        });
+                    } else {
+                        for (var i=0;i<sectionOptions[attribute].length;i++) {
+                            if (sectionOptions[attribute][i] == sectionInfo[attribute]) {
+                                $("select#edit-"+attribute).append(selectedOptionFormatString.format(spacesToUnderscores(sectionOptions[attribute][i]),sectionOptions[attribute][i]));
+                            } else {
+                                $("select#edit-"+attribute).append(optionFormatString.format(spacesToUnderscores(sectionOptions[attribute][i]),sectionOptions[attribute][i]));
+                            }
+                        }
+                    }
+                } else if (element.is("input")) {
+                    if (attribute.includes("time")) {
+                        element.val(toMilitaryTime(sectionInfo[attribute]));
+                    } else {
+                        element.val(sectionInfo[attribute]);
+                    }
                 }
             }
+        },
+        error: function(err) {
+            console.log(err);
+        }
+    });
+}
+
+function editSection() {
+    var sectionData = {};
+    sectionData = {
+         'name': $("#edit-course").children("p").text() + "-" + $("#edit-section_num").val(),
+         'section_num': $("#edit-section_num").val(),
+         'type': $("#edit-type").val(),
+         'faculty': $("#edit-faculty").val(),
+         'room': $("#edit-room").val(),
+         'days': $("#edit-days").val(),
+         'capacity': $("#edit-capacity").val(),
+         'start_time': $("#edit-start_time").val(),
+         'end_time': $("#edit-end_time").val(),
+         'students_enrolled': $("#edit-students_enrolled").val(),
+         'students_waitlisted': $("#edit-students_waitlisted").val()
+        };
+    console.log(sectionData);
+    $.ajax({
+        type: "POST",
+        url: "edit-section",
+        data: JSON.stringify(sectionData),
+        dataType: 'json',
+        success: function(response) {
+            console.log("Successful update!");
         },
         error: function(err) {
             console.log(err);
@@ -791,11 +855,6 @@ function displaySectionInfo(sectionElement) {
 function renderSectionNumber() {
 
 }
-
-function displayEditOptions(id, options) {
-
-}
-
 
 
 // removes the section row from Section Details (does not delete)
