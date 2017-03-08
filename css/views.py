@@ -85,8 +85,14 @@ def HomeView(request):
 def CoursePreferences(request):
 	res = HttpResponse()
 	faculty = CUser.get_faculty(email = request.session.get('email'))
+
+	list = FacultyCoursePreferences.objects.filter(faculty=faculty)
+	#we have a query object, now we need to get it's attributes
 	if request.method == "GET":
-		return render(request,'course_prefs.html', {'add_course_pref': CoursePrefForm()})
+		return render(request,'course_prefs.html', {
+						'add_course_pref': CoursePrefForm(), 
+						'course_pref_list': FacultyCoursePreferences.objects.filter(faculty=faculty)
+						})
 	elif request.method == "POST" and 'add_course_pref' in request.POST:
 		form = CoursePrefForm(request.POST)
 		print(form.errors)

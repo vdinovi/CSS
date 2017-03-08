@@ -229,7 +229,7 @@ class CoursePrefForm(forms.Form):
 
 	 def save(self, faculty):
 	 	course_pref = FacultyCoursePreferences.create(faculty=faculty,
- 							      course = self.cleaned_data['course'],
+                    course = self.cleaned_data['course'],
 	 						      comments = self.cleaned_data['comments'],
 	 						      rank  = self.cleaned_data['rank'])
 	 	course_pref.save()
