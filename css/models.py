@@ -345,8 +345,8 @@ class SectionType(models.Model):
         for sectionType in SectionType.objects.all():
             list.append((sectionType.name, sectionType.name))
         return tuple(list)
-    
-    @classmethod 
+
+    @classmethod
     def to_json(self):
         return dict(name=self.name)
 
@@ -376,8 +376,28 @@ class Availability(models.Model):
     level = models.CharField(max_length=16) #preferred, unavailable
 
     @classmethod
-    def get_availability(cls, faculty):
-        return cls.objects.filter(faculty=faculty)
+    def get_availabilities(cls, faculty):
+        print "Get availabilities: Faculty:"
+        print faculty.user.first_name
+        print Availability.objects.filter(faculty=faculty)
+        return Availability.objects.filter(faculty=faculty)
+    @classmethod
+    def initializeAvailabilities(cls, faculty):
+            for hour in range(8, 19):
+                time = datetime.time
+                time.hour = hour
+
+                time.minute = 0
+                mwfAvail = cls(faculty=faculty, day_of_week="mwf", start_time = time, level = "unset")
+                tthAvail = cls(faculty=faculty, day_of_week="tth", start_time = time, level = "unset")
+                mwfAvail.save()
+                tthAvail.save()
+
+                time.minute = 30
+                mwfAvail = cls(faculty=faculty, day_of_week="mwf", start_time = time, level = "unset")
+                tthAvail = cls(faculty=faculty, day_of_week="tth", start_time = time, level = "unset")
+                mwfAvail.save()
+                tthAvail.save()
 
     def create(cls, email, day, start_time, end_time, level):
         faculty = CUser.get_faculty(email=email)
@@ -386,7 +406,7 @@ class Availability(models.Model):
         elif (start_time is None):
             raise ValidationError("Need to input start time")
         elif (level is None) or (level != "Preferred" and level != "Unavailable"):
-            raise ValidationError("Need to input level of availability: preferred or unavailable")
+            raise ValidationError("Need to input level of availability: Preferred or Unavailable")
         else:
             availability = cls(faculty=faculty,day_of_week=day, start_time=start_time, end_time=end_time, level=level)
             availability.save()
@@ -523,7 +543,7 @@ class Section(models.Model):
         print courseName
         course = Course.get_course(courseName)
         num = " ".join(nameStrArr[1].split("_"))
-        
+
         return cls.objects.get(course=course, section_num=num)
 
     # This takes in the name which is constructed in .to_json() as course-section_num
@@ -534,7 +554,7 @@ class Section(models.Model):
         print courseName
         course = Course.get_course(courseName)
         num = " ".join(nameStrArr[1].split("_"))
-        
+
         return cls.objects.filter(course=course, section_num=num)
 
     # THIS IS FOR PAULA's TESTING PURPOSES: don't use for anything besides the foreign key attributes

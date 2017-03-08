@@ -87,9 +87,21 @@ from django.views.decorators.csrf import csrf_exempt
 def AvailabilityView(request):
     res = HttpResponse()
     email = request.session.get('email')
-    availability = Availability.get_availability(CUser.get_faculty(email=email))
-    print "Availability"
+    availabilities = Availability.get_availabilities(faculty = CUser.get_faculty(email=email))
+
     print Availability.objects.count()
+
+    if availabilities.count() < 14:
+        print "Reset availabilities!"
+        Availability.initializeAvailabilities(faculty = CUser.get_faculty(email=email))
+        availabilities = Availability.get_availabilities(faculty = CUser.get_faculty(email=email))
+
+
+    for availability in availabilities:
+        print "Availability"
+        print availability.faculty
+        print availability.start_time
+        print availability.level
 
     if request.method == "GET":
         return render(request,'availability.html', {
