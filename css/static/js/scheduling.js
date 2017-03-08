@@ -541,27 +541,6 @@ function updateFilterLogic() {
 }
 
 /* *** HELPER FUNCTIONS FOR LOGIC *** */
-function csrfSafeMethod(method) {
-    // these HTTP methods do not require CSRF protection
-    return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
-}
-
-function getCookie(name) {
-    var cookieValue = null;
-    if (document.cookie && document.cookie !== '') {
-        var cookies = document.cookie.split(';');
-        for (var i = 0; i < cookies.length; i++) {
-            var cookie = jQuery.trim(cookies[i]);
-            // Does this cookie string begin with the name we want?
-            if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                break;
-            }
-        }
-    }
-    return cookieValue;
-}
-
 // Retrieves sections
 function getFilteredSections() {
     updateFilters(); 
@@ -758,8 +737,8 @@ function updateSectionDetails(resort) {
     if (getSelectedSections() || resort) {
         detailFrame.empty();
         for (var i in sectionDetails) {  
-            detailFrame.prepend(sectionDetailsFormatString.format(sectionDetails[i].name, underscoreToSpaces(sectionDetails[i].name), sectionDetails[i].term, sectionDetails[i].course, sectionDetails[i].type, sectionDetails[i].faculty, sectionDetails[i].room, sectionDetails[i].days, sectionDetails[i].start_time, 
-            sectionDetails[i].end_time));
+            detailFrame.prepend(sectionDetailsFormatString.format(sectionDetails[i].name, underscoreToSpaces(sectionDetails[i].name), sectionDetails[i].term, sectionDetails[i].course, sectionDetails[i].type, sectionDetails[i].faculty, sectionDetails[i].room, sectionDetails[i].days, toStandardTime(sectionDetails[i].start_time), 
+            toStandardTime(sectionDetails[i].end_time)));
         }
     }
 }
@@ -848,7 +827,7 @@ function displaySectionInfo(sectionElement) {
                     }
                 } else if (element.is("input")) {
                     if (attribute.includes("time")) {
-                        element.val(toMilitaryTime(sectionInfo[attribute]));
+                        element.val(sectionInfo[attribute].split(" ")[0]);
                     } else {
                         element.val(sectionInfo[attribute]);
                     }
