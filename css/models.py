@@ -89,7 +89,6 @@ class CUser(models.Model):
     def get_cuser_by_full_name(cls, full_name):
         first_name = full_name.split()[0]
         last_name = full_name.split()[1]
-        print first_name + last_name
         return cls.objects.get(user__first_name=first_name,
                                user__last_name=last_name)
     @classmethod
@@ -97,7 +96,6 @@ class CUser(models.Model):
     def get_faculty_by_full_name(cls, full_name):
         first_name = full_name.split("-")[0]
         last_name = full_name.split("-")[1]
-        print first_name + last_name
         return cls.objects.get(user_type='faculty', user__first_name=first_name,
                                user__last_name=last_name)
     # Return faculty cuser by email
@@ -306,6 +304,12 @@ class Course(models.Model):
             i+=1
         return JsonResponse(sectionTypesDictionary)
 
+    def to_json(self):
+        return dict(name=self.name,
+                    equipment_req=self.equipment_req,
+                    description=self.description)
+
+
 
 class SectionType(models.Model):
     name = models.CharField(max_length=32, unique=True) # eg. lecture or lab
@@ -351,40 +355,53 @@ class WorkInfo(models.Model):
         return work_info
 
 class Availability(models.Model):
-    class Meta:
-        unique_together = (("faculty", "day_of_week", "start_time"),)
-    faculty = models.ForeignKey(CUser, on_delete=models.CASCADE, null=True)
-    day_of_week = models.CharField(max_length=16) # MWF or TR
-    start_time = models.TimeField()
-    end_time = models.TimeField()
-    level = models.CharField(max_length=16) #preferred, unavailable
+    faculty = models.OneToOneField(CUser, on_delete=models.CASCADE)
+    timeList = [0, 30, 100, 130, 200, 230, 300, 330, 400, 430, 500, 530, 600, 630, 700, 730, 800, 830, 900, 930, 1000, 1030, 1100, 1130, 1200, 1230, 1300, 1330, 1400, 1430, 1500, 1530, 1600, 1630, 1700, 1730, 1800, 1830, 1900, 1930, 2000]
+    days = {}
+    dayList = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday']
+    day_of_week = "defaultDay"
 
     @classmethod
-    def get_availability_list(cls, faculty):
-        return cls.objects.filter(faculty=faculty)
-	
-    @classmethod
-    def create(cls, email, day, start_time, end_time, level):
-	faculty = CUser.get_faculty(email=email)
-        if (day is None):
-            raise ValidationError("Invalid days of week input")
-        elif (start_time is None):
-            raise ValidationError("Need to input start time")
-        elif (end_time is None):
-            raise ValidationError("Need to input end time")
-        elif (level is None) or (level != "Preferred" and level != "Unavailable"):
-            raise ValidationError("Need to input level of availability: preferred or unavailable")
+    def create(cls, faculty):
+        print "add availability"
+        availability = cls(faculty=faculty)
+
+        for day in availability.dayList:
+            print day
+            for time in availability.timeList:
+                print time
+                availability.days[day] = "unset"
+        print availability
+        availability.save()
+        print "saved"
+        return availability
+
+    def setRange(self, startTime, endTime, day, setting):
+        hour = startTime.hour * 100
+        if(startTime.minute < 15 or startTime.minute > 45):
+            minute = 0
         else:
-            availability = cls(faculty=faculty,day_of_week=day, start_time=start_time, end_time=end_time, level=level)
-            availability.save()
-            return availability
+            minute = 30
+        start = hour + minute
 
-    def to_json(self):
-		  return dict(faculty = self.faculty.to_json(),
-					day = self.day_of_week,
-					start_time = self.start_time,
-					end_time = self.end_time,
-					level = self.level)
+        hour = endTime.hour * 100
+        if(endTime.minute < 15 or endTime.minute > 45):
+            minute = 0
+        else:
+            minute = 30
+        end = hour + minute
+
+        for time in self.timeList:
+            if(time >= start and time <= end):
+                self.days[day][time] = setting
+        print "Added range:"
+        print self.days
+        self.save()
+
+    @classmethod
+    def get_availability(cls, faculty):
+        return cls.objects.filter(faculty=faculty)
+
 
         # ---------- Scheduling Models ----------
 # Schedule is a container for scheduled sections and correponds to exactly 1 academic term
@@ -484,7 +501,7 @@ class Section(models.Model):
         if fault == 'y' and fault_reason != "faculty" and fault_reason != "room":
             raise ValidationError("Invalid fault reason.")
         section = cls(
-                  section_num=section_num,
+                  section_num=int(section_num),
                   schedule=schedule,
                   course=course,
                   section_type=section_type,
@@ -503,8 +520,18 @@ class Section(models.Model):
         section.save()
         return section
 
+    # This takes in the name which is constructed in .to_json() as course-section_num
     @classmethod
-    def get_section(cls, **kwargs):
+    def get_section_by_name(cls, name):
+        nameStrArr = name.split("-")
+        course = Course.get_course(nameStrArr[0])
+        num = " ".join(nameStrArr[1].split("_"))
+        return cls.objects.get(course=course, section_num=num)
+
+
+    # THIS IS FOR PAULA's TESTING PURPOSES: don't use for anything besides the foreign key attributes
+    @classmethod
+    def get_section_test(cls, **kwargs):
         for k,v in kwargs.iteritems():
             if k == 'schedule':
                 return cls.objects.get(schedule=Schedule.get_schedule(v))
@@ -559,7 +586,7 @@ class Section(models.Model):
                 queryLoop = Q()
                 for index in range(len(filters)):
                     if key == "course":
-                        filterObject = Course.get_course(filters[index])
+                        filterObject = Course.get_course(" ".join(filters[index].split("_")))
                         queryLoop = reduce(operator.or_, [queryLoop, Q(course=filterObject)])
                     elif key == "faculty":
                         filterObject = CUser.get_faculty_by_full_name(filters[index])
@@ -567,6 +594,9 @@ class Section(models.Model):
                     elif key == "room":
                         filterObject = Room.get_room(filters[index])
                         queryLoop = reduce(operator.or_, [queryLoop, Q(room=filterObject)])
+                    elif key == "schedule":
+                        filterObject = Schedule.get_schedule(filters[index])
+                        queryLoop = reduce(operator.or_, [queryLoop, Q(schedule=filterObject)])
                     else:
                         raise ValidationError("Invalid filter type.")
 
@@ -601,8 +631,8 @@ class Section(models.Model):
         return sections
 
     def to_json(self):
-        return dict(id = str(self.id),
-                    name = self.course.name + "-" + str(self.id),
+        return dict(id = str(self.section_num),
+                    name = "_".join(self.course.name.split(" ")) + "-" + str(self.section_num),
                     term = self.schedule.academic_term,
                     course = self.course.name,
                     type = self.section_type.name,
@@ -611,6 +641,18 @@ class Section(models.Model):
                     days = self.days,
                     start_time = self.start_time.strftime("%H:%M%p"),
                     end_time = self.end_time.strftime("%H:%M%p"))
+
+    # Returns list of sections that conflict because of faculty
+    @classmethod
+    def get_conflicts(cls, reason, section):
+        conflicts = SectionConflict.objects.filter(conflict_reason=reason).filter(Q(section1=section) | Q(section2=section))
+        sections = []
+        for conflict in conflicts:
+            if conflicts.section1 == section:
+                sections.append(section2.to_json())
+            else:
+                sections.append(section1.to_json())
+        return sections
 
 
 class FacultyCoursePreferences(models.Model):
@@ -681,8 +723,15 @@ class CohortData(models.Model):
         return cohort_entry
 
     @classmethod
-    def get_cohort_data(cls, schedule, course, major):
-        return cls.objects.get(schedule=schedule, course=course, major=major)
+    def get_cohort_data(cls, **kwargs):
+        if 'schedule' in kwargs and 'course' in kwargs and 'major' in kwargs:
+            return cls.objects.get(schedule=kwargs['schedule'], course=kwargs['course'], major=kwargs['major'])
+        elif 'schedule' in kwargs and 'course' in kwargs:
+            return cls.objects.filter(schedule=kwargs['schedule'], course=kwargs['course'])
+        elif 'schedule' in kwagrs:
+            return cls.objects.filter(schedule=kwargs['schedule'])
+        return None
+
 
     # Handles an uploaded cohort data file and commits it to the system
     @classmethod
@@ -704,7 +753,7 @@ class CohortData(models.Model):
         except ObjectDoesNotExist:
             messages.append("Schedule '%s' on line %d does not exist" % (term, 0))
             return messages
-        # Begin parsing data 
+        # Begin parsing data
         courses = None
         i = 1
         while i < len(lines):
@@ -752,11 +801,11 @@ class CohortData(models.Model):
             for j  in range (1, len(courses)):
                 try:
                     if (courses[j] == "Total"):
-                        CohortTotal.create(schedule=schedule, major=major, 
+                        CohortTotal.create(schedule=schedule, major=major,
                                            freshman=int(freshman[j+1]), sophomore=int(sophomore[j+1]),
                                            junior=int(junior[j+1]), senior=int(senior[j+1]))
                         pass
-                    else: 
+                    else:
                         course = Course.get_course(name=courses[j])
                         CohortData.create(schedule=schedule, course=course, major=major,
                                           freshman=int(freshman[j+1]), sophomore=int(sophomore[j+1]),
@@ -797,8 +846,14 @@ class CohortTotal(models.Model):
         return cohort_total
 
     @classmethod
-    def get_cohort_total(cls, schedule, major):
-        return cls.objects.get(schedule=schedule, major=major)
+    def get_cohort_total(cls, **kwargs):
+        if 'schedule' in kwargs and 'major' in kwargs:
+            return cls.objects.get(schedule=kwargs['schedule'], major=kwargs['major'])
+        elif 'schedule' in kwargs:
+            return cls.objects.filter(schedule=kwargs['schedule'])
+        return None
+
+
 
 # Student Plan Data.
 class StudentPlanData(models.Model):
@@ -813,7 +868,7 @@ class StudentPlanData(models.Model):
     enrollment_capacity = models.IntegerField(default=0)
     unmet_seat_demand = models.IntegerField(default=0)
     percent_unmet_seat_demand = models.FloatField(default=0)
-    
+
     @classmethod
     def create(cls, schedule, course, section_type, **kwargs):
         plan_data = cls(schedule=schedule, course=course, section_type=section_type)
@@ -831,12 +886,25 @@ class StudentPlanData(models.Model):
         return plan_data
 
     @classmethod
-    def get_student_plan_data(cls, schedule, course=None, section_type=None):
-        if course == None:
-            return cls.objects.filter(schedule=schedule)
-        if sectionType == None:
-            return cls.objects.filter(schedule=schedule, course=course)
-        return cls.objects.get(schedule=schedule, course=course, section_type=section_type)
+    def get_student_plan_data(cls, **kwargs):
+        if 'course' in kwargs and 'schedule' in kwargs and 'section_type' in kwargs:
+            return cls.objects.get(schedule=kwargs['scheudle'], course=kwargs['course'], section_type=kwargs['section_type'])
+        elif 'course' in kwargs and 'schedule' in kwargs:
+            return cls.objects.filter(schedule=kwargs['schedule'], course=kwargs['course'])
+        elif 'schedule' in kwargs:
+            return cls.objects.filter(schedule=kwargs['schedule'])
+        return None
+
+    def to_json(self):
+        return dict(
+                schedule=self.schedule.name,
+                course=self.course.name,
+                section_type=self.section_type.name,
+                seat_demand=self.seat_demand,
+                sections_offered=self.sections_offered,
+                enrollment_capacity=self.enrollment_capacity,
+                unmet_seat_demand=self.unmet_seat_demand,
+                percent_unmet_seat_demand=self.percent_unmet_seat_demand)
 
     # Handles an uploaded student plan data file and commits it to the system
     @classmethod
@@ -850,12 +918,12 @@ class StudentPlanData(models.Model):
         term_ignore = ["quarter"] #Ignore these terms when reading in term name
         # Keys that are accepted by the system
         valid_keys = ["Term", "Subject Code", "Catalog Nbr", "Course Title", "Component", "Seat Demand",
-                      "Sections Offered", "Enrollment Capacity", "Unmet Seat Demand", "% Unmet Seat Demand"] 
+                      "Sections Offered", "Enrollment Capacity", "Unmet Seat Demand", "% Unmet Seat Demand"]
         # Index for parsing
         index = lines[0].split(',')
         # Null out anything that is not a valid key
         for i in range(0, len(index)):
-            if index[i] not in valid_keys: 
+            if index[i] not in valid_keys:
                 index[i] = None
         # Parse all lines using valid keys in index
         for i in range(1, len(lines)):
@@ -868,7 +936,7 @@ class StudentPlanData(models.Model):
                     break
                 # Parse line
                 line = lines[i].split(',')
-                content = {} 
+                content = {}
                 for j in range(0, len(index)):
                     # Does not have a valid key
                     if index[j] is None:
@@ -898,9 +966,9 @@ class StudentPlanData(models.Model):
                 try:
                     course.get_section_type(section_type_name=section_type.name)
                 except:
-                    messages.append("Course '%s' has no associated section type '%s'" % (course.name, section_type.name)) 
+                    messages.append("Course '%s' has no associated section type '%s'" % (course.name, section_type.name))
                     continue
-                already_parsed = ["Term", "Subject Code", "Catalog Nbr", "Component"] 
+                already_parsed = ["Term", "Subject Code", "Catalog Nbr", "Component"]
                 # Collect other secondary arguments
                 kwargs = {}
                 for k, v in content.iteritems():
@@ -908,14 +976,13 @@ class StudentPlanData(models.Model):
                         kwargs[k] = v
                 # Create entry
                 cls.create(schedule=schedule, course=course, section_type=section_type, **kwargs)
-                print 'Success'
             except IndexError as e:
-                messages.append("Invalid entry on line %d: %s" % (i, e[0])) 
+                messages.append("Invalid entry on line %d: %s" % (i, e[0]))
             except:
                 raise
-                messages.append("Unknown error on line %d" % (i,)) 
+                messages.append("Unknown error on line %d" % (i,))
         return messages
- 
+
 # Section Conflicts Model
 class SectionConflict(models.Model):
     section1 = models.ForeignKey(Section, related_name="first_section", on_delete=models.CASCADE)
@@ -929,8 +996,8 @@ class SectionConflict(models.Model):
         if conflict_reason != "faculty" and conflict_reason != "room":
             raise ValidationError("Invalid conflict reason.")
         conflict = cls(
-                    section1=section1, 
-                    section2=section2, 
+                    section1=section1,
+                    section2=section2,
                     conflict_reason=conflict_reason)
         conflict.save()
         return conflict

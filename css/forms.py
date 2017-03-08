@@ -15,7 +15,7 @@ class LoginForm(forms.Form):
     @staticmethod
     def validate_password(password):
         if re.match(r'^(?=.*\d)(?=.*[A-Za-z])(?=.*[-._!@#$%^&*?+])[A-Za-z0-9-._!@#$%^&*?+]{8,32}$', password) is None:
-            raise ValidationError("Attempted CUser creation with invalid password") 
+            raise ValidationError("Attempted CUser creation with invalid password")
 
 #  Invite Form
 class InviteUserForm(forms.Form):
@@ -218,19 +218,17 @@ class AddSectionForm(forms.Form):
         section.save()
         return
 
+
 class AddAvailabilityForm(forms.Form):
     DAYS = ('Monday', 'Monday',),('Tuesday','Tuesday'),('Wednesday','Wednesday'), ('Thursday','Thursday',), ('Friday', 'Friday')
     day = forms.ChoiceField(label='Day', choices=DAYS)
     start_time = forms.TimeField(label='Start Time')
     end_time = forms.TimeField(label='End Time')
-    level = forms.ChoiceField(label='Type', choices=[('Preferred', 'Preferred'), ('Unavailable','Unavailable')])
+    level = forms.ChoiceField(label='Type', choices=[('preferred', 'preferred'), ('Unavailable','Unavailable')])
 
     def save(self, email):
-        availability = Availability.create(email=email,
-                                            day = self.cleaned_data['day'], 
-                                            start_time = self.cleaned_data['start_time'],
-                                            end_time = self.cleaned_data['end_time'],
-                                            level = self.cleaned_data['level'])
+        availability = Availability.create(CUser.get_user(email))
+        availability.setRange(start_time, end_time, day, level)
         availability.save()
 
 class AddScheduleForm(forms.Form):
