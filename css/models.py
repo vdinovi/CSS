@@ -372,7 +372,7 @@ class Availability(models.Model):
             raise ValidationError("Need to input start time")
         elif (end_time is None):
             raise ValidationError("Need to input end time")
-        elif (level is None) or (level != "preferred" and level != "unavailable"):
+        elif (level is None) or (level != "Preferred" and level != "Unavailable"):
             raise ValidationError("Need to input level of availability: preferred or unavailable")
         else:
             availability = cls(faculty=faculty,day_of_week=day, start_time=start_time, end_time=end_time, level=level)

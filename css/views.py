@@ -86,6 +86,7 @@ from django.views.decorators.csrf import csrf_exempt
 def AvailabilityView(request):
     res = HttpResponse()
     email = request.session.get('email')
+    print(email)
     list = Availability.get_availability_list(CUser.get_faculty(email=email))
     
     if request.method == "GET":
@@ -99,13 +100,16 @@ def AvailabilityView(request):
                 form.save(email)
                 return HttpResponseRedirect('/availability')
             except ValidationError as e:
+            	print('form cannot save')
+            	print(request.POST.get('level'))
                 return ErrorView(request, 400, "Invalid form entry")
         else:
-            return ErrorView(request, 400, "Invalid form entry")
-    elif request.method == "POST" and 'availability_view' in request.body: 
-    	data = json.dumps({"availability_view": [avail.to_json() for avail in list]})
-        res.write(data)
-        res.status_code = 200
+			print('form not valid')
+			return ErrorView(request, 400, "Invalid form entry")
+    # elif request.method == "POST" and 'availability_view' in request.body: 
+    # 	data = json.dumps({"availability_view": [avail.to_json() for avail in list]})
+    #     res.write(data)
+    #     res.status_code = 200
     else:
         return ErrorView(request, 400, "")
     return res
