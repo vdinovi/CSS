@@ -367,7 +367,7 @@ class Availability(models.Model):
         return cls.objects.filter(faculty=faculty)
 
     def create(cls, email, day, start_time, end_time, level):
-	  faculty = CUser.get_faculty(email=email)
+        faculty = CUser.get_faculty(email=email)
         if (day is None):
             raise ValidationError("Invalid days of week input")
         elif (start_time is None):
