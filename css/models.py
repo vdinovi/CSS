@@ -664,10 +664,10 @@ class Section(models.Model):
         conflicts = SectionConflict.objects.filter(conflict_reason=reason).filter(Q(section1=section) | Q(section2=section))
         sections = []
         for conflict in conflicts:
-            if conflicts.section1 == section:
-                sections.append(section2.to_json())
+            if conflict.section1 == section:
+                sections.append(conflict.section2.to_json())
             else:
-                sections.append(section1.to_json())
+                sections.append(conflict.section1.to_json())
         return sections
 
 

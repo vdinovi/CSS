@@ -802,7 +802,75 @@ function updateSectionDetailConflicts() {
         data: JSON.stringify({'section_details': sectionDetails}),
         dataType: 'json',
         success: function(response) {
-            console.log(response['CPE_225-12']);
+            console.log(sectionDetails.length);
+            for (var key in sectionDetails) {
+                console.log('in for loop');
+                // Gets conflicts for one section
+                var conflicts = response[sectionDetails[key].name];
+
+                // Save room conflicts for section
+                var room_conflicts = []
+                for (var room in conflicts['room']) {
+                    room_conflicts.push(conflicts['room'][room].name)
+                    console.log(room_conflicts)
+                }
+
+                // Save faculty conflicts for section
+                var faculty_conflicts = []
+                for (var faculty in conflicts['faculty']) {
+                    faculty_conflicts.push(conflicts['faculty'][faculty].name)
+                    console.log(faculty_conflicts)
+                }
+
+                var sectionDetailEntry = $("#{0}-detail".format(sectionDetails[key].name))
+
+                if (room_conflicts.length || faculty_conflicts.length) {
+                    var conflictSectionFormatString = 
+                            "<td>\n" +
+                                "<button type=\"button\" class=\"btn btn-info btn-xs\" data-toggle=\"modal\" data-target=\"#deselect-section\" onclick=\"removeSectionFromDetails(this)\"><span class=\"glyphicon glyphicon-minus\" title=\"Remove section from details\"></span>&nbsp;</button>\n" +
+                                "<button type=\"button\" class=\"btn btn-info btn-xs\" data-toggle=\"modal\" data-target=\"#edit-section-modal\" onclick=\"displaySectionInfo(this)\"><span class=\"glyphicon glyphicon-edit\" title=\"Edit section\"></span>&nbsp;</button>\n" +
+                                "<button type=\"button\" class=\"btn btn-info btn-xs\" data-toggle=\"modal\" data-target=\"#delete-section-modal\" onclick=\"confirmDeleteModal(this)\"><span class=\"glyphicon glyphicon-trash\" title=\"Delete section\"></span>&nbsp;</button>\n" +
+                            "</td>\n" +
+                            "<td>{1}</td>\n" + 
+                            "<td>{2}</td>\n" + 
+                            "<td>{3}</td>\n" + 
+                            "<td>{4}</td>\n" + 
+                            "<td {5}>{6}</td>\n" + 
+                            "<td {7}>{8}</td>\n" + 
+                            "<td>{9}</td>\n" + 
+                            "<td>{10}</td>\n" + 
+                            "<td>{11}</td>\n";
+                    sectionDetailEntry.empty();
+
+                    var faculty_string = ""
+                    var room_string = ""
+                    if (faculty_conflicts.length) {
+                        console.log("FACULTY CONFLICT FOUND")
+                        faculty_string = 'class=\"alert-danger\" data-toggle=\"popover\" data-trigger=\"hover\" title=\"Conflicting Sections\" data-content=\"BLAH\"'
+                    }
+                    if (room_conflicts.length) {
+                        console.log("ROOM CONFLICT FOUND")
+                        room_string = 'class=\"alert-danger\" data-toggle=\"popover\" data-trigger=\"hover\" title=\"Conflicting Sections\" data-content=\"BLAH\"'
+                    }
+
+                    console.log(conflictSectionFormatString.format(sectionDetails[key].name, underscoreToSpaces(sectionDetails[key].name), sectionDetails[key].term, sectionDetails[key].course, sectionDetails[key].type, 
+                        faculty_string, 
+                        sectionDetails[key].faculty, room_string, sectionDetails[key].room, sectionDetails[key].days, sectionDetails[key].start_time, 
+                        sectionDetails[key].end_time));
+                    sectionDetailEntry.prepend(conflictSectionFormatString.format(sectionDetails[key].name, underscoreToSpaces(sectionDetails[key].name), sectionDetails[key].term, sectionDetails[key].course, sectionDetails[key].type, 
+                        faculty_string, sectionDetails[key].faculty, room_string, sectionDetails[key].room, sectionDetails[key].days, sectionDetails[key].start_time, 
+                        sectionDetails[key].end_time));
+                    // if (room_conflicts.length) {
+                    //     console.log("ROOM CONFLICT FOUND");
+                    //     console.log(conflictSectionFormatString.format(sectionDetails[key].name, underscoreToSpaces(sectionDetails[key].name), sectionDetails[key].term, sectionDetails[key].course, sectionDetails[key].type, 
+                    //         "", sectionDetails[key].faculty, 'class=\"alert-danger\" data-toggle=\"popover\" data-trigger=\"hover\" title=\"Conflicting Sections\" data-content=\"BLAH\"', sectionDetails[key].room, sectionDetails[key].days, sectionDetails[key].start_time, 
+                    //         sectionDetails[key].end_time));
+                    //     sectionDetailEntry.append(conflictSectionFormatString.format(sectionDetails[key].name, underscoreToSpaces(sectionDetails[key].name), sectionDetails[key].term, sectionDetails[key].course, sectionDetails[key].type, 
+                    //         "", sectionDetails[key].faculty, 'class=\"alert-danger\" data-toggle=\"popover\" data-trigger=\"hover\" title=\"Conflicting Sections\" data-content=\"BLAH\"', sectionDetails[key].room, sectionDetails[key].days, sectionDetails[key].start_time, 
+                    //         sectionDetails[key].end_time));
+                    // }
+                }
+            }
         },
         error: function(err) {
             console.log(err);
@@ -836,10 +904,7 @@ function updateSectionDetails(resort) {
             detailFrame.prepend(sectionDetailsFormatString.format(sectionDetails[i].name, underscoreToSpaces(sectionDetails[i].name), sectionDetails[i].term, sectionDetails[i].course, sectionDetails[i].type, sectionDetails[i].faculty, sectionDetails[i].room, sectionDetails[i].days, sectionDetails[i].start_time, 
             sectionDetails[i].end_time));
         }
-        console.log(sectionDetails);
     }
-
-    console.log(sectionDetails);
 
     updateSectionDetailConflicts();
 }

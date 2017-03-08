@@ -283,12 +283,14 @@ def Conflicts(section):
     room = section.room
     faculty = section.faculty
     academic_term = section.schedule
-    room_conflict = False
-    faculty_conflict = False
 
     # Find all sections that are between start_time and end_time of the new section
-    # sections = Section.objects.filter(schedule=academic_term).filter(start_time__range=[start_time, end_time]).filter(end_time__range=[start_time, end_time])
-    sections = Section.objects.filter(schedule=academic_term).filter(Q(start_time__range=[start_time, end_time]) | Q(end_time__range=[time(start_time.hour, start_time.minute + 1), end_time]))
+
+    # cases:
+    #   - Q(start_time__range=[start_time, end_time])    starts in the middle of the section
+    #   - Q(end_time__range=[start_time, end_time])      ends in the middle of the section
+    #   - Q(start_time__lt = start_time, end_time__gt = end_time)
+    sections = Section.objects.filter(schedule=academic_term).filter(Q(start_time__range=[start_time, end_time]) | Q(end_time__range=[time(start_time.hour, start_time.minute + 1), end_time]) | Q(start_time__lt = start_time, end_time__gt = end_time))
 
     # Check if rooms or faculty overlap
     for s in sections:
