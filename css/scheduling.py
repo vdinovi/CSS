@@ -132,7 +132,7 @@ def NewSection(request):
     if request.method == "POST":
         sectionData = json.loads(request.body)
         new_section = Section.create(
-                sectionData['section_num'],
+                sectionData['section-num'],
                 sectionData['schedule'],
                 sectionData['course'],
                 sectionData['section-type'],
@@ -175,6 +175,24 @@ def ConflictCheck(request):
         res.status_code = 400
     return res
 
+@csrf_exempt
+def SectionDetailConflicts(request):
+    res = HttpResponse()
+    if request.method == "POST":
+        sectionDetails = json.loads(request.body)['section_details']
+        conflict_dict = {}
+        for s in sectionDetails:
+            section = Section.get_section_by_name(s['name'])
+            faculty_conflicts = Section.get_conflicts('faculty', section)
+            room_conflicts = Section.get_conflicts('room', section)
+            conflict_dict[s['name']] = {'faculty': faculty_conflicts,
+                                        'room': room_conflicts}
+        res.content_type = 'json'
+        res.write(json.dumps(conflict_dict))
+        res.status_code = 200
+    else:
+        res.status_code = 400
+    return res
 
 
 # Editing a section
@@ -209,6 +227,7 @@ def GetSectionInfo(request):
 def EditSection(request):
     res = HttpResponse()
     if request.method == "POST":
+        print request.body
         sectionData = json.loads(request.body)
         section = Section.get_section_by_name(sectionData['name'])
         
@@ -216,7 +235,7 @@ def EditSection(request):
         faculty = CUser.get_faculty_by_full_name(sectionData['faculty'])
         room = Room.get_room(sectionData['room'])
 
-        section.section_num=sectionData['section_num']
+        section.section_num=sectionData['section-num']
         section.section_type=section_type
         section.faculty=faculty
         section.room=room
@@ -224,8 +243,8 @@ def EditSection(request):
         section.students_enrolled=int(sectionData['students_enrolled'])
         section.students_waitlisted=int(sectionData['students_waitlisted'])
         section.days=sectionData['days']
-        section.start_time=sectionData['start_time']
-        section.end_time=sectionData['end_time']
+        section.start_time=sectionData['start-time']
+        section.end_time=sectionData['end-time']
         
         section.save()
         res.status_code = 200
@@ -264,12 +283,14 @@ def Conflicts(section):
     room = section.room
     faculty = section.faculty
     academic_term = section.schedule
-    room_conflict = False
-    faculty_conflict = False
 
     # Find all sections that are between start_time and end_time of the new section
-    # sections = Section.objects.filter(schedule=academic_term).filter(start_time__range=[start_time, end_time]).filter(end_time__range=[start_time, end_time])
-    sections = Section.objects.filter(schedule=academic_term).filter(Q(start_time__range=[start_time, end_time]) | Q(end_time__range=[time(start_time.hour, start_time.minute + 1), end_time]))
+
+    # cases:
+    #   - Q(start_time__range=[start_time, end_time])    starts in the middle of the section
+    #   - Q(end_time__range=[start_time, end_time])      ends in the middle of the section
+    #   - Q(start_time__lt = start_time, end_time__gt = end_time)
+    sections = Section.objects.filter(schedule=academic_term).filter(Q(start_time__range=[start_time, end_time]) | Q(end_time__range=[time(start_time.hour, start_time.minute + 1), end_time]) | Q(start_time__lt = start_time, end_time__gt = end_time))
 
     # Check if rooms or faculty overlap
     for s in sections:
@@ -293,7 +314,10 @@ def Conflicts(section):
 def Confirmation(start_time, end_time, room, faculty, schedule):
     academic_term = Schedule.get_schedule(schedule)
     room = Room.get_room(room)
-    faculty = CUser.get_faculty(faculty)
+    if "@" in faculty:
+        faculty = CUser.get_faculty(faculty)
+    else:
+        faculty = CUser.get_faculty_by_full_name(faculty)
     start_time = datetime.strptime(start_time, '%H:%M').time()
     end_time = datetime.strptime(end_time, '%H:%M').time()
     sections = Section.objects.filter(schedule=academic_term).filter(Q(start_time__range=[start_time, end_time]) | Q(end_time__range=[time(start_time.hour, start_time.minute + 1), end_time]))
@@ -301,11 +325,13 @@ def Confirmation(start_time, end_time, room, faculty, schedule):
 
     # Check if rooms or faculty overlap
     for s in sections:
+        print str(s.course.name) + " " + str(s.section_num)
         if s.room == room:
             conflicts['room'].append(s.to_json())
         if s.faculty == faculty:
             conflicts['faculty'].append(s.to_json())
 
+    print conflicts
     return conflicts
 
 

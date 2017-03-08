@@ -218,18 +218,32 @@ class AddSectionForm(forms.Form):
         section.save()
         return
 
+class CoursePrefForm(forms.Form):
+	 course = forms.ModelChoiceField(label='Course', queryset=Course.objects.values_list('name', flat=True))
+	 comments = forms.CharField()
+	 rank = forms.IntegerField()
+
+	 def save(self, faculty):
+	 	course_pref = CoursePrefForm.create(faculty=faculty,
+								course = Course.objects.get(course=self.cleaned_data['course']),
+								comments = self.cleaned_data['comments'],
+	 						  	rank  = self.cleaned_data['rank'])
+	 	course_pref.save()
+	 	print(faculty)
+	 	print(course)
+	 	print(comments)
+	 	print(rank)
 
 class AddAvailabilityForm(forms.Form):
     DAYS = ('Monday', 'Monday',),('Tuesday','Tuesday'),('Wednesday','Wednesday'), ('Thursday','Thursday',), ('Friday', 'Friday')
     day = forms.ChoiceField(label='Day', choices=DAYS)
     start_time = forms.TimeField(label='Start Time')
     end_time = forms.TimeField(label='End Time')
-    level = forms.ChoiceField(label='Type', choices=[('preferred', 'preferred'), ('Unavailable','Unavailable')])
+    level = forms.ChoiceField(label='Type', choices=[('Preferred', 'Preferred'), ('Unavailable','Unavailable')])
 
     def save(self, email):
-        availability = Availability.create(CUser.get_user(email))
-        availability.setRange(start_time, end_time, day, level)
-        availability.save()
+        faculty = faculty = CUser.get_faculty(email=email)
+        Availability.setRange(faculty=faculty, day_of_week=self.cleaned_data['day'], start_time= self.cleaned_data['start_time'], end_time=self.cleaned_data['end_time'], level=self.cleaned_data['level'])
 
 class AddScheduleForm(forms.Form):
     academic_term = forms.CharField(max_length=16)

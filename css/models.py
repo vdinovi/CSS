@@ -14,6 +14,7 @@ from django.db.models import Q
 from django.http import JsonResponse
 from django.core import serializers
 from datetime import datetime
+import time
 
 
 # System User class,
@@ -345,8 +346,8 @@ class SectionType(models.Model):
         for sectionType in SectionType.objects.all():
             list.append((sectionType.name, sectionType.name))
         return tuple(list)
-    
-    @classmethod 
+
+    @classmethod
     def to_json(self):
         return dict(name=self.name)
 
@@ -371,14 +372,44 @@ class Availability(models.Model):
     class Meta:
         unique_together = (("faculty", "day_of_week", "start_time"),)
     faculty = models.ForeignKey(CUser, on_delete=models.CASCADE, null=True)
-    day_of_week = models.CharField(max_length=16) # MWF or TR
-    start_time = models.TimeField()
-    level = models.CharField(max_length=16) #preferred, unavailable
+    day_of_week = models.CharField(max_length=16, null=True) # MWF or TR
+    start_time = models.TimeField(null=True)
+    level = models.CharField(max_length=16, null=True) #preferred, unavailable
 
     @classmethod
-    def get_availability(cls, faculty):
-        return cls.objects.filter(faculty=faculty)
+    def get_availabilities(cls, faculty):
+        return Availability.objects.filter(faculty=faculty)
+    @classmethod
+    def initializeAvailabilities(cls, faculty):
+            for hour in range(8, 19):
+                currentTime = datetime(year=2000, month=1, day=1, hour=hour, minute=0)
 
+                mwfAvail = cls(faculty=faculty, day_of_week="mwf", start_time = currentTime, level = "unset")
+                tthAvail = cls(faculty=faculty, day_of_week="tth", start_time = currentTime, level = "unset")
+                mwfAvail.save()
+                tthAvail.save()
+
+                currentTime = datetime(year=2000, month=1, day=1, hour=hour, minute=30)
+
+                mwfAvail = cls(faculty=faculty, day_of_week="mwf", start_time = currentTime, level = "unset")
+                tthAvail = cls(faculty=faculty, day_of_week="tth", start_time = currentTime, level = "unset")
+                mwfAvail.save()
+                tthAvail.save()
+
+    @classmethod
+    def setRange(self, faculty, day_of_week, start_time, end_time, level):
+        if day_of_week == "Monday" or day_of_week == "Wednesday" or day_of_week == "Friday":
+            day_of_week = "mwf"
+        else:
+            day_of_week = "tth"
+        availabilities = Availability.objects.filter(faculty=faculty, day_of_week=day_of_week)
+
+        for availability in availabilities:
+            if(availability.start_time >= start_time and availability.start_time <= end_time):
+                availability.level = level
+                availability.save()
+
+    # Deprecated
     def create(cls, email, day, start_time, end_time, level):
         faculty = CUser.get_faculty(email=email)
         if (day is None):
@@ -386,7 +417,7 @@ class Availability(models.Model):
         elif (start_time is None):
             raise ValidationError("Need to input start time")
         elif (level is None) or (level != "Preferred" and level != "Unavailable"):
-            raise ValidationError("Need to input level of availability: preferred or unavailable")
+            raise ValidationError("Need to input level of availability: Preferred or Unavailable")
         else:
             availability = cls(faculty=faculty,day_of_week=day, start_time=start_time, end_time=end_time, level=level)
             availability.save()
@@ -523,7 +554,7 @@ class Section(models.Model):
         print courseName
         course = Course.get_course(courseName)
         num = " ".join(nameStrArr[1].split("_"))
-        
+
         return cls.objects.get(course=course, section_num=num)
 
     # This takes in the name which is constructed in .to_json() as course-section_num
@@ -534,7 +565,7 @@ class Section(models.Model):
         print courseName
         course = Course.get_course(courseName)
         num = " ".join(nameStrArr[1].split("_"))
-        
+
         return cls.objects.filter(course=course, section_num=num)
 
     # THIS IS FOR PAULA's TESTING PURPOSES: don't use for anything besides the foreign key attributes
@@ -664,10 +695,10 @@ class Section(models.Model):
         conflicts = SectionConflict.objects.filter(conflict_reason=reason).filter(Q(section1=section) | Q(section2=section))
         sections = []
         for conflict in conflicts:
-            if conflicts.section1 == section:
-                sections.append(section2.to_json())
+            if conflict.section1 == section:
+                sections.append(conflict.section2.to_json())
             else:
-                sections.append(section1.to_json())
+                sections.append(conflict.section1.to_json())
         return sections
 
 

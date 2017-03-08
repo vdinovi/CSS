@@ -82,19 +82,68 @@ def IndexView(request):
 def HomeView(request):
     return render(request, 'home.html')
 
+def CoursePreferences(request):
+	res = HttpResponse()
+	faculty = CUser.get_faculty(email = request.session.get('email'))
+	if request.method == "GET":
+		return render(request,'course_prefs.html', {'add_course_pref': CoursePrefForm()})
+	elif request.method == "POST" and 'add_course_pref' in request.POST:
+		print('here')
+		form = CoursePrefForm(request.POST)
+		if form.is_valid():
+			try:
+				form.save(faculty)
+				return HttpResponseRedirect('/course')
+			except ValidationError as e:
+				return ErrorView(request, 400, "Invalid form entry")
+			else:
+				return ErrorView(request, 400, "Invalid form entry")
+	else:
+		print('form not valid')
+		return ErrorView(request, 400, "")
+	return res
+
 from django.views.decorators.csrf import csrf_exempt
 @csrf_exempt
 def AvailabilityView(request):
     res = HttpResponse()
     email = request.session.get('email')
-    availability = Availability.get_availability(CUser.get_faculty(email=email))
-    print "Availability"
-    print Availability.objects.count()
 
     if request.method == "GET":
+        availabilities = Availability.get_availabilities(faculty = CUser.get_faculty(email=email))
+
+        print Availability.objects.count()
+
+        if availabilities.count() < 14:
+            print "Reset availabilities!"
+            Availability.initializeAvailabilities(faculty = CUser.get_faculty(email=email))
+            availabilities = Availability.get_availabilities(faculty = CUser.get_faculty(email=email)).order_by('start_time')
+
+        times = ["8:00am", "8:30am", "9:00am", "9:30am," "10:00am", "10:30am", "11:00am", "11:30am", "12:00pm", "12:30pm", "1:00pm", "1:30pm", "2:00pm", "2:30pm", "3:00pm", "3:30pm", "4:00pm", "4:30pm", "5:00pm", "5:30pm", "6:00pm", "6:30pm", "7:00pm", "7:30pm"]
+        availAtTime = OrderedDict()
+
+        mwfCount = 0
+        tthCount = 0
+        for time in times:
+            availAtTime[time] = {}
+
+
+        for availability in availabilities:
+            if availability.day_of_week == "mwf":
+
+                availAtTime[times[mwfCount]]["mwf"] = availability.level
+                mwfCount += 1
+            else:
+                availAtTime[times[tthCount]]["tth"] = availability.level
+                tthCount += 1
+
+        for availability in availabilities:
+            print availability.start_time
+
         return render(request,'availability.html', {
-        			'availability': availability,
+        			'availAtTime': availAtTime,
                     'add_availability_form': AddAvailabilityForm()})
+
     elif request.method == "POST" and 'add_availability_form' in request.POST:
         form = AddAvailabilityForm(request.POST)
         if form.is_valid():
@@ -103,7 +152,6 @@ def AvailabilityView(request):
                 return HttpResponseRedirect('/availability')
             except ValidationError as e:
             	print('form cannot save')
-            	print(request.POST.get('level'))
                 return ErrorView(request, 400, "Invalid form entry")
         else:
             return ErrorView(request, 400, "Invalid form entry")

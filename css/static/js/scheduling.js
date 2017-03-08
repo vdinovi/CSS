@@ -141,7 +141,7 @@ function getSchedules() {
         success: function(response) {
             data = JSON.parse(response);
             list = $("#view-term-modal-body").children("div");
-            var scheduleFormatString = "<button class=\"list-group-item\" onclick=\"addSchedule('{0}')\">{0}</button>\n";
+            var scheduleFormatString = "<button class=\"list-group-item\" onclick=\"addSchedule('{0}')\" data-dismiss=\"modal\">{0}</button>\n";
             list.empty();
             for (var i = 0; i < data.active.length; ++i) {
                 list.append(scheduleFormatString.format(data.active[i].academic_term));
@@ -636,20 +636,18 @@ function getSelectedFilters() {
     return selectedFilters;
 }
 
-function newSection() {
-    var sectionData = {};
-    console.log($("#section_num").val());
+function newSection(sectionData) {
     sectionData = {
-         'section_num': $("#section_num").val(), 
-         'schedule': $("#academic-term").val(), 
-         'course': $("#course").val(),
-         'section-type': $("#section-type").val(),
-         'faculty': $("#faculty").val(),
-         'room': $("#room").val(),
-         'days': $("#days").val(),
-         'capacity': $("#capacity").val(),
-         'start-time': $("#start-time").val(),
-         'end-time': $("#end-time").val()
+             'section-num': $("#section-num").val(), 
+             'schedule': $("#academic-term").val(), 
+             'course': $("#course").val(),
+             'section-type': $("#section-type").val(),
+             'faculty': $("#faculty").val(),
+             'room': $("#room").val(),
+             'days': $("#days").val(),
+             'capacity': $("#capacity").val(),
+             'start-time': $("#start-time").val(),
+             'end-time': $("#end-time").val()
         };
     console.log(sectionData);
     $.ajax({
@@ -658,7 +656,6 @@ function newSection() {
         data: JSON.stringify(sectionData),
         dataType: 'json',
         success: function(response) {
-            console.log(sectionData)
             // Clear all elements
             $("#new-section-frame").find("select").each(function (index, value) {
                 $($(value).children('option')[0]).prop('selected', true);
@@ -674,21 +671,38 @@ function newSection() {
 }
 
 /* Confirming new section */
-function newSectionConfirmation() {
+function sectionConflictCheck(element) {
     var sectionData = {};
-    console.log($("#section_num").val());
-    sectionData = {
-         'section_num': $("#section_num").val(), 
-         'schedule': $("#academic-term").val(), 
-         'course': $("#course").val(),
-         'section-type': $("#section-type").val(),
-         'faculty': $("#faculty").val(),
-         'room': $("#room").val(),
-         'days': $("#days").val(),
-         'capacity': $("#capacity").val(),
-         'start-time': $("#start-time").val(),
-         'end-time': $("#end-time").val()
+    if (element.id.includes("create")) {
+        sectionData = {
+             'section_num': $("#section_num").val(), 
+             'schedule': $("#academic-term").val(), 
+             'course': $("#course").val(),
+             'section-type': $("#section-type").val(),
+             'faculty': $("#faculty").val(),
+             'room': $("#room").val(),
+             'days': $("#days").val(),
+             'capacity': $("#capacity").val(),
+             'start-time': $("#start-time").val(),
+             'end-time': $("#end-time").val()
         };
+    }
+    else {
+        sectionData = {
+         'schedule': $("#edit-term").children("p").text(),
+         'name': $("#edit-course").children("p").text() + "-" + $("#edit-section_num").val(),
+         'section_num': $("#edit-section_num").val(),
+         'type': $("#edit-type").val(),
+         'faculty': $("#edit-faculty").val(),
+         'room': $("#edit-room").val(),
+         'days': $("#edit-days").val(),
+         'capacity': $("#edit-capacity").val(),
+         'start-time': $("#edit-start_time").val(),
+         'end-time': $("#edit-end_time").val(),
+         'students_enrolled': $("#edit-students_enrolled").val(),
+         'students_waitlisted': $("#edit-students_waitlisted").val()
+        };
+    }
     console.log(sectionData);
     $.ajax({
         type: "POST",
@@ -701,11 +715,140 @@ function newSectionConfirmation() {
             faculty_conflicts = response.faculty;
             console.log(faculty_conflicts);
             if (!(room_conflicts.length) && !(faculty_conflicts.length)) {
-                newSection();
+                if (element.id.includes("create")) {
+                    newSection();
+                }
+                else {
+                    editSection();
+                }
             }
             else {
-                $('#confirm-conflicts-modal').show();
-                $('#confirm-conflicts-modal').toggleClass("in");                
+                if (element.id.includes("create")) {
+                    $('#confirm-create-conflicts-modal').show();
+                    $('#confirm-create-conflicts-modal').toggleClass("in");
+                    frame = $("#confirm-create-section-check");
+                }
+                else {
+                    $('#confirm-edit-conflicts-modal').show();
+                    $('#confirm-edit-conflicts-modal').toggleClass("in");
+                    frame = $("#confirm-edit-section-check");
+                }
+                
+
+                var roomFormatStr1 = "<div class=\"col-xs-6\" style=\"text-align:center;\"\>\n" +
+                             "<h4>Room Conflicts</h4>\n" +
+                             "<ul>\n";
+                var roomFormatStr2 = "";
+                if (room_conflicts.length == 0) {
+                    roomFormatStr2 = "None";
+                }
+                else {
+                    for (i = 0; i < room_conflicts.length; i++)
+                        roomFormatStr2 += "<li> {0} </li>\n".format(underscoreToSpaces(room_conflicts[i].name));
+                }
+                var roomFormatStr3 = "</ul>\n</div>\n";
+                var roomFormatStr = roomFormatStr1 + roomFormatStr2 + roomFormatStr3;
+
+                var facultyFormatStr1 = "<div class=\"col-xs-6 col-xs-offset-6\" style=\"text-align:center;\"\>\n" +
+                                        "<h4>Faculty Conflicts</h4>\n" +
+                                        "<ul>\n";
+                var facultyFormatStr2 = "";
+                if (faculty_conflicts.length == 0) {
+                    facultyFormatStr2 = "None";
+                }
+                else {
+                    for (i = 0; i < faculty_conflicts.length; i++)
+                        facultyFormatStr2 += "<li> {0} </li>\n".format(underscoreToSpaces(faculty_conflicts[i].name));
+                }
+                var facultyFormatStr3 = "</ul>\n</div>\n";
+                var facultyFormatStr = facultyFormatStr1 + facultyFormatStr2 + facultyFormatStr3;
+
+                frame.empty()
+                frame.append(roomFormatStr + facultyFormatStr);
+                                   
+            }
+        },
+        error: function(err) {
+            console.log(err);
+        }
+    });
+}
+
+function updateSectionDetailConflicts() {
+    $.ajax({
+        type: "POST",
+        url: "section-detail-conflicts",
+        data: JSON.stringify({'section_details': sectionDetails}),
+        dataType: 'json',
+        success: function(response) {
+            console.log(sectionDetails.length);
+            for (var key in sectionDetails) {
+                console.log('in for loop');
+                // Gets conflicts for one section
+                var conflicts = response[sectionDetails[key].name];
+
+                // Save room conflicts for section
+                var room_conflicts = []
+                for (var room in conflicts['room']) {
+                    room_conflicts.push(conflicts['room'][room].name)
+                    console.log(room_conflicts)
+                }
+
+                // Save faculty conflicts for section
+                var faculty_conflicts = []
+                for (var faculty in conflicts['faculty']) {
+                    faculty_conflicts.push(conflicts['faculty'][faculty].name)
+                    console.log(faculty_conflicts)
+                }
+
+                var sectionDetailEntry = $("#{0}-detail".format(sectionDetails[key].name))
+
+                if (room_conflicts.length || faculty_conflicts.length) {
+                    var conflictSectionFormatString = 
+                            "<td>\n" +
+                                "<button type=\"button\" class=\"btn btn-info btn-xs\" data-toggle=\"modal\" data-target=\"#deselect-section\" onclick=\"removeSectionFromDetails(this)\"><span class=\"glyphicon glyphicon-minus\" title=\"Remove section from details\"></span>&nbsp;</button>\n" +
+                                "<button type=\"button\" class=\"btn btn-info btn-xs\" data-toggle=\"modal\" data-target=\"#edit-section-modal\" onclick=\"displaySectionInfo(this)\"><span class=\"glyphicon glyphicon-edit\" title=\"Edit section\"></span>&nbsp;</button>\n" +
+                                "<button type=\"button\" class=\"btn btn-info btn-xs\" data-toggle=\"modal\" data-target=\"#delete-section-modal\" onclick=\"confirmDeleteModal(this)\"><span class=\"glyphicon glyphicon-trash\" title=\"Delete section\"></span>&nbsp;</button>\n" +
+                            "</td>\n" +
+                            "<td>{1}</td>\n" + 
+                            "<td>{2}</td>\n" + 
+                            "<td>{3}</td>\n" + 
+                            "<td>{4}</td>\n" + 
+                            "<td {5}>{6}</td>\n" + 
+                            "<td {7}>{8}</td>\n" + 
+                            "<td>{9}</td>\n" + 
+                            "<td>{10}</td>\n" + 
+                            "<td>{11}</td>\n";
+                    sectionDetailEntry.empty();
+
+                    var faculty_string = ""
+                    var room_string = ""
+                    if (faculty_conflicts.length) {
+                        console.log("FACULTY CONFLICT FOUND")
+                        faculty_string = 'class=\"alert-danger\" data-toggle=\"popover\" data-trigger=\"hover\" title=\"Conflicting Sections\" data-content=\"BLAH\"'
+                    }
+                    if (room_conflicts.length) {
+                        console.log("ROOM CONFLICT FOUND")
+                        room_string = 'class=\"alert-danger\" data-toggle=\"popover\" data-trigger=\"hover\" title=\"Conflicting Sections\" data-content=\"BLAH\"'
+                    }
+
+                    console.log(conflictSectionFormatString.format(sectionDetails[key].name, underscoreToSpaces(sectionDetails[key].name), sectionDetails[key].term, sectionDetails[key].course, sectionDetails[key].type, 
+                        faculty_string, 
+                        sectionDetails[key].faculty, room_string, sectionDetails[key].room, sectionDetails[key].days, sectionDetails[key].start_time, 
+                        sectionDetails[key].end_time));
+                    sectionDetailEntry.prepend(conflictSectionFormatString.format(sectionDetails[key].name, underscoreToSpaces(sectionDetails[key].name), sectionDetails[key].term, sectionDetails[key].course, sectionDetails[key].type, 
+                        faculty_string, sectionDetails[key].faculty, room_string, sectionDetails[key].room, sectionDetails[key].days, sectionDetails[key].start_time, 
+                        sectionDetails[key].end_time));
+                    // if (room_conflicts.length) {
+                    //     console.log("ROOM CONFLICT FOUND");
+                    //     console.log(conflictSectionFormatString.format(sectionDetails[key].name, underscoreToSpaces(sectionDetails[key].name), sectionDetails[key].term, sectionDetails[key].course, sectionDetails[key].type, 
+                    //         "", sectionDetails[key].faculty, 'class=\"alert-danger\" data-toggle=\"popover\" data-trigger=\"hover\" title=\"Conflicting Sections\" data-content=\"BLAH\"', sectionDetails[key].room, sectionDetails[key].days, sectionDetails[key].start_time, 
+                    //         sectionDetails[key].end_time));
+                    //     sectionDetailEntry.append(conflictSectionFormatString.format(sectionDetails[key].name, underscoreToSpaces(sectionDetails[key].name), sectionDetails[key].term, sectionDetails[key].course, sectionDetails[key].type, 
+                    //         "", sectionDetails[key].faculty, 'class=\"alert-danger\" data-toggle=\"popover\" data-trigger=\"hover\" title=\"Conflicting Sections\" data-content=\"BLAH\"', sectionDetails[key].room, sectionDetails[key].days, sectionDetails[key].start_time, 
+                    //         sectionDetails[key].end_time));
+                    // }
+                }
             }
         },
         error: function(err) {
@@ -741,6 +884,8 @@ function updateSectionDetails(resort) {
             toStandardTime(sectionDetails[i].end_time)));
         }
     }
+
+    updateSectionDetailConflicts();
 }
 
 function confirmDeleteModal(sectionElement) {
@@ -840,18 +985,18 @@ function displaySectionInfo(sectionElement) {
     });
 }
 
-function editSection() {
-    var sectionData = {};
+function editSection(sectionData) {
     sectionData = {
+         'schedule': $("#edit-term").children("p").text(),
          'name': $("#edit-course").children("p").text() + "-" + $("#edit-section_num").val(),
-         'section_num': $("#edit-section_num").val(),
+         'section-num': $("#edit-section_num").val(),
          'type': $("#edit-type").val(),
          'faculty': $("#edit-faculty").val(),
          'room': $("#edit-room").val(),
          'days': $("#edit-days").val(),
          'capacity': $("#edit-capacity").val(),
-         'start_time': $("#edit-start_time").val(),
-         'end_time': $("#edit-end_time").val(),
+         'start-time': $("#edit-start_time").val(),
+         'end-time': $("#edit-end_time").val(),
          'students_enrolled': $("#edit-students_enrolled").val(),
          'students_waitlisted': $("#edit-students_waitlisted").val()
         };
