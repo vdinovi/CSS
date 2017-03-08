@@ -318,8 +318,6 @@ class Course(models.Model):
                     equipment_req=self.equipment_req,
                     description=self.description)
 
-
-
 class SectionType(models.Model):
     name = models.CharField(max_length=32, unique=True) # eg. lecture or lab
 
@@ -670,7 +668,6 @@ class Section(models.Model):
                 sections.append(section1.to_json())
         return sections
 
-
 class FacultyCoursePreferences(models.Model):
     faculty = models.ForeignKey(CUser, on_delete = models.CASCADE)
     course = models.ForeignKey(Course, on_delete = models.CASCADE)
@@ -679,11 +676,13 @@ class FacultyCoursePreferences(models.Model):
 
     @classmethod
     def create(cls, faculty, course, comments, rank):
+        faculty = CUser.get_faculty(faculty)
+        course = Course.get_course(course)
         course_pref = cls(
-            faculty=faculty,
-            course=course,
-            comments=comments,
-            rank=rank)
+            			faculty=faculty,
+            			course=course,
+            			comments=comments,
+            			rank=rank)
         course_pref.save()
         return course_pref
 
