@@ -860,15 +860,6 @@ function updateSectionDetailConflicts() {
                     sectionDetailEntry.prepend(conflictSectionFormatString.format(sectionDetails[key].name, underscoreToSpaces(sectionDetails[key].name), sectionDetails[key].term, sectionDetails[key].course, sectionDetails[key].type, 
                         faculty_string, sectionDetails[key].faculty, room_string, sectionDetails[key].room, sectionDetails[key].days, sectionDetails[key].start_time, 
                         sectionDetails[key].end_time));
-                    // if (room_conflicts.length) {
-                    //     console.log("ROOM CONFLICT FOUND");
-                    //     console.log(conflictSectionFormatString.format(sectionDetails[key].name, underscoreToSpaces(sectionDetails[key].name), sectionDetails[key].term, sectionDetails[key].course, sectionDetails[key].type, 
-                    //         "", sectionDetails[key].faculty, 'class=\"alert-danger\" data-toggle=\"popover\" data-trigger=\"hover\" title=\"Conflicting Sections\" data-content=\"BLAH\"', sectionDetails[key].room, sectionDetails[key].days, sectionDetails[key].start_time, 
-                    //         sectionDetails[key].end_time));
-                    //     sectionDetailEntry.append(conflictSectionFormatString.format(sectionDetails[key].name, underscoreToSpaces(sectionDetails[key].name), sectionDetails[key].term, sectionDetails[key].course, sectionDetails[key].type, 
-                    //         "", sectionDetails[key].faculty, 'class=\"alert-danger\" data-toggle=\"popover\" data-trigger=\"hover\" title=\"Conflicting Sections\" data-content=\"BLAH\"', sectionDetails[key].room, sectionDetails[key].days, sectionDetails[key].start_time, 
-                    //         sectionDetails[key].end_time));
-                    // }
                 }
             }
         },
