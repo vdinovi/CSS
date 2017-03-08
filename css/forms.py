@@ -231,7 +231,6 @@ class AddAvailabilityForm(forms.Form):
         availability.setRange(start_time, end_time, day, level)
         availability.save()
 
-
 class AddScheduleForm(forms.Form):
     academic_term = forms.CharField(max_length=16)
 

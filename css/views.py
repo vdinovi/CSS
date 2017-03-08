@@ -91,7 +91,6 @@ def AvailabilityView(request):
     print "Availability"
     print Availability.objects.count()
 
-
     if request.method == "GET":
         return render(request,'availability.html', {
         			'availability': availability,
@@ -103,15 +102,11 @@ def AvailabilityView(request):
                 form.save(email)
                 return HttpResponseRedirect('/availability')
             except ValidationError as e:
+            	print('form cannot save')
+            	print(request.POST.get('level'))
                 return ErrorView(request, 400, "Invalid form entry")
         else:
             return ErrorView(request, 400, "Invalid form entry")
-    elif request.method == "POST" and 'availability_view' in request.body:
-    	#data = json.dumps({"availability_view": [avail.to_json() for avail in list]})
-        #res.write(data)
-        #weekArray = [[0 for x in range(24)] for y in range(24)]
-
-        res.status_code = 200
     else:
         return ErrorView(request, 400, "")
     return res
