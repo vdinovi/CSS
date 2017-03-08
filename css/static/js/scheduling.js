@@ -677,7 +677,6 @@ function newSection(sectionData) {
         data: JSON.stringify(sectionData),
         dataType: 'json',
         success: function(response) {
-            console.log(sectionData)
             // Clear all elements
             $("#new-section-frame").find("select").each(function (index, value) {
                 $($(value).children('option')[0]).prop('selected', true);
@@ -741,7 +740,6 @@ function sectionConflictCheck(element) {
                     newSection();
                 }
                 else {
-                    console.log(sectionData);
                     editSection();
                 }
             }
@@ -797,6 +795,72 @@ function sectionConflictCheck(element) {
     });
 }
 
+function updateSectionDetailConflicts() {
+    $.ajax({
+        type: "POST",
+        url: "section-detail-conflicts",
+        data: JSON.stringify({'section_details': sectionDetails}),
+        dataType: 'json',
+        success: function(response) {
+            console.log(sectionDetails.length);
+            for (var key in sectionDetails) {
+                console.log('in for loop');
+                // Gets conflicts for one section
+                var conflicts = response[sectionDetails[key].name];
+
+                // Save room conflicts for section
+                var room_conflicts = []
+                for (var room in conflicts['room']) {
+                    room_conflicts.push(conflicts['room'][room].name)
+                }
+
+                // Save faculty conflicts for section
+                var faculty_conflicts = []
+                for (var faculty in conflicts['faculty']) {
+                    faculty_conflicts.push(conflicts['faculty'][faculty].name)
+                }
+
+                var sectionDetailEntry = $("#{0}-detail".format(sectionDetails[key].name))
+
+                if (room_conflicts.length || faculty_conflicts.length) {
+                    var conflictSectionFormatString = 
+                            "<td>\n" +
+                                "<button type=\"button\" class=\"btn btn-info btn-xs\" data-toggle=\"modal\" data-target=\"#deselect-section\" onclick=\"removeSectionFromDetails(this)\"><span class=\"glyphicon glyphicon-minus\" title=\"Remove section from details\"></span>&nbsp;</button>\n" +
+                                "<button type=\"button\" class=\"btn btn-info btn-xs\" data-toggle=\"modal\" data-target=\"#edit-section-modal\" onclick=\"displaySectionInfo(this)\"><span class=\"glyphicon glyphicon-edit\" title=\"Edit section\"></span>&nbsp;</button>\n" +
+                                "<button type=\"button\" class=\"btn btn-info btn-xs\" data-toggle=\"modal\" data-target=\"#delete-section-modal\" onclick=\"confirmDeleteModal(this)\"><span class=\"glyphicon glyphicon-trash\" title=\"Delete section\"></span>&nbsp;</button>\n" +
+                            "</td>\n" +
+                            "<td>{1}</td>\n" + 
+                            "<td>{2}</td>\n" + 
+                            "<td>{3}</td>\n" + 
+                            "<td>{4}</td>\n" + 
+                            "<td {5}>{6}</td>\n" + 
+                            "<td {7}>{8}</td>\n" + 
+                            "<td>{9}</td>\n" + 
+                            "<td>{10}</td>\n" + 
+                            "<td>{11}</td>\n";
+                    sectionDetailEntry.empty();
+
+                    var faculty_string = ""
+                    var room_string = ""
+                    if (faculty_conflicts.length) {
+                        faculty_string = 'class=\"alert-danger\" data-toggle=\"popover\" data-trigger=\"hover\" title=\"Conflicting Sections\" data-content=\"BLAH\"'
+                    }
+                    if (room_conflicts.length) {
+                        room_string = 'class=\"alert-danger\" data-toggle=\"popover\" data-trigger=\"hover\" title=\"Conflicting Sections\" data-content=\"BLAH\"'
+                    }
+
+                    sectionDetailEntry.prepend(conflictSectionFormatString.format(sectionDetails[key].name, underscoreToSpaces(sectionDetails[key].name), sectionDetails[key].term, sectionDetails[key].course, sectionDetails[key].type, 
+                        faculty_string, sectionDetails[key].faculty, room_string, sectionDetails[key].room, sectionDetails[key].days, sectionDetails[key].start_time, 
+                        sectionDetails[key].end_time));
+                }
+            }
+        },
+        error: function(err) {
+            console.log(err);
+        }
+    });
+}
+
 /* Section Details Functions */
 function updateSectionDetails(resort) {
     var sectionDetailsFormatString = 
@@ -824,6 +888,8 @@ function updateSectionDetails(resort) {
             sectionDetails[i].end_time));
         }
     }
+
+    updateSectionDetailConflicts();
 }
 
 function confirmDeleteModal(sectionElement) {

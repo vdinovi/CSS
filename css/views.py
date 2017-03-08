@@ -109,14 +109,42 @@ from django.views.decorators.csrf import csrf_exempt
 def AvailabilityView(request):
     res = HttpResponse()
     email = request.session.get('email')
-    availability = Availability.get_availability(CUser.get_faculty(email=email))
-    print "Availability"
-    print Availability.objects.count()
 
     if request.method == "GET":
+        availabilities = Availability.get_availabilities(faculty = CUser.get_faculty(email=email))
+
+        print Availability.objects.count()
+
+        if availabilities.count() < 14:
+            print "Reset availabilities!"
+            Availability.initializeAvailabilities(faculty = CUser.get_faculty(email=email))
+            availabilities = Availability.get_availabilities(faculty = CUser.get_faculty(email=email)).order_by('start_time')
+
+        times = ["8:00am", "8:30am", "9:00am", "9:30am," "10:00am", "10:30am", "11:00am", "11:30am", "12:00pm", "12:30pm", "1:00pm", "1:30pm", "2:00pm", "2:30pm", "3:00pm", "3:30pm", "4:00pm", "4:30pm", "5:00pm", "5:30pm", "6:00pm", "6:30pm", "7:00pm", "7:30pm"]
+        availAtTime = OrderedDict()
+
+        mwfCount = 0
+        tthCount = 0
+        for time in times:
+            availAtTime[time] = {}
+
+
+        for availability in availabilities:
+            if availability.day_of_week == "mwf":
+
+                availAtTime[times[mwfCount]]["mwf"] = availability.level
+                mwfCount += 1
+            else:
+                availAtTime[times[tthCount]]["tth"] = availability.level
+                tthCount += 1
+
+        for availability in availabilities:
+            print availability.start_time
+
         return render(request,'availability.html', {
-        			'availability': availability,
+        			'availAtTime': availAtTime,
                     'add_availability_form': AddAvailabilityForm()})
+
     elif request.method == "POST" and 'add_availability_form' in request.POST:
         form = AddAvailabilityForm(request.POST)
         if form.is_valid():
@@ -125,7 +153,6 @@ def AvailabilityView(request):
                 return HttpResponseRedirect('/availability')
             except ValidationError as e:
             	print('form cannot save')
-            	print(request.POST.get('level'))
                 return ErrorView(request, 400, "Invalid form entry")
         else:
             return ErrorView(request, 400, "Invalid form entry")
@@ -316,7 +343,8 @@ def CoursesView(request):
                 'add_course_form': AddCourseForm(auto_id='add_course_%s'),
                 'edit_course_form': EditCourseForm(auto_id='edit_course_%s'),
                 'delete_course_form': DeleteCourseForm(),
-                'add_course_section_type_form': AddCourseSectionTypeForm()
+                'add_course_section_type_form': AddCourseSectionTypeForm(),
+		'upload_form': UploadForm()
             });
     elif request.method == "POST" and 'add-course-form' in request.POST:
         form = AddCourseForm(request.POST);
@@ -350,12 +378,12 @@ def CoursesView(request):
         else:
             return ErrorView(request, 400, "Invalid form entry")
 
-    elif request.method == "POST" and request.POST['request-name'] == 'course-section-request':
+    elif request.method == "POST" and 'course-section-request' in request.POST:
         courseName = request.POST.__getitem__('course')
         course = Course.get_course(courseName)
         res.content = course.get_all_section_types_JSON()
 
-    elif request.method == "POST" and request.POST['request-name'] == 'delete-section-type-request':
+    elif request.method == "POST" and 'delete-section-type-request' in request.POST:
         courseName = request.POST.__getitem__('course')
         sectionTypeName = request.POST.__getitem__('section_type_name')
         course = Course.get_course(courseName)
@@ -363,7 +391,7 @@ def CoursesView(request):
 
         res.content = course.get_all_section_types_JSON()
 
-    elif request.method == "POST" and request.POST['request-name'] == 'save-section-request':
+    elif request.method == "POST" and 'save-section-request' in request.POST:
             courseName = request.POST.__getitem__('course')
 
             course = Course.get_course(courseName)
@@ -375,10 +403,22 @@ def CoursesView(request):
             course.add_section_type(name, work_units, work_hours)
 
             res.content = course.get_all_section_types_JSON()
+    elif request.method == "POST" and 'course-import-data' in request.POST:
+	form = UploadForm(request.POST, request.FILES)
+	if form.is_valid():
+	    try:
+		result = Course.import_course_file(request.FILES['file'])
+		return HttpResponseRedirect("/resources/courses")
+	    except:
+		raise
+	    res.status_code = 500
+	else:
+	    res.status_code = 400
+	    res.reason_phrase = "Invalid form entry"
+
     else:
         return ErrorView(request, 400, "")
     return res
-
 #  Schedulers View
 # @descr Displays all of the schedulers currecntly registered in the database.
 #        Also includes a + and - button that link to the invite form and delete form
