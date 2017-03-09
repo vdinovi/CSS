@@ -160,7 +160,7 @@
                 </div>
               </div>
              
-              <button id="create-section-button" type="submit" class="btn btn-primary" onclick="sectionConflictCheck(this)">Create Section</button>
+              <button id="create-section-button" type="submit" class="btn btn-primary" data-toggle="modal" data-target="#confirm-create-conflicts-modal" onclick="sectionConflictCheck(this)">Create Section</button>
             </div>
             <div class="col-xs-6 col-offset-xs-6">
               <!-- Data Display -->
@@ -313,7 +313,7 @@
     </div>
 
     <!-- Edit Section Modal -->
-    <div id="edit-section-modal" class="modal fade" role="dialog">
+    <div id="edit-section-modal" class="col-xs-8 col-xs-offset-2 modal fade " role="dialog">
       <div class="modal-dialog">
         <!-- Modal content-->
         <div class="modal-content">
@@ -433,9 +433,12 @@
                 </div>
               </div>
             </div>
+            <div id="conflicts-frame" style="padding-top:20px;">
+              <!-- Conflicts appear here. -->
+            </div>
             <div id="response-btns">
                 <button class="btn response-btn" data-dismiss="modal">Close</button>
-                <button class="btn response-btn" onclick="sectionConflictCheck(this)">Update Section Info</button>
+                <button class="btn response-btn" data-toggle="modal" data-target="#confirm-edit-conflicts-modal" onclick="sectionConflictCheck(this)">Update Section Info</button>
             </div>
           </div>
         </div>
@@ -531,7 +534,7 @@
         <!-- Modal content-->
         <div class="modal-content">
           <div class="modal-header">
-            <div class="confirm-create-conflicts-modal-header">You have a conflict!!!</div>
+            <div class="section-detail-modal-header">You have a conflict!!!</div>
             <button type="button" class="close" data-dismiss="modal">&times;</button>
           </div>
           <div id="confirm-conflicts-modal-body" class="modal-body">

@@ -745,13 +745,13 @@ function sectionConflictCheck(element) {
             }
             else {
                 if (element.id.includes("create")) {
-                    $('#confirm-create-conflicts-modal').show();
-                    $('#confirm-create-conflicts-modal').toggleClass("in");
+                    // $('#confirm-create-conflicts-modal').show();
+                    // $('#confirm-create-conflicts-modal').toggleClass("in");
                     frame = $("#confirm-create-section-check");
                 }
                 else {
-                    $('#confirm-edit-conflicts-modal').show();
-                    $('#confirm-edit-conflicts-modal').toggleClass("in");
+                    // $('#confirm-edit-conflicts-modal').show();
+                    // $('#confirm-edit-conflicts-modal').toggleClass("in");
                     frame = $("#confirm-edit-section-check");
                 }
                 
@@ -948,6 +948,7 @@ function displaySectionInfo(sectionElement) {
             console.log("SUCCESS");
             sectionInfo = response.info;
             sectionOptions = response.options;
+            conflicts = response.conflicts;
             parStr = "<p>{0}</p>";
 
             optionFormatString = "<option value=\"{0}\">{1}</option>"
@@ -982,6 +983,40 @@ function displaySectionInfo(sectionElement) {
                     }
                 }
             }
+
+            conflicts_frame = $('#conflicts-frame')
+            if (conflicts['room'].length || conflicts['faculty'].length) {
+                var roomFormatStr1 = "<div class=\"col-xs-6\" style=\"text-align:center;\"\>\n" +
+                             "<h4>Room Conflicts</h4>\n" +
+                             "<ul>\n";
+                var roomFormatStr2 = "";
+                if (conflicts['room'].length == 0) {
+                    roomFormatStr2 = "None";
+                }
+                else {
+                    for (i = 0; i < conflicts['room'].length; i++)
+                        roomFormatStr2 += "<li> {0} </li>\n".format(underscoreToSpaces(conflicts['room'][i].name));
+                }
+                var roomFormatStr3 = "</ul>\n</div>\n";
+                var roomFormatStr = roomFormatStr1 + roomFormatStr2 + roomFormatStr3;
+
+                var facultyFormatStr1 = "<div class=\"col-xs-6 col-xs-offset-6\" style=\"text-align:center;\"\>\n" +
+                                        "<h4>Faculty Conflicts</h4>\n" +
+                                        "<ul>\n";
+                var facultyFormatStr2 = "";
+                if (conflicts['faculty'].length == 0) {
+                    facultyFormatStr2 = "None";
+                }
+                else {
+                    for (i = 0; i < conflicts['faculty'].length; i++)
+                        facultyFormatStr2 += "<li> {0} </li>\n".format(underscoreToSpaces(conflicts['faculty'][i].name));
+                }
+                var facultyFormatStr3 = "</ul>\n</div>\n";
+                var facultyFormatStr = facultyFormatStr1 + facultyFormatStr2 + facultyFormatStr3;
+
+                conflicts_frame.append(roomFormatStr + facultyFormatStr);
+            }
+            
         },
         error: function(err) {
             console.log(err);
