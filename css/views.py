@@ -497,6 +497,7 @@ def FacultyView(request):
             try:
                 form.delete_user()
                 res.status_code = 200
+                return HttpResponseRedirect('/resources/faculty')
             except ObjectDoesNotExist:
                 res.status_code = 404
                 res.reason_phrase = "User not found"

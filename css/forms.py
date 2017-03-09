@@ -72,7 +72,7 @@ class RegisterUserForm(forms.Form):
 
 # Edit User Form
 class EditUserForm(forms.Form):
-    user_email = forms.CharField(widget=forms.HiddenInput(), initial='a@a.com')
+    user_email = forms.CharField(widget=forms.HiddenInput(), initial='default@email.com')
     first_name = forms.CharField()
     last_name = forms.CharField()
     password = forms.CharField()
@@ -82,6 +82,8 @@ class EditUserForm(forms.Form):
         user.set_first_name(self.cleaned_data['first_name'])
         user.set_last_name(self.cleaned_data['last_name'])
         user.set_password(self.cleaned_data['password'])
+	user.save()
+	return user
 
 # Delete Form
 class DeleteUserForm(forms.Form):
@@ -89,7 +91,7 @@ class DeleteUserForm(forms.Form):
 
     def delete_user(self):
         email = self.cleaned_data['email']
-        CUser.get_user(user__username=self.cleaned_data['email']).delete()
+        CUser.get_user(email=self.cleaned_data['email']).delete()
 
 class AddRoomForm(forms.Form):
     name = forms.CharField()
