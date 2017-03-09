@@ -212,7 +212,11 @@ def GetSectionInfo(request):
                             'faculty': [fac.to_json()['name'] for fac in CUser.get_all_faculty()],
                             'room': [room.to_json()['name'] for room in Room.get_all_rooms()], 
                         }, 
-                        'info': section.to_json()
+                        'info': section.to_json(),
+                        'conflicts': {
+                            'room': Section.get_conflicts('room', section),
+                            'faculty': Section.get_conflicts('faculty', section)
+                        }
                         }
         res.content_type = "json"
         res.write(json.dumps(section_info))
