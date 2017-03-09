@@ -82,6 +82,8 @@ def IndexView(request):
 def HomeView(request):
     return render(request, 'home.html')
 
+from django.views.decorators.csrf import csrf_exempt
+@csrf_exempt
 def CoursePreferences(request):
     res = HttpResponse()
     email = request.session.get('email')
@@ -106,7 +108,6 @@ def CoursePreferences(request):
         return ErrorView(request, 400, "")
     return res
 
-from django.views.decorators.csrf import csrf_exempt
 @csrf_exempt
 def AvailabilityView(request):
     res = HttpResponse()
