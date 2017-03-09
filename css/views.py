@@ -84,32 +84,34 @@ def HomeView(request):
 
 def CoursePreferences(request):
 	res = HttpResponse()
-	faculty = CUser.get_faculty(email = request.session.get('email'))
+	email = request.session.get('email')
+	faculty = CUser.get_faculty(email=email)
+	# try:
+	# 	list = FacultyCoursePreferences.objects.filter(faculty=faculty)
+	# except FacultyCoursePreferences.DoesNotExist:
+	# 	list = None
+	# print(list.values())
 
-	list = FacultyCoursePreferences.objects.filter(faculty=faculty)
-	#we have a query object, now we need to get it's attributes
+	#'course_pref_list': FacultyCoursePreferences.objects.filter(faculty=faculty)
+	
 	if request.method == "GET":
 		return render(request,'course_prefs.html', {
-						'add_course_pref': CoursePrefForm(), 
-						'course_pref_list': FacultyCoursePreferences.objects.filter(faculty=faculty)
-						})
+						'add_course_pref': CoursePrefForm()})
 	elif request.method == "POST" and 'add_course_pref' in request.POST:
-		form = CoursePrefForm(request.POST)
-		print(form.errors)
-                print request.POST
-		if form.is_valid():
-			try:
-				form.save(faculty)
-				return HttpResponseRedirect('/course')
-			except ValidationError as e:
-				
-				return ErrorView(request, 400, "Invalid form entry")
-		else:
-			print('here')
-			return ErrorView(request, 400, "Invalid form entry")
-	else:
-		return ErrorView(request, 400, "")
-	return res
+        form = CoursePrefForm(request.POST)
+		# print(form.errors)
+		#print request.POST
+        if form.is_valid():
+            try:
+                form.save(faculty)
+                return HttpResponseRedirect('/course')
+            except ValidationError as e:
+                return ErrorView(request, 400, "Invalid form entry")
+        else:
+            return ErrorView(request, 400, "Invalid form entry")
+    else:
+        return ErrorView(request, 400, "")
+    return res
 
 from django.views.decorators.csrf import csrf_exempt
 @csrf_exempt
@@ -151,7 +153,6 @@ def AvailabilityView(request):
         return render(request,'availability.html', {
         			'availAtTime': availAtTime,
                     'add_availability_form': AddAvailabilityForm()})
-
     elif request.method == "POST" and 'add_availability_form' in request.POST:
         form = AddAvailabilityForm(request.POST)
         if form.is_valid():
