@@ -229,9 +229,6 @@ class CoursePrefForm(forms.Form):
      query_choices = [('', 'None')] + [(id, id) for id in query]
      course = forms.ChoiceField(query_choices,
                                 required=False, widget=forms.Select())
-     # course = CoursePrefModelChoiceField(label='Course', queryset=Course.objects.filter(), empty_label="      ")
-     # course = forms.ModelChoiceField(label='Course', queryset=Course.objects.values_list('name', flat=True), empty_label="       ")
-     # course = forms.ModelChoiceField(label='Course', queryset=Course.objects.filter(), empty_label="       ")
      comments = forms.CharField()
      rank = forms.IntegerField()
 
