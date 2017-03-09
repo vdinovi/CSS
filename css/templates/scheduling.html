@@ -433,7 +433,7 @@
                 </div>
               </div>
             </div>
-            <div id="conflicts-frame" style="padding-top:20px;">
+            <div id="conflicts-frame">
               <!-- Conflicts appear here. -->
             </div>
             <div id="response-btns">
@@ -580,16 +580,21 @@
         });
     </script>
 
-<!-- POPOVER FUNCTION BUT IDK -->
-    <script type="text/javascript">
-    $(function () { $("[data-toggle = 'popover']").popover(); });
+    <!-- POPOVER FUNCTION BUT IDK -->
+    <script>
+    $(function () {
+      $('[data-toggle="tooltip"]').tooltip();
+      $('[data-toggle="popover"]').popover();  
+      $('#lst_art_adm').on('all.bs.table', function (e, name, args) {
+          $('[data-toggle="tooltip"]').tooltip();
+          $('[data-toggle="popover"]').popover();  
+      });
+    });
     </script>
 
     <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
 
-<!-- SCRIPT FOR POPOVER BUT IDK -->
-<!-- <script type='text/javascript' src="http://netdna.bootstrapcdn.com/bootstrap/3.0.0/js/bootstrap.min.js"></script> -->
 
     <!-- Include all compiled plugins (below), or include individual files as needed -->
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>

@@ -83,24 +83,24 @@ def HomeView(request):
     return render(request, 'home.html')
 
 def CoursePreferences(request):
-	res = HttpResponse()
-	email = request.session.get('email')
-	faculty = CUser.get_faculty(email=email)
-	# try:
-	# 	list = FacultyCoursePreferences.objects.filter(faculty=faculty)
-	# except FacultyCoursePreferences.DoesNotExist:
-	# 	list = None
-	# print(list.values())
+    res = HttpResponse()
+    email = request.session.get('email')
+    faculty = CUser.get_faculty(email=email)
+    # try:
+    # 	list = FacultyCoursePreferences.objects.filter(faculty=faculty)
+    # except FacultyCoursePreferences.DoesNotExist:
+    # 	list = None
+    # print(list.values())
 
-	#'course_pref_list': FacultyCoursePreferences.objects.filter(faculty=faculty)
-	
-	if request.method == "GET":
-		return render(request,'course_prefs.html', {
-						'add_course_pref': CoursePrefForm()})
-	elif request.method == "POST" and 'add_course_pref' in request.POST:
+    #'course_pref_list': FacultyCoursePreferences.objects.filter(faculty=faculty)
+
+    if request.method == "GET":
+        return render(request,'course_prefs.html', {
+                        'add_course_pref': CoursePrefForm()})
+    elif request.method == "POST" and 'add_course_pref' in request.POST:
         form = CoursePrefForm(request.POST)
-		# print(form.errors)
-		#print request.POST
+        # print(form.errors)
+        #print request.POST
         if form.is_valid():
             try:
                 form.save(faculty)

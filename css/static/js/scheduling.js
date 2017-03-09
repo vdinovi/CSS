@@ -834,6 +834,7 @@ function updateSectionDetailConflicts() {
                             "<td>{3}</td>\n" + 
                             "<td>{4}</td>\n" + 
                             "<td {5}>{6}</td>\n" + 
+                            // "<td><span class=\"faculty\">{6}  </span></td" +
                             "<td {7}>{8}</td>\n" + 
                             "<td>{9}</td>\n" + 
                             "<td>{10}</td>\n" + 
@@ -843,10 +844,10 @@ function updateSectionDetailConflicts() {
                     var faculty_string = ""
                     var room_string = ""
                     if (faculty_conflicts.length) {
-                        faculty_string = 'class=\"alert-danger\" data-toggle=\"popover\" data-trigger=\"hover\" title=\"Conflicting Sections\" data-content=\"BLAH\"'
+                        faculty_string = 'class=\"alert-danger faculty-conflict\" data-toggle=\"popover\" data-trigger=\"hover\" title=\"Conflicting Sections\" data-content=\"BLAH\"'
                     }
                     if (room_conflicts.length) {
-                        room_string = 'class=\"alert-danger\" data-toggle=\"popover\" data-trigger=\"hover\" title=\"Conflicting Sections\" data-content=\"BLAH\"'
+                        room_string = 'class=\"alert-danger room-conflict\" data-toggle=\"popover\" data-trigger=\"hover\" title=\"Conflicting Sections\" data-content=\"BLAH\"'
                     }
 
                     sectionDetailEntry.prepend(conflictSectionFormatString.format(sectionDetails[key].name, underscoreToSpaces(sectionDetails[key].name), sectionDetails[key].term, sectionDetails[key].course, sectionDetails[key].type, 
