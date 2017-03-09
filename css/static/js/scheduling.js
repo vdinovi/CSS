@@ -162,7 +162,7 @@ function addSchedule(name) {
         "<li class=\"dropdown\">\n" +
         "  <a id=\"{0}\" class=\"dropdown-toggle\" data-toggle=\"dropdown\" href=\"#\">{1}<b class=\"caret\"></b></a>\n" +
         "  <ul class=\"dropdown-menu\">\n" +
-        "    <li><a href=\"#\" onclick=\"selectSchedule('{0}')\">Select Schedule</a></li>\n" +
+        "    <li><a href=\"#\" onclick=\"selectSchedule('{0}')\">Select/Unselect Schedule</a></li>\n" +
         "    <li><a href=\"#\" data-toggle=\"modal\" data-name=\"{1}\" data-target=\"#approve-term-modal\">Approve Schedule</a></li>\n" +
         "    <li><a href=\"#\" onclick=\"closeSchedule('{0}')\">Close Tab</a></li>\n" +
         "    <li><a href=\"#\" data-toggle=\"modal\" data-name=\"{1}\" data-target=\"#delete-term-modal\">Delete Schedule</a></li>\n" +
@@ -181,6 +181,7 @@ function addSchedule(name) {
         // Activate dropdown
         $("#"+scheduleId).dropdown();
     }
+    selectSchedule(scheduleId);
 }
 
 // Select a schedule from tab
@@ -190,7 +191,8 @@ function selectSchedule(name) {
         value.className = "";
     });*/
     //$("#"+name).parent().className("dropdown active-schedule");
-    $("#"+name).addClass("active-schedule");
+    $("#"+name).toggleClass("active-schedule");
+    getFilteredSections();
 }
 
 // Gets the currently selected term. If none, returns false
@@ -293,6 +295,7 @@ function selectFilter(element, filterType) {
                                 $("#option-"+data.options[i].name.replace(/ /g, '-')).children("span").children("input").prop("checked", true);
                             }
                         });
+
                     }
                 }
             },
@@ -380,6 +383,10 @@ function selectOption(element) {
             break;
         }
     }
+    console.log("#"+filterType.prop('id').split("-options")[0]+"-logic-checkbox");
+    if ($("#"+filterType.prop('id').split("-options")[0]+"-logic-checkbox").prop("checked") == false) {
+        $("#"+filterType.prop('id').split("-options")[0]+"-logic-checkbox").click();
+    }
     // Add option to selected option list
     if (filterType.prop('id') != "time-options" && element.checked) {
         var optionFormatString = 
@@ -416,6 +423,11 @@ function unselectAllSelectedOptions() {
             unselectSelectedOption(value.id);
         });
     }
+    $(".logic-checkbox").each(function(index, value) {
+        if (value.checked == true) {
+            $(value).click();
+        }
+    });
 }
 
 // OnClick function for removing a selected option
@@ -591,8 +603,6 @@ function getSelectedSections() {
     $("#section-frame").children("div").each(function(index, value) { 
         if ($("#"+value.id+"-checkbox").prop('checked')) { 
             if (inArrayByName(value.id.split("section-")[1], sectionDetails) === -1) {
-                console.log("pushing...");
-                console.log(filteredSections[inArrayByName(value.id.split("section-")[1], filteredSections)]);
                 sectionDetails.push(filteredSections[inArrayByName(value.id.split("section-")[1], filteredSections)]);
                 newSectionSelected = true;
             }
@@ -649,7 +659,6 @@ function newSection(sectionData) {
              'start-time': $("#start-time").val(),
              'end-time': $("#end-time").val()
         };
-    console.log(sectionData);
     $.ajax({
         type: "POST",
         url: "newSection",
@@ -703,7 +712,6 @@ function sectionConflictCheck(element) {
          'students_waitlisted': $("#edit-students_waitlisted").val()
         };
     }
-    console.log(sectionData);
     $.ajax({
         type: "POST",
         url: "conflict-check",
@@ -711,9 +719,7 @@ function sectionConflictCheck(element) {
         dataType: 'json',
         success: function(response) {
             room_conflicts = response.room;
-            console.log(room_conflicts);
             faculty_conflicts = response.faculty;
-            console.log(faculty_conflicts);
             if (!(room_conflicts.length) && !(faculty_conflicts.length)) {
                 if (element.id.includes("create")) {
                     newSection();
@@ -781,9 +787,7 @@ function updateSectionDetailConflicts() {
         data: JSON.stringify({'section_details': sectionDetails}),
         dataType: 'json',
         success: function(response) {
-            console.log(sectionDetails.length);
             for (var key in sectionDetails) {
-                console.log('in for loop');
                 // Gets conflicts for one section
                 var conflicts = response[sectionDetails[key].name];
 
@@ -863,7 +867,7 @@ function updateSectionDetails(resort) {
     if (getSelectedSections() || resort) {
         detailFrame.empty();
         for (var i in sectionDetails) {  
-            detailFrame.prepend(sectionDetailsFormatString.format(sectionDetails[i].name, underscoreToSpaces(sectionDetails[i].name), sectionDetails[i].term, sectionDetails[i].course, sectionDetails[i].type, sectionDetails[i].faculty, sectionDetails[i].room, sectionDetails[i].days, toStandardTime(sectionDetails[i].start_time), 
+            detailFrame.prepend(sectionDetailsFormatString.format(sectionDetails[i].name, underscoreToSpaces(sectionDetails[i].course_num), sectionDetails[i].term, sectionDetails[i].course, sectionDetails[i].type, sectionDetails[i].faculty, sectionDetails[i].room, sectionDetails[i].days, toStandardTime(sectionDetails[i].start_time), 
             toStandardTime(sectionDetails[i].end_time)));
         }
     }
@@ -881,10 +885,9 @@ function confirmDeleteModal(sectionElement) {
                 "<li>{3} {4}</li>\n" +
                 "<li>{5} {6} - {7}</li>\n" +
                 "</ul>\n";
-    console.log(section);
     frame = $("#delete-section-check");
     frame.empty();
-    frame.append(formatStr.format(underscoreToSpaces(section.name), section.term, section.faculty, section.type, section.room, section.days, section.start_time, section.end_time));
+    frame.append(formatStr.format(underscoreToSpaces(section.course_num), section.term, section.faculty, section.type, section.room, section.days, toStandardTime(section.start_time), toStandardTime(section.end_time)));
 }
 
 
@@ -895,7 +898,6 @@ function removeDeletedSection(sectionName) {
 
 function deleteSection(element) {
     sectionName = $($("#delete-section-check").children('h4')[0]).text();
-    console.log("HERE" + sectionName);
     $.ajax({
         type: "POST",
         url: "deleteSection",
@@ -911,8 +913,6 @@ function deleteSection(element) {
 }
 
 function daysAreEqual(sectionOption, sectionAttr) {
-    // console.log(sectionOption);
-    // console.log(sectionAttr);
     return ((sectionOption == "Mon/Wed/Fri" && sectionAttr == "MWF") || (sectionOption == "Tue/Thu" && sectionAttr == "TR"));
 }
 
@@ -924,7 +924,6 @@ function displaySectionInfo(sectionElement) {
         dataType: "json",
         data: JSON.stringify({"section": sectionName}),
         success: function(response) {
-            console.log("SUCCESS");
             sectionInfo = response.info;
             sectionOptions = response.options;
             parStr = "<p>{0}</p>";
@@ -983,7 +982,6 @@ function editSection(sectionData) {
          'students_enrolled': $("#edit-students_enrolled").val(),
          'students_waitlisted': $("#edit-students_waitlisted").val()
         };
-    console.log(sectionData);
     $.ajax({
         type: "POST",
         url: "edit-section",
@@ -1007,7 +1005,7 @@ function renderSectionNumber() {
 // removes the section row from Section Details (does not delete)
 function removeSectionFromDetails(element) {
     // remove element from sectionDetails
-    index = inArrayByName($(element).parent().next("td").text(), sectionDetails);
+    index = inArrayByName($(element).parent().val(), sectionDetails);
     if (index !== -1) { sectionDetails.splice(index, 1); }
     // gets to <tr> parent element
     $(element).parent().parent().remove();

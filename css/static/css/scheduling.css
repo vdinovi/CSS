@@ -386,3 +386,7 @@ label.checkbox-inline.checked {
 .col-xs-offset-6 {
     margin-left:0 !important;
 }
+
+.form-control {
+    height: inherit!important;
+}

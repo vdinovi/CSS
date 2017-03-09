@@ -82,36 +82,43 @@ def IndexView(request):
 def HomeView(request):
     return render(request, 'home.html')
 
-def CoursePreferences(request):
-	res = HttpResponse()
-	faculty = CUser.get_faculty(email = request.session.get('email'))
-
-	list = FacultyCoursePreferences.objects.filter(faculty=faculty)
-	#we have a query object, now we need to get it's attributes
-	if request.method == "GET":
-		return render(request,'course_prefs.html', {
-						'add_course_pref': CoursePrefForm(), 
-						'course_pref_list': FacultyCoursePreferences.objects.filter(faculty=faculty)
-						})
-	elif request.method == "POST" and 'add_course_pref' in request.POST:
-		form = CoursePrefForm(request.POST)
-		print(form.errors)
-                print request.POST
-		if form.is_valid():
-			try:
-				form.save(faculty)
-				return HttpResponseRedirect('/course')
-			except ValidationError as e:
-				
-				return ErrorView(request, 400, "Invalid form entry")
-		else:
-			print('here')
-			return ErrorView(request, 400, "Invalid form entry")
-	else:
-		return ErrorView(request, 400, "")
-	return res
-
 from django.views.decorators.csrf import csrf_exempt
+@csrf_exempt
+def CoursePreferences(request):
+    res = HttpResponse()
+    email = request.session.get('email')
+    faculty = CUser.get_faculty(email)
+
+    #we have a query object, now we need to get it's attributes
+    if request.method == "GET":
+        list = FacultyCoursePreferences.objects.filter(faculty=faculty)
+        return render(request,'course_prefs.html', {
+                        'add_course_pref': CoursePrefForm(), 
+                        'course_pref_list': FacultyCoursePreferences.objects.filter(faculty=faculty)
+                        })
+    elif request.method == "POST" and 'add_course_pref' in request.POST:
+        email = request.session.get('email')
+        print "----" + email + "----"
+        faculty = CUser.get_faculty(email)
+
+        list = FacultyCoursePreferences.objects.filter(faculty=faculty)
+        form = CoursePrefForm(request.POST)
+        print(form.errors)
+        print request.POST
+        if form.is_valid():
+            try:
+                form.save(email)
+                return HttpResponseRedirect('/course')
+            except ValidationError as e:
+                
+                return ErrorView(request, 400, "Invalid form entry")
+        else:
+            print('here')
+            return ErrorView(request, 400, "Invalid form entry")
+    else:
+        return ErrorView(request, 400, "")
+    return res
+
 @csrf_exempt
 def AvailabilityView(request):
     res = HttpResponse()
@@ -149,7 +156,7 @@ def AvailabilityView(request):
             print availability.start_time
 
         return render(request,'availability.html', {
-        			'availAtTime': availAtTime,
+                    'availAtTime': availAtTime,
                     'add_availability_form': AddAvailabilityForm()})
 
     elif request.method == "POST" and 'add_availability_form' in request.POST:
@@ -159,7 +166,7 @@ def AvailabilityView(request):
                 form.save(email)
                 return HttpResponseRedirect('/availability')
             except ValidationError as e:
-            	print('form cannot save')
+                print('form cannot save')
                 return ErrorView(request, 400, "Invalid form entry")
         else:
             return ErrorView(request, 400, "Invalid form entry")
@@ -351,7 +358,7 @@ def CoursesView(request):
                 'edit_course_form': EditCourseForm(auto_id='edit_course_%s'),
                 'delete_course_form': DeleteCourseForm(),
                 'add_course_section_type_form': AddCourseSectionTypeForm(),
-		'upload_form': UploadForm()
+        'upload_form': UploadForm()
             });
     elif request.method == "POST" and 'add-course-form' in request.POST:
         form = AddCourseForm(request.POST);
@@ -411,18 +418,17 @@ def CoursesView(request):
 
             res.content = course.get_all_section_types_JSON()
     elif request.method == "POST" and 'course-import-data' in request.POST:
-	form = UploadForm(request.POST, request.FILES)
-	if form.is_valid():
-	    try:
-		result = Course.import_course_file(request.FILES['file'])
-		return HttpResponseRedirect("/resources/courses")
-	    except:
-		raise
-	    res.status_code = 500
-	else:
-	    res.status_code = 400
-	    res.reason_phrase = "Invalid form entry"
-
+        form = UploadForm(request.POST, request.FILES)
+        if form.is_valid():
+            try:
+                result = Course.import_course_file(request.FILES['file'])
+                return HttpResponseRedirect("/resources/courses")
+            except:
+                raise
+                res.status_code = 500
+        else:
+            res.status_code = 400
+            res.reason_phrase = "Invalid form entry"
     else:
         return ErrorView(request, 400, "")
     return res
