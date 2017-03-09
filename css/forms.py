@@ -72,7 +72,7 @@ class RegisterUserForm(forms.Form):
 
 # Edit User Form
 class EditUserForm(forms.Form):
-    user_email = forms.CharField(widget=forms.HiddenInput(), initial='a@a.com')
+    user_email = forms.CharField(widget=forms.HiddenInput(), initial='default@email.com')
     first_name = forms.CharField()
     last_name = forms.CharField()
     password = forms.CharField()
@@ -82,6 +82,8 @@ class EditUserForm(forms.Form):
         user.set_first_name(self.cleaned_data['first_name'])
         user.set_last_name(self.cleaned_data['last_name'])
         user.set_password(self.cleaned_data['password'])
+	user.save()
+	return user
 
 # Delete Form
 class DeleteUserForm(forms.Form):
@@ -89,7 +91,7 @@ class DeleteUserForm(forms.Form):
 
     def delete_user(self):
         email = self.cleaned_data['email']
-        CUser.get_user(user__username=self.cleaned_data['email']).delete()
+        CUser.get_user(email=self.cleaned_data['email']).delete()
 
 class AddRoomForm(forms.Form):
     name = forms.CharField()
@@ -223,16 +225,23 @@ class CoursePrefModelChoiceField(forms.ModelChoiceField):
  	    return obj.name
 
 class CoursePrefForm(forms.Form):
-	 course = CoursePrefModelChoiceField(label='Course', queryset=Course.objects.filter(), empty_label="      ")
-	 comments = forms.CharField()
-	 rank = forms.IntegerField()
+     query = Course.objects.values_list('name', flat=True)
+     query_choices = [('', 'None')] + [(id, id) for id in query]
+     course = forms.ChoiceField(query_choices,
+                                required=False, widget=forms.Select())
+     # course = CoursePrefModelChoiceField(label='Course', queryset=Course.objects.filter(), empty_label="      ")
+     # course = forms.ModelChoiceField(label='Course', queryset=Course.objects.values_list('name', flat=True), empty_label="       ")
+     # course = forms.ModelChoiceField(label='Course', queryset=Course.objects.filter(), empty_label="       ")
+     comments = forms.CharField()
+     rank = forms.IntegerField()
 
-	 def save(self, faculty):
-	 	course_pref = FacultyCoursePreferences.create(faculty=faculty,
-                                  course = self.cleaned_data['course'],
-	 						      comments = self.cleaned_data['comments'],
-	 						      rank  = self.cleaned_data['rank'])
-	 	course_pref.save()
+     def save(self, email):
+        print self.cleaned_data['course']
+        course_pref = FacultyCoursePreferences.create(faculty=email,
+                        course = self.cleaned_data['course'],
+                        comments = self.cleaned_data['comments'],
+                        rank  = self.cleaned_data['rank'])
+        course_pref.save()
 
 class AddAvailabilityForm(forms.Form):
     DAYS = ('Monday', 'Monday',),('Tuesday','Tuesday'),('Wednesday','Wednesday'), ('Thursday','Thursday',), ('Friday', 'Friday')
