@@ -85,12 +85,15 @@ def HomeView(request):
 def CoursePreferences(request):
     res = HttpResponse()
     email = request.session.get('email')
-    #faculty = CUser.get_faculty(email=email)
-    #course_pref_list = FacultyCoursePreferences.objects.filter(faculty=faculty)
+    faculty = CUser.get_faculty(email=email)
+    course_pref_list = FacultyCoursePreferences.objects.filter(faculty=faculty)
+    print(course_pref_list)
 
     if request.method == "GET":
         return render(request,'course_prefs.html', {
-                        'add_course_pref': CoursePrefForm()})
+                        'add_course_pref': CoursePrefForm(), 
+                        'course_pref_list': FacultyCoursePreferences.objects.filter(faculty=faculty)
+                        })
     elif request.method == "POST" and 'add_course_pref' in request.POST:
         form = CoursePrefForm(request.POST)
         print(form.errors)
@@ -378,7 +381,6 @@ def CoursesView(request):
             return HttpResponseRedirect('/resources/courses')
         else:
             return ErrorView(request, 400, "Invalid form entry")
-
     elif request.method == "POST" and 'course-section-request' in request.POST:
         courseName = request.POST.__getitem__('course')
         course = Course.get_course(courseName)
