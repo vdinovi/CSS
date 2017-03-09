@@ -225,17 +225,23 @@ class CoursePrefModelChoiceField(forms.ModelChoiceField):
  	    return obj.name
 
 class CoursePrefForm(forms.Form):
-	 #course = CoursePrefModelChoiceField(label='Course', queryset=Course.objects.filter(), empty_label="      ")
-	 course = forms.ModelChoiceField(label='Course', queryset=Course.objects.values_list('name', flat=True), empty_label="       ")
-	 comments = forms.CharField()
-	 rank = forms.IntegerField()
+     query = Course.objects.values_list('name', flat=True)
+     query_choices = [('', 'None')] + [(id, id) for id in query]
+     course = forms.ChoiceField(query_choices,
+                                required=False, widget=forms.Select())
+     # course = CoursePrefModelChoiceField(label='Course', queryset=Course.objects.filter(), empty_label="      ")
+     # course = forms.ModelChoiceField(label='Course', queryset=Course.objects.values_list('name', flat=True), empty_label="       ")
+     # course = forms.ModelChoiceField(label='Course', queryset=Course.objects.filter(), empty_label="       ")
+     comments = forms.CharField()
+     rank = forms.IntegerField()
 
-	 def save(self, email):
-	 	course_pref = FacultyCoursePreferences.create(faculty=email,
-								  course = self.cleaned_data['course'],
-	 						      comments = self.cleaned_data['comments'],
-	 						      rank  = self.cleaned_data['rank'])
-	 	course_pref.save()
+     def save(self, email):
+        print self.cleaned_data['course']
+        course_pref = FacultyCoursePreferences.create(faculty=email,
+                        course = self.cleaned_data['course'],
+                        comments = self.cleaned_data['comments'],
+                        rank  = self.cleaned_data['rank'])
+        course_pref.save()
 
 class AddAvailabilityForm(forms.Form):
     DAYS = ('Monday', 'Monday',),('Tuesday','Tuesday'),('Wednesday','Wednesday'), ('Thursday','Thursday',), ('Friday', 'Friday')
