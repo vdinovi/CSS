@@ -1,6 +1,6 @@
 from django import forms
 from django.core.mail import send_mail
-from css.models import CUser, Room, Course, SectionType, Schedule, Section, Availability
+from css.models import CUser, Room, Course, SectionType, Schedule, Section, Availability, FacultyCoursePreferences
 from django.http import HttpResponseRedirect
 from settings import DEPARTMENT_SETTINGS, HOSTNAME
 import re
@@ -218,21 +218,21 @@ class AddSectionForm(forms.Form):
         section.save()
         return
 
+class CoursePrefModelChoiceField(forms.ModelChoiceField):
+    def label_from_instance(self,obj):
+ 	    return obj.name
+
 class CoursePrefForm(forms.Form):
-	 course = forms.ModelChoiceField(label='Course', queryset=Course.objects.values_list('name', flat=True))
+	 course = CoursePrefModelChoiceField(label='Course', queryset=Course.objects.filter(), empty_label="      ")
 	 comments = forms.CharField()
 	 rank = forms.IntegerField()
 
 	 def save(self, faculty):
-	 	course_pref = CoursePrefForm.create(faculty=faculty,
-								course = Course.objects.get(course=self.cleaned_data['course']),
-								comments = self.cleaned_data['comments'],
-	 						  	rank  = self.cleaned_data['rank'])
+	 	course_pref = FacultyCoursePreferences.create(faculty=faculty,
+                    course = self.cleaned_data['course'],
+	 						      comments = self.cleaned_data['comments'],
+	 						      rank  = self.cleaned_data['rank'])
 	 	course_pref.save()
-	 	print(faculty)
-	 	print(course)
-	 	print(comments)
-	 	print(rank)
 
 class AddAvailabilityForm(forms.Form):
     DAYS = ('Monday', 'Monday',),('Tuesday','Tuesday'),('Wednesday','Wednesday'), ('Thursday','Thursday',), ('Friday', 'Friday')

@@ -85,21 +85,29 @@ def HomeView(request):
 def CoursePreferences(request):
 	res = HttpResponse()
 	faculty = CUser.get_faculty(email = request.session.get('email'))
+
+	list = FacultyCoursePreferences.objects.filter(faculty=faculty)
+	#we have a query object, now we need to get it's attributes
 	if request.method == "GET":
-		return render(request,'course_prefs.html', {'add_course_pref': CoursePrefForm()})
+		return render(request,'course_prefs.html', {
+						'add_course_pref': CoursePrefForm(), 
+						'course_pref_list': FacultyCoursePreferences.objects.filter(faculty=faculty)
+						})
 	elif request.method == "POST" and 'add_course_pref' in request.POST:
-		print('here')
 		form = CoursePrefForm(request.POST)
+		print(form.errors)
+                print request.POST
 		if form.is_valid():
 			try:
 				form.save(faculty)
 				return HttpResponseRedirect('/course')
 			except ValidationError as e:
+				
 				return ErrorView(request, 400, "Invalid form entry")
-			else:
-				return ErrorView(request, 400, "Invalid form entry")
+		else:
+			print('here')
+			return ErrorView(request, 400, "Invalid form entry")
 	else:
-		print('form not valid')
 		return ErrorView(request, 400, "")
 	return res
 
@@ -342,7 +350,8 @@ def CoursesView(request):
                 'add_course_form': AddCourseForm(auto_id='add_course_%s'),
                 'edit_course_form': EditCourseForm(auto_id='edit_course_%s'),
                 'delete_course_form': DeleteCourseForm(),
-                'add_course_section_type_form': AddCourseSectionTypeForm()
+                'add_course_section_type_form': AddCourseSectionTypeForm(),
+		'upload_form': UploadForm()
             });
     elif request.method == "POST" and 'add-course-form' in request.POST:
         form = AddCourseForm(request.POST);
@@ -376,12 +385,12 @@ def CoursesView(request):
         else:
             return ErrorView(request, 400, "Invalid form entry")
 
-    elif request.method == "POST" and request.POST['request-name'] == 'course-section-request':
+    elif request.method == "POST" and 'course-section-request' in request.POST:
         courseName = request.POST.__getitem__('course')
         course = Course.get_course(courseName)
         res.content = course.get_all_section_types_JSON()
 
-    elif request.method == "POST" and request.POST['request-name'] == 'delete-section-type-request':
+    elif request.method == "POST" and 'delete-section-type-request' in request.POST:
         courseName = request.POST.__getitem__('course')
         sectionTypeName = request.POST.__getitem__('section_type_name')
         course = Course.get_course(courseName)
@@ -389,7 +398,7 @@ def CoursesView(request):
 
         res.content = course.get_all_section_types_JSON()
 
-    elif request.method == "POST" and request.POST['request-name'] == 'save-section-request':
+    elif request.method == "POST" and 'save-section-request' in request.POST:
             courseName = request.POST.__getitem__('course')
 
             course = Course.get_course(courseName)
@@ -401,10 +410,22 @@ def CoursesView(request):
             course.add_section_type(name, work_units, work_hours)
 
             res.content = course.get_all_section_types_JSON()
+    elif request.method == "POST" and 'course-import-data' in request.POST:
+	form = UploadForm(request.POST, request.FILES)
+	if form.is_valid():
+	    try:
+		result = Course.import_course_file(request.FILES['file'])
+		return HttpResponseRedirect("/resources/courses")
+	    except:
+		raise
+	    res.status_code = 500
+	else:
+	    res.status_code = 400
+	    res.reason_phrase = "Invalid form entry"
+
     else:
         return ErrorView(request, 400, "")
     return res
-
 #  Schedulers View
 # @descr Displays all of the schedulers currecntly registered in the database.
 #        Also includes a + and - button that link to the invite form and delete form
