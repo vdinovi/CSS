@@ -448,7 +448,7 @@ class Availability(models.Model):
 
     @classmethod
     def setRange(self, faculty, day_of_week, start_time, end_time, level):
-        if day_of_week == "Monday" or day_of_week == "Wednesday" or day_of_week == "Friday":
+        if day_of_week == "Mon/Wed/Fri":
             day_of_week = "mwf"
         else:
             day_of_week = "tth"
