@@ -33,15 +33,16 @@
       		<button type="submit" name="add_course_pref" class="save btn btn-default">Submit</button>
       	</form>
 
-      	{% for course in course_pref_list %}
-        	<h1> {{ course.name }} </h1>
-
-      		<ul id="sortable">
-  				<li class="ui-state-default"><span class="ui-icon ui-icon-arrowthick-2-n-s"></span>{{ course.name }}</li>
+		<div id="course-pref-list">
+			<h3>Courses</h3>
+			<ul id="sortable">
+			{% for pref in course_pref_list %}
+				<li style="border:2px;" class="ui-state-default"><span class="ui-icon ui-icon-arrowthick-2-n-s"></span>
+				{{ pref.course.name }}
+				</li>
+			{% endfor %}
 			</ul>
-
-		{% endfor %}
-
+		</div>
 
  	<!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>

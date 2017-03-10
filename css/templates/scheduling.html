@@ -48,118 +48,119 @@
           </div>
             <!-- <form id="new-section-form" method="POST" class="form-horizontal" role="form" onsubmit="NewSection()">  -->
             {% csrf_token %}
-            <div class="col-xs-4 well">
-              <div  class="row new-section-inputs">
-                <h3 style="text-align:center;">Create a New Section</h3>
-                <div class="col-xs-6">
-                  <label class="form-control-label" for="academic-term">Academic Term</label>
+            <div class="col-xs-4">
+              <h3 style="text-align:center;">Create a New Section</h3>
+                <div class="well new-section-form">
+                <div  class="row new-section-inputs">
+                  <div class="col-xs-6">
+                    <label class="form-control-label" for="academic-term">Academic Term</label>
+                  </div>
+                  <div class="col-xs-6 col-xs-offset-6">
+                    <select id="academic-term" class="form-control" type="text">
+                      <option value="" disabled selected>Select a term</option>
+                    {% for term in academic_terms %}
+                      <option value="{{ term.academic_term }}">{{ term.academic_term }}</option>
+                    {% endfor %}
+                    </select>
+                  </div>
                 </div>
-                <div class="col-xs-6 col-xs-offset-6">
-                  <select id="academic-term" class="form-control" type="text">
-                    <option value="" disabled selected>Select a term</option>
-                  {% for term in academic_terms %}
-                    <option value="{{ term.academic_term }}">{{ term.academic_term }}</option>
-                  {% endfor %}
-                  </select>
+                <div class="row new-section-inputs form-group has-danger">
+                  <div class="col-xs-6">
+                    <label for="course">Course</label>
+                  </div>
+                  <div class="col-xs-6 col-xs-offset-6">
+                    <select id="course" class="form-control" type="text">
+                      <option value="" disabled selected>Select a Course</option>
+                    {% for course in courses %}
+                      <option value="{{course.name}}">{{ course.name }}</option>
+                    {% endfor %}
+                    </select>
+                  </div>
+                </div>
+                <div class="row new-section-inputs form-group has-danger">
+                  <div class="col-xs-6">
+                    <label for="section-num">Section Number</label>
+                  </div>
+                  <div class="col-xs-6 col-xs-offset-6">
+                    <input id="section-num" class="form-control" type="integer">
+                  </div>
+                </div>
+                <div class="row new-section-inputs form-group has-danger">
+                  <div class="col-xs-6">            
+                    <label for="section-type">Section Type</label>
+                  </div>
+                  <div class="col-xs-6 col-xs-offset-6">
+                    <select id="section-type" class="form-control" type="text">
+                      <option value="" disabled selected>Select a type</option>
+                    {% for section_type in section_types %}
+                      <option value="{{section_type.name}}">{{ section_type.name }}</option>
+                    {% endfor %}
+                    </select>
+                  </div>
+                </div>
+                <div class="row new-section-inputs form-group has-danger">
+                  <div class="col-xs-6">
+                    <label for="faculty">Faculty</label>
+                  </div>
+                  <div class="col-xs-6 col-xs-offset-6">
+                    <select id="faculty" class="form-control" type="text">
+                      <option value="" disabled selected>Select faculty</option>
+                    {% for f in faculty %}
+                      <option value="{{f.user.email}}">{{ f.user.first_name }} {{ f.user.last_name }}</option>
+                    {% endfor %}
+                    </select>
+                  </div>
+                </div>
+                <div class="row new-section-inputs form-group has-danger">
+                  <div class="col-xs-6">
+                    <label for="room">Room</label>
+                  </div>
+                  <div class="col-xs-6 col-xs-offset-6">
+                    <select required="true" id="room" class="form-control" type="text">
+                      <option value="" disabled selected>Select a room</option>
+                    {% for room in rooms %}
+                      <option value="{{room.name}}">{{ room.name }}</option>
+                    {% endfor %}
+                    </select>
+                  </div>
+                </div>
+                <div class="row new-section-inputs form-group has-danger">
+                  <div class="col-xs-6">
+                    <label for="capacity">Capacity</label>
+                  </div>
+                  <div class="col-xs-6 col-xs-offset-6">
+                    <input id="capacity" class="form-control" type="integer">
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-xs-6">
+                    <label for="days">Days</label>
+                  </div>
+                  <div class="col-xs-6 col-xs-offset-6">
+                    <select id="days" class="form-control" type="text">
+                      <option value="" disabled selected>Select Days</option>
+                      <option value="MWF">Mon/Wed/Fri</option>
+                      <option value="TR">Tue/Thu</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-xs-6">
+                    <label for="start-time">Start Time</label>
+                  </div>
+                  <div class="col-xs-6 col-xs-offset-6">
+                    <input id="start-time" class="form-control" type="time">
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-xs-6">
+                    <label for="end-time">End Time</label>
+                  </div>
+                  <div class="col-xs-6 col-xs-offset-6">
+                    <input id="end-time" class="form-control" type="time">
+                  </div>
                 </div>
               </div>
-              <div class="row new-section-inputs form-group has-danger">
-                <div class="col-xs-6">
-                  <label for="course">Course</label>
-                </div>
-                <div class="col-xs-6 col-xs-offset-6">
-                  <select id="course" class="form-control" type="text">
-                    <option value="" disabled selected>Select a Course</option>
-                  {% for course in courses %}
-                    <option value="{{course.name}}">{{ course.name }}</option>
-                  {% endfor %}
-                  </select>
-                </div>
-              </div>
-              <div class="row new-section-inputs form-group has-danger">
-                <div class="col-xs-6">
-                  <label for="section-num">Section Number</label>
-                </div>
-                <div class="col-xs-6 col-xs-offset-6">
-                  <input id="section-num" class="form-control" type="integer">
-                </div>
-              </div>
-              <div class="row new-section-inputs form-group has-danger">
-                <div class="col-xs-6">            
-                  <label for="section-type">Section Type</label>
-                </div>
-                <div class="col-xs-6 col-xs-offset-6">
-                  <select id="section-type" class="form-control" type="text">
-                    <option value="" disabled selected>Select a type</option>
-                  {% for section_type in section_types %}
-                    <option value="{{section_type.name}}">{{ section_type.name }}</option>
-                  {% endfor %}
-                  </select>
-                </div>
-              </div>
-              <div class="row new-section-inputs form-group has-danger">
-                <div class="col-xs-6">
-                  <label for="faculty">Faculty</label>
-                </div>
-                <div class="col-xs-6 col-xs-offset-6">
-                  <select id="faculty" class="form-control" type="text">
-                    <option value="" disabled selected>Select faculty</option>
-                  {% for f in faculty %}
-                    <option value="{{f.user.email}}">{{ f.user.first_name }} {{ f.user.last_name }}</option>
-                  {% endfor %}
-                  </select>
-                </div>
-              </div>
-              <div class="row new-section-inputs form-group has-danger">
-                <div class="col-xs-6">
-                  <label for="room">Room</label>
-                </div>
-                <div class="col-xs-6 col-xs-offset-6">
-                  <select required="true" id="room" class="form-control" type="text">
-                    <option value="" disabled selected>Select a room</option>
-                  {% for room in rooms %}
-                    <option value="{{room.name}}">{{ room.name }}</option>
-                  {% endfor %}
-                  </select>
-                </div>
-              </div>
-              <div class="row new-section-inputs form-group has-danger">
-                <div class="col-xs-6">
-                  <label for="capacity">Capacity</label>
-                </div>
-                <div class="col-xs-6 col-xs-offset-6">
-                  <input id="capacity" class="form-control" type="integer">
-                </div>
-              </div>
-              <div class="row">
-                <div class="col-xs-6">
-                  <label for="days">Days</label>
-                </div>
-                <div class="col-xs-6 col-xs-offset-6">
-                  <select id="days" class="form-control" type="text">
-                    <option value="" disabled selected>Select Days</option>
-                    <option value="MWF">Mon/Wed/Fri</option>
-                    <option value="TR">Tue/Thu</option>
-                  </select>
-                </div>
-              </div>
-              <div class="row">
-                <div class="col-xs-6">
-                  <label for="start-time">Start Time</label>
-                </div>
-                <div class="col-xs-6 col-xs-offset-6">
-                  <input id="start-time" class="form-control" type="time">
-                </div>
-              </div>
-              <div class="row">
-                <div class="col-xs-6">
-                  <label for="end-time">End Time</label>
-                </div>
-                <div class="col-xs-6 col-xs-offset-6">
-                  <input id="end-time" class="form-control" type="time">
-                </div>
-              </div>
-             
               <button id="create-section-button" type="submit" class="btn btn-primary" data-toggle="modal" data-target="#confirm-create-conflicts-modal" onclick="sectionConflictCheck(this)">Create Section</button>
             </div>
             <div class="col-xs-6 col-offset-xs-6">

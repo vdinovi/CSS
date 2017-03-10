@@ -245,7 +245,7 @@ class AddAvailabilityForm(forms.Form):
     day = forms.ChoiceField(label='Day', choices=DAYS)
     start_time = forms.TimeField(label='Start Time')
     end_time = forms.TimeField(label='End Time')
-    level = forms.ChoiceField(label='Type', choices=[('Preferred', 'Preferred'), ('Unavailable','Unavailable')])
+    level = forms.ChoiceField(label='Type', choices=[('Preferred', 'Preferred'), ('Unavailable','Unavailable'), ('Available','Available')])
 
     def save(self, email):
         faculty = faculty = CUser.get_faculty(email=email)
