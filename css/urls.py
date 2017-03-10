@@ -23,7 +23,7 @@ from . import views, scheduling
 
 urlpatterns = [
     # BASE_URL/Home* addresses
-    url(r'^$', views.IndexView, name='index'),
+    url(r'^$', views.HomeView, name='home'),
     url(r'^home/$', views.HomeView, name='home'),
     url(r'^resources/', include([
         url(r'^faculty/$', views.FacultyView, name='faculty'),
