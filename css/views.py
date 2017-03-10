@@ -164,9 +164,6 @@ def AvailabilityView(request):
                 availAtTime[times[tthCount]]["tth"] = availability.level
                 tthCount += 1
 
-        for availability in availabilities:
-            print availability.start_time
-
         return render(request,'availability.html', {
                     'availAtTime': availAtTime,
                     'add_availability_form': AddAvailabilityForm()})
@@ -292,6 +289,10 @@ def LoginView(request):
                 request.session['first_name'] = user.first_name
                 request.session['last_name'] = user.last_name
                 request.session.set_expiry(6000) # 5 min session duration
+                if request.session['user_type'] == "faculty":
+                    return HttpResponseRedirect('/availability')
+                if request.session['user_type'] == "scheduler":
+                    return HttpResponseRedirect('/scheduling')
                 return HttpResponseRedirect('/home')
             # Authentication failed
             else:

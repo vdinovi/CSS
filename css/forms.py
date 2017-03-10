@@ -234,7 +234,6 @@ class CoursePrefForm(forms.Form):
      rank = forms.IntegerField()
 
      def save(self, email):
-        print self.cleaned_data['course']
         course_pref = FacultyCoursePreferences.create(faculty=email,
                         course = self.cleaned_data['course'],
                         comments = self.cleaned_data['comments'],
@@ -242,7 +241,7 @@ class CoursePrefForm(forms.Form):
         course_pref.save()
 
 class AddAvailabilityForm(forms.Form):
-    DAYS = ('Monday', 'Monday',),('Tuesday','Tuesday'),('Wednesday','Wednesday'), ('Thursday','Thursday',), ('Friday', 'Friday')
+    DAYS = ('Mon/Wed/Fri', 'Mon/Wed/Fri',),('Tue/Thu','Tue/Thu')
     day = forms.ChoiceField(label='Day', choices=DAYS)
     start_time = forms.TimeField(label='Start Time')
     end_time = forms.TimeField(label='End Time')
