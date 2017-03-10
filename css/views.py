@@ -84,12 +84,32 @@ def HomeView(request):
 
 from django.views.decorators.csrf import csrf_exempt
 @csrf_exempt
+def UpdateRank(request):
+    res = HttpResponse()
+    email = request.session.get('email')
+    faculty = CUser.get_faculty(email=email)
+
+    if request.method == 'POST': 
+        course_prefs = json.loads(request.body)
+        for rank,course_name in course_prefs.items():
+            course = Course.get_course(course_name)
+            print(course.name)
+            course_pref = FacultyCoursePreferences.objects.get(faculty=faculty, course=course)
+            course_pref.rank = rank
+            course_pref.save()
+            print(course_pref.rank)
+        res.status_code = 200
+    else:
+        res.status_code = 400 
+    return res
+
+
+from django.views.decorators.csrf import csrf_exempt
+@csrf_exempt
 def CoursePreferences(request):
     res = HttpResponse()
     email = request.session.get('email')
     faculty = CUser.get_faculty(email=email)
-    #course_pref_list = FacultyCoursePreferences.objects.filter(faculty=faculty).values('comments')
-    #print(course_pref_list)
 
     if request.method == "GET":
         print FacultyCoursePreferences.objects.filter(faculty=faculty)

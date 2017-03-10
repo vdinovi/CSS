@@ -61,11 +61,15 @@ class RegisterUserForm(forms.Form):
         super(RegisterUserForm, self).__init__(*args,**kwargs)
 
     def save(self):
-        user = CUser.create(email=self.cleaned_data['email'],
-                            password=self.cleaned_data['password2'],
-                            user_type=self.cleaned_data['user_type'],
-                            first_name=self.cleaned_data['first_name'],
-                            last_name=self.cleaned_data['last_name'])
+	if CUser.objects.filter(user__email = self.cleaned_data['email']).exists():
+	    user = CUser.get_user(email = self.cleaned_data['email'])
+	    user.is_active = True
+	else:
+            user = CUser.create(email=self.cleaned_data['email'],
+                                password=self.cleaned_data['password2'],
+                                user_type=self.cleaned_data['user_type'],
+                                first_name=self.cleaned_data['first_name'],
+                                last_name=self.cleaned_data['last_name'])
         user.save()
         return user
 
