@@ -231,7 +231,6 @@ def GetSectionInfo(request):
 def EditSection(request):
     res = HttpResponse()
     if request.method == "POST":
-        print request.body
         sectionData = json.loads(request.body)
         section = Section.get_section_by_name(sectionData['name'])
         

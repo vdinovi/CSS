@@ -36,9 +36,14 @@
     position: absolute;
     min-width:300px;
     height: 550px;
-    background-color: #e5e5e5;
+    background-color: #FFF;
     border: 1px solid black;
     display:inline-block;
+}
+
+.new-section-form {
+    overflow-y: scroll;
+    height: 390px;
 }
 
 
@@ -47,7 +52,7 @@
     position: absolute;
     min-width:300px;
     height: 550px;
-    background-color: #e5e5e5;
+    background-color: #FFF;
     border: 1px solid black;
     overflow-x: scroll;
     white-space: nowrap;
@@ -60,7 +65,7 @@
 }
 
 .inner-frame {
-    background-color: #cccccc;
+    background-color: #e9e9e9;
     width: 100%;
     height: 300px;
     margin: 0 auto;
@@ -73,6 +78,7 @@
 
 #filter-logic-frame {
     padding-left: 0px;
+    overflow-y: auto;
 }
 
 /* ********************** */
@@ -132,6 +138,10 @@ input[type=checkbox] {
     height: 100%;
 }
 
+button#create-section-button {
+    margin: -10px 0 0 0px;
+}
+
 /* **************************** */
 /* ***** Data Display ********* */
 /* **************************** */
@@ -139,7 +149,7 @@ input[type=checkbox] {
 .data-display-window {
     margin-top: 20px;
     background-color: white;
-    width: 100%;
+    width: 135%;
     height: 450px;
     border: 1px solid black;
     border-radius: 5px;
@@ -266,7 +276,6 @@ input[type=checkbox] {
 
 /* **** FILTER LOGIC **** */
 .filter-logic {
-    background-color: #ccccc9;
     width: 100%;
     height: 23%;
     bottom:0;
@@ -349,7 +358,6 @@ div#filter-logic-frame > div > div > select[disabled] {
 
 /* filter logic frame custom style from other frames */
 h4.filter-logic {
-    background-color: #e5e5e5;
     text-align: center;
     padding-top: 50px;
 }

@@ -383,7 +383,6 @@ function selectOption(element) {
             break;
         }
     }
-    console.log("#"+filterType.prop('id').split("-options")[0]+"-logic-checkbox");
     if ($("#"+filterType.prop('id').split("-options")[0]+"-logic-checkbox").prop("checked") == false) {
         $("#"+filterType.prop('id').split("-options")[0]+"-logic-checkbox").click();
     }
@@ -529,7 +528,6 @@ function updateFilters() {
             filters[filterType]['filters'] = otherArr
         }
     }); 
-    console.log(filters);
 }
 
 // OnClick function for a filter logic checkbox
@@ -730,13 +728,9 @@ function sectionConflictCheck(element) {
             }
             else {
                 if (element.id.includes("create")) {
-                    // $('#confirm-create-conflicts-modal').show();
-                    // $('#confirm-create-conflicts-modal').toggleClass("in");
                     frame = $("#confirm-create-section-check");
                 }
                 else {
-                    // $('#confirm-edit-conflicts-modal').show();
-                    // $('#confirm-edit-conflicts-modal').toggleClass("in");
                     frame = $("#confirm-edit-section-check");
                 }
                 
@@ -833,9 +827,8 @@ function updateSectionDetailConflicts() {
                         room_string = 'class=\"alert-danger room-conflict\" data-toggle=\"popover\" data-trigger=\"hover\" title=\"Conflicting Sections\" data-content=\"BLAH\"'
                     }
 
-                    sectionDetailEntry.prepend(conflictSectionFormatString.format(sectionDetails[key].name, underscoreToSpaces(sectionDetails[key].name), sectionDetails[key].term, sectionDetails[key].course, sectionDetails[key].type, 
-                        faculty_string, sectionDetails[key].faculty, room_string, sectionDetails[key].room, sectionDetails[key].days, sectionDetails[key].start_time, 
-                        sectionDetails[key].end_time));
+                    sectionDetailEntry.prepend(conflictSectionFormatString.format(sectionDetails[key].name, underscoreToSpaces(sectionDetails[key].course_num), sectionDetails[key].term, sectionDetails[key].course, sectionDetails[key].type, 
+                        faculty_string, sectionDetails[key].faculty, room_string, sectionDetails[key].room, sectionDetails[key].days, toStandardTime(sectionDetails[key].start_time), toStandardTime(sectionDetails[key].end_time)));
                 }
             }
         },
@@ -964,6 +957,7 @@ function displaySectionInfo(sectionElement) {
             }
 
             conflicts_frame = $('#conflicts-frame')
+            conflicts_frame.empty();
             if (conflicts['room'].length || conflicts['faculty'].length) {
                 var roomFormatStr1 = "<div class=\"col-xs-6\" style=\"text-align:center;\"\>\n" +
                              "<h4>Room Conflicts</h4>\n" +
@@ -1033,10 +1027,19 @@ function editSection(sectionData) {
 }
 
 /*** EDIT SECTION INFO FUNCTIONS  ***/
-function renderSectionNumber() {
-
+var reA = /[^a-zA-Z]/g;
+var reN = /[^0-9]/g;
+function sortAlphaNum(a,b) {
+    var aA = a.replace(reA, "");
+    var bA = b.replace(reA, "");
+    if(aA === bA) {
+        var aN = parseInt(a.replace(reN, ""), 10);
+        var bN = parseInt(b.replace(reN, ""), 10);
+        return aN === bN ? 0 : aN > bN ? 1 : -1;
+    } else {
+        return aA > bA ? 1 : -1;
+    }
 }
-
 
 // removes the section row from Section Details (does not delete)
 function removeSectionFromDetails(element) {
@@ -1049,7 +1052,13 @@ function removeSectionFromDetails(element) {
 
 // sort by given attribute in Section Details 
 function sortSectionDetailsBy(element, attribute) {
-    sectionDetails.sort(function(a,b) { return a[attribute].localeCompare(b[attribute]); });
+    sectionDetails.sort(function(a,b) { 
+            if (attribute.includes("time")) {
+                return sortAlphaNum(toMilitaryTime(b[attribute]), toMilitaryTime(a[attribute])); 
+            } else {
+                return sortAlphaNum(b[attribute], a[attribute]); 
+            }
+        });
     updateSectionDetails(true);
     $(element).parent().children("th").each(function(index,value) {
         $(value).toggleClass("sorted", false);
@@ -1272,6 +1281,19 @@ $("#course").on('change', function() {
 
 $("#faculty").on('change', function() {
     //@TODO Render faculty availability and course preferences
+    $("#data-window").children().each( function(index, value) {
+        $(value).hide();
+    });
+    facultyName = $("#faculty option:selected").text();
+    facultyEmail = $("#faculty").val();
+    facultyTabName = "{0} {1}";
+    facultyTimesId = spacesToUnderscores(facultyName) + '-faculty-times';
+    facultyPrefsId = spacesToUnderscores(facultyName) + '-faculty-prefs';
+    facultyTimesContent = "<p>Times</p>";
+    facultyPrefsContent = "<p>Course Preferences</p>";
+    openDataTab(facultyTimesId, facultyTabName.format(facultyName, "times"), facultyTimesContent);
+    openDataTab(facultyPrefsId, facultyTabName.format(facultyName, "prefs"), facultyPrefsContent);
+    selectDataTab(facultyPrefsId);
 });
 
 $("#room").on('change', function() {

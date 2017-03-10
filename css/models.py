@@ -424,7 +424,7 @@ class Availability(models.Model):
     faculty = models.ForeignKey(CUser, on_delete=models.CASCADE, null=True)
     day_of_week = models.CharField(max_length=16, null=True) # MWF or TR
     start_time = models.TimeField(null=True)
-    level = models.CharField(max_length=16, null=True) #preferred, unavailable
+    level = models.CharField(max_length=16, null=True) #preferred, unavailable, available
 
     @classmethod
     def get_availabilities(cls, faculty):
@@ -466,7 +466,7 @@ class Availability(models.Model):
             raise ValidationError("Invalid days of week input")
         elif (start_time is None):
             raise ValidationError("Need to input start time")
-        elif (level is None) or (level != "Preferred" and level != "Unavailable"):
+        elif (level is None) or (level != "Preferred" and level != "Unavailable" and level != "Available"):
             raise ValidationError("Need to input level of availability: Preferred or Unavailable")
         else:
             availability = cls(faculty=faculty,day_of_week=day, start_time=start_time, end_time=end_time, level=level)
