@@ -167,7 +167,8 @@ def ConflictCheck(request):
             sectionData['end-time'], 
             sectionData['room'], 
             sectionData['faculty'], 
-            sectionData['schedule'])
+            sectionData['schedule'],
+            sectionData['days'])
         res.content_type = 'json'
         res.write(json.dumps(conflicts))
         res.status_code = 200
@@ -283,6 +284,7 @@ def DeleteSection(request):
 def Conflicts(section):
     start_time = datetime.strptime(section.start_time, '%H:%M').time()
     end_time = datetime.strptime(section.end_time, '%H:%M').time()
+    days = section.days
     room = section.room
     faculty = section.faculty
     academic_term = section.schedule
@@ -293,7 +295,7 @@ def Conflicts(section):
     #   - Q(start_time__range=[start_time, end_time])    starts in the middle of the section
     #   - Q(end_time__range=[start_time, end_time])      ends in the middle of the section
     #   - Q(start_time__lt = start_time, end_time__gt = end_time)
-    sections = Section.objects.filter(schedule=academic_term).filter(Q(start_time__range=[start_time, end_time]) | Q(end_time__range=[time(start_time.hour, start_time.minute + 1), end_time]) | Q(start_time__lt = start_time, end_time__gt = end_time))
+    sections = Section.objects.filter(schedule=academic_term, days=days).filter(Q(start_time__range=[start_time, end_time]) | Q(end_time__range=[time(start_time.hour, start_time.minute + 1), end_time]) | Q(start_time__lt = start_time, end_time__gt = end_time))
 
     # Check if rooms or faculty overlap
     for s in sections:
@@ -314,7 +316,7 @@ def Conflicts(section):
 
 # Temporary confirmation that there are no conflicts when creating a 
 # section.
-def Confirmation(start_time, end_time, room, faculty, schedule):
+def Confirmation(start_time, end_time, room, faculty, schedule, days):
     academic_term = Schedule.get_schedule(schedule)
     room = Room.get_room(room)
     if "@" in faculty:
@@ -323,7 +325,7 @@ def Confirmation(start_time, end_time, room, faculty, schedule):
         faculty = CUser.get_faculty_by_full_name(faculty)
     start_time = datetime.strptime(start_time, '%H:%M').time()
     end_time = datetime.strptime(end_time, '%H:%M').time()
-    sections = Section.objects.filter(schedule=academic_term).filter(Q(start_time__range=[start_time, end_time]) | Q(end_time__range=[time(start_time.hour, start_time.minute + 1), end_time]) | Q(start_time__lt = start_time, end_time__gt = end_time))
+    sections = Section.objects.filter(schedule=academic_term, days=days).filter(Q(start_time__range=[start_time, end_time]) | Q(end_time__range=[time(start_time.hour, start_time.minute + 1), end_time]) | Q(start_time__lt = start_time, end_time__gt = end_time))
     conflicts = {'room': [], 'faculty': []}
 
     # Check if rooms or faculty overlap
