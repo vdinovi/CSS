@@ -1049,7 +1049,13 @@ function removeSectionFromDetails(element) {
 
 // sort by given attribute in Section Details 
 function sortSectionDetailsBy(element, attribute) {
-    sectionDetails.sort(function(a,b) { return a[attribute].localeCompare(b[attribute]); });
+    sectionDetails.sort(function(a,b) { 
+            if (attribute.includes("time")) {
+                return toMilitaryTime(a[attribute]).localeCompare(toMilitaryTime(b[attribute])); 
+            } else {
+                return a[attribute].localeCompare(b[attribute]); 
+            }
+        });
     updateSectionDetails(true);
     $(element).parent().children("th").each(function(index,value) {
         $(value).toggleClass("sorted", false);

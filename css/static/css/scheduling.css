@@ -73,6 +73,7 @@
 
 #filter-logic-frame {
     padding-left: 0px;
+    overflow-y: auto;
 }
 
 /* ********************** */
