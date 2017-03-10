@@ -871,34 +871,36 @@ function updateSectionDetails(resort) {
 
 function confirmDeleteModal(sectionElement) {
     sectionName = spacesToUnderscores($($(sectionElement).parent().next("td")).text());
+    sectionId = $(sectionElement).parent().parent().prop('id');
     sectionIndex = inArrayByName(sectionName, sectionDetails);
     section = sectionDetails[sectionIndex];
-    formatStr = "<h4\>{0}\</h4>\n" +
+    formatStr = "<h4 id=\"{0}-delete\"\>{1}\</h4>\n" +
                 "<ul>\n" +
-                "<li>{1} {2}</li>\n" +
-                "<li>{3} {4}</li>\n" +
-                "<li>{5} {6} - {7}</li>\n" +
+                "<li>{2} {3}</li>\n" +
+                "<li>{4} {5}</li>\n" +
+                "<li>{6} {7} - {8}</li>\n" +
                 "</ul>\n";
     frame = $("#delete-section-check");
     frame.empty();
-    frame.append(formatStr.format(underscoreToSpaces(section.course_num), section.term, section.faculty, section.type, section.room, section.days, toStandardTime(section.start_time), toStandardTime(section.end_time)));
+    frame.append(formatStr.format(sectionId, underscoreToSpaces(section.course_num), section.term, section.faculty, section.type, section.room, section.days, toStandardTime(section.start_time), toStandardTime(section.end_time)));
 }
 
 
-function removeDeletedSection(sectionName) {
-    $("#"+sectionName+"-detail").remove();
+function removeDeletedSection(sectionId) {
+    $("#"+sectionId).remove();
     $("#delete-section-modal").children(".close").click();
 }
 
 function deleteSection(element) {
     sectionName = $($("#delete-section-check").children('h4')[0]).text();
+    sectionId = $($("#delete-section-check").children('h4')[0]).prop('id');
     $.ajax({
         type: "POST",
         url: "deleteSection",
         dataType: 'json',
         data: JSON.stringify({"section": sectionName}),
         success: function(response) {
-            removeDeletedSection(spacesToUnderscores(sectionName));
+            removeDeletedSection(spacesToUnderscores(sectionId.split("-delete")[0]));
         },
         error: function(err) {
             console.log(err);
