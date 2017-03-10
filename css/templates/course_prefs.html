@@ -32,17 +32,15 @@
       		{{ add_course_pref.as_p }}
       		<button type="submit" name="add_course_pref" class="save btn btn-default">Submit</button>
       	</form>
+      	
+      	<ul id="sortable">
+      		{% for course_pref in course_pref_list %}
+  				<li class="element"><span class="ui-icon ui-icon-arrowthick-2-n-s"></span>{{ course_pref.course.name }}</li>
+  			{% endfor %}
+		</ul>
 
-      	{% for course in course_pref_list %}
-        	<h1> {{ course.name }} </h1>
-
-      		<ul id="sortable">
-  				<li class="ui-state-default"><span class="ui-icon ui-icon-arrowthick-2-n-s"></span>{{ course.name }}</li>
-			</ul>
-
-		{% endfor %}
-
-
+		<button id='update-rank' type="submit" onclick ="updateRank()" class="save btn btn-default">Update Rank</button>
+	
  	<!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
     <!-- Include all compiled plugins (below), or include individual files as needed -->
@@ -50,9 +48,13 @@
 
 	<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
  	<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
+    {% load static %}
+    <script src="{% static "js/course_prefs.js" %}"></script>
+
     <script>
 		$( function() {
-    	$( "#sortable" ).sortable();
+		$( "#sortable" ).sortable(); 
     	$( "#sortable" ).disableSelection();
   		} );
   	</script>

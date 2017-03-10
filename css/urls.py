@@ -30,6 +30,10 @@ urlpatterns = [
         url(r'^rooms/$', views.RoomsView, name='rooms'),
         url(r'^courses/$', views.CoursesView, name='courses'),
     ])),
+    url(r'^course/', include([
+    	url(r'^$', views.CoursePreferences, name='course'),
+   	 	url(r'^update-rank$', views.UpdateRank, name='update_rank')
+    ])),
     url(r'^scheduling/', include([
         url(r'^$', views.SchedulingView, name='scheduling'),
         url(r'^options$', scheduling.Options, name='options'), 
@@ -58,7 +62,8 @@ urlpatterns = [
     url(r'^logout/$', views.LogoutView, name='logout'),
     url(r'^availability/$', views.AvailabilityView, name='availability'),
     url(r'^availability/availabilityView$', views.AvailabilityView, name='availabilityView'),
-    url(r'^course/$', views.CoursePreferences, name='course')
+    url(r'^course/$', views.CoursePreferences, name='course'),
+    url(r'^course/updateRank$', views.CoursePreferences, name='updateRank'),
 
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 
