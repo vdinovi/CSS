@@ -88,8 +88,8 @@ def CoursePreferences(request):
     res = HttpResponse()
     email = request.session.get('email')
     faculty = CUser.get_faculty(email=email)
-    course_pref_list = FacultyCoursePreferences.objects.filter(faculty=faculty)
-    print(course_pref_list)
+    #course_pref_list = FacultyCoursePreferences.objects.filter(faculty=faculty).values('comments')
+    #print(course_pref_list)
 
     if request.method == "GET":
         return render(request,'course_prefs.html', {
