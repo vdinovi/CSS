@@ -66,3 +66,61 @@ table.table-borderless > thead > tr > th, table.table-borderless > tbody > tr > 
 .table tbody tr.hover td, .table tbody tr.hover th {
     background-color: whiteSmoke;
 }
+
+div#course-prefs {
+    width: 100%;
+}
+
+div#new-course-pref {
+    float: left;
+    width: 40%;
+    padding-left: 20px;
+}
+
+div#course-prefs-list {
+    float: left;
+    width: 45%;
+    padding-right: 15px;
+}
+
+div#update-rank-btn {
+    float: left;
+    width: 14%;
+    padding-top: 2%;
+}
+
+button.btn {
+    background-color: #94bdbd;
+    color: black;
+}
+
+button.btn.active .btn:active {
+    background-color: #94bdbd;
+}
+
+#sortable { 
+    /* list-style-type: none; */
+    margin: 0; 
+    padding: 0; 
+    width: 60%; 
+}
+
+#sortable li { 
+    margin: 0 3px 3px 3px; 
+    padding-left: 1.5em; 
+    font-size: 1.4em; 
+    height: 18px; 
+    padding: 1.5em;
+    line-height: 1em;
+}
+
+#sortable li span { 
+    position: absolute; 
+    margin-left: -1.3em; 
+}
+
+#sortable > li > p {
+    margin: 0px;
+}
+
+
