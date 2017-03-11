@@ -32,8 +32,8 @@
               <tr class="top">
                 <th>Edit</th>
                 <th>Name</th>
-                <th>Description</th>
                 <th>Equipment Requirements</th>
+                <th>Description</th>
               </tr>
             </thead>
             <tbody>
@@ -44,8 +44,8 @@
                   <button type="button" class="btn btn-info btn-xs" data-toggle="modal" data-target="#edit-course" onclick="setEditFormFields('{{ course.name }}', 'course'), getCourseInfo('{{ course.name }}', '{{ csrf_token }}')"><span class="glyphicon glyphicon-edit"></span>&nbsp;</button>
                 </td>
                 <td name="courseName">{{ course.name }}</td>
-                <td name="description">{{ course.description }}</td>
                 <td name="equipment_req">{{ course.equipment_req }}</td>
+                <td name="description">{{ course.description }}</td>
               </tr>
               {% endfor %}
             </tbody>
