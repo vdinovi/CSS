@@ -720,18 +720,36 @@ function sectionConflictCheck(element) {
             faculty_conflicts = response.faculty;
             if (!(room_conflicts.length) && !(faculty_conflicts.length)) {
                 if (element.id.includes("create")) {
+                    console.log("create new section!");
+                    frame = $("#create-conflict-modal-header");
+                    frame.empty();
+                    frame.append("<div class=\"section-detail-modal-header\">Success!</div><button type=\"button\" class=\"close\" data-dismiss=\"modal\">&times;</button></div>");
+                    frame.append("<div id=\"confirm-conflicts-modal-body\" class=\"modal-body\"><div id=\"response-btns\"><button class=\"btn response-btn\" data-dismiss=\"modal\">Continue</button></div></div>");
                     newSection();
                 }
                 else {
+                    frame = $("#edit-conflict-modal-header");
+                    frame.empty()
+                    frame.append("<div class=\"section-detail-modal-header\">Success!</div><button type=\"button\" class=\"close\" data-dismiss=\"modal\">&times;</button></div>");
+                    frame.append("<div id=\"edit-conflicts-modal-body\" class=\"modal-body\"><div id=\"response-btns\"><button class=\"btn response-btn\" data-dismiss=\"modal\">Continue</button></div></div>");
                     editSection();
                 }
             }
             else {
+
+                modalFormatStr1 = "<div class=\"section-detail-modal-header\">You have a conflict!!!</div>\n<button type=\"button\" class=\"close\" data-dismiss=\"modal\">&times;</button></div>"
+
                 if (element.id.includes("create")) {
-                    frame = $("#confirm-create-section-check");
+                    frame = $("#create-conflict-modal-header");
+                    frame.empty();
+                    modalFormatStr2 = "<div id=\"confirm-conflicts-modal-body\" class=\"modal-body\">\n<div id=\"confirm-create-section-check\"> "
+                    modalFormatStr3 = "</div>\n<div id=\"response-btns\">\n<button class=\"btn response-btn\" data-dismiss=\"modal\">Cancel</button>\n<button class=\"btn response-btn\" onclick=\"newSection()\" data-dismiss=\"modal\">Create Section</button>\n</div>"
                 }
                 else {
-                    frame = $("#confirm-edit-section-check");
+                    frame = $("#edit-conflict-modal-header");
+                    frame.empty()
+                    modalFormatStr2 = "<div id=\"confirm-conflicts-modal-body\" class=\"modal-body\">\n<div id=\"confirm-edit-section-check\"> "
+                    modalFormatStr3 = "</div>\n<div id=\"response-btns\">\n<button class=\"btn response-btn\" data-dismiss=\"modal\">Cancel</button>\n<button class=\"btn response-btn\" onclick=\"editSection()\" data-dismiss=\"modal\">Edit Section</button>\n</div>"
                 }
                 
 
@@ -764,7 +782,8 @@ function sectionConflictCheck(element) {
                 var facultyFormatStr = facultyFormatStr1 + facultyFormatStr2 + facultyFormatStr3;
 
                 frame.empty()
-                frame.append(roomFormatStr + facultyFormatStr);
+                console.log(modalFormatStr1 + modalFormatStr2 + roomFormatStr + facultyFormatStr + modalFormatStr3)
+                frame.append(modalFormatStr1 + modalFormatStr2 + roomFormatStr + facultyFormatStr + modalFormatStr3);
                                    
             }
         },
