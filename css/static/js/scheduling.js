@@ -670,6 +670,8 @@ function newSection(sectionData) {
             $("#new-section-frame").find("input").each(function (index, value) {
                 ($(value).val(''));
             })
+
+            getFilteredSections();
         },
         error: function(err) {
             console.log(err);
@@ -1040,6 +1042,7 @@ function editSection(sectionData) {
         dataType: 'json',
         success: function(response) {
             console.log("Successful update!");
+            getFilteredSections();
         },
         error: function(err) {
             console.log(err);
