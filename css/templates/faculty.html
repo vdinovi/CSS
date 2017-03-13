@@ -45,7 +45,7 @@
               {% for cuser in faculty_list %}
               <tr>
                 <td>
-                <button type="button" class="btn btn-info btn-xs" data-toggle="modal" data-target="#delete-faculty" onclick="setDeleteID('{{ faculty.user.email }}')"><span class="glyphicon glyphicon-trash"></span>&nbsp;</button>
+                <button type="button" class="btn btn-info btn-xs" data-toggle="modal" data-target="#delete-faculty" onclick="setDeleteFormItem('{{ CUser.user.email }}', 'id_user_email')"><span class="glyphicon glyphicon-trash"></span>&nbsp;</button>
                 <button type="button" class="btn btn-info btn-xs" data-toggle="modal" data-target="#edit-faculty"><span onclick="updateRoom('{{ faculty.user.name }}')" class="glyphicon glyphicon-edit"></span>&nbsp;</button>
                 </td>
                 <td>{{ cuser.user.email }}</td>
@@ -54,7 +54,7 @@
               {% endfor %}
             </tbody>
           </table>
-          <button type="button" class="btn btn-info btn-xs" data-toggle="modal" data-target="#add-faculty">+</button>
+          <button type="button" class="btn btn-info btn-xs" data-toggle="modal" data-target="#add-faculty"><span class="glyphicon glyphicon-plus"></span>&nbsp;</button>
         </div>
       </div>
     </div>

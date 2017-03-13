@@ -1,5 +1,5 @@
 from django.http import HttpResponse, HttpResponseRedirect
-from .models import Course, CUser, Room, Schedule, Section, SectionConflict
+from .models import Course, CUser, Room, Schedule, Section, SectionType, SectionConflict, StudentPlanData, CohortData, CohortTotal
 from .forms import AddScheduleForm
 import json
 from django.db import IntegrityError
@@ -130,10 +130,9 @@ def Sections(request):
 def NewSection(request):
     res = HttpResponse()
     if request.method == "POST":
-        res.status_code = 200
-        res.write(request.body)
         sectionData = json.loads(request.body)
-        Section.create(
+        new_section = Section.create(
+                sectionData['section-num'],
                 sectionData['schedule'],
                 sectionData['course'],
                 sectionData['section-type'],
@@ -150,6 +149,126 @@ def NewSection(request):
                 'n',
                 None
                 )
+        Conflicts(new_section)
+        res.status_code = 200
+        res.write(request.body)
+    else:
+        res.status_code = 400
+    return res
+
+# Checking conflicts for new section.
+@csrf_exempt
+def ConflictCheck(request):
+    res = HttpResponse()
+    if request.method == "POST":
+        sectionData = json.loads(request.body)
+        conflicts = Confirmation(
+            sectionData['start-time'], 
+            sectionData['end-time'], 
+            sectionData['room'], 
+            sectionData['faculty'], 
+            sectionData['schedule'],
+            sectionData['days'])
+        res.content_type = 'json'
+        res.write(json.dumps(conflicts))
+        res.status_code = 200
+    else:
+        res.status_code = 400
+    return res
+
+@csrf_exempt
+def SectionDetailConflicts(request):
+    res = HttpResponse()
+    if request.method == "POST":
+        sectionDetails = json.loads(request.body)['section_details']
+        conflict_dict = {}
+        for s in sectionDetails:
+            section = Section.get_section_by_name(s['name'])
+            faculty_conflicts = Section.get_conflicts('faculty', section)
+            room_conflicts = Section.get_conflicts('room', section)
+            conflict_dict[s['name']] = {'faculty': faculty_conflicts,
+                                        'room': room_conflicts}
+        res.content_type = 'json'
+        res.write(json.dumps(conflict_dict))
+        res.status_code = 200
+    else:
+        res.status_code = 400
+    return res
+
+
+# Editing a section
+@csrf_exempt
+def GetSectionInfo(request):
+    res = HttpResponse()
+    if request.method == "POST":
+        sectionName = json.loads(request.body)['section']
+        section = Section.get_section_by_name(sectionName)
+        section_types = SectionType.get_all_section_types()
+        for obj in section_types:
+            for attr in section_types.query.deferred_loading[0]:
+                obj._meta.local_fields.append(section_types.model._meta.get_field(attr))
+        serialized_types = json.loads(serializers.serialize("json", section_types))
+        section_info = {'options': {
+                            'type': [serialized_types[i]["fields"]["name"] for i in range(len(serialized_types))],
+                            'faculty': [fac.to_json()['name'] for fac in CUser.get_all_faculty()],
+                            'room': [room.to_json()['name'] for room in Room.get_all_rooms()], 
+                        }, 
+                        'info': section.to_json(),
+                        'conflicts': {
+                            'room': Section.get_conflicts('room', section),
+                            'faculty': Section.get_conflicts('faculty', section)
+                        }
+                        }
+        res.content_type = "json"
+        res.write(json.dumps(section_info))
+        res.status_code = 200
+    else:
+        res.status_code = 400
+    return res
+### Can edit everything besides the section number, the course, and the term 
+
+# Editing an existing section.
+@csrf_exempt
+def EditSection(request):
+    res = HttpResponse()
+    if request.method == "POST":
+        sectionData = json.loads(request.body)
+        section = Section.get_section_by_name(sectionData['name'])
+        
+        section_type = SectionType.get_section_type(sectionData['type'])
+        faculty = CUser.get_faculty_by_full_name(sectionData['faculty'])
+        room = Room.get_room(sectionData['room'])
+
+        section.section_num=sectionData['section-num']
+        section.section_type=section_type
+        section.faculty=faculty
+        section.room=room
+        section.capacity=int(sectionData['capacity'])
+        section.students_enrolled=int(sectionData['students_enrolled'])
+        section.students_waitlisted=int(sectionData['students_waitlisted'])
+        section.days=sectionData['days']
+        section.start_time=sectionData['start-time']
+        section.end_time=sectionData['end-time']
+        
+        section.save()
+        res.status_code = 200
+        res.write(request.body)
+    else:
+        res.status_code = 400
+    return res
+
+# Deleting a section.
+@csrf_exempt
+def DeleteSection(request):
+    res = HttpResponse()
+    if request.method == "POST":
+        sectionName = json.loads(request.body)["section"]
+        sectionObjects = Section.get_sections_by_name(sectionName)
+        for obj in sectionObjects:
+            obj.delete()
+        res.content_type = "json"
+        res.write(json.dumps({"response":"Success!"}))
+        res.status_code = 200
     else:
         res.status_code = 400
     return res
@@ -165,13 +284,18 @@ def NewSection(request):
 def Conflicts(section):
     start_time = datetime.strptime(section.start_time, '%H:%M').time()
     end_time = datetime.strptime(section.end_time, '%H:%M').time()
+    days = section.days
     room = section.room
     faculty = section.faculty
     academic_term = section.schedule
 
     # Find all sections that are between start_time and end_time of the new section
-    # sections = Section.objects.filter(schedule=academic_term).filter(start_time__range=[start_time, end_time]).filter(end_time__range=[start_time, end_time])
-    sections = Section.objects.filter(schedule=academic_term).filter(Q(start_time__range=[start_time, end_time]) | Q(end_time__range=[time(start_time.hour, start_time.minute + 1), end_time]))
+
+    # cases:
+    #   - Q(start_time__range=[start_time, end_time])    starts in the middle of the section
+    #   - Q(end_time__range=[start_time, end_time])      ends in the middle of the section
+    #   - Q(start_time__lt = start_time, end_time__gt = end_time)
+    sections = Section.objects.filter(schedule=academic_term, days=days).filter(Q(start_time__range=[start_time, end_time]) | Q(end_time__range=[time(start_time.hour, start_time.minute + 1), end_time]) | Q(start_time__lt = start_time, end_time__gt = end_time))
 
     # Check if rooms or faculty overlap
     for s in sections:
@@ -180,13 +304,145 @@ def Conflicts(section):
             s.conflict_reason = 'room'
             s.save()
             if s.id != section.id:
-                SectionConflict.create(section, s, 'room')
+                conflict = SectionConflict.create(section, s, 'room')
+                conflict.save()
         if s.faculty == faculty:
             s.conflict = 'y'
             s.conflict_reason = 'faculty'
             s.save()
             if s.id != section.id:
-                SectionConflict.create(section, s, 'faculty')
+                conflict = SectionConflict.create(section, s, 'faculty')
+                conflict.save()
 
+# Temporary confirmation that there are no conflicts when creating a 
+# section.
+def Confirmation(start_time, end_time, room, faculty, schedule, days):
+    academic_term = Schedule.get_schedule(schedule)
+    room = Room.get_room(room)
+    if "@" in faculty:
+        faculty = CUser.get_faculty(faculty)
+    else:
+        faculty = CUser.get_faculty_by_full_name(faculty)
+    start_time = datetime.strptime(start_time, '%H:%M').time()
+    end_time = datetime.strptime(end_time, '%H:%M').time()
+    sections = Section.objects.filter(schedule=academic_term, days=days).filter(Q(start_time__range=[start_time, end_time]) | Q(end_time__range=[time(start_time.hour, start_time.minute + 1), end_time]) | Q(start_time__lt = start_time, end_time__gt = end_time))
+    conflicts = {'room': [], 'faculty': []}
+
+    # Check if rooms or faculty overlap
+    for s in sections:
+        if s.room == room:
+            conflicts['room'].append(s.to_json())
+        if s.faculty == faculty:
+            conflicts['faculty'].append(s.to_json())
+
+    return conflicts
+
+
+def GetStudentPlanData(request):
+    res = HttpResponse()
+    if request.method == "GET":
+        try:
+            term = request.GET.get('schedule')
+            schedule = Schedule.get_schedule(term_name=term)
+            student_plan_data = StudentPlanData.get_student_plan_data(schedule=schedule).all()
+            data = []
+            for v in student_plan_data:
+               data.append(v.to_json())
+            res.write(json.dumps({'data': data}))
+        except KeyError as e:
+            res.status_code = 400
+            if term == None:
+                res.reason_phrase = "Missing schedule in query string"
+            else:
+                res.status_code = 500
+        except ObjectDoesNotExist:
+            res.status_code = 400
+            if schedule is None:
+                res.reason_phrase = "Schedule '%s' does not exist" % (request.GET.get('schedule'),)
+            elif student_plan_data is None:
+                res.reason_phrase = "No student plan data for schedule '%s'" % (schedule.academic_term,)
+            else:
+                res.status_code = 500
+    else:
+        res.status_code = 400
+    return res
+
+def GetCourseInfo(request):
+    res = HttpResponse()
+    if request.method == "GET":
+        try:
+            term = request.GET.get('schedule')
+            schedule = Schedule.get_schedule(term_name=term)
+            course_name = request.GET.get('course')
+            course = Course.get_course(name=course_name)
+            cohort_data = CohortData.get_cohort_data(schedule=schedule, course=course).all()
+            cohort_total = CohortTotal.get_cohort_total(schedule=schedule).all()
+            
+            data = {}  
+            data['course'] = course.to_json()
+            tmp = {}
+            for c in cohort_data:
+                tmp[c.major] = [
+                    c.freshman,
+                    c.sophomore,
+                    c.junior,
+                    c.senior
+                ]
+            data['cohort_data'] = tmp
+            tmp = []
+            for c in cohort_total:
+                tmp[c.major] = [
+                    c.freshman,
+                    c.sophomore,
+                    c.junior,
+                    c.senior
+                ]
+            data['cohort_total'] = tmp
+            res.write(json.dumps(data))
+        except KeyError as e:
+            res.status_code = 400
+            if term is None:
+                res.reason_phrase = "Missing schedule in query string"
+            elif course is None:
+                res.reason_phrase = "Missing course in query string"
+            else:
+                res.status_code = 500
+        except ObjectDoesNotExist:
+            res.status_code = 400
+            if schedule is None:
+                res.reason_phrase = "Schedule '%s' does not exist" % (request.GET.get('schedule'),)
+            if course is None:
+                res.reason_phrase = "Course '%s' does not exist" % (request.GET.get('course'),)
+            elif cohort_data is None or cohort_total is None:
+                res.reason_phrase = "No cohort data for schedule '%s' and course '%s'" % (schedule.name, course.name)
+            else:
+                res.status_code = 500
+    else:
+        res.status_code = 400
+    return res
+
+
+def GetRoomInfo(request):
+    res = HttpResponse()
+    if request.method == "GET":
+        try:
+            room_name = request.GET.get('room')
+            room = Room.get_room(name=room_name)
+            res.write(json.dumps({'room': room.to_json()}))
+        except KeyError as e:
+            res.status_code = 400
+            if room == None:
+                res.reason_phrase = "Missing room name in query string"
+            else:
+                res.status_code = 500
+        except ObjectDoesNotExist:
+            res.status_code = 400
+            if room is None:
+                res.reason_phrase = "Room '%s' does not exist" % (request.GET.get('room'),)
+            else:
+                res.status_code = 500
+    else:
+        res.status_code = 400
+    return res
 
 

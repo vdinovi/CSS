@@ -23,19 +23,31 @@ from . import views, scheduling
 
 urlpatterns = [
     # BASE_URL/Home* addresses
-    url(r'^$', views.IndexView, name='index'),
+    url(r'^$', views.HomeView, name='home'),
     url(r'^home/$', views.HomeView, name='home'),
     url(r'^resources/', include([
         url(r'^faculty/$', views.FacultyView, name='faculty'),
         url(r'^rooms/$', views.RoomsView, name='rooms'),
         url(r'^courses/$', views.CoursesView, name='courses'),
     ])),
+    url(r'^course/', include([
+    	url(r'^$', views.CoursePreferences, name='course'),
+   	 	url(r'^update-rank$', views.UpdateRank, name='update_rank')
+    ])),
     url(r'^scheduling/', include([
         url(r'^$', views.SchedulingView, name='scheduling'),
         url(r'^options$', scheduling.Options, name='options'), 
         url(r'^schedules$', scheduling.Schedules, name='schedules'),
         url(r'^sections$', scheduling.Sections, name='sections'),
-        url(r'^newSection$', scheduling.NewSection, name='newSection')
+        url(r'^newSection$', scheduling.NewSection, name='newSection'),
+        url(r'^conflict-check$', scheduling.ConflictCheck, name='conflict_check'),
+        url(r'^section-detail-conflicts$', scheduling.SectionDetailConflicts, name='section-detail-conflicts'),
+        url(r'^deleteSection$', scheduling.DeleteSection, name='deleteSection'),
+        url(r'^get-section-info$', scheduling.GetSectionInfo, name='get-section-info'),
+        url(r'^edit-section$', scheduling.EditSection, name='edit-section'),
+        url(r'^student-plan-data$', scheduling.GetStudentPlanData, name='student_plan_data'),
+        url(r'^course-info$', scheduling.GetCourseInfo, name='course_info'),
+        url(r'^room-info$', scheduling.GetRoomInfo, name='room_info')
     ])),
     url(r'^department/', include([
         url(r'^schedulers/$', views.SchedulersView, name='schedulers'),
@@ -49,7 +61,9 @@ urlpatterns = [
     url(r'^landing/$', views.LandingView, name='landing'),
     url(r'^logout/$', views.LogoutView, name='logout'),
     url(r'^availability/$', views.AvailabilityView, name='availability'),
-    url(r'^availability/availabilityView$', views.AvailabilityView, name='availabilityView')
+    url(r'^availability/availabilityView$', views.AvailabilityView, name='availabilityView'),
+    url(r'^course/$', views.CoursePreferences, name='course'),
+    url(r'^course/updateRank$', views.CoursePreferences, name='updateRank'),
 
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 

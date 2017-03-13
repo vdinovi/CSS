@@ -10,7 +10,7 @@
     	{% load static %}
     	<link href="{% static "css/availability.css" %}" rel="stylesheet">
 	</head>
-	<body onload="viewAvailablity()">
+	<body>
   		{% include "navbar.html" %}
   		<button type="button" class="btn btn-info btn-xs" data-toggle="modal" data-target="#add-availability">+</button>
 
@@ -24,8 +24,32 @@
           			</div>
           			<div class="modal-body">
             			<form method="POST">{% csrf_token %}
-              				{{ add_availability_form.as_p }}
+            				<p>
+            				{{ add_availability_form.day.label_tag }}
+              				{{ add_availability_form.day }}
+              				{{ add_availability_form.day.errors }}
+              				</p>
+
+              				<p>
+              				<label for="id_start_time">Start Time:</label>
+              				<input id="id_start_time" name="start_time" type="time" required="">
+              				{{ add_availability_form.start_time.errors }}
+              				</p>
+
+              				<p>
+              				<label for="id_end_time">End Time:</label>
+              				<input id="id_end_time" name="end_time" type="time" required="">
+              				{{ add_availability_form.end_time.errors }}
+              				</p>
+
+              				<p>
+              				{{ add_availability_form.level.label_tag}}
+              				{{ add_availability_form.level }}
+              				{{ add_availability_form.level.errors }}
+              				</p>
+
               				<button type="submit" name="add_availability_form" class="save btn btn-default">Submit</button>
+
             			</form>
           			</div>
           			<div class="modal-footer">
@@ -47,218 +71,60 @@
 	        </tr>
 	    </thead>
 	    <tbody>
-	    	{% for avail in availability_list %}
-	    	{% endfor %}
-	        <tr>
-	            <td>08:00am</td>
-	  			<td class=" no-events" rowspan="1"></td>
-	            <td class=" no-events" rowspan="1"></td>
-	            <td class=" no-events" rowspan="1"></td>
-	            <td class=" no-events" rowspan="1"></td>
-	            <td class=" no-events" rowspan="1"></td>
-	        </tr>
-	        <tr>
-	            <td>08:30am</td>
-	            <td class=" no-events" rowspan="1"></td>
-	            <td class=" no-events" rowspan="1"></td>
-	            <td class=" no-events" rowspan="1"></td>
-	            <td class=" no-events" rowspan="1"></td>
-	            <td class=" no-events" rowspan="1"></td>
-	        </tr>
-	        <tr>
-	            <td>09:00am</td>
-	            <td class=" no-events" rowspan="1"></td>
-	            <td class=" no-events" rowspan="1"></td>
-	            <td class=" no-events" rowspan="1"></td>
-	            <td class=" no-events" rowspan="1"></td>
-	            <td class=" no-events" rowspan="1"></td>
+				{% for key, value in  availAtTime.items %}
 
-	        </tr>
-	        <tr>
-	            <td>09:30am</td>
-	            <td class=" no-events" rowspan="1"></td>
-	            <td class=" no-events" rowspan="1"></td>
-	            <td class=" no-events" rowspan="1"></td>
-	            <td class=" no-events" rowspan="1"></td>
-	            <td class=" no-events" rowspan="1"></td>
-	        </tr>
-	        <tr>
-	            <td>10:00am</td>
-	            <!-- <td class=" has-events" rowspan="4">
-	                <div class="row-fluid lecture" style="width: 99%; height: 100%;">
-	                    <span class="title">Unavailable</span>
-	                </div>
-	            </td> -->
-	            <td class=" no-events" rowspan="1"></td>
-	            <td class=" no-events" rowspan="1"></td>
-	            <td class=" no-events" rowspan="1"></td>
-	            <td class=" no-events" rowspan="1"></td>
-	            <td class=" no-events" rowspan="1"></td>
-	        </tr>
-	        <tr>
-	            <td>10:30am</td>
-	            <td class=" no-events" rowspan="1"></td>
-	            <td class=" no-events" rowspan="1"></td>
-	            <td class=" no-events" rowspan="1"></td>
-	            <td class=" no-events" rowspan="1"></td>
-	            <td class=" no-events" rowspan="1"></td>
+				<tr>
+						<td>{{ key }}</td>
+						{% if value.mwf == "Preferred" %}
+							<td class="no-events success" rowspan="1"></td>
+						{% elif value.mwf == "Unavailable" %}
+							<td class="no-events danger" rowspan="1"></td>
+						{% else %}
+							<td class="no-events" rowspan="1"></td>
+						{% endif %}
 
-	        </tr>
-	        <tr>
-	            <td>11:00am</td>
-	            <td class=" no-events" rowspan="1"></td>
-	            <td class=" no-events" rowspan="1"></td>
-	            <td class=" no-events" rowspan="1"></td>
-	            <td class=" no-events" rowspan="1"></td>
-	            <td class=" no-events" rowspan="1"></td>
-	        </tr>
-	        <tr>
-	            <td>11:30am</td>
-	            <td class=" no-events" rowspan="1"></td>
-	            <td class=" no-events" rowspan="1"></td>
-	            <td class=" no-events" rowspan="1"></td>
-	            <td class=" no-events" rowspan="1"></td>
-	            <td class=" no-events" rowspan="1"></td>
-	        </tr>
-	        <tr>
-	            <td>12:00pm</td>
-	            <td class=" no-events" rowspan="1"></td>
-	            <td class=" no-events" rowspan="1"></td>
-	            <td class=" no-events" rowspan="1"></td>
-	            <td class=" no-events" rowspan="1"></td>
-	            <td class=" no-events" rowspan="1"></td>
-	        </tr>
-	        <tr>
-	            <td>12:30pm</td>
-	            <td class=" no-events" rowspan="1"></td>
-	            <td class=" no-events" rowspan="1"></td>
-	            <td class=" no-events" rowspan="1"></td>
-	            <td class=" no-events" rowspan="1"></td>
-	            <td class=" no-events" rowspan="1"></td>
-	        </tr>
-	        <tr>
-	            <td>1:00pm</td>
-	            <td class=" no-events" rowspan="1"></td>
-	            <td class=" no-events" rowspan="1"></td>
-	            <td class=" no-events" rowspan="1"></td>
-	            <td class=" no-events" rowspan="1"></td>
-	            <td class=" no-events" rowspan="1"></td>
+						{% if value.tth == "Preferred" %}
+							<td class="no-events success" rowspan="1"></td>
+						{% elif value.tth == "Unavailable" %}
+							<td class="no-events danger" rowspan="1"></td>
+						{% else %}
+							<td class="no-events" rowspan="1"></td>
+						{% endif %}
 
-	        </tr>
-	        <tr>
-	            <td>1:30pm</td>
-	            <td class=" no-events" rowspan="1"></td>
-	            <td class=" no-events" rowspan="1"></td>
-	            <td class=" no-events" rowspan="1"></td>
-	            <td class=" no-events" rowspan="1"></td>
-	            <td class=" no-events" rowspan="1"></td>
+						{% if value.mwf == "Preferred" %}
+							<td class="no-events success" rowspan="1"></td>
+						{% elif value.mwf == "Unavailable" %}
+							<td class="no-events danger" rowspan="1"></td>
+						{% else %}
+							<td class="no-events" rowspan="1"></td>
+						{% endif %}
 
 
-	        </tr>
-	        <tr>
-	            <td>2:00pm</td>
-	            <td class=" no-events" rowspan="1"></td>
-	            <td class=" no-events" rowspan="1"></td>
-	            <td class=" no-events" rowspan="1"></td>
-	            <td class=" no-events" rowspan="1"></td>
-	            <td class=" no-events" rowspan="1"></td>
-	            </td>
-	        </tr>
-	        <tr>
-	            <td>2:30pm</td>
-	            <td class=" no-events" rowspan="1"></td>
-	            <td class=" no-events" rowspan="1"></td>
-	            <td class=" no-events" rowspan="1"></td>
-	            <td class=" no-events" rowspan="1"></td>
-	            <td class=" no-events" rowspan="1"></td>
-	        </tr>
-	        <tr>
-	            <td>3:00pm</td>
-	            <td class=" no-events" rowspan="1"></td>
-	            <td class=" no-events" rowspan="1"></td>
-	            <td class=" no-events" rowspan="1"></td>
-	            <td class=" no-events" rowspan="1"></td>
-	            <td class=" no-events" rowspan="1"></td>
-	        </tr>
-	        <tr>
-	            <td>3:30pm</td>
-	            <td class=" no-events" rowspan="1"></td>
-	            <td class=" no-events" rowspan="1"></td>
-	            <td class=" no-events" rowspan="1"></td>
-	            <td class=" no-events" rowspan="1"></td>
-	            <td class=" no-events" rowspan="1"></td>
-	        </tr>
-	        <tr>
-	            <td>4:00pm</td>
-	            <td class=" no-events" rowspan="1"></td>
-	            <td class=" no-events" rowspan="1"></td>
-	            <td class=" no-events" rowspan="1"></td>
-	            <td class=" no-events" rowspan="1"></td>
-	            <td class=" no-events" rowspan="1"></td>
-	        </tr>
-	            <td>4:30pm</td>
-	            <td class=" no-events" rowspan="1"></td>
-	            <td class=" no-events" rowspan="1"></td>
-	            <td class=" no-events" rowspan="1"></td>
-	            <td class=" no-events" rowspan="1"></td>
-	            <td class=" no-events" rowspan="1"></td>
-	        </tr>
-	        <tr>
-	            <td>5:00pm</td>
-	            <td class=" no-events" rowspan="1"></td>
-	            <td class=" no-events" rowspan="1"></td>
-	            <td class=" no-events" rowspan="1"></td>
-	            <td class=" no-events" rowspan="1"></td>
-	            <td class=" no-events" rowspan="1"></td>
-	        </tr>
-	        <tr>
-	            <td>5:30pm</td>
-	            <td class=" no-events" rowspan="1"></td>
-	            <td class=" no-events" rowspan="1"></td>
-	            <td class=" no-events" rowspan="1"></td>
-	            <td class=" no-events" rowspan="1"></td>
-	            <td class=" no-events" rowspan="1"></td>
-	        </tr>
-	        <tr>
-	            <td>6:00pm</td>
-	            <td class=" no-events" rowspan="1"></td>
-	            <td class=" no-events" rowspan="1"></td>
-	            <td class=" no-events" rowspan="1"></td>
-	            <td class=" no-events" rowspan="1"></td>
-	            <td class=" no-events" rowspan="1"></td>
-	        </tr>
-	        <tr>
-	            <td>6:30pm</td>
-	            <td class=" no-events" rowspan="1"></td>
-	            <td class=" no-events" rowspan="1"></td>
-	            <td class=" no-events" rowspan="1"></td>
-	            <td class=" no-events" rowspan="1"></td>
-	            <td class=" no-events" rowspan="1"></td>
-	        </tr>
-	        <tr>
-	            <td>7:00pm</td>
-	            <td class=" no-events" rowspan="1"></td>
-	            <td class=" no-events" rowspan="1"></td>
-	            <td class=" no-events" rowspan="1"></td>
-	            <td class=" no-events" rowspan="1"></td>
-	            <td class=" no-events" rowspan="1"></td>
-	        </tr>
-	        <tr>
-	            <td>7:30pm</td>
-	            <td class=" no-events" rowspan="1"></td>
-	            <td class=" no-events" rowspan="1"></td>
-	            <td class=" no-events" rowspan="1"></td>
-	            <td class=" no-events" rowspan="1"></td>
-	            <td class=" no-events" rowspan="1"></td>
-	        </tr>
+						{% if value.tth == "Preferred" %}
+							<td class="no-events success" rowspan="1"></td>
+						{% elif value.tth == "Unavailable" %}
+							<td class="no-events danger" rowspan="1"></td>
+						{% else %}
+							<td class="no-events" rowspan="1"></td>
+						{% endif %}
+
+						{% if value.mwf == "Preferred" %}
+							<td class="no-events success" rowspan="1"></td>
+						{% elif value.mwf == "Unavailable" %}
+							<td class="no-events danger" rowspan="1"></td>
+						{% else %}
+							<td class="no-events" rowspan="1"></td>
+						{% endif %}
+				</tr>
+				{% endfor %}
 	    </tbody>
 	</table>
 
-	<script src="{% static "js/availability.js" %}"></script>
+	<!-- <script src="{% static "js/availability.js" %}"></script> -->
 
 	<!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
     <!-- Include all compiled plugins (below), or include individual files as needed -->
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
 	</body>
-	</html>
+</html>

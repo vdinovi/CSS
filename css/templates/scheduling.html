@@ -42,127 +42,138 @@
           <button type="button" class="btn btn-info" data-toggle="modal" data-target="#new-term-modal">Create New Term</button>
         </div>
         <!-- New Section Frame -->
-        <!-- <div id="new-section-frame" class="col-xs-12 new-section-frame" style="display:none;"> -->
         <div id="new-section-frame" class="col-xs-12 new-section-frame" style="display:none;">
           <div class="row" style="padding-top:20px">
             <button id="filter-frame-btn" class="btn switch-frame-btn col-xs-4 col-xs-offset-4" onclick='switchFrame("new-section-frame", "filter-frame")'>Filter Sections</button>
           </div>
             <!-- <form id="new-section-form" method="POST" class="form-horizontal" role="form" onsubmit="NewSection()">  -->
             {% csrf_token %}
-            <div class="col-xs-6">
-              <div  class="row new-section-inputs">
-                <div class="col-xs-6">
-                  <label for="academic-term">Academic Term</label>
+            <div class="col-xs-4">
+              <h3 style="text-align:center;">Create a New Section</h3>
+                <div class="well new-section-form">
+                <div  class="row new-section-inputs">
+                  <div class="col-xs-6">
+                    <label class="form-control-label" for="academic-term">Academic Term</label>
+                  </div>
+                  <div class="col-xs-6 col-xs-offset-6">
+                    <select id="academic-term" class="form-control" type="text">
+                      <option value="" disabled selected>Select a term</option>
+                    {% for term in academic_terms %}
+                      <option value="{{ term.academic_term }}">{{ term.academic_term }}</option>
+                    {% endfor %}
+                    </select>
+                  </div>
                 </div>
-                <div class="col-xs-6 col-xs-offset-6">
-                  <select id="academic-term" class="form-control" type="text">
-                    <option value="" disabled selected>Select a term</option>
-                  {% for term in academic_terms %}
-                    <option value="{{ term.academic_term }}">{{ term.academic_term }}</option>
-                  {% endfor %}
-                  </select>
+                <div class="row new-section-inputs form-group has-danger">
+                  <div class="col-xs-6">
+                    <label for="course">Course</label>
+                  </div>
+                  <div class="col-xs-6 col-xs-offset-6">
+                    <select id="course" class="form-control" type="text">
+                      <option value="" disabled selected>Select a Course</option>
+                    {% for course in courses %}
+                      <option value="{{course.name}}">{{ course.name }}</option>
+                    {% endfor %}
+                    </select>
+                  </div>
+                </div>
+                <div class="row new-section-inputs form-group has-danger">
+                  <div class="col-xs-6">
+                    <label for="section-num">Section Number</label>
+                  </div>
+                  <div class="col-xs-6 col-xs-offset-6">
+                    <input id="section-num" class="form-control" type="integer">
+                  </div>
+                </div>
+                <div class="row new-section-inputs form-group has-danger">
+                  <div class="col-xs-6">            
+                    <label for="section-type">Section Type</label>
+                  </div>
+                  <div class="col-xs-6 col-xs-offset-6">
+                    <select id="section-type" class="form-control" type="text">
+                      <option value="" disabled selected>Select a type</option>
+                    {% for section_type in section_types %}
+                      <option value="{{section_type.name}}">{{ section_type.name }}</option>
+                    {% endfor %}
+                    </select>
+                  </div>
+                </div>
+                <div class="row new-section-inputs form-group has-danger">
+                  <div class="col-xs-6">
+                    <label for="faculty">Faculty</label>
+                  </div>
+                  <div class="col-xs-6 col-xs-offset-6">
+                    <select id="faculty" class="form-control" type="text">
+                      <option value="" disabled selected>Select faculty</option>
+                    {% for f in faculty %}
+                      <option value="{{f.user.email}}">{{ f.user.first_name }} {{ f.user.last_name }}</option>
+                    {% endfor %}
+                    </select>
+                  </div>
+                </div>
+                <div class="row new-section-inputs form-group has-danger">
+                  <div class="col-xs-6">
+                    <label for="room">Room</label>
+                  </div>
+                  <div class="col-xs-6 col-xs-offset-6">
+                    <select required="true" id="room" class="form-control" type="text">
+                      <option value="" disabled selected>Select a room</option>
+                    {% for room in rooms %}
+                      <option value="{{room.name}}">{{ room.name }}</option>
+                    {% endfor %}
+                    </select>
+                  </div>
+                </div>
+                <div class="row new-section-inputs form-group has-danger">
+                  <div class="col-xs-6">
+                    <label for="capacity">Capacity</label>
+                  </div>
+                  <div class="col-xs-6 col-xs-offset-6">
+                    <input id="capacity" class="form-control" type="integer">
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-xs-6">
+                    <label for="days">Days</label>
+                  </div>
+                  <div class="col-xs-6 col-xs-offset-6">
+                    <select id="days" class="form-control" type="text">
+                      <option value="" disabled selected>Select Days</option>
+                      <option value="MWF">Mon/Wed/Fri</option>
+                      <option value="TR">Tue/Thu</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-xs-6">
+                    <label for="start-time">Start Time</label>
+                  </div>
+                  <div class="col-xs-6 col-xs-offset-6">
+                    <input id="start-time" class="form-control" type="time">
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-xs-6">
+                    <label for="end-time">End Time</label>
+                  </div>
+                  <div class="col-xs-6 col-xs-offset-6">
+                    <input id="end-time" class="form-control" type="time">
+                  </div>
                 </div>
               </div>
-              <div class="row new-section-inputs">
-                <div class="col-xs-6">
-                  <label for="course">Course</label>
-                </div>
-                <div class="col-xs-6 col-xs-offset-6">
-                  <select id="course" class="form-control" type="text">
-                    <option value="" disabled selected>Select a Course</option>
-                  {% for course in courses %}
-                    <option value="{{course.name}}">{{ course.name }}</option>
-                  {% endfor %}
-                  </select>
-                </div>
-              </div>
-              <div class="row new-section-inputs">
-                <div class="col-xs-6">
-                  <label for="section-type">Section Type</label>
-                </div>
-                <div class="col-xs-6 col-xs-offset-6">
-                  <select id="section-type" class="form-control" type="text">
-                    <option value="" disabled selected>Select a type</option>
-                  {% for section_type in section_types %}
-                    <option value="{{section_type.name}}">{{ section_type.name }}</option>
-                  {% endfor %}
-                  </select>
-                </div>
-              </div>
-              <div class="row new-section-inputs">
-                <div class="col-xs-6">
-                  <label for="faculty">Faculty</label>
-                </div>
-                <div class="col-xs-6 col-xs-offset-6">
-                  <select id="faculty" class="form-control" type="text">
-                    <option value="" disabled selected>Select faculty</option>
-                  {% for f in faculty %}
-                    <option value="{{f.user.email}}">{{ f.user.first_name }} {{ f.user.last_name }}</option>
-                  {% endfor %}
-                  </select>
-                </div>
-              </div>
-              <div class="row new-section-inputs">
-                <div class="col-xs-6">
-                  <label for="room">Room</label>
-                </div>
-                <div class="col-xs-6 col-xs-offset-6">
-                  <select id="room" class="form-control" type="text">
-                    <option value="" disabled selected>Select a room</option>
-                  {% for room in rooms %}
-                    <option value="{{room.name}}">{{ room.name }}</option>
-                  {% endfor %}
-                  </select>
-                </div>
-              </div>
-              <div class="row new-section-inputs">
-                <div class="col-xs-6">
-                  <label for="capacity">Capacity</label>
-                </div>
-                <div class="col-xs-6 col-xs-offset-6">
-                  <input id="capacity" class="form-control" type="integer">
-                </div>
-              </div>
-              <!-- <div class="btn-group row" data-toggle="buttons">
-                <label class="btn btn-primary active">
-                  <input type="radio" name="days" id="MWF" autocomplete="off" checked onclick="setDays(this, new_section_form)"> MWF
-                </label>
-                <label class="btn btn-primary active">
-                  <input type="radio" name="days" id="TR" autocomplete="off" onclick="setDays(this, new_section_form)"> TR
-                </label>
-              </div> -->
-              <div class="row">
-                <div class="col-xs-6">
-                  <label for="days">Days</label>
-                </div>
-                <div class="col-xs-6 col-xs-offset-6">
-                  <select id="days" class="form-control" type="text">
-                    <option value="" disabled selected>Select Days</option>
-                    <option value="MWF">Mon/Wed/Fri</option>
-                    <option value="TR">Tue/Thu</option>
-                  </select>
-                </div>
-              </div>
-              <div class="row">
-                <div class="col-xs-6">
-                  <label for="start-time">Start Time</label>
-                </div>
-                <div class="col-xs-6 col-xs-offset-6">
-                  <input id="start-time" class="form-control" type="time">
-                </div>
-              </div>
-              <div class="row">
-                <div class="col-xs-6">
-                  <label for="end-time">End Time</label>
-                </div>
-                <div class="col-xs-6 col-xs-offset-6">
-                  <input id="end-time" class="form-control" type="time">
-                </div>
-              </div>
-              <button id="create-section-button" type="submit" class="btn btn-primary" onclick="NewSection()">Create Section</button>
+              <button id="create-section-button" type="submit" class="btn btn-primary" data-toggle="modal" data-target="#confirm-create-conflicts-modal" onclick="sectionConflictCheck(this)">Create Section</button>
             </div>
-          <!-- </form> -->
-          <!-- </div> -->
+            <div class="col-xs-6 col-offset-xs-6">
+              <!-- Data Display -->
+              <div class="data-display-window">
+                <!-- Data Display Tabs -->
+                <ul id="data-tab-window" class="nav nav-tabs">
+                </ul>
+                <div id="data-window" class="row data-window">
+                </div>
+              </div>
+            </div>
+              <!-- </form> -->
         </div>
         <!-- Filter Window -->
         <div id="filter-frame" class="col-xs-12 filter-frame">
@@ -190,8 +201,8 @@
                 <div id="time-options" class="list-group" style="margin:0px">
                 </div>
               </div>
-              <button id="clear-filter-btn" class="btn" style="margin-top:5px;width:100%;" onclick="unselectAllSelectedOptions()">Clear</button>
             </div>
+            <button id="clear-filter-btn" class="btn" style="margin-top:5px;width:100%;" onclick="unselectAllSelectedOptions()">Clear</button>
           </div>
           <!-- Option Window -->
           <div class="col-xs-3 outer-frame">
@@ -211,7 +222,7 @@
                 <!-- COURSE LOGIC FILTER -->
                 <div id="course-filter-logic" class="filter-logic">
                   <div class="col-xs-8 col-xs-offset-2" style="height:100%;">
-                    <label class="checkbox-inline"><input type="checkbox" id="course" class="logic-checkbox" onclick="updateFilters();updateFilterLogic();" value="">Course</label>
+                    <label class="checkbox-inline"><input type="checkbox" id="course-logic-checkbox" class="logic-checkbox" onclick="updateFilters();updateFilterLogic();" value="">Course</label>
                     <select id="course-logic" onchange="setLogic(this)" disabled>
                       <option value="and">AND</option>
                       <option value="or">OR</option>
@@ -221,7 +232,7 @@
                 <!-- FACULTY LOGIC FILTER -->
                 <div id="faculty-filter-logic" class="filter-logic">
                   <div class="col-xs-8 col-xs-offset-2" style="height:100%;">
-                    <label class="checkbox-inline"><input type="checkbox" id="faculty" class="logic-checkbox" onclick="updateFilters();updateFilterLogic();" value="">Faculty</label>
+                    <label class="checkbox-inline"><input type="checkbox" id="faculty-logic-checkbox" class="logic-checkbox" onclick="updateFilters();updateFilterLogic();" value="">Faculty</label>
                     <select id="faculty-logic" onchange="setLogic(this)" disabled>
                       <option value="and">AND</option>
                       <option value="or">OR</option>
@@ -231,7 +242,7 @@
                 <!-- ROOM LOGIC FILTER -->
                 <div id="room-filter-logic" class="filter-logic">
                   <div class="col-xs-8 col-xs-offset-2" style="height:100%;">
-                    <label class="checkbox-inline"><input type="checkbox" id="room" class="logic-checkbox" onclick="updateFilters();updateFilterLogic();" value="">Room</label>
+                    <label class="checkbox-inline"><input type="checkbox" id="room-logic-checkbox" class="logic-checkbox" onclick="updateFilters();updateFilterLogic();" value="">Room</label>
                     <select id="room-logic" onchange="setLogic(this)" disabled>
                       <option value="and">AND</option>
                       <option value="or">OR</option>
@@ -241,7 +252,7 @@
                 <!-- TIME LOGIC FILTER -->
                 <div id="time-filter-logic" class="filter-logic">
                   <div class="col-xs-8 col-xs-offset-2" style="height:100%;">
-                    <label class="checkbox-inline"><input type="checkbox" id="time" class="logic-checkbox" onclick="updateFilters();updateFilterLogic();" value="">Time</label>
+                    <label class="checkbox-inline"><input type="checkbox" id="time-logic-checkbox" class="logic-checkbox" onclick="updateFilters();updateFilterLogic();" value="">Time</label>
                   </div>
                 </div>
               </div>
@@ -283,25 +294,175 @@
               </tr>
             </thead>
             <tbody id="section-detail-rows">
-            <!-- Selected filtered Section Results get inserted here when updateSectionDetails() gets called -->
-              <tr>
-                <td>
-                  <button type="button" class="btn btn-info btn-xs" data-toggle="modal" data-target="#deselect-section" onclick="removeSectionFromDetails(this)"><span class="glyphicon glyphicon-minus" title="Remove section from details"></span>&nbsp;</button>
-                  <button type="button" class="btn btn-info btn-xs" data-toggle="modal" data-target="#edit-section"><span class="glyphicon glyphicon-edit" title="Edit section"></span>&nbsp;</button>
-                  <button type="button" class="btn btn-info btn-xs" data-toggle="modal" data-target="#delete-section"><span class="glyphicon glyphicon-trash" title="Delete section"></span>&nbsp;</button>
-                </td>
-                <td>cpe101-01</td>
-                <td>Fall 2016</td>
-                <td>cpe101</td>
-                <td>lecture</td>
-                <td>Kearns</td>
-                <td>14-256</td>
-                <td>mwf</td>
-                <td>10:00AM</td>
-                <td>12:00PM</td>
-              </tr>
+              <tr id="no-sections">
+                <td>&nbsp;</td>
+                <td>&nbsp;</td>
+                <td>&nbsp;</td>
+                <td>&nbsp;</td>
+                <td>&nbsp;</td>
+                <td>&nbsp;</td>
+                <td>&nbsp;</td>
+                <td>&nbsp;</td>
+                <td>&nbsp;</td>
+                <td>&nbsp;</td>
+                </tr>
+              <!-- Selected filtered Section Results get inserted here when updateSectionDetails() gets called -->
             </tbody>
           </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Edit Section Modal -->
+    <div id="edit-section-modal" class="col-xs-8 col-xs-offset-2 modal fade " role="dialog">
+      <div class="modal-dialog">
+        <!-- Modal content-->
+        <div class="modal-content">
+          <div class="modal-header">
+            <div class="section-detail-modal-header">Section Information</div>
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+          </div>
+          <div id="edit-section-modal-body" class="modal-body">
+            <div id="edit-section-frame" class="col-xs-12">
+              <div class="row section-info">
+                <div class="col-xs-6">
+                    <strong>Academic Term</strong>
+                </div>
+                <div id="edit-term" class="col-xs-6 col-xs-offset-6">
+                    <!-- the sections academic term is inserted here -->
+                </div>
+              </div>
+              <div class="row section-info">
+                <div class="col-xs-6">
+                    <strong>Course</strong>
+                </div>
+                <div id="edit-course" class="col-xs-6 col-xs-offset-6">
+                    <!-- the sections course is inserted here -->
+                </div>
+              </div>
+              <div class="row edit-section-inputs">
+                <div class="col-xs-6">
+                  <label for="edit-section_num">Section Number</label>
+                </div>
+                <div class="col-xs-6 col-xs-offset-6">
+                  <input id="edit-section_num" class="form-control" type="integer">
+                </div>
+              </div>
+              <div class="row new-section-inputs">
+                <div class="col-xs-6">            
+                  <label for="edit-type">Section Type</label>
+                </div>
+                <div class="col-xs-6 col-xs-offset-6">
+                  <select id="edit-type" class="form-control" type="text">
+                    <option value="" disabled="" selected="">Select a type</option>
+                    <!-- additional options inserted here -->
+                  </select>
+                </div>
+              </div>
+              <div class="row edit-section-inputs">
+                <div class="col-xs-6">
+                  <label for="edit-faculty">Faculty</label>
+                </div>
+                <div class="col-xs-6 col-xs-offset-6">
+                  <select id="edit-faculty" class="form-control" type="text">
+                    <option value="" disabled="" selected="">Select faculty</option>
+                    <!-- additional options inserted here -->
+                  </select>
+                </div>
+              </div>
+              <div class="row edit-section-inputs">
+                <div class="col-xs-6">
+                  <label for="edit-room">Room</label>
+                </div>
+                <div class="col-xs-6 col-xs-offset-6">
+                  <select id="edit-room" class="form-control" type="text">
+                    <option value="" disabled="" selected="">Select a room</option>
+                    <!-- additional options inserted here -->
+                  </select>
+                </div>
+              </div>
+              <div class="row edit-section-inputs">
+                <div class="col-xs-6">
+                  <label for="edit-capacity">Capacity</label>
+                </div>
+                <div class="col-xs-6 col-xs-offset-6">
+                  <input id="edit-capacity" class="form-control" type="integer">
+                </div>
+              </div>
+              <div class="row edit-section-inputs">
+                <div class="col-xs-6">
+                  <label for="edit-students_enrolled">Students Enrolled</label>
+                </div>
+                <div class="col-xs-6 col-xs-offset-6">
+                  <input id="edit-students_enrolled" class="form-control" type="integer">
+                </div>
+              </div>
+              <div class="row edit-section-inputs">
+                <div class="col-xs-6">
+                  <label for="edit-students_waitlisted">Students Waitlisted</label>
+                </div>
+                <div class="col-xs-6 col-xs-offset-6">
+                  <input id="edit-students_waitlisted" class="form-control" type="integer">
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-xs-6">
+                  <label for="edit-days">Days</label>
+                </div>
+                <div class="col-xs-6 col-xs-offset-6">
+                  <select id="edit-days" class="form-control" type="text">
+                    <option value="" disabled="" selected="">Select Days</option>
+                    <option value="MWF">Mon/Wed/Fri</option>
+                    <option value="TR">Tue/Thu</option>
+                  </select>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-xs-6">
+                  <label for="edit-start_time">Start Time</label>
+                </div>
+                <div class="col-xs-6 col-xs-offset-6">
+                  <input id="edit-start_time" class="form-control" type="time">
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-xs-6">
+                  <label for="edit-end_time">End Time</label>
+                </div>
+                <div class="col-xs-6 col-xs-offset-6">
+                  <input id="edit-end_time" class="form-control" type="time">
+                </div>
+              </div>
+            </div>
+            <div id="conflicts-frame">
+              <!-- Conflicts appear here. -->
+            </div>
+            <div id="response-btns">
+                <button class="btn response-btn" data-dismiss="modal">Close</button>
+                <button class="btn response-btn" data-toggle="modal" data-target="#confirm-edit-conflicts-modal" onclick="sectionConflictCheck(this)">Update Section Info</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Delete Section Check Modal -->
+    <div id="delete-section-modal" class="modal fade" role="dialog">
+      <div class="modal-dialog">
+        <!-- Modal content-->
+        <div class="modal-content">
+          <div class="modal-header">
+            <div class="section-detail-modal-header">Are you sure?</div>
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+          </div>
+          <div id="delete-section-modal-body" class="modal-body">
+            <div id="delete-section-check">              
+            </div>
+            <div id="response-btns">
+                <button class="btn response-btn" data-dismiss="modal">Cancel</button>
+                <button class="btn response-btn" onclick="deleteSection(this)" data-dismiss="modal">Delete Section</button>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -316,6 +477,7 @@
           <div id="view-term-modal-body" class="modal-body">
             <div class="list-group">              
             </div>
+            <button class="btn response-btn" data-dismiss="modal">Close</button>
           </div>
         </div>
       </div>
@@ -368,6 +530,30 @@
       </div>
     </div>
 
+    
+
+    <div id="confirm-create-conflicts-modal" class="modal fade" role="dialog">
+      <div class="modal-dialog">
+        <!-- Modal content-->
+        <div class="modal-content">
+          <div id="create-conflict-modal-header" class="modal-header">
+            <!-- Fill in frame in function -->
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="confirm-edit-conflicts-modal" class="modal fade" role="dialog">
+      <div class="modal-dialog">
+        <!-- Modal content-->
+        <div class="modal-content">
+          <div id="edit-conflict-modal-header" class="modal-header">
+            <!-- Fill in frame in function -->
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Custom JS -->
     <script src="{% static "js/scheduling.js" %}"></script>
     <script language="javascript">
@@ -379,8 +565,22 @@
         });
     </script>
 
+    <!-- POPOVER FUNCTION BUT IDK -->
+    <script>
+    $(function () {
+      $('[data-toggle="tooltip"]').tooltip();
+      $('[data-toggle="popover"]').popover();  
+      $('#lst_art_adm').on('all.bs.table', function (e, name, args) {
+          $('[data-toggle="tooltip"]').tooltip();
+          $('[data-toggle="popover"]').popover();  
+      });
+    });
+    </script>
+
     <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+
+
     <!-- Include all compiled plugins (below), or include individual files as needed -->
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
 
