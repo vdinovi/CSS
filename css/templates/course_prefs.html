@@ -9,7 +9,6 @@
 
     	{% load static %}
     	<link href="{% static "css/course_preferences.css" %}" rel="stylesheet">
-  		
 	</head>
 	<body>
   		{% include "navbar.html" %}
@@ -43,6 +42,32 @@
 			</div>
 			<div id="update-rank-btn">
 				<button id='update-rank' type="submit" onclick ="updateRank()" class="save btn btn-default">Update Rank</button>
+			</div>
+		</div>
+
+       	<div class= "container">
+       		<div class= "row">
+       			<div class="col-xs-4 col-xs-offset-2"> 
+       				<div class= "well">
+        			<h3 style="text-align:left;">Create a New Preference</h3>
+						<form method="POST">{% csrf_token %}
+
+							{{ add_course_pref.as_p }}
+      						<button type="submit" name="add_course_pref" class="save btn btn-default">Submit</button>
+      					</form>
+      				</div>
+      			</div>
+      			<div class= "col-xs-4">
+      				<div class= "well">
+      					<ul id="sortable" class="sort">
+      						<h3> Change Rank</h3>
+      					{% for course_pref in course_pref_list %}
+  							<li class="element"><span class="ui-icon ui-icon-arrowthick-2-n-s"></span>{{ course_pref.course.name }}</li>
+  						{% endfor %}
+						</ul>
+						<button id='update-rank' type="submit" onclick ="updateRank()" class="save btn btn-default">Submit</button>
+					</div>
+				</div>
 			</div>
 		</div>
 
