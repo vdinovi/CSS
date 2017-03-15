@@ -8,14 +8,9 @@
     	<title>Faculty Course Preferences</title>
 
     	{% load static %}
-    	<link href="{% static "css/availability.css" %}" rel="stylesheet">
+    	<link href="{% static "css/course_preferences.css" %}" rel="stylesheet">
 
-    	 <style>
-  			#sortable { list-style-type: none; margin: 0; padding: 0; width: 60%; }
-  			#sortable li { margin: 0 3px 3px 3px; padding: 0.4em; padding-left: 1.5em; font-size: 1.4em; height: 18px; }
-  			#sortable li span { position: absolute; margin-left: -1.3em; }
-  		</style>
-  		
+    	
 	</head>
 	<body>
   		{% include "navbar.html" %}
@@ -28,17 +23,33 @@
       		</div>
       	</div>
 
-		<form method="POST">{% csrf_token %}
-      		{{ add_course_pref.as_p }}
-      		<button type="submit" name="add_course_pref" class="save btn btn-default">Submit</button>
-      	</form>
-      	<ul id="sortable">
-      		{% for course_pref in course_pref_list %}
-  				<li class="element"><span class="ui-icon ui-icon-arrowthick-2-n-s"></span>{{ course_pref.course.name }}</li>
-  			{% endfor %}
-		</ul>
+       	<div class= "container">
+       		<div class= "row">
+       			<div class="col-xs-4 col-xs-offset-2"> 
+       				<div class= "well">
+        			<h3 style="text-align:left;">Create a New Preference</h3>
+						<form method="POST">{% csrf_token %}
 
-		<button id='update-rank' type="submit" onclick ="updateRank()" class="save btn btn-default">Update Rank</button>
+							{{ add_course_pref.as_p }}
+      						<button type="submit" name="add_course_pref" class="save btn btn-default">Submit</button>
+      					</form>
+      				</div>
+      			</div>
+      			<div class= "col-xs-4">
+      				<div class= "well">
+      					<ul id="sortable" class="sort">
+      						<h3> Change Rank</h3>
+      					{% for course_pref in course_pref_list %}
+  							<li class="element"><span class="ui-icon ui-icon-arrowthick-2-n-s"></span>{{ course_pref.course.name }}</li>
+  						{% endfor %}
+						</ul>
+						<button id='update-rank' type="submit" onclick ="updateRank()" class="save btn btn-default">Submit</button>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		
  	<!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
     <!-- Include all compiled plugins (below), or include individual files as needed -->
