@@ -720,6 +720,7 @@ class Section(models.Model):
         return sections
 
     def to_json(self):
+        print self.section_num
         return dict(section_num = str(self.section_num),
                     name = "_".join(self.course.name.split()) + "-" + str(self.section_num) + "-" + "_".join(self.schedule.academic_term.split()),
                     course_num = "_".join(self.course.name.split()) + "-" + str(self.section_num),

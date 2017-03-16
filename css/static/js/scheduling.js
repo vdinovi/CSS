@@ -1131,8 +1131,8 @@ function openDataTab(name, title, data) {
 // On term selection
 $("#academic-term").on('change', function() {
     var dataFormat = 
-        "<div id=\"student-plan\" class=\"container\">\n" +
         "<h3>Student Plan Data</h3>\n" + 
+        "<div id=\"student-plan\" class=\"container\">\n" +
         "<table class=\"table\">\n" +
         "  <thead>\n" +
         "    <tr>\n" +
@@ -1147,14 +1147,41 @@ $("#academic-term").on('change', function() {
         "  </thead>\n" +
         "  <tbody>\n" +
         "    <tr>\n" +
-        "      <td>{0}</td>\n" +
-        "      <td>{0}</td>\n" +
-        "      <td>{0}</td>\n" +
-        "      <td>{0}</td>\n" +
-        "      <td>{0}</td>\n" +
-        "      <td>{0}</td>\n" +
-        "      <td>{0}</td>\n" +
+        "      <td>Fall 2018</td>\n" +
+        "      <td>CPE 101</td>\n" +
+        "      <td>LEC</td>\n" +
+        "      <td>37</td>\n" +
+        "      <td>3</td>\n" +
+        "      <td>94</td>\n" +
+        "      <td>0</td>\n" +
         "    </tr>\n" +
+        "    <tr>\n" +
+        "      <td>Fall 2018</td>\n" +
+        "      <td>CPE 431</td>\n" +
+        "      <td>LEC</td>\n" +
+        "      <td>21</td>\n" +
+        "      <td>0</td>\n" +
+        "      <td>0</td>\n" +
+        "      <td>21</td>\n" +
+        "    </tr>\n" + 
+        "    <tr>\n" +
+        "      <td>Fall 2018</td>\n" +
+        "      <td>CPE 309</td>\n" +
+        "      <td>LEC</td>\n" +
+        "      <td>5</td>\n" +
+        "      <td>0</td>\n" +
+        "      <td>0</td>\n" +
+        "      <td>5</td>\n" +
+        "    </tr>\n" + 
+        "    <tr>\n" +
+        "      <td>Fall 2018</td>\n" +
+        "      <td>CSC 348</td>\n" +
+        "      <td>LEC</td>\n" +
+        "      <td>111</td>\n" +
+        "      <td>1</td>\n" +
+        "      <td>35</td>\n" +
+        "      <td>76</td>\n" +
+        "    </tr>\n" +  
         "  </tbody>\n" +
         "</table>\n" +
         "</div>";
@@ -1170,7 +1197,7 @@ $("#academic-term").on('change', function() {
         success: function(response) {
             $("#data-window").empty();
             $("#data-tab-window").empty();
-            openDataTab('student-plan', 'Student Plan Data', dataFormat.format('temp'));
+            openDataTab('student-plan', 'Student Plan Data', dataFormat);
             selectDataTab('student-plan');
         },
         error: function(error) {
@@ -1184,7 +1211,6 @@ function formatCohortData(courseName, cohortData, cohortTotal) {
     var grades = ['freshman', 'sophomore', 'junior', 'senior'];
     var cohortDataFormat = 
         "<div id=\"cohort-data\" class=\"container\">\n" +
-        "<h3>Cohort Data</h3>\n" +
         "<table class=\"table\">\n" +
         "  <thead>\n" +
         "    <tr>\n" +
@@ -1201,7 +1227,7 @@ function formatCohortData(courseName, cohortData, cohortTotal) {
         "  </thead>\n" +
         "  <tbody>\n";
     // Paste in data
-    for (var i = 0; i < 3; ++i) {
+    for (var i = 0; i < 4; ++i) {
         cohortDataFormat +=
         "    <tr>\n" +
         "      <td>"+grades[i]+"</td>\n";
@@ -1213,10 +1239,10 @@ function formatCohortData(courseName, cohortData, cohortTotal) {
         "    </tr>\n";
     }
     cohortDataFormat +=
-        "    <tr>\n" +
-        "      <td>Cohort Total</td>\n" +
-        "    </tr>\n";
     // @TODO Add cohort total
+    /*    "    <tr>\n" +
+        "      <td>Cohort Total</td>\n" +
+        "    </tr>\n";*/
     /*for (var i = 0; i < 3; ++i) {
         cohortDataFormat +=
         "    <tr>\n" +
@@ -1237,15 +1263,12 @@ function formatCohortData(courseName, cohortData, cohortTotal) {
 $("#course").on('change', function() {
     // Get Cohort, Course, and Enrollment Data
     var courseDataFormat =
-        "<div id=\"course-info\" class=\"container\">\n" +
-        "<h3>Course Info</h3>\n" +  
+        "<div id=\"course-info\" class=\"container\" style=\"width=100%\">\n" +
         "<table class=\"table\">\n" +
         "  <thead>\n" +
+        "    <th>{0}</th>" + // Course Name
         "    <tr>\n" +
-        "      <th>{0}</th>" + // Course Name
-        "    </tr>\n" +
-        "    <tr>\n" +
-        "      <th>Description</th>\n" +
+        "      <th >Description</th>\n" +
         "      <th>Equipement Required</th>\n" +
         "    </tr>\n" +
         "  </thead>\n" +
@@ -1258,8 +1281,7 @@ $("#course").on('change', function() {
         "</table>\n" +
         "</div>";
     var enrollmentDataFormat = 
-        "<div id=\"enrollment-data\" class=\"container\">\n" +
-        "<h3>Historic Enrollment Data</h3>\n" +   
+        "<div id=\"enrollment-data\" class=\"container\" style=\"width=100%\">\n" +
         "<table class=\"table\">\n" +
         "  <thead>\n" +
         "    <tr>\n" +
@@ -1289,11 +1311,12 @@ $("#course").on('change', function() {
             var course = response.course
             var cohortData = response.cohort_data
             var cohortTotal = response.cohort_total
+            console.log(course.description.length)
             openDataTab('cohort-data', 'Cohort Data', formatCohortData(course.name, cohortData, cohortTotal));
             openDataTab('enrollment-data', 'Historic Enrollment Data', enrollmentDataFormat.format(course.name));
             openDataTab('course-info', 'Course Info', courseDataFormat.format(course.name,
-                                                                              course.equipment_req,
-                                                                              course.description)
+                                                                              course.description,
+                                                                              course.equipment_req)
             );
             selectDataTab('course-info');
         },
@@ -1313,17 +1336,20 @@ $("#faculty").on('change', function() {
     facultyTabName = "{0} {1}";
     facultyTimesId = spacesToUnderscores(facultyName) + '-faculty-times';
     facultyPrefsId = spacesToUnderscores(facultyName) + '-faculty-prefs';
-    facultyTimesContent = "<p>Times</p>";
-    facultyPrefsContent = "<p>Course Preferences</p>";
-    openDataTab(facultyTimesId, facultyTabName.format(facultyName, "times"), facultyTimesContent);
-    openDataTab(facultyPrefsId, facultyTabName.format(facultyName, "prefs"), facultyPrefsContent);
-    selectDataTab(facultyPrefsId);
+    facultyPrefsContent = "";
+    facultyTimesContent = 
+        "<div id=\""+facultyTimesId+"\">\n" +
+        "  <img src=\"/static/images/AvailDataDisplay.png\" style=\"width:725px; height:445px;\"></img>\n" +
+        "</div>\n";
+    openDataTab(facultyPrefsId, facultyTabName.format(facultyName, "Prefs"), facultyPrefsContent);
+    openDataTab(facultyTimesId, facultyTabName.format(facultyName, "Times"), facultyTimesContent);
+    selectDataTab(facultyTimesId);
+    console.log(facultyTimesId);
 });
 
 $("#room").on('change', function() {
     var roomDataFormat =
-        "<div id=\"room-info\" class=\"container\">\n" +
-        "<h3>Room Info</h3>\n" +   
+        "<div id=\"room-info\" class=\"container\" style=\"width=100%\">\n" +
         "<table class=\"table\">\n" +
         "  <thead>\n" +
         "    <tr>\n" +
