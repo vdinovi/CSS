@@ -83,8 +83,8 @@ class EditUserForm(forms.Form):
         user.set_first_name(self.cleaned_data['first_name'])
         user.set_last_name(self.cleaned_data['last_name'])
         user.set_password(self.cleaned_data['password'])
-	user.save()
-	return user
+        user.save()
+        return user
 
 # Delete Form
 class DeleteUserForm(forms.Form):
@@ -223,7 +223,7 @@ class AddSectionForm(forms.Form):
 
 class CoursePrefModelChoiceField(forms.ModelChoiceField):
     def label_from_instance(self,obj):
- 	    return obj.name
+        return obj.name
 
 class CoursePrefForm(forms.Form):
      query = Course.objects.values_list('name', flat=True)
@@ -232,6 +232,7 @@ class CoursePrefForm(forms.Form):
                                 required=False, widget=forms.Select())
      comments = forms.CharField()
      rank = forms.IntegerField()
+      
 
      def save(self, email):
         course_pref = FacultyCoursePreferences.create(faculty=email,
