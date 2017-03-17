@@ -14,6 +14,7 @@
   		{% include "navbar.html" %}
 
   		<div class="container">
+
       		<div class="row">
         		<div class="col-sm-12" style="padding-bottom: 20px">
          	 		<h1 align="center">Course Preferences</h1>
@@ -21,6 +22,7 @@
       		</div>
       	</div>
 		<div id="course-prefs">
+			
 			<div id="new-course-pref">
 				<h3>Add New Course Preference</h3>
 				<form method="POST">{% csrf_token %}
@@ -44,7 +46,7 @@
 				<button id='update-rank' type="submit" onclick ="updateRank()" class="save btn btn-default">Update Rank</button>
 			</div>
 		</div>
-
+<!-- 
        	<div class= "container">
        		<div class= "row">
        			<div class="col-xs-4 col-xs-offset-2"> 
@@ -62,15 +64,20 @@
       					<ul id="sortable" class="sort">
       						<h3> Change Rank</h3>
       					{% for course_pref in course_pref_list %}
-  							<li class="element"><span class="ui-icon ui-icon-arrowthick-2-n-s"></span>{{ course_pref.course.name }}</li>
+      						<li class="element"><span class="ui-icon ui-icon-arrowthick-2-n-s"></span>
+							<p>{{ course_pref.course.name }}</p>
+							<p> - {{ course_pref.comments }}</p>
+							</li>
   						{% endfor %}
 						</ul>
+					</div>
+					<div>
 						<button id='update-rank' type="submit" onclick ="updateRank()" class="save btn btn-default">Submit</button>
 					</div>
 				</div>
 			</div>
 		</div>
-
+ -->
  	<!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
     <!-- Include all compiled plugins (below), or include individual files as needed -->

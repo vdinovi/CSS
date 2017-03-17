@@ -1,3 +1,13 @@
+/*.sort { list-style-type: none; margin: 0; padding: 0; width: 60%; }
+.sort li { margin: 0 3px 3px 3px; padding: 0.4em; padding-left: 1.5em; font-size: 1.4em; height: 18px; }
+.sort li span { position: absolute; margin-left: -1.3em; }
+*/
+.col-xs-6 { 
+	width: 45%; 
+	display: inline-block;
+	float: left;
+}
+
 table.calendar {
     margin-bottom: 0;
 }
@@ -99,7 +109,7 @@ button.btn.active .btn:active {
 }
 
 #sortable { 
-    /* list-style-type: none; */
+    list-style-type: none; 
     margin: 0; 
     padding: 0; 
     width: 60%; 
