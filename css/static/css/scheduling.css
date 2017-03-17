@@ -395,3 +395,7 @@ label.checkbox-inline.checked {
 .form-control {
     height: inherit!important;
 }
+
+div#data-window, div#course-info, div#enrollment-data, div#cohort-data, div#student-plan {
+    width: 100%;
+}
